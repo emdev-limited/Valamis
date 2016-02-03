@@ -27,6 +27,7 @@ object Version {
   val scalaMock         = "3.2.2"
   val mockito           = "1.10.17"
   val slick             = "2.1.0"
+  val slickMigration    = "2.1.0.3"
   val slickJodaMapper   = "1.2.0"
   val guiceScala        = "4.0.0"
   val guice             = "4.0"
@@ -91,7 +92,7 @@ object Libraries {
   // slick
   val slick           = "com.typesafe.slick" %% "slick"           % Version.slick
   val slickDrivers    = "com.arcusys.slick"  %% "slick-drivers"   % Version.slick
-  val slickMigration  = "com.arcusys.slick" %% "slick-migration" % Version.slick
+  val slickMigration  = "com.arcusys.slick" %% "slick-migration" % Version.slickMigration
 
   // guice
   val guiceScala        = "net.codingwell"               %% "scala-guice"        % Version.guiceScala

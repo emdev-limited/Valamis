@@ -1,11 +1,12 @@
 package com.arcusys.learn.models.response.certificates
 
 import com.arcusys.learn.models._
-import com.arcusys.learn.models.response.users.UserShortResponse
+import com.arcusys.learn.models.response.users.UserResponse
 import com.arcusys.valamis.model.PeriodTypes
 import org.joda.time.DateTime
 
-case class CertificateResponse(id: Int,
+case class CertificateResponse(
+    id: Long,
     title: String,
     shortDescription: String,
     description: String,
@@ -18,7 +19,8 @@ case class CertificateResponse(id: Int,
     statements: Iterable[StatementGoalResponse],
     activities: Iterable[ActivityGoalResponse],
     packages: Iterable[PackageGoalResponse],
-    users: Map[String, UserShortResponse],
-    scope: Option[CourseResponse]) extends CertificateResponseContract {
+    users: Map[String, UserResponse],
+    scope: Option[CourseResponse],
+    isJoint: Option[Boolean] = None) extends CertificateResponseContract {
   def expirationDate = PeriodTypes.getEndDate(PeriodTypes.parse(validPeriod.valueType), validPeriod.value, createdAt)
 }

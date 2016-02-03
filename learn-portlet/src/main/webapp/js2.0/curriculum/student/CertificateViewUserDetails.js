@@ -18,10 +18,9 @@ var CertificateGoalStatus = Backbone.Model.extend({
     id: 0,
     isActivity: false,
     selected: false,
-    value: "",
     title: ""
   }
-}).extend(CertificateGoalStatusService)
+}).extend(CertificateGoalStatusService);
 
 
 var GoalStatusView = Backbone.View.extend({
@@ -32,13 +31,20 @@ var GoalStatusView = Backbone.View.extend({
 
     this.model.set({ type: options.type, certificateID: options.certificateID, status: options.status});
 
-    if (options.type == GOAL_TYPE.STATEMENT)
-      this.model.set({title: this.language[this.model.get('tincanStmntVerb')] + ' ' + this.model.get('tincanStmntObj')});
+    if (options.type == GOAL_TYPE.STATEMENT) {
+      var objectName = this.model.get('tincanStmntObjName');
+      var objectTitle = objectName ? Utils.getLangDictionaryTincanValue(objectName) : this.model.get('tincanStmntObj');
+      this.model.set({title: this.language[this.model.get('tincanStmntVerb')] + ' ' + objectTitle});
+    }
     else if (options.type == GOAL_TYPE.ACTIVITY) {
-        var name = this.model.get('title');
-        this.model.set({activityID: this.model.get('title'), title: this.language[this.model.get('title')]});
-        if (name == 'participation' || name == 'contribution')
-            this.model.set({noDate: true });
+      var name = this.model.get('activityId');
+      var noDate = (name == 'participation' || name == 'contribution');
+
+      this.model.set({
+        isActivity: true,
+        title: this.language[this.model.get('activityId')],
+        noDate: noDate
+      });
     }
   },
   render: function () {
@@ -49,7 +55,7 @@ var GoalStatusView = Backbone.View.extend({
     return this;
   },
   setPeriod: function () {
-    this.$('#duringPeriodType option[value=' + this.model.get('period') + ']').prop('selected', true);
+    this.$('#duringPeriodType option[value=' + this.model.get('periodType') + ']').prop('selected', true);
   }
 });
 
@@ -103,21 +109,21 @@ var ViewUserDetailsDialog = Backbone.View.extend({
         if (statuses != undefined) {
           if (type == GOAL_TYPE.ACTIVITY) {
             goalStatus = statuses.filter(function (i) {
-              return i.name == item.get('title')
+              return i.activityId == item.get('activityId')
             }).map(function (i) {
                 return i.status;
               });
           }
           else if (type == GOAL_TYPE.STATEMENT) {
             goalStatus = statuses.filter(function (i) {
-              return i.obj == item.get('tincanStmntObj') && i.verb == item.get('tincanStmntVerb')
+              return i.tincanStmntObj == item.get('tincanStmntObj') && i.tincanStmntVerb == item.get('tincanStmntVerb')
             }).map(function (i) {
                 return i.status;
               });
           }
           else if (type == GOAL_TYPE.COURSE) {
             goalStatus = statuses.filter(function (i) {
-              return i.id == item.id
+              return i.courseGoalId == item.get('courseGoalId')
             }).map(function (i) {
                 return i.status;
               });

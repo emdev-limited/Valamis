@@ -5,4 +5,6 @@ import com.liferay.portal.service.CompanyLocalServiceUtil
 
 object CompanyLocalServiceHelper {
   def getCompanies: java.util.List[Company] = CompanyLocalServiceUtil.getCompanies
+  def getCompany(id: Long): Company = CompanyLocalServiceUtil.getCompany(id)
+  def getCompanyGroupId(id: Long): Long = CompanyLocalServiceUtil.getCompany(id).getGroupId
 }

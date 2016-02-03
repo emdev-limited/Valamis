@@ -7,6 +7,7 @@ object GradebookActionType extends Enumeration {
   val Grades = Value("GRADES")
   val TotalGrade = Value("TOTAL_GRADE")
   val GradedPackage = Value("GRADED_PACKAGE")
+  val LastOpen = Value("LAST_OPEN")
   val LastModified = Value("LAST_MODIFIED")
   val Review = Value("REVIEW")
   val Statements = Value("STATEMENTS")

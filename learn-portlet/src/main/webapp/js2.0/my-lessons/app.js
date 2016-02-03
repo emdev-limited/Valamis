@@ -6,14 +6,7 @@ var MyLessons = Marionette.Application.extend({
     });
   },
   start: function(){
-    this.lessons = new myLessons.Entities.LessonCollection();
-    this.lessons.on('sync', this.showContent, this);
-    this.lessons.fetch({
-      userId: Valamis.currentUserId
-    });
-  },
-  showContent: function() {
-    var layoutView = new myLessons.Views.AppLayoutView({collection: this.lessons});
+    var layoutView = new myLessons.Views.AppLayoutView();
     this.mainRegion.show(layoutView);
   }
 });

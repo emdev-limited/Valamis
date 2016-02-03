@@ -1,6 +1,7 @@
 package com.arcusys.learn.models.request
 
-import java.io.{ File, InputStream }
+import java.io.{File, InputStream}
+import java.text.Normalizer
 
 import com.arcusys.learn.liferay.util.Base64Helper
 import com.arcusys.learn.service.util.Parameter
@@ -9,14 +10,17 @@ import com.arcusys.learn.web.FileUploading
 object FileRequest extends BaseRequest {
   val UserId = "userID"
   val CompanyId = "companyID"
-  val QuizId = "quizID"
+  val EntityId = "entityId"
   val CategoryId = "categoryID"
+  val SlideId = "slideId"
+  val SlideSetId = "slideSetId"
 
   val Stream = "stream"
   val File = "file"
   val ContentType = "contentType"
   val FileId = "fileId"
   val FolderId = "folderId"
+  val FolderPrefix = "folderPrefix"
   val Base64Content = "inputBase64"
   val FileEntryId = "fileEntryID"
   val FileVersion = "fileVersion"
@@ -36,7 +40,9 @@ object FileRequest extends BaseRequest {
 
     def fileName = {
       // IE returns absolute path, e.g. C:/users/anonymous/Docs/pict.jpg Need to trim it
-      getFileItem.fold("")(f => new File(f.getName).getName.replaceAll(" ", "_"))
+      Normalizer.normalize(getFileItem.fold("")(f => new File(f.getName).getName.replaceAll(" ", "_")),Normalizer.Form.NFC)
+      //actually, filename from fileuploader.js already comes in NFD (Unicode Normalization Form D),
+      //but i'm not sure that is true for all browsers and OS, so to be sure convert it from NFD to NFC ((Unicode Normalization Form C)
     }
 
     def fileContent = {
@@ -62,13 +68,15 @@ object FileRequest extends BaseRequest {
 
     def folder = Parameter(FolderId).required
 
+    def folderPrefix = Parameter(FolderPrefix).option
+
     def fileEntryId = Parameter(FileEntryId).longRequired
 
     def fileVersion = Parameter(FileVersion).required
 
     def file = Parameter(File).required
 
-    def quizId = Parameter(QuizId).intRequired
+    def entityId = Parameter(EntityId).intRequired
 
     def categoryId = Parameter(CategoryId).option
 
@@ -96,6 +104,9 @@ object FileRequest extends BaseRequest {
       //        map { f => {println(f.getContentType); UploadContentType.withName(Parameter(ContentType).required) }}.
       //        getOrElse { throw new FileUploadingException(s"Wrong content type. It is undefined for file uploading }") }
     } //UploadContentType.withName(Parameter(ContentType).required)
+
+    def slideId = Parameter(SlideId).longRequired
+    def slideSetId = Parameter(SlideSetId).longRequired
   }
 
 }

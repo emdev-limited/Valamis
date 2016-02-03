@@ -14,8 +14,6 @@ trait ActivityGoalStorage {
 
   def get(certificateId: Long, activityName: String): Option[ActivityGoal]
 
-  def getByActivityName(activityName: String): Seq[ActivityGoal]
-
   def getByCertificateId(certificateId: Long): Seq[ActivityGoal]
   def getByCertificateIdCount(certificateId: Long): Int
 }

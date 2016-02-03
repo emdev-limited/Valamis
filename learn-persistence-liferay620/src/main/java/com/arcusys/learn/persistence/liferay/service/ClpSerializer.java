@@ -11,7 +11,6 @@ import com.arcusys.learn.persistence.liferay.model.LFAttemptDataClp;
 import com.arcusys.learn.persistence.liferay.model.LFBigDecimalClp;
 import com.arcusys.learn.persistence.liferay.model.LFChildrenSelectionClp;
 import com.arcusys.learn.persistence.liferay.model.LFConditionRuleClp;
-import com.arcusys.learn.persistence.liferay.model.LFConfigClp;
 import com.arcusys.learn.persistence.liferay.model.LFCourseClp;
 import com.arcusys.learn.persistence.liferay.model.LFGlblObjectiveStateClp;
 import com.arcusys.learn.persistence.liferay.model.LFLRSToActivitySettingClp;
@@ -38,9 +37,6 @@ import com.arcusys.learn.persistence.liferay.model.LFSeqPermissionsClp;
 import com.arcusys.learn.persistence.liferay.model.LFSequencingClp;
 import com.arcusys.learn.persistence.liferay.model.LFSequencingTrackingClp;
 import com.arcusys.learn.persistence.liferay.model.LFSiteDependentConfigClp;
-import com.arcusys.learn.persistence.liferay.model.LFSlideClp;
-import com.arcusys.learn.persistence.liferay.model.LFSlideEntityClp;
-import com.arcusys.learn.persistence.liferay.model.LFSlideSetClp;
 import com.arcusys.learn.persistence.liferay.model.LFTCClntApiStorageClp;
 import com.arcusys.learn.persistence.liferay.model.LFTincanLrsEndpointClp;
 import com.arcusys.learn.persistence.liferay.model.LFTincanManifestActClp;
@@ -178,10 +174,6 @@ public class ClpSerializer {
             return translateInputLFConditionRule(oldModel);
         }
 
-        if (oldModelClassName.equals(LFConfigClp.class.getName())) {
-            return translateInputLFConfig(oldModel);
-        }
-
         if (oldModelClassName.equals(LFCourseClp.class.getName())) {
             return translateInputLFCourse(oldModel);
         }
@@ -284,18 +276,6 @@ public class ClpSerializer {
 
         if (oldModelClassName.equals(LFSiteDependentConfigClp.class.getName())) {
             return translateInputLFSiteDependentConfig(oldModel);
-        }
-
-        if (oldModelClassName.equals(LFSlideClp.class.getName())) {
-            return translateInputLFSlide(oldModel);
-        }
-
-        if (oldModelClassName.equals(LFSlideEntityClp.class.getName())) {
-            return translateInputLFSlideEntity(oldModel);
-        }
-
-        if (oldModelClassName.equals(LFSlideSetClp.class.getName())) {
-            return translateInputLFSlideSet(oldModel);
         }
 
         if (oldModelClassName.equals(LFTCClntApiStorageClp.class.getName())) {
@@ -444,16 +424,6 @@ public class ClpSerializer {
         LFConditionRuleClp oldClpModel = (LFConditionRuleClp) oldModel;
 
         BaseModel<?> newModel = oldClpModel.getLFConditionRuleRemoteModel();
-
-        newModel.setModelAttributes(oldClpModel.getModelAttributes());
-
-        return newModel;
-    }
-
-    public static Object translateInputLFConfig(BaseModel<?> oldModel) {
-        LFConfigClp oldClpModel = (LFConfigClp) oldModel;
-
-        BaseModel<?> newModel = oldClpModel.getLFConfigRemoteModel();
 
         newModel.setModelAttributes(oldClpModel.getModelAttributes());
 
@@ -726,36 +696,6 @@ public class ClpSerializer {
         return newModel;
     }
 
-    public static Object translateInputLFSlide(BaseModel<?> oldModel) {
-        LFSlideClp oldClpModel = (LFSlideClp) oldModel;
-
-        BaseModel<?> newModel = oldClpModel.getLFSlideRemoteModel();
-
-        newModel.setModelAttributes(oldClpModel.getModelAttributes());
-
-        return newModel;
-    }
-
-    public static Object translateInputLFSlideEntity(BaseModel<?> oldModel) {
-        LFSlideEntityClp oldClpModel = (LFSlideEntityClp) oldModel;
-
-        BaseModel<?> newModel = oldClpModel.getLFSlideEntityRemoteModel();
-
-        newModel.setModelAttributes(oldClpModel.getModelAttributes());
-
-        return newModel;
-    }
-
-    public static Object translateInputLFSlideSet(BaseModel<?> oldModel) {
-        LFSlideSetClp oldClpModel = (LFSlideSetClp) oldModel;
-
-        BaseModel<?> newModel = oldClpModel.getLFSlideSetRemoteModel();
-
-        newModel.setModelAttributes(oldClpModel.getModelAttributes());
-
-        return newModel;
-    }
-
     public static Object translateInputLFTCClntApiStorage(BaseModel<?> oldModel) {
         LFTCClntApiStorageClp oldClpModel = (LFTCClntApiStorageClp) oldModel;
 
@@ -889,11 +829,6 @@ public class ClpSerializer {
         }
 
         if (oldModelClassName.equals(
-                    "com.arcusys.learn.persistence.liferay.model.impl.LFConfigImpl")) {
-            return translateOutputLFConfig(oldModel);
-        }
-
-        if (oldModelClassName.equals(
                     "com.arcusys.learn.persistence.liferay.model.impl.LFCourseImpl")) {
             return translateOutputLFCourse(oldModel);
         }
@@ -1021,21 +956,6 @@ public class ClpSerializer {
         if (oldModelClassName.equals(
                     "com.arcusys.learn.persistence.liferay.model.impl.LFSiteDependentConfigImpl")) {
             return translateOutputLFSiteDependentConfig(oldModel);
-        }
-
-        if (oldModelClassName.equals(
-                    "com.arcusys.learn.persistence.liferay.model.impl.LFSlideImpl")) {
-            return translateOutputLFSlide(oldModel);
-        }
-
-        if (oldModelClassName.equals(
-                    "com.arcusys.learn.persistence.liferay.model.impl.LFSlideEntityImpl")) {
-            return translateOutputLFSlideEntity(oldModel);
-        }
-
-        if (oldModelClassName.equals(
-                    "com.arcusys.learn.persistence.liferay.model.impl.LFSlideSetImpl")) {
-            return translateOutputLFSlideSet(oldModel);
         }
 
         if (oldModelClassName.equals(
@@ -1200,11 +1120,6 @@ public class ClpSerializer {
         }
 
         if (className.equals(
-                    "com.arcusys.learn.persistence.liferay.NoSuchLFConfigException")) {
-            return new com.arcusys.learn.persistence.liferay.NoSuchLFConfigException();
-        }
-
-        if (className.equals(
                     "com.arcusys.learn.persistence.liferay.NoSuchLFCourseException")) {
             return new com.arcusys.learn.persistence.liferay.NoSuchLFCourseException();
         }
@@ -1332,21 +1247,6 @@ public class ClpSerializer {
         if (className.equals(
                     "com.arcusys.learn.persistence.liferay.NoSuchLFSiteDependentConfigException")) {
             return new com.arcusys.learn.persistence.liferay.NoSuchLFSiteDependentConfigException();
-        }
-
-        if (className.equals(
-                    "com.arcusys.learn.persistence.liferay.NoSuchLFSlideException")) {
-            return new com.arcusys.learn.persistence.liferay.NoSuchLFSlideException();
-        }
-
-        if (className.equals(
-                    "com.arcusys.learn.persistence.liferay.NoSuchLFSlideEntityException")) {
-            return new com.arcusys.learn.persistence.liferay.NoSuchLFSlideEntityException();
-        }
-
-        if (className.equals(
-                    "com.arcusys.learn.persistence.liferay.NoSuchLFSlideSetException")) {
-            return new com.arcusys.learn.persistence.liferay.NoSuchLFSlideSetException();
         }
 
         if (className.equals(
@@ -1491,16 +1391,6 @@ public class ClpSerializer {
         newModel.setModelAttributes(oldModel.getModelAttributes());
 
         newModel.setLFConditionRuleRemoteModel(oldModel);
-
-        return newModel;
-    }
-
-    public static Object translateOutputLFConfig(BaseModel<?> oldModel) {
-        LFConfigClp newModel = new LFConfigClp();
-
-        newModel.setModelAttributes(oldModel.getModelAttributes());
-
-        newModel.setLFConfigRemoteModel(oldModel);
 
         return newModel;
     }
@@ -1769,36 +1659,6 @@ public class ClpSerializer {
         newModel.setModelAttributes(oldModel.getModelAttributes());
 
         newModel.setLFSiteDependentConfigRemoteModel(oldModel);
-
-        return newModel;
-    }
-
-    public static Object translateOutputLFSlide(BaseModel<?> oldModel) {
-        LFSlideClp newModel = new LFSlideClp();
-
-        newModel.setModelAttributes(oldModel.getModelAttributes());
-
-        newModel.setLFSlideRemoteModel(oldModel);
-
-        return newModel;
-    }
-
-    public static Object translateOutputLFSlideEntity(BaseModel<?> oldModel) {
-        LFSlideEntityClp newModel = new LFSlideEntityClp();
-
-        newModel.setModelAttributes(oldModel.getModelAttributes());
-
-        newModel.setLFSlideEntityRemoteModel(oldModel);
-
-        return newModel;
-    }
-
-    public static Object translateOutputLFSlideSet(BaseModel<?> oldModel) {
-        LFSlideSetClp newModel = new LFSlideSetClp();
-
-        newModel.setModelAttributes(oldModel.getModelAttributes());
-
-        newModel.setLFSlideSetRemoteModel(oldModel);
 
         return newModel;
     }

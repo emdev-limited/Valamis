@@ -9,11 +9,11 @@ object FileExportRequest extends BaseRequest {
 
   val CompanyId = "companyID"
   val CategoryId = "categoryID"
+  val PlainTextId = "plainTextId"
 
   val ExportAll = "EXPORTALL"
   val Export = "EXPORT"
   val Download = "DOWNLOAD"
-  val DownloadExternal = "DOWNLOAD_EXTERNAL"
   val ContentType = "contentType"
 
   val ExportExtension = ".zip"
@@ -41,9 +41,9 @@ object FileExportRequest extends BaseRequest {
     def contentType = Parameter(ContentType).required
     def courseId = Parameter(CourseId).intRequired
     def companyID = Parameter(CompanyId).intRequired
-    def ids = Parameter(Id).multiWithEmpty.map(x => Try(x.toInt).get)
-    def idsLong = Parameter(Id).multiWithEmpty.map(x => Try(x.toLong).get)
-    def categoryIds = Parameter(CategoryId).multiWithEmpty.map(x => Try(x.toInt).get)
+    def ids = Parameter(Id).multiLong
+    def categoryIds = Parameter(CategoryId).multiLong
+    def plainTextIds = Parameter(PlainTextId).multiLong
     def id = Parameter(Id).intRequired
     def publishType = PackagePublishType.withName(Parameter(PublishType).required)
     def theme = Parameter(Theme).option

@@ -375,7 +375,12 @@ create table Learn_LFSlide (
 	id_ LONG not null primary key,
 	bgcolor VARCHAR(75) null,
 	bgimage VARCHAR(512) null,
+	questionFont VARCHAR(255) null,
+	answerFont VARCHAR(255) null,
+	answerBg VARCHAR(255) null,
+	font VARCHAR(255) null,
 	title VARCHAR(75) null,
+	duration VARCHAR(75) null,
 	slideSetId LONG null,
 	topSlideId LONG null,
 	leftSlideId LONG null,
@@ -427,7 +432,8 @@ create table Learn_LFTincanLrsEndpoint (
 	endpoint VARCHAR(2000) null,
 	authType VARCHAR(2000) null,
 	key_ VARCHAR(2000) null,
-	secret VARCHAR(2000) null
+	secret VARCHAR(2000) null,
+	customHost VARCHAR(255) null
 );
 
 create table Learn_LFTincanManifestAct (

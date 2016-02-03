@@ -5,29 +5,31 @@ learningPaths.module('Entities', function(Entities, learningPaths, Backbone, Mar
     sync: {
       'read': {
         'path': function (model) {
-          return path.api.certificates + model.id + '?action=GETBYID'+
-            '&courseId=' + Utils.getCourseId();
+          return path.api.certificates + model.id + '?courseId=' + Utils.getCourseId();
         }
       }
     }
   });
 
   Entities.CertificateModel = Backbone.Model.extend({
+    parse: function(response) {
+      response['url'] = Utils.getCertificateUrl(response.id);
+      response['packages'] = _.map(response['packages'], function(pkg) {
+        pkg['url'] = Utils.getPackageUrl(pkg.packageId);
+        return pkg;
+      });
+      return response;
+    }
   }).extend(CertificateService);
 
   var CertificateCollectionService = new Backbone.Service({
     url: path.root,
     sync: {
       'read': {
-        'path': function (collection, options) {
-          return path.api.certificates;
-        },
-        'data': function (collection, options) {
-          return {
+        'path': path.api.certificateStates,
+        'data': {
             courseId: Utils.getCourseId(),
-            action: 'GETCERTIFICATESTATES',
-            statuses: ['inprogress', 'failed']
-          }
+            statuses: ['InProgress', 'Failed']
         },
         'method': 'get'
       }
@@ -35,7 +37,13 @@ learningPaths.module('Entities', function(Entities, learningPaths, Backbone, Mar
   });
 
   Entities.CertificateCollection = Backbone.Collection.extend({
-    model: Entities.CertificateModel
+    model: Entities.CertificateModel,
+    parse: function(response) {
+      return _.map(response, function(model) {
+        model['url'] = Utils.getCertificateUrl(model.id);
+        return model;
+      });
+    }
   }).extend(CertificateCollectionService);
 
 

@@ -1,26 +1,26 @@
-<section data-state="numeric_{{id}}">
-<div class="SCORMPlayerContentDisplay content{{id}}">
+<section data-state="numeric_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
+<div class="SCORMPlayerContentDisplay content{{id}}_{{questionNumber}}">
     <div class="playerHeader">
         <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
     </div>
     <div class="playerMainArea">
-        <input class="playerShortAnswerField" id="scormNumericAnswer{{id}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
+        <input class="playerShortAnswerField" id="scormNumericAnswer{{id}}_{{questionNumber}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
     </div>
     <!--{{#autoShowAnswer}} -->
-    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton" onclick="TinCanCourseHelpers['numericShowAnswers_{{id}}']()">Check</button>
+    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton" onclick="TinCanCourseHelpers['numericShowAnswers_{{id}}_{{questionNumber}}']()">Check</button>
     <!--{{/autoShowAnswer}} -->
 </div>
 <!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}" style="display: none;">
-    <h2> <span id="answerCorrectness{{id}}" style="vertical-align: baseline !important;"></span></h2>
+<div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
+    <h2> <span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
 
-    <div id="answerComparison{{id}}" style="display: none;">
-        <p>Your answers: <span id="usersAnswers{{id}}"></span></p>
+    <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
+        <p><strong>Your answers:</strong> <span id="usersAnswers{{id}}_{{questionNumber}}"></span></p>
 
         <div>
-            <p>Correct:</p>
+            <p><strong>Correct answers:</strong></p>
 
-            <div id="correctAnswers{{id}}"></div>
+            <div id="correctAnswers{{id}}_{{questionNumber}}"></div>
         </div>
         <br class="clear"/>
         <br>
@@ -34,11 +34,11 @@
 <!--{{/autoShowAnswer}} -->
 </section>
 <script type="text/javascript">
-    TinCanCourseHelpers['collectAnswers_{{id}}'] = function() {
+    TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function() {
         var dataToCompare = JSON.parse('{{{answers}}}');
 
         // this will check is user answer right
-        var userAnswer = parseFloat(jQuery("#scormNumericAnswer{{id}}").val());
+        var userAnswer = parseFloat(jQuery("#scormNumericAnswer{{id}}_{{questionNumber}}").val());
 
         var isPassed = false,
             correctResponses = [],
@@ -63,7 +63,7 @@
     };
 
     /*{{#autoShowAnswer}}*/
-    TinCanCourseHelpers['numericShowAnswers_{{id}}'] = function() {
+    TinCanCourseHelpers['numericShowAnswers_{{id}}_{{questionNumber}}'] = function() {
         function addMatchedLine(target, from, to) {
             if (from === to)
                 target.append(jQuery("<div>").addClass("matchedLine").html(from));
@@ -71,41 +71,45 @@
                 target.append(jQuery("<div>").addClass("matchedLine").html("from " + from + " to " + to + ""));
         }
 
-        jQuery('.answers{{id}}').show();
-        jQuery('.content{{id}}').hide();
+        jQuery('.answers{{id}}_{{questionNumber}}').show();
+        jQuery('.content{{id}}_{{questionNumber}}').hide();
+
+        var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
+        parent_el.prevAll('.rj-element').hide();
+        parent_el.nextAll('.rj-element').hide();
 
         var dataToCompare = JSON.parse('{{{answers}}}');
-        var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
         var correct = answers.isPassed;
         var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
         if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
-        jQuery("#answerCorrectness{{id}}").html(correctness);
+        jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
         if (!correct) {
-            jQuery("#answerComparison{{id}}").show();
+            jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
             var learnerResponse = answers.learnerResponse;
             if (isNaN(learnerResponse)) {
-                jQuery("#usersAnswers{{id}}").html('<i>No answer</i>');
+                jQuery("#usersAnswers{{id}}_{{questionNumber}}").html('<i>No answer</i>');
             } else {
-                jQuery("#usersAnswers{{id}}").html(learnerResponse);
+                jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(learnerResponse);
             }
 
             for (var j = 0; j < dataToCompare.length; j++) {
-                addMatchedLine(jQuery("#correctAnswers{{id}}"), dataToCompare[j].from, dataToCompare[j].to);
+                addMatchedLine(jQuery("#correctAnswers{{id}}_{{questionNumber}}"), dataToCompare[j].from, dataToCompare[j].to);
             }
         }
         doScale();
     };
     /*{{/autoShowAnswer}}*/
 
-    TinCanCourseModules['numeric_{{id}}'] = function(tincan) {
-        var dataToCompare = JSON.parse('{{{answers}}}');
+    TinCanCourseModules['numeric_{{id}}_{{questionNumber}}'] = function(tincan) {
+        var dataToCompare = JSON.parse(unescapeElement('{{answers}}'));
         // this will check is user answer right
-        var userAnswer = parseFloat(jQuery("#scormNumericAnswer{{id}}").val());
+        var userAnswer = parseFloat(jQuery("#scormNumericAnswer{{id}}_{{questionNumber}}").val());
 
-        var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
         var isPassed = false;
-        var taskID = 'task{{id}}';
+        var taskID = 'task{{id}}_{{questionNumber}}';
         var score = 0;
         var correctAnswer = '';
 
@@ -120,11 +124,21 @@
         }
 
         if (answers.isPassed) {
-            tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'numeric', userAnswer, correctAnswer, true, 100, score));
+            tincan.sendStatement(GetQuestionAnswerStatement(
+                taskID, unescapeElement('{{text}}'), '{{title}}', 'numeric', userAnswer, correctAnswer, true, 100, score));
             return 1;
         } else {
-            tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'numeric', userAnswer, correctAnswer, false, 0, score));
+            tincan.sendStatement(GetQuestionAnswerStatement(
+                taskID, unescapeElement('{{text}}'), '{{title}}', 'numeric', userAnswer, correctAnswer, false, 0, score));
             return 0;
         }
-    }
+    };
+
+    TinCanCourseSetAnswers['numeric_{{id}}_{{questionNumber}}'] = function(userAnswer) {
+        jQuery("#scormNumericAnswer{{id}}_{{questionNumber}}").val(userAnswer);
+    };
+
+    TinCanCourseQuestionsAll['numeric_{{id}}_{{questionNumber}}'] = unescapeElement('{{title}}');
+    TinCanCourseQuestionsContent['numeric_{{id}}_{{questionNumber}}'] = unescapeElement('{{text}}');
+
 </script>

@@ -1,6 +1,13 @@
 var UserAccountView = Backbone.View.extend({
   initialize: function (options) {
     this.language = options.language;
+
+    this.certificates = new CertificateCollection();
+    this.certificates.on('sync', this.addAll, this);
+    this.certificates.fetch({
+      userId: this.model.get('id')
+    });
+
     this.render();
   },
 
@@ -8,12 +15,21 @@ var UserAccountView = Backbone.View.extend({
     'click .js-open-goals': 'openGoals'
   },
 
-  addOne: function (element) {
+  addOne: function (model) {
+    /*Some certificate images are not on local server
+     * We need to check this. */
+    var element = model.toJSON();
+
     var template = Mustache.to_html(jQuery('#userCertificateTileItemView').html(), _.extend({
-      decodedDescription: element.description
+      decodedDescription: element.description,
+      isLocal: !(element.id < 0)
     }, element, this.language));
 
     this.$('.js-certificates-list').append(template);
+  },
+
+  addAll: function() {
+    this.certificates.each(this.addOne, this);
   },
 
   openGoals: function (e) {
@@ -27,19 +43,6 @@ var UserAccountView = Backbone.View.extend({
     ));
     this.$el.append(template);
 
-    if (this.model.get('certificates') != null &&
-      this.model.get('certificates') != undefined)
-    {
-      for (var i = 0; i < this.model.get('certificates').length; i++)
-      {
-        var model = this.model.get('certificates')[i];
-        /*Some certificate images are not on local server
-         * We need to check this.
-         */
-        model.isLocal = !(model.id == -1);
-        this.addOne(model);
-      }
-    }
     return this;
   }
 });

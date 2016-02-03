@@ -18,5 +18,6 @@ object TagRequest extends BaseRequest {
 
     def companyId = Parameter(CompanyId).intRequired
     def tagId = Parameter(TagId).intRequired
+    def courseId = Parameter(CourseId).longRequired
   }
 }

@@ -1,6 +1,6 @@
 GradebookRowView = Backbone.View.extend({
     events:{
-        "click .val-icon-edit": "showEditGradeView",
+        "click .js-action-edit": "showEditGradeView",
         "click .student-click": "showStudent"
     },
 

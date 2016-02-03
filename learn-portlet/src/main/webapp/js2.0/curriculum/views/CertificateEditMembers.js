@@ -2,17 +2,16 @@ CertificateMemberModelService = new Backbone.Service({ url: path.root,
   sync: {
     'delete': {
       'path': function (model) {
-        return path.api.certificates + jQuery('#selectedCertificateID').val()
+        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/users'
       },
       'data': function (model) {
         return {
-            action: 'DELETEUSERS',
             courseId: Utils.getCourseId(),
             userIDs: model.id
 
         }
       },
-      'method': 'post'
+      'method': 'delete'
     }
   }
 });
@@ -34,17 +33,15 @@ CertificateMemberModel = Backbone.Model.extend({
 CertificateMemberCollectionService = new Backbone.Service({ url: path.root,
   sync: {
     'read': {
-      'path': function (collection, options) {
-        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/users';
-      },
+      'path': path.api.users,
       'data': function (collection, options) {
         var order = options.order;
         var sortBy = order.split(':')[0];
         var asc = order.split(':')[1];
         return {
-          action: 'GETSTUDENTS',
           orgId: options.orgId,
           courseId: Utils.getCourseId(),
+          certificateId: jQuery('#selectedCertificateID').val(),
           sortBy: sortBy,
           sortAscDirection: asc,
           filter: options.filter,
@@ -57,19 +54,18 @@ CertificateMemberCollectionService = new Backbone.Service({ url: path.root,
   },
   targets: {
     'deleteFromCertificate': {
-      'path': function(model, options){
-       return path.api.certificates + jQuery('#selectedCertificateID').val();
+      'path': function () {
+        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/users'
       },
       'data': function (model, options) {
         var params =  {
-            action: 'DELETEUSERS',
-            courseId: Utils.getCourseId()
-        }
-        _.extend(params, options.users);
+            courseId: Utils.getCourseId(),
+            userIDs : options.users
+        };
         return params;
 
       },
-      method: 'post'
+      method: 'DELETE'
     }
   }
 });
@@ -77,16 +73,7 @@ CertificateMemberCollectionService = new Backbone.Service({ url: path.root,
 CertificateMemberCollection = Backbone.Collection.extend({
   model: CertificateMemberModel,
   parse: function (response) {
-    var arr = [];
-      jQuery1816Curriculum.map(response.records, function(item) {
-          for (var key in item) {
-              if (item.hasOwnProperty(key)) {
-                  item[key].joinedDate = new Date(key);
-                  arr.push(item[key]);
-              }
-          }
-      });
-
+    var arr = response.records;
     this.trigger('userCollection:updated', { total: response.total, currentPage: response.currentPage, listed: arr.length });
     return arr;
   }
@@ -110,7 +97,7 @@ var CertificateMemberListElement = Backbone.View.extend({
   },
   render: function () {
     var template = Mustache.to_html(jQuery('#certificateMemberElementView').html(), _.extend(
-      { status: this.language[this.model.get('status')] },
+      {statusLabel: this.language[this.model.get('status').toLowerCase() + 'StatusLabel']},
       this.model.toJSON(),
       this.language,
       permissionActionsCurriculum
@@ -169,6 +156,13 @@ var CertificateEditMembersDialog = Backbone.View.extend({
     var data = _.extend(this.language, permissionActionsCurriculum);
     var renderedTemplate = Mustache.to_html(jQuery('#certificateItemEditMembers').html(), data);
     this.$el.html(renderedTemplate);
+    this.$('.js-search')
+        .on('focus', function() {
+          jQuery(this).parent('.val-search').addClass('focus');
+        })
+        .on('blur', function() {
+          jQuery(this).parent('.val-search').removeClass('focus');
+        });
 
     this.organizations.fetch({reset: true});
 
@@ -236,15 +230,16 @@ var CertificateEditMembersDialog = Backbone.View.extend({
 
   reloadFirstPage: function () {
     jQuery('#noMembersLabel').hide();
-    this.fetchCollection(1);
+    this.paginatorModel.set({'currentPage': 1});
+    this.fetchCollection();
   },
   reload: function () {
-    this.fetchCollection(this.paginator.currentPage());
+    this.fetchCollection();
   },
-  fetchCollection: function (page) {
+  fetchCollection: function () {
     this.collection.fetch({
       reset: true,
-      currentPage: page,
+      currentPage: this.paginator.currentPage(),
       itemsOnPage: this.paginator.itemsOnPage(),
       filter: this.$('#searchMembers').val(),
       orgId: this.$('#memberOrganization').data('value'),
@@ -275,10 +270,9 @@ var CertificateEditMembersDialog = Backbone.View.extend({
         return item.get('id');
       });
 
-    var users = jQuery.param({'userIDs': selectedUsers}, true);
-    if (users.length > 0) {
+    if (selectedUsers.length > 0) {
       var that = this;
-      this.collection.deleteFromCertificate({}, {users: users}).then(function (res) {
+      this.collection.deleteFromCertificate({}, {users: selectedUsers}).then(function (res) {
         that.reload();
         toastr.success(that.language['overlayCompleteMessageLabel']);
       }, function (err, res) {

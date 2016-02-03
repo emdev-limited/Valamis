@@ -28,7 +28,7 @@
             submitEl: '.bbm-button',
             cancelEl: '.modal-close',
             onRender: function () {
-                var me = this;
+                var that = this;
                 var uploader = new FileUploader({
                     endpoint: path.root + path.api.files +
                             '?action=ADD' +
@@ -39,8 +39,9 @@
                 });
 
                 uploader.on('fileuploaddone', function (data) {
-                    me.trigger('modal:close');
-                    me.close();
+                    that.trigger('modal:close');
+                    that.close();
+
                 });
 
                 this.$('.certificate-modal-content').append(uploader.render().$el);
@@ -62,7 +63,6 @@
 </head>
 <body >
 <div style="height: 100px; padding: 10px;">
-
     <button class="button big primary bbm-button val-icon-download " onclick="exportAllCertificates()">
         {{exportAll}}
     </button>

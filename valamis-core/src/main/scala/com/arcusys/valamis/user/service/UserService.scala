@@ -1,8 +1,8 @@
 package com.arcusys.valamis.user.service
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.valamis.model.{RangeResult, SkipTake}
-import com.arcusys.valamis.user.model.User
+import com.arcusys.valamis.model.SkipTake
+import com.arcusys.valamis.user.model.{ScormUser, UserFilter, User}
 import com.liferay.portal.model.Organization
 
 /**
@@ -10,33 +10,26 @@ import com.liferay.portal.model.Organization
  * Date: 14.10.2014
  */
 trait UserService {
-  def all(companyId: Int): Seq[LUser]
+  def all(companyId: Long): Seq[LUser]
 
   def all(courseId: Long,
-    skip: Int,
-    take: Int,
     filter: String,
     sortAZ: Boolean): Seq[LUser]
 
-  def byId(id: Long): LUser
+  def getBy(filter: UserFilter, skipTake: Option[SkipTake] = None): Seq[LUser]
 
-  def byIds(companyId: Long, ids: Set[Long]): Set[LUser]
+  def getCountBy(filter: UserFilter): Long
 
-  def all(companyId: Long,
-    orgId: Option[Long],
-    skipTake: Option[SkipTake],
-    filter: String,
-    sortAZ: Boolean): RangeResult[LUser]
+  def getById(id: Long): LUser
 
-  def getByName(name: String, companyId: Long): Seq[User]
 
-  def getByIds(companyId: Long, ids: Set[Long]): Seq[User]
+  def getByName(name: String, companyId: Long, count: Option[Int] = None): Seq[User]
 
-  def orgs(): Seq[Organization]
+  def getByIds(companyId: Long, ids: Set[Long]): Seq[LUser]
 
-  def getUserOption(userId: Int): Option[User]
+  def getOrganizations: Seq[Organization]
+
+  def getUserOption(userId: Int): Option[ScormUser]
 
   def createAndGetId(userId: Int, name: String)
-
-  def getUsersWithAttemptsByCourseID(courseID: Long)
 }

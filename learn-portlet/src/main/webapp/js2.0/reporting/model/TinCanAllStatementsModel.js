@@ -1,4 +1,4 @@
-var TinCanOverallByPeriodModelService = new Backbone.Service({ url: '/',
+var TinCanOverallByPeriodModelService = new Backbone.Service({ url: path.root,
     sync: {
         'read': {
             path: path.api.report,

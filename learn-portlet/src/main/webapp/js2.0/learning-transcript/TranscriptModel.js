@@ -14,8 +14,6 @@ UserCertificateCollectionService = new Backbone.Service({ url: path.root,
             'data': function () {
                 return {
                     companyID: jQuery('#transcriptCompanyID').val(),
-                    page: 0,
-                    count: 1,
                     isOnlyPublished: true,
                     courseId: Utils.getCourseId()
                 }
@@ -50,7 +48,10 @@ UserCoursesCollectionService = new Backbone.Service({ url: path.root,
 });
 
 var UserCoursesCollection = Backbone.Collection.extend({
-    model: TranscriptModel
+    model: TranscriptModel,
+    parse: function(response) {
+        return response.records;
+    }
 }).extend(UserCoursesCollectionService);
 
 // ####
@@ -89,12 +90,7 @@ CertificateGoalCollectionService = new Backbone.Service({ url: path.root,
             'path': function (e, options) {
                 return path.api.certificates + options.certificateID;
             },
-            'data': function (e, options) {
-                return {
-                    action: 'GETBYID',
-                    courseId: Utils.getCourseId()
-                }
-            },
+            'data': {courseId: Utils.getCourseId()},
             'method': 'get'
         }
     }
@@ -143,10 +139,10 @@ var CertificateGoalStatus = Backbone.Model.extend({
         title: "",
         validPeriod: ""
     }
-}).extend(CertificateGoalStatusService)
+}).extend(CertificateGoalStatusService);
 
 // Pass amount=0 for filtered statements; amount=-1 for ALL statements
-StatementModelCollectionService = new Backbone.Service({ url: '/',
+StatementModelCollectionService = new Backbone.Service({ url: path.root,
     sync: {
         'read':{
         path: path.api.report,
@@ -200,7 +196,7 @@ var UserCollection = Backbone.Collection.extend({
 }).extend(UserService);
 
 
-PrintTranscriptService = new Backbone.Service({ url: '/',
+PrintTranscriptService = new Backbone.Service({ url: path.root,
     sync: {
         'read' : function () {
 

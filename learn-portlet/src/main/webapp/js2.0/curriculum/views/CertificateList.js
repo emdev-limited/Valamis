@@ -55,13 +55,20 @@ var CertificatesListView = Backbone.View.extend({
     this.views = [];
     var template = Mustache.to_html(jQuery('#curriculumLayoutTemplate').html(),
       _.extend({
+          isAdminView: (this.viewType == VIEW_TYPE.ADMIN),
           scopeAvailable: scopeAvailable,
           currentCertificateID: Utils.getCourseId(),
           portletId: this.portletId
         }, this.language, this.permissions));
     this.$el.html(template);
     this.$('.dropdown').valamisDropDown();
-
+    this.$('.js-search')
+      .on('focus', function() {
+        jQuery(this).parent('.val-search').addClass('focus');
+      })
+      .on('blur', function() {
+        jQuery(this).parent('.val-search').removeClass('focus');
+      });
 
     if (this.settings.get('layout') === DISPLAY_TYPE.TILES) {
       this.displayTiles();
@@ -91,20 +98,20 @@ var CertificatesListView = Backbone.View.extend({
   },
 
   reloadFirstPage: function () {
-    this.fetchCollection(1);
+    this.paginatorModel.set({'currentPage': 1});
+    this.fetchCollection();
   },
   reloadWithMessage: function () {
     toastr.success(this.language['overlayCompleteMessageLabel']);
     this.reload();
   },
   reload: function () {
-    var page = this.paginatorModel.get('currentPage');
-    this.fetchCollection(page);
+    this.fetchCollection();
   },
-  fetchCollection: function(pageNumber) {
+  fetchCollection: function() {
     this.collection.fetch({
       reset: true,
-      currentPage: pageNumber,
+      currentPage: this.paginatorModel.get('currentPage'),
       itemsOnPage: this.paginatorModel.get('itemsOnPage'),
       filter: this.$el.find('.js-certificate-filter').val(),
       order: this.$el.find('#certificateOrder_' + this.portletId).data('value'),
@@ -135,6 +142,7 @@ var CertificatesListView = Backbone.View.extend({
     view.on('reload', this.reload, this);
     view.on('item:model:removed', function(model) {
       this.collection.remove(model);
+      if (this.collection.models.length <= 0) return;
       if (this.collection.length === 0)
         this.paginatorModel.set('currentPage', this.paginatorModel.get('currentPage')-1);
       this.reload();
@@ -180,7 +188,8 @@ var CertificatesListView = Backbone.View.extend({
   },
 
   addCertificate: function () {
-    this.trigger('addCertificate');
+    if (jQuery('.certificate-modals-container:empty').length != 0)
+      this.trigger('addCertificate');
   },
   filterCertificates: function () {
     clearTimeout(this.inputTimeout);

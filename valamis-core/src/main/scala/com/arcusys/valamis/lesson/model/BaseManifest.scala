@@ -14,7 +14,6 @@ trait BaseManifest {
   def passingLimit: Int
   def rerunInterval: Int
   def rerunIntervalType: PeriodType
-  def assetRefId: Option[Long]
 
   def logo: Option[String]
 

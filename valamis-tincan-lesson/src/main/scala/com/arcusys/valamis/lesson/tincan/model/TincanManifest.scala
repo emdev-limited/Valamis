@@ -11,7 +11,6 @@ case class TincanManifest(
     title: String,
     summary: Option[String],
     courseId: Option[Int],
-    assetRefId: Option[Long] = None,
 
     visibility: Option[Boolean] = None,
     logo: Option[String] = None,

@@ -1,14 +1,17 @@
 package com.arcusys.learn.liferay.permission
 
-import com.arcusys.learn.exceptions.{ NotAuthorizedException, AccessDeniedException }
+import javax.management.ListenerNotFoundException
+import javax.servlet.http.HttpServletRequest
+
+import com.arcusys.learn.exceptions.{AccessDeniedException, NotAuthorizedException}
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.learn.liferay.services.{ResourceActionLocalServiceHelper, PermissionHelper}
-import com.liferay.portal.NoSuchResourceActionException
+import com.arcusys.learn.liferay.services.{LayoutLocalServiceHelper, PermissionHelper, ResourceActionLocalServiceHelper}
+import com.liferay.portal.{NoSuchLayoutSetPrototypeException, NoSuchResourceActionException}
 import com.liferay.portal.kernel.portlet.LiferayPortletSession
-import com.liferay.portal.model.Layout
+import com.liferay.portal.model.{LayoutTypePortlet, Layout}
 import com.liferay.portal.security.permission.PermissionChecker
-import com.liferay.portal.service.{ LayoutLocalServiceUtil, ServiceContextThreadLocal, UserLocalServiceUtil }
-import com.liferay.portal.util.LayoutTypePortletFactoryUtil
+import com.liferay.portal.service.{LayoutLocalServiceUtil, ServiceContextThreadLocal, UserLocalServiceUtil}
+import com.liferay.portal.util.PortalUtil
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -35,20 +38,38 @@ object SetDefaultPermission extends PermissionBase("SET_DEFAULT")
 
 object ViewAllPermission extends PermissionBase("VIEW_ALL")
 
+object ModifyAllPermission extends PermissionBase("MODIFY_ALL")
+
+object WriteStatusPermission extends PermissionBase("WRITE_STATUS")
+
+object CommentPermission extends PermissionBase("COMMENT")
+
+object LikePermission extends PermissionBase("LIKE")
+
+object HideStatisticPermission extends PermissionBase("HIDE_STATISTIC")
+
+object ShowAllActivities extends PermissionBase("SHOW_ALL")
+
+object EditThemePermission extends PermissionBase("EDIT_THEME")
+
+object OrderPermission extends PermissionBase("ORDER_ACTION")
+
 case class Permission(permission: PermissionBase, portlets: Seq[PortletName])
 
 object PermissionUtil {
 
   val logger = LoggerFactory.getLogger(PermissionUtil.getClass)
 
-  def requireCurrentLoggedInUser(userID: Int) = {
-    if (getUserId != userID)
+  def requireCurrentLoggedInUser(userId: Long) = {
+    if (getUserId != userId)
       throw AccessDeniedException()
   }
 
   def getUserId: Long = ServiceContextThreadLocal.getServiceContext.getUserId
 
   def getCompanyId: Long = PermissionHelper.getPermissionChecker().getCompanyId
+
+  def getCourseId: Long = ServiceContextThreadLocal.getServiceContext.getRequest.getParameter("courseId").toLong
 
   def requireLogin() = {
     if (!isAuthenticated)
@@ -59,53 +80,70 @@ object PermissionUtil {
 
   def isAuthenticated: Boolean = PermissionHelper.getPermissionChecker().isSignedIn
 
-  def hasPermissionApi(permission: PermissionBase, portlets: PortletName*): Boolean = {
-    hasPermissionApiSeq(PermissionHelper.getPermissionChecker(), permission, portlets)
+  def hasPermissionApi(permission: PermissionBase, portlets: PortletName*)(implicit r: HttpServletRequest): Boolean = {
+    hasPermissionApiSeq(PermissionHelper.getPermissionChecker(), permission, portlets, Some(r))
   }
 
-  def hasPermissionApi(user: LUser, permission: PermissionBase, portlets: PortletName*): Boolean = {
-    hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets)
+  def hasPermissionApi(user: LUser, permission: PermissionBase, portlets: PortletName*)
+                      (implicit r: HttpServletRequest): Boolean = {
+    hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets,Some(r))
   }
 
-  def requirePermissionApi(permission: PermissionBase, portlets: PortletName*) = {
-    if (!hasPermissionApiSeq(PermissionHelper.getPermissionChecker(), permission, portlets)) {
-      throw AccessDeniedException(permission.name + " required on " + portlets)
+  def hasPermissionApi(courseId: Long, user: LUser, permission: PermissionBase, portlets: PortletName*): Boolean = {
+    hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets, courseId = Some(courseId.toInt))
+  }
+
+  def requirePermissionApi(permission: PermissionBase, portlets: PortletName*)(implicit r: HttpServletRequest):Unit = {
+    val companyId = PortalUtil.getCompanyId(r)
+
+    val user = Option(PortalUtil.getUser(r)).getOrElse {
+      UserLocalServiceUtil.getUser(UserLocalServiceUtil.getDefaultUserId(companyId))
+    }
+
+    if (!hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets, Some(r))) {
+      throw AccessDeniedException(s"no ${permission.name} permission for ${portlets.mkString(", ")}")
     }
   }
 
-  def requirePermissionApi(permissions: Permission*): Unit = {
+  def requirePermissionApi(permissions: Permission*)(implicit r: HttpServletRequest): Unit = {
     if (!permissions.foldLeft(false) { (acc, permission) =>
-      acc || hasPermissionApiSeq(PermissionHelper.getPermissionChecker(), permission.permission, permission.portlets)
+      acc || hasPermissionApiSeq(PermissionHelper.getPermissionChecker(), permission.permission, permission.portlets, Some(r))
     }) throw AccessDeniedException("You don't have required permissions")
   }
 
-  def requirePermissionApi(user: LUser, permission: PermissionBase, portlets: PortletName*) = {
-    if (!hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets)) {
-      throw AccessDeniedException(permission.name + " required on " + portlets)
+  def requirePermissionApi(user: LUser, permission: PermissionBase, portlets: PortletName*)
+                          (implicit r: HttpServletRequest): Unit = {
+    if (!hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets, Some(r))) {
+      throw AccessDeniedException(s"no ${permission.name} permission for ${portlets.mkString(", ")}")
     }
   }
 
-  private def hasPermissionApiSeq(checker: PermissionChecker, permission: PermissionBase, portlets: Seq[PortletName]): Boolean = {
+  private def hasPermissionApiSeq(checker: PermissionChecker,
+                                  permission: PermissionBase,
+                                  portlets: Seq[PortletName],
+                                  r: Option[HttpServletRequest] = None,
+                                  courseId: Option[Int] = None): Boolean = {
     val keys = portlets.map(_.key)
-    val courseId = getCourseId
+    val cId = courseId.getOrElse(getCourseId(r))
 
-    lazy val privateLayouts = LayoutLocalServiceUtil.getLayouts(courseId, true).asScala
-    lazy val publicLayouts = LayoutLocalServiceUtil.getLayouts(courseId, false).asScala
+    lazy val privateLayouts = LayoutLocalServiceUtil.getLayouts(cId, true).asScala
+    lazy val publicLayouts = LayoutLocalServiceUtil.getLayouts(cId, false).asScala
 
-    checker.isGroupAdmin(courseId) ||
+
+      checker.isGroupAdmin(cId) ||
       check(checker, permission, keys, privateLayouts) ||
       check(checker, permission, keys, publicLayouts)
   }
 
   private def check(checker: PermissionChecker, permission: PermissionBase, keys: Seq[String], allLayouts: Seq[Layout]): Boolean = {
     for (
-      l <- allLayouts;
-      plid = l.getPlid;
-      portletId <- LayoutTypePortletFactoryUtil.create(l).getPortletIds.asScala
+      layout <- allLayouts;
+      plid = layout.getPlid;
+      portletId <- LayoutLocalServiceHelper.getPortletIds(layout)
     ) {
       if (keys.contains(portletId)) {
         val primaryKey = plid + LiferayPortletSession.LAYOUT_SEPARATOR + portletId
-        if (hasPermission(checker, l.getGroupId, portletId, primaryKey, permission)) {
+        if (hasPermission(checker, layout.getGroupId, portletId, primaryKey, permission)) {
           return true
         }
       }
@@ -126,12 +164,9 @@ object PermissionUtil {
     checker.hasPermission(groupId, portletId, primaryKey, action.name)
   }
 
-  def getCourseId = {
-    val context = ServiceContextThreadLocal.getServiceContext
-    val request = context.getRequest
-    val courseId = request.getParameter("courseId")
-    Option(courseId).getOrElse(throw AccessDeniedException("courseId empty")).toLong
+  def getCourseId(r: Option[HttpServletRequest]) = {
+    val courseId = r.getOrElse(throw AccessDeniedException("courseId is empty")).getParameter("courseId")
+    Option(courseId).getOrElse(throw AccessDeniedException("courseId is empty")).toInt
   }
-
 }
 

@@ -8,7 +8,7 @@ package com.arcusys.valamis.certificate.model
 object CertificateSortBy extends Enumeration {
   type CertificateSortBy = Value
   val Name, Description, CreationDate, UserJoined = Value
-  def apply(v: String): CertificateSortBy = v.toLowerCase() match {
+  def apply(v: String): CertificateSortBy = v.toLowerCase match {
     case "name"         => Name
     case "description"  => Description
     case "creationdate" => CreationDate

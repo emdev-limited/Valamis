@@ -1,34 +1,26 @@
 package com.arcusys.valamis.certificate.repository
 
-import javax.inject.Inject
-
-import com.arcusys.valamis.certificate.model.{CertificateStateFilter, CertificateStatus, Certificate, CertificateState}
-import com.arcusys.valamis.certificate.schema.{CertificateTableComponent, CertificateStateTableComponent}
+import com.arcusys.valamis.certificate.model.{CertificateFilter, CertificateState, CertificateStateFilter}
+import com.arcusys.valamis.certificate.schema.{CertificateStateTableComponent, CertificateTableComponent}
 import com.arcusys.valamis.certificate.storage.CertificateStateRepository
-import com.arcusys.valamis.core.{SlickProfile, SlickDBInfo}
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
-import org.joda.time.DateTime
+import com.arcusys.valamis.core.SlickProfile
 
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.JdbcBackend
 
-class CertificateStateRepositoryImpl @Inject() (val db: JdbcBackend#DatabaseDef,
-                                                val driver: JdbcProfile)
+class CertificateStateRepositoryImpl(val db: JdbcBackend#DatabaseDef,
+                                     val driver: JdbcProfile)
   extends CertificateStateTableComponent
   with CertificateStateRepository
   with SlickProfile
-  with CertificateTableComponent{
+  with CertificateTableComponent
+  with Queries {
 
   import driver.simple._
 
-  implicit val CertificateStatusTypeMapper = MappedColumnType.base[CertificateStatus.Value, String](
-    s => s.toString,
-    s => CertificateStatus.withName(s)
-  )
-
   override def create(state: CertificateState) = db.withSession { implicit session =>
     certificateStates.insert(state)
-    getBy(state.userId, state.certificateId).get
+    certificateStates.filter(cs => cs.userId === state.userId && cs.certificateId === state.certificateId).first
   }
 
   override def getBy(userId: Long, certificateId: Long) = db.withSession { implicit session =>
@@ -36,33 +28,37 @@ class CertificateStateRepositoryImpl @Inject() (val db: JdbcBackend#DatabaseDef,
   }
 
   override def getBy(filter: CertificateStateFilter) = db.withSession { implicit session =>
-    val collection = certificateStates
-    val userIdFiltered = 
-      if(filter.userId.isDefined) collection.filter(_.userId === filter.userId.get)
-      else collection
-    val certificateIdFiltered =
-      if(filter.certificateId.isDefined) userIdFiltered.filter(_.certificateId === filter.certificateId.get)
-      else userIdFiltered
-    val statusFiltered =
-      if(filter.statuses.nonEmpty) certificateIdFiltered.filter(_.status inSet(filter.statuses))
-      else certificateIdFiltered
-    statusFiltered.run
+    certificateStates.filterBy(filter).run
+  }
+
+  override def getBy(filter: CertificateStateFilter, certificateFilter: CertificateFilter) = {
+    db.withSession { implicit session =>
+      val stateQuery = certificateStates.filterBy(filter)
+      certificates.filterBy(certificateFilter)
+        .join(stateQuery).on(_.id === _.certificateId)
+        .map(_._2)
+        .list
+    }
+  }
+
+  override def getByCertificateId(id: Long) =
+    getBy(CertificateStateFilter(certificateId = Some(id)))
+
+  override def getByUserId(id: Long) =
+    getBy(CertificateStateFilter(userId = Some(id)))
+
+  override def getUsersBy(certificateId: Long) = db.withSession { implicit session =>
+    val filter = CertificateStateFilter(certificateId = Some(certificateId))
+    certificateStates.filterBy(filter).map(_.userId).run
   }
 
   override def update(state: CertificateState) = db.withSession { implicit session =>
-    certificateStates.filter(entity => entity.certificateId === state.certificateId.toLong && entity.userId === state.userId).update(state)
-    getBy(state.userId, state.certificateId).get
+    val filtered = certificateStates.filter(entity => entity.certificateId === state.certificateId && entity.userId === state.userId)
+    filtered.update(state)
+    filtered.first
   }
-
 
   override def delete(userId: Long, certificateId: Long) = db.withSession { implicit session =>
     certificateStates.filter(ca => ca.userId === userId && ca.certificateId === certificateId).delete
-  }
-
-  override def delete(states: Seq[CertificateState]) = db.withSession { implicit session =>
-    if(!states.isEmpty)
-      certificateStates
-        .filter(dbCA => states.map(ca => dbCA.userId === ca.userId && dbCA.certificateId === ca.certificateId).reduce(_||_))
-        .delete
   }
 }

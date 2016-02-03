@@ -29,7 +29,7 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                             attemptCount: model.get('attemptCount'),
                             beginDate: model.get('beginDate'),
                             endDate: model.get('endDate'),
-                            description: model.get('description') || 'New description',
+                            description: model.get('description') || "",
                             isDefault: model.get('isDefault'),
                             packageType: model.get('packageType'),
                             passingLimit: model.get('passingLimit'),
@@ -47,18 +47,9 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                 'method': "post"
             },
             'delete': {
-                'path': apiUrl,
-                'data': function(model){
-                    var params ={
-                        action: 'DELETE',
-                        id: model.get('id'),
-                        courseId: Utils.getCourseId(),
-                        scope : model.get('scope'),
-                        packageType: model.get('packageType')
-                    };
-                    return params;
-                },
-                'method': 'post'
+                'path': function(model){ return apiUrl + model.get('packageType') + "/" + model.get('id')},
+                'data': {courseId: Utils.getCourseId()},
+                'method': 'delete'
             }
 
         },
@@ -131,7 +122,7 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                         packageType: filter.packageType || '',
                         page: options.currentPage,
                         count: options.itemsOnPage,
-                        tagID: tagId
+                        tagId: tagId
                     };
 
                     return params;
@@ -162,7 +153,7 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                     return {
                     id: item.get('id'),
                     title: item.get('title') || "New lesson",
-                    description: item.get('description') || "New description",
+                    description: item.get('description') || "",
                     packageType: item.get('packageType'),
                     logo: item.get('logo')
                     };
@@ -216,12 +207,13 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
             selectedCategories: []
         },
         initialize: function(){
+            var that = this;
             this.tags = new Valamis.TagCollection();
-            this.tags.fetch({reset: true});
-
-            this.tags.on('sync', function(){
-                this.set('categories', this.tags.toJSON());
-            }, this);
+            var scope = this.get('scope');
+            this.tags.getPackagesTags({}, {courseId: scope =='site' ? Utils.getCourseId() : ''}).then(function(collection) {
+                    that.set('categories', collection);
+                }
+            );
         }
     });
 

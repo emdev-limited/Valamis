@@ -1,7 +1,8 @@
 package com.arcusys.learn.service.util
 
-import javax.servlet.http.HttpServletResponse
 import java.util.Date
+import javax.servlet.http.HttpServletResponse
+
 import org.joda.time.DateTime
 import org.scalatra.ScalatraServlet
 

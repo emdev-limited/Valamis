@@ -1,11 +1,14 @@
 package com.arcusys.learn.models.request
 
+import java.util.UUID
+
 import com.arcusys.learn.liferay.permission.PermissionUtil
-import com.arcusys.learn.service.util.{ AntiSamyHelper, Parameter }
+import com.arcusys.learn.models.request.GradebookActionType._
+import com.arcusys.learn.service.util.{AntiSamyHelper, Parameter}
 import com.arcusys.valamis.gradebook.model.GradebookUserSortBy
 import org.scalatra.ScalatraBase
-import com.arcusys.learn.models.request.GradebookActionType._
-import java.util.UUID
+
+import scala.util.Try
 
 object GradebookRequest extends BaseCollectionFilteredRequest with BaseRequest {
 
@@ -21,13 +24,15 @@ object GradebookRequest extends BaseCollectionFilteredRequest with BaseRequest {
   val PackageId = "packageId"
   val StudyCourseId = "studyCourseId"
   val WithStatements = "withStatements"
+  val Completed = "completed"
+  val PackagesCount  = "packagesCount"
 
   val SHORT_RESULT_VALUE = "short"
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
 
-  class Model(val scalatra: ScalatraBase) extends BaseSortableCollectionFilteredRequestModel(scalatra, GradebookUserSortBy.apply)
-    with OAuthModel {
+  class Model(val scalatra: ScalatraBase)
+    extends BaseSortableCollectionFilteredRequestModel(scalatra, GradebookUserSortBy.apply) {
 
     def actionType: GradebookActionType = GradebookActionType.withName(Parameter(Action).required.toUpperCase)
 
@@ -56,17 +61,22 @@ object GradebookRequest extends BaseCollectionFilteredRequest with BaseRequest {
       case None        => true
     }
 
-    def selectedPackages = Parameter(SelectedPackages).multiWithEmpty.map(x => x.toInt)
+    def selectedPackages = Parameter(SelectedPackages).multiWithEmpty.map(x => x.toLong)
 
     def gradeComment = Parameter(GradeComment).option.map(AntiSamyHelper.sanitize)
 
-    def grade = AntiSamyHelper.sanitize(Parameter(Grade).required)
+    // TODO: check what will be send from browser, remove AntiSamyHelper
+    def grade = Try(AntiSamyHelper.sanitize(Parameter(Grade).required).toFloat).toOption
 
     def statementId = UUID.fromString(Parameter(StatementId).required)
 
     def packageId = Parameter(PackageId).intRequired
 
     def statementGrade = Parameter(StatementGrade).intRequired
+
+    def isCompleted =  Parameter(Completed).booleanRequired
+
+    def packagesCount = Parameter(PackagesCount).intRequired
   }
 }
 

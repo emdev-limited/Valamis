@@ -18,6 +18,10 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             'click .js-clone': 'cloneContent',
             'click .js-delete': 'deleteContent'
         },
+        modelEvents:{
+            'sync': 'render',
+            'destroy': 'destroy'
+        },
         initialize: function(options){
             this.parent = options.parent;
             this.model.set('categoryTitle', this.parent.get('title'));
@@ -25,13 +29,14 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         onRender: function(){
             var that = this;
             var contentType = that.model.get('contentType');
-            if(contentType == 'category'){
-                that.content.show(new Views.CategoryPreview({model : that.model}));
-            }
+
 
             if(contentType == 'question'){
                 var questionType = that.model.get('questionType');
                 var preview = new questionPreviewViews[questionType]({model : that.model});
+                that.content.show(preview);
+            } else if (contentType == 'plaintext') {
+                var preview = new questionPreviewViews['8']({model : that.model});
                 that.content.show(preview);
             }
         },
@@ -40,13 +45,16 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
 
             if(contentType == 'category'){
                 contentManager.execute('category:edit', this.model);
-            }else if(contentType == 'question'){
-                if(this.model.get('questionType') == '8') {
+            }
+            else if(contentType == 'question') {
+                if (this.model.isContent()) {
                     contentManager.execute('content:edit', this.model);
-                }else{
+                }
+                else {
                     contentManager.execute('question:edit', this.model);
                 }
-
+            } else if (contentType == 'plaintext') {
+                contentManager.execute('content:edit',this.model);
             }
         },
         cloneContent: function(){
@@ -56,19 +64,14 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             var contentType = this.model.get('contentType');
             if(contentType == 'category'){
                 contentManager.execute('category:delete', this.model);
-            }else if(contentType == 'question'){
+            } else if(contentType == 'question' || contentType == 'plaintext'){//TODO separate this
                 contentManager.execute('question:delete', this.model);
             }
-            this.destroy();
         }
     });
 
     Views.BasePreviewView = Marionette.CompositeView.extend({
         childViewContainer: '.js-answers',
-        modelEvents: {
-            'change:title': 'render',
-            'change:questionType': 'render'
-        },
         initialize: function(options) {
             this.collection = new Backbone.Collection(this.model.get('answers'));
         }
@@ -159,7 +162,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         }
     });
 
-    Views.PlaintTextQuestoinPreview = Views.BasePreviewView.extend({
+    Views.PlaintTextQuestionPreview = Views.BasePreviewView.extend({
         template: '#plainTextQuestionPreviewTemplate'
     });
 
@@ -171,14 +174,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         '4' : Views.MatchingQuestoinPreview,
         '5' : Views.EssayQuestoinPreview,
         '7' : Views.CategorizationQuestoinPreview,
-        '8' : Views.PlaintTextQuestoinPreview
+        '8' : Views.PlaintTextQuestionPreview
     };
-
-    Views.CategoryPreview = Marionette.ItemView.extend({
-        template: '#contentManagerCategoryDetailsTemplate',
-        modelEvents: {
-            'change:title': 'render'
-        }
-    });
 
 });

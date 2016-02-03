@@ -34,10 +34,12 @@ page import="com.liferay.portal.kernel.search.facet.util.FacetFactoryUtil" %><%@
 page import="com.liferay.portal.kernel.search.facet.util.RangeParserUtil" %><%@
 page import="com.liferay.portal.kernel.util.DateFormatFactoryUtil" %><%@
 page import="com.liferay.portal.kernel.xml.Element" %><%@
+page import="com.liferay.portal.kernel.xml.SAXReader" %><%@
 page import="com.liferay.portal.kernel.xml.SAXReaderUtil" %><%@
 page import="com.liferay.portal.security.permission.comparator.ModelResourceComparator" %><%@
 page import="com.liferay.portal.service.PortletLocalServiceUtil" %><%@
 page import="com.liferay.portlet.asset.NoSuchCategoryException" %><%@
+page import="com.liferay.portlet.asset.service.permission.AssetCategoryPermission" %><%@
 page import="com.liferay.taglib.aui.ScriptTag" %><%@
 page import="com.liferay.util.PropertyComparator" %>
 
@@ -99,8 +101,9 @@ if (querySuggestionsMax <= 0) {
 String searchConfiguration = portletPreferences.getValue("searchConfiguration", StringPool.BLANK);
 
 if (!advancedConfiguration && Validator.isNull(searchConfiguration)) {
-    String configOverride = "{facets: [{className: 'com.liferay.portal.kernel.search.facet.ScopeFacet',data: {frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'scopes',fieldName: 'groupId',label: 'site',order: 'OrderHitsDesc',static: false,weight: 1.6},{className: 'com.liferay.portal.kernel.search.facet.AssetEntriesFacet',data: {frequencyThreshold: 1,values: ['com.liferay.portal.model.User','com.liferay.portlet.bookmarks.model.BookmarksEntry','com.liferay.portlet.bookmarks.model.BookmarksFolder','com.liferay.portlet.blogs.model.BlogsEntry','com.liferay.portlet.documentlibrary.model.DLFileEntry','com.liferay.portlet.documentlibrary.model.DLFolder','com.liferay.portlet.journal.model.JournalArticle','com.liferay.portlet.journal.model.JournalFolder','com.liferay.portlet.messageboards.model.MBMessage','com.liferay.portlet.wiki.model.WikiPage','com.arcusys.learn.scorm.manifest.model.Manifest']},displayStyle: 'asset_entries',fieldName: 'entryClassName',label: 'asset-type',order: 'OrderHitsDesc',static: false,weight: 1.5},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {displayStyle: 'list',frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'asset_tags',fieldName: 'assetTagNames',label: 'tag',order: 'OrderHitsDesc',static: false,weight: 1.4},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {displayStyle: 'list',frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'asset_categories',fieldName: 'assetCategoryIds',label: 'category',order: 'OrderHitsDesc',static: false,weight: 1.3},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'folders',fieldName: 'folderId',label: 'folder',order: 'OrderHitsDesc',static: false,weight: 1.2},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'users',fieldName: 'userId',label: 'user',order: 'OrderHitsDesc',static: false,weight: 1.1},{className: 'com.liferay.portal.kernel.search.facet.ModifiedFacet',data: {frequencyThreshold: 0,ranges: [{label:'past-hour',range:'[past-hour TO *]'},{label:'past-24-hours',range:'[past-24-hours TO *]'},{label:'past-week',range:'[past-week TO *]'},{label:'past-month',range:'[past-month TO *]'},{label:'past-year',range:'[past-year TO *]'}]},displayStyle: 'modified',fieldName: 'modified',label: 'modified',order: 'OrderHitsDesc',static: false,weight: 1.0}]}";
-	searchConfiguration = configOverride;//ContentUtil.get(PropsValues.SEARCH_FACET_CONFIGURATION);
+    String configOverride = "{facets: [{className: 'com.liferay.portal.kernel.search.facet.ScopeFacet',data: {frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'scopes',fieldName: 'groupId',label: 'site',order: 'OrderHitsDesc',static: false,weight: 1.6},{className: 'com.liferay.portal.kernel.search.facet.AssetEntriesFacet',data: {frequencyThreshold: 1,values: ['com.liferay.portal.model.User','com.liferay.portlet.bookmarks.model.BookmarksEntry','com.liferay.portlet.bookmarks.model.BookmarksFolder','com.liferay.portlet.blogs.model.BlogsEntry','com.liferay.portlet.documentlibrary.model.DLFileEntry','com.liferay.portlet.documentlibrary.model.DLFolder','com.liferay.portlet.journal.model.JournalArticle','com.liferay.portlet.journal.model.JournalFolder','com.liferay.portlet.messageboards.model.MBMessage','com.liferay.portlet.wiki.model.WikiPage','com.arcusys.valamis.lesson.scorm.model.manifest.Manifest','com.arcusys.valamis.certificate.model.Certificate','com.arcusys.valamis.lesson.tincan.model.TincanManifest']},displayStyle: 'asset_entries',fieldName: 'entryClassName',label: 'asset-type',order: 'OrderHitsDesc',static: false,weight: 1.5},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {displayStyle: 'list',frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'asset_tags',fieldName: 'assetTagNames',label: 'tag',order: 'OrderHitsDesc',static: false,weight: 1.4},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {displayStyle: 'list',frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'asset_categories',fieldName: 'assetCategoryIds',label: 'category',order: 'OrderHitsDesc',static: false,weight: 1.3},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'folders',fieldName: 'folderId',label: 'folder',order: 'OrderHitsDesc',static: false,weight: 1.2},{className: 'com.liferay.portal.kernel.search.facet.MultiValueFacet',data: {frequencyThreshold: 1,maxTerms: 10,showAssetCount: true},displayStyle: 'users',fieldName: 'userId',label: 'user',order: 'OrderHitsDesc',static: false,weight: 1.1},{className: 'com.liferay.portal.kernel.search.facet.ModifiedFacet',data: {frequencyThreshold: 0,ranges: [{label:'past-hour',range:'[past-hour TO *]'},{label:'past-24-hours',range:'[past-24-hours TO *]'},{label:'past-week',range:'[past-week TO *]'},{label:'past-month',range:'[past-month TO *]'},{label:'past-year',range:'[past-year TO *]'}]},displayStyle: 'modified',fieldName: 'modified',label: 'modified',order: 'OrderHitsDesc',static: false,weight: 1.0}]}";
+	searchConfiguration = configOverride;
+	//searchConfiguration = ContentUtil.get(PropsValues.SEARCH_FACET_CONFIGURATION);
 }
 
 boolean viewInContext = GetterUtil.getBoolean(portletPreferences.getValue("viewInContext", null), true);
@@ -113,7 +116,7 @@ private String _buildAssetCategoryPath(AssetCategory assetCategory, Locale local
 	List<AssetCategory> assetCategories = assetCategory.getAncestors();
 
 	if (assetCategories.isEmpty()) {
-		return HtmlUtil.escape(assetCategory.getName());
+		return HtmlUtil.escape(assetCategory.getTitle(locale));
 	}
 
 	Collections.reverse(assetCategories);
@@ -125,7 +128,7 @@ private String _buildAssetCategoryPath(AssetCategory assetCategory, Locale local
 		sb.append(" &raquo; ");
 	}
 
-	sb.append(HtmlUtil.escape(assetCategory.getName()));
+	sb.append(HtmlUtil.escape(assetCategory.getTitle(locale)));
 
 	return sb.toString();
 }

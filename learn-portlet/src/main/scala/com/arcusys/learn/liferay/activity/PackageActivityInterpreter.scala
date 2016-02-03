@@ -8,9 +8,8 @@ import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.valamis.lesson.model.PackageActivityType
 import com.arcusys.valamis.lesson.scorm.model.ScormPackage
-import com.arcusys.valamis.lesson.service.PackageService
+import com.arcusys.valamis.lesson.service.ValamisPackageService
 import com.arcusys.valamis.lesson.tincan.model.TincanPackage
-import com.arcusys.valamis.quiz.service.QuizService
 import com.escalatesoft.subcut.inject.Injectable
 import com.liferay.portlet.social.model.SocialActivity
 import org.ocpsoft.prettytime.PrettyTime
@@ -29,14 +28,14 @@ class PackageActivityInterpreterSO extends PackageActivityInterpreter {
 
 abstract class PackageActivityInterpreter extends LBaseSocialActivityInterpreter with Injectable {
   import PackageActivityInterpreter._
-  implicit val bindingModule = Configuration
+  implicit lazy val bindingModule = Configuration
 
-  lazy val quizService = inject[QuizService]
-  lazy val packageService = inject[PackageService]
+  lazy val packageService = inject[ValamisPackageService]
 
   def getVerb(value: Int) = PackageActivityType.apply(value) match {
     case PackageActivityType.Published => "published"
     case PackageActivityType.Shared => "shared"
+    case PackageActivityType.Completed => "completed"
   }
 
   override protected def doInterpret(activity: SocialActivity , context: Context): LSocialActivityFeedEntry = {

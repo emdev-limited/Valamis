@@ -1,4 +1,4 @@
-var ParticipantModelService = new Backbone.Service({ url: '/',
+var ParticipantModelService = new Backbone.Service({ url: path.root,
     sync: {
         'read':{
             path: path.api.report,

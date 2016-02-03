@@ -1,7 +1,6 @@
 package com.arcusys.valamis.certificate.storage
 
 import com.arcusys.valamis.certificate.model.goal.CourseGoal
-import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes._
 
 /**

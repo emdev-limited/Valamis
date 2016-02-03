@@ -2,7 +2,6 @@ package com.arcusys.valamis.lesson.scorm.model.manifest
 
 import com.arcusys.valamis.lesson.model.LessonType.LessonType
 import com.arcusys.valamis.lesson.model.{ BaseManifest, LessonType }
-import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes._
 import com.arcusys.valamis.util.TreeNode
 import org.joda.time.DateTime
@@ -63,7 +62,6 @@ case class Manifest(
     title: String,
     summary: Option[String] = None,
     metadata: Option[Metadata] = None,
-    assetRefId: Option[Long] = None,
     courseId: Option[Int],
 
     visibility: Option[Boolean] = None,
@@ -71,7 +69,7 @@ case class Manifest(
     isDefault: Boolean,
     passingLimit: Int = 0,
     rerunInterval: Int = 0,
-    rerunIntervalType: PeriodType = PeriodTypes.UNLIMITED,
+    rerunIntervalType: PeriodType = UNLIMITED,
     beginDate: Option[DateTime],
     endDate: Option[DateTime]) extends BaseManifest {
   base foreach {

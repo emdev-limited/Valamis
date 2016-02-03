@@ -29,7 +29,8 @@ learningPaths.module('Views', function (Views, learningPaths, Backbone, Marionet
     className: 'learning-path-item',
     templateHelpers: function() {
       return {
-        isFailed : this.options.model.get('status') === 'Failed'
+        isFailed: this.options.model.get('status') === 'Failed',
+        apiPath: path.root + path.api.prefix
       }
     },
     regions: {
@@ -101,23 +102,25 @@ learningPaths.module('Views', function (Views, learningPaths, Backbone, Marionet
           switch(type) {
             case Views.GOAL_TYPE.ACTIVITY:
               statusItem = status.filter(function (i) {
-                return i.name == item['title']
+                return i.activityId == item['activityId']
               }).map(function (i) {
                 return i.status;
               });
-              goalTitle = item['activityCount'] + ' ' + Valamis.language[item['title']];
+              goalTitle = item['activityCount'] + ' ' + Valamis.language[item['activityId']];
               break;
             case Views.GOAL_TYPE.STATEMENT:
               statusItem = status.filter(function (i) {
-                return i.obj == item['tincanStmntObj'] && i.verb == item['tincanStmntVerb']
+                return i.tincanStmntObj == item['tincanStmntObj'] && i.tincanStmntVerb == item['tincanStmntVerb']
               }).map(function (i) {
                 return i.status;
               });
-              goalTitle = Valamis.language['statementLabel'] + ': ' + Valamis.language[item['tincanStmntVerb']] + ' ' + item['tincanStmntObj'];
+              var objectName = item['tincanStmntObjName'];
+              var objectTitle = objectName ? Utils.getLangDictionaryTincanValue(objectName) : item['tincanStmntObj'];
+              goalTitle = Valamis.language['statementLabel'] + ': ' + Valamis.language[item['tincanStmntVerb']] + ' ' + objectTitle;
               break;
             case Views.GOAL_TYPE.COURSE:
               statusItem = status.filter(function (i) {
-                return i.id == item['id']
+                return i.courseGoalId == item['courseGoalId']
               }).map(function (i) {
                 return i.status;
               });
@@ -131,9 +134,18 @@ learningPaths.module('Views', function (Views, learningPaths, Backbone, Marionet
               }).map(function (i) {
                 return i.status;
               });
-              goalTitle = item['title'];
-              packageCourseName = item['course']['title'];
-              packageCourseUrl = item['course']['url'];
+              if (item['isDeleted'] === true) {
+                goalTitle=Valamis.language['deletedLabel'];
+                packageCourseName = "";
+                packageCourseUrl = "";
+              }  else {
+                goalTitle = item['title'];
+                goalUrl = item['url'];
+                packageCourseName = item['course']['title'];
+                packageCourseUrl = item['course']['url'];
+              }
+
+
               break;
           }
 

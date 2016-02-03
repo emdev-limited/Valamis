@@ -2,9 +2,9 @@ package com.arcusys.learn.models.request
 
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.learn.service.util.Parameter
-import com.arcusys.valamis.model.{SkipTake, Order}
+import com.arcusys.valamis.model.{Order, SkipTake}
 import com.arcusys.valamis.social
-import com.arcusys.valamis.social.model.{CommentSortBy, CommentSortByCriteria, Comment}
+import com.arcusys.valamis.social.model.{Comment, CommentSortBy, CommentSortByCriteria}
 import org.json4s.DefaultFormats
 import org.scalatra.ScalatraServlet
 
@@ -24,7 +24,7 @@ object CommentRequest extends BaseRequest {
 
   implicit val serializationFormats = DefaultFormats ++ org.json4s.ext.JodaTimeSerializers.all
 
-  class Model(val controller: ScalatraServlet) extends OAuthModel {
+  class Model(val controller: ScalatraServlet) {
     implicit val scalatra = controller
     def action = Parameter(Action).required
 
@@ -33,6 +33,7 @@ object CommentRequest extends BaseRequest {
     def content = Parameter(Content).required
     def subject = Parameter(Subject).required
     def activityId = Parameter(ActivityId).longRequired
+    def courseId = Parameter(CourseId).longRequired
 
     def comment = Comment(
       PortalUtilHelper.getCompanyId(controller.request),
@@ -40,7 +41,7 @@ object CommentRequest extends BaseRequest {
       content,
       activityId)
 
-    def commentRequest = social.model.CommentFilter(
+    def commentFilter = social.model.CommentFilter(
       companyId =  PortalUtilHelper.getCompanyId(controller.request),
       userId = Parameter(UserId).longOption,
       activityId = Parameter(ActivityId).longOption,

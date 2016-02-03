@@ -41,14 +41,14 @@ public class LFQuizAnswerScoreLocalServiceClpInvoker {
     private String[] _methodParameterTypes14;
     private String _methodName15;
     private String[] _methodParameterTypes15;
-    private String _methodName216;
-    private String[] _methodParameterTypes216;
-    private String _methodName217;
-    private String[] _methodParameterTypes217;
-    private String _methodName222;
-    private String[] _methodParameterTypes222;
-    private String _methodName223;
-    private String[] _methodParameterTypes223;
+    private String _methodName200;
+    private String[] _methodParameterTypes200;
+    private String _methodName201;
+    private String[] _methodParameterTypes201;
+    private String _methodName206;
+    private String[] _methodParameterTypes206;
+    private String _methodName207;
+    private String[] _methodParameterTypes207;
 
     public LFQuizAnswerScoreLocalServiceClpInvoker() {
         _methodName0 = "addLFQuizAnswerScore";
@@ -133,21 +133,21 @@ public class LFQuizAnswerScoreLocalServiceClpInvoker {
                 "com.arcusys.learn.persistence.liferay.model.LFQuizAnswerScore"
             };
 
-        _methodName216 = "getBeanIdentifier";
+        _methodName200 = "getBeanIdentifier";
 
-        _methodParameterTypes216 = new String[] {  };
+        _methodParameterTypes200 = new String[] {  };
 
-        _methodName217 = "setBeanIdentifier";
+        _methodName201 = "setBeanIdentifier";
 
-        _methodParameterTypes217 = new String[] { "java.lang.String" };
+        _methodParameterTypes201 = new String[] { "java.lang.String" };
 
-        _methodName222 = "getScoresForAnswer";
+        _methodName206 = "getScoresForAnswer";
 
-        _methodParameterTypes222 = new String[] { "long" };
+        _methodParameterTypes206 = new String[] { "long" };
 
-        _methodName223 = "createLFQuizQuestionScore";
+        _methodName207 = "createLFQuizQuestionScore";
 
-        _methodParameterTypes223 = new String[] {  };
+        _methodParameterTypes207 = new String[] {  };
     }
 
     public Object invokeMethod(String name, String[] parameterTypes,
@@ -239,25 +239,25 @@ public class LFQuizAnswerScoreLocalServiceClpInvoker {
             return LFQuizAnswerScoreLocalServiceUtil.updateLFQuizAnswerScore((com.arcusys.learn.persistence.liferay.model.LFQuizAnswerScore) arguments[0]);
         }
 
-        if (_methodName216.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes216, parameterTypes)) {
+        if (_methodName200.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes200, parameterTypes)) {
             return LFQuizAnswerScoreLocalServiceUtil.getBeanIdentifier();
         }
 
-        if (_methodName217.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes217, parameterTypes)) {
+        if (_methodName201.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes201, parameterTypes)) {
             LFQuizAnswerScoreLocalServiceUtil.setBeanIdentifier((java.lang.String) arguments[0]);
 
             return null;
         }
 
-        if (_methodName222.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes222, parameterTypes)) {
+        if (_methodName206.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes206, parameterTypes)) {
             return LFQuizAnswerScoreLocalServiceUtil.getScoresForAnswer(((Long) arguments[0]).longValue());
         }
 
-        if (_methodName223.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes223, parameterTypes)) {
+        if (_methodName207.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes207, parameterTypes)) {
             return LFQuizAnswerScoreLocalServiceUtil.createLFQuizQuestionScore();
         }
 

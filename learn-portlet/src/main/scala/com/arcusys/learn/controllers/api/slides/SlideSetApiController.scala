@@ -1,38 +1,65 @@
 package com.arcusys.learn.controllers.api.slides
 
-import com.arcusys.learn.controllers.api.BaseApiController
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission.PermissionUtil
+import javax.servlet.http.HttpServletResponse
+import com.arcusys.learn.controllers.api.base.BaseApiController
+import com.arcusys.learn.liferay.permission.PortletName.LessonStudio
+import com.arcusys.learn.liferay.permission.{PermissionUtil, ViewPermission}
 import com.arcusys.learn.liferay.services.PermissionHelper
-import com.arcusys.learn.models.request.{ SlideActionType, SlideRequest }
+import com.arcusys.learn.models.request.{SlideActionType, SlideRequest}
 import com.arcusys.learn.models.response.CollectionResponse
+import com.arcusys.learn.web.FileUploading
+import com.arcusys.valamis.questionbank.exceptions.NoQuestionException
 import com.arcusys.valamis.slide.model.SlideSetModel
 import com.arcusys.valamis.slide.service.SlideSetServiceContract
-import com.escalatesoft.subcut.inject.BindingModule
 
-class SlideSetApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  def this() = this(Configuration)
+class SlideSetApiController extends BaseApiController with FileUploading {
+
+  before() {
+    scentry.authenticate(LIFERAY_STRATEGY_NAME)
+  }
 
   private lazy val slideSetService = inject[SlideSetServiceContract]
 
-  get("/slidesets(/)")(jsonAction {
-    val slideRequest = SlideRequest(this)
-    val page = slideRequest.page
-    val itemsOnPage = slideRequest.itemsOnPage
-    val titleFilter = slideRequest.titleFilter
-    val sortTitleAsc = slideRequest.sortTitleAsc
+  private lazy val slideRequest = SlideRequest(this)
 
-    val requestedSlideSetsCount = slideSetService.getSlideSetsCount(slideRequest.titleFilter, slideRequest.courseIdOption)
-    val requestedSlideSets = slideSetService.getSlideSets(slideRequest.titleFilter, slideRequest.sortTitleAsc, slideRequest.page, slideRequest.itemsOnPage, slideRequest.courseIdOption)
+  get("/slidesets(/)")(jsonAction {
+    PermissionUtil.requirePermissionApi(ViewPermission, LessonStudio)
+
+    val page = slideRequest.page
+
+    val requestedSlideSetsCount =
+      slideSetService.getSlideSetsCount(
+        slideRequest.titleFilter,
+        slideRequest.courseIdOption,
+        slideRequest.isTemplate)
+    val requestedSlideSets =
+      slideSetService.getSlideSets(
+        slideRequest.titleFilter,
+        slideRequest.sortTitleAsc,
+        slideRequest.page,
+        slideRequest.itemsOnPage,
+        slideRequest.courseIdOption,
+        slideRequest.isTemplate)
 
     CollectionResponse(page, requestedSlideSets, requestedSlideSetsCount)
   })
 
-  post("/slidesets(/)(:id)")(jsonAction {
-    val slideRequest = SlideRequest(this)
+  get("/slidesets/:id/logo")(action {
+    PermissionUtil.requirePermissionApi(ViewPermission, LessonStudio)
 
+    val content = slideSetService.getLogo(slideRequest.id.get)
+      .getOrElse( halt(HttpServletResponse.SC_NOT_FOUND, s"SlideSet with id: ${slideRequest.id.get} doesn't exist") )
+
+    response.reset()
+    response.setStatus(HttpServletResponse.SC_OK)
+    response.setContentType("image/png")
+    response.getOutputStream.write(content)
+  })
+
+  post("/slidesets(/)(:id)")(jsonAction {
     val userId = PermissionUtil.getUserId
     PermissionHelper.preparePermissionChecker(userId)
+    PermissionUtil.requirePermissionApi(ViewPermission, LessonStudio)
 
     val learnPortletPath = getServletContext.getRealPath("/")
 
@@ -43,9 +70,15 @@ class SlideSetApiController(configuration: BindingModule) extends BaseApiControl
           slideRequest.id,
           slideRequest.title,
           slideRequest.description,
-          slideRequest.courseIdOption,
+          slideRequest.courseId,
           slideRequest.logo,
-          List()
+          List(),
+          slideRequest.isTemplate.getOrElse(false),
+          slideRequest.isSelectedContinuity.getOrElse(false),
+          slideRequest.themeId,
+          slideRequest.slideSetDuration,
+          slideRequest.scoreLimit,
+          slideRequest.playerTitle
         )
       )
       case SlideActionType.Create => slideSetService.createWithDefaultSlide(
@@ -53,16 +86,32 @@ class SlideSetApiController(configuration: BindingModule) extends BaseApiControl
           None,
           slideRequest.title,
           slideRequest.description,
-          slideRequest.courseIdOption,
+          slideRequest.courseId,
           slideRequest.logo,
-          List()
+          List(),
+          slideRequest.isTemplate.getOrElse(false),
+          slideRequest.isSelectedContinuity.getOrElse(false)
         )
       )
-      case SlideActionType.Publish => slideSetService.publishSlideSet(
+      case SlideActionType.Publish =>
+        try {
+          slideSetService.publishSlideSet(
+            slideRequest.id.get,
+            userId,
+            learnPortletPath,
+            slideRequest.courseId
+          )
+        }
+        catch {
+          case e: NoQuestionException => halt(424, s"{relation:'question', id:${e.id}}", reason = e.getMessage)
+        }
+      case SlideActionType.Clone => slideSetService.clone(
         slideRequest.id.get,
-        userId,
-        learnPortletPath,
-        slideRequest.courseId
+        slideRequest.isTemplate.getOrElse(false),
+        slideRequest.fromTemplate.getOrElse(false),
+        slideRequest.title,
+        slideRequest.description,
+        slideRequest.logo
       )
       case _ => throw new UnsupportedOperationException("Unknown action type")
     }

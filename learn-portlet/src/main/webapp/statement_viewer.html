@@ -52,6 +52,7 @@
                 <div>
                     <label>Agent Property</label>
                     <select id="agentProperty">
+                        <option value="account">account</option>
                         <option value="mbox">mbox</option>
                     </select>
                 </div>
@@ -88,8 +89,7 @@
         <button id="showQuery">Show TCAPI Query</button>
     </div>
     <div id='theStatements'></div>
-    <div id='statementsLoading'>
-        <img src="{{contextPath}}/img/loading.gif" alt="Loading">
+    <div id='statementsLoading' class="loading-container">
     </div>
     <button id='showAllStatements'>More...</button>
     <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
@@ -99,9 +99,9 @@
     function Config() {
         "use strict";
     }
-    var endpointData = {{{endpointData}}};
+    var tincanAccountHomePage = '{{{accountHomePage}}}';
 
-    TincanHelper.SetLRS(endpointData);
+    TincanHelper.SetLRS({{{endpointData}}});
     Config.endpoint = TincanHelper.getEndpoint();
     Config.authLine = TincanHelper.getAuth();
     Config.actor = TincanHelper.getActor();

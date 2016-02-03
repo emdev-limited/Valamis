@@ -1,7 +1,10 @@
 package com.arcusys.learn.models.request
 
-import com.arcusys.learn.liferay.permission.PermissionCredentials
-import com.arcusys.learn.service.util.{ AntiSamyHelper, Parameter }
+import com.arcusys.learn.models.{AnswerResponse, AnswerSerializer}
+import com.arcusys.learn.service.util.Parameter
+import com.arcusys.valamis.content.model.{AnswerKeyValue, AnswerRange, AnswerText}
+import com.arcusys.valamis.util.serialization.JsonHelper
+import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.ScalatraBase
 
 import scala.util.Try
@@ -25,35 +28,40 @@ object QuestionRequest extends BaseRequest {
   val Index = "index"
   val ParentId = "parentID"
   val QuestionIds = "questionIDs"
+  val ContentIds = "contentIDs"
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
 
   class Model(scalatra: ScalatraBase) extends BaseCollectionFilteredRequestModel(scalatra) {
     implicit val httpRequest = scalatra.request
+    implicit val fs: Formats = DefaultFormats + new AnswerSerializer
 
     def action = QuestionActionType.withName(Parameter(Action).required.toUpperCase)
 
-    def id = Parameter(Id).intRequired
+    def id = Parameter(Id).longRequired
 
-    def idOption = Parameter(Id).intOption
+    def idOption = Parameter(Id).longOption
 
-    def courseId = Parameter(CourseId).intOption
+    def courseId = Parameter(CourseId).longRequired
+
+    @deprecated
+    def courseIdOption = Parameter(CourseId).intOption
 
     def newCourseId = Parameter(NewCourseId).intOption
 
     def questionType = Parameter(QuestionType).intRequired
 
-    def categoryId = Parameter(CategoryId).intOption
+    def categoryId = Parameter(CategoryId).longOption
 
-    def title = AntiSamyHelper.sanitize(Parameter(Title).required)
+    def title = Parameter(Title).required
 
-    def text = AntiSamyHelper.sanitize(Parameter(Text).withDefault(""))
+    def text = Parameter(Text).withDefault("")
 
-    def explanationText = AntiSamyHelper.sanitize(Parameter(ExplanationText).withDefault(""))
-    
-    def rightAnswerText = AntiSamyHelper.sanitize(Parameter(RightAnswerText).withDefault(""))
+    def explanationText = Parameter(ExplanationText).withDefault("")
 
-    def wrongAnswerText = AntiSamyHelper.sanitize(Parameter(WrongAnswerText).withDefault(""))
+    def rightAnswerText = Parameter(RightAnswerText).withDefault("")
+
+    def wrongAnswerText = Parameter(WrongAnswerText).withDefault("")
 
     def forceCorrectCount = Parameter(Force).booleanRequired
 
@@ -61,13 +69,28 @@ object QuestionRequest extends BaseRequest {
 
     def answers = Parameter(Answers).withDefault("[]")
 
-    def parentId = Parameter(ParentId).intOption
+    def equalsAnswers : Seq[AnswerText] = {
+      JsonHelper.fromJson[List[AnswerResponse]](answers)
+        .map(a => AnswerText(None, None, courseId, a.answerText, a.isCorrect, 0,a.score))
+    }
+
+    def rangeAnswers : Seq[AnswerRange] = {
+      JsonHelper.fromJson[List[AnswerResponse]](answers)
+        .map(a => AnswerRange(None, None, courseId, a.rangeFrom.toDouble, a.rangeTo.toDouble, a.score))
+    }
+
+    def keyValueAnswers : Seq[AnswerKeyValue] = {
+      JsonHelper.fromJson[List[AnswerResponse]](answers)
+        .map(a => AnswerKeyValue(None, None, courseId, a.answerText, Some(a.matchingText), a.score))
+    }
+
+    def parentId = Parameter(ParentId).longOption
 
     def index = Parameter(Index).intRequired
 
-    def categoryIds = Parameter(CategoryIds).multiWithEmpty.map(x => Try(x.toInt).get)
+    def questionIds = Parameter(QuestionIds).multiLong
 
-    def questionIds = Parameter(QuestionIds).multiWithEmpty.map(x => Try(x.toInt).get)
+    def contentIds = Parameter(ContentIds).multiLong
   }
 
 }

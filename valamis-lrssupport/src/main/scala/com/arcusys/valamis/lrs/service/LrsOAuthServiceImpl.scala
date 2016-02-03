@@ -19,7 +19,7 @@ class LrsOAuthServiceImpl(implicit val bindingModule: BindingModule) extends Lrs
                          redirectUrl: Option[String]): OAuthAuthInfo = {
     val provider = getServiceProvider(endpoint)
     val consumer = new OAuthConsumer(null, clientId, clientSecret, provider)
-    val client = new LrsClient(consumer)
+    val client = new LrsOAuthClient(consumer)
 
     try {
       client.authorize(redirectUrl, scope)
@@ -28,6 +28,8 @@ class LrsOAuthServiceImpl(implicit val bindingModule: BindingModule) extends Lrs
       case e: ConnectException =>
         logger.error(s"${e.getMessage} endpoint: $endpoint")
         throw new Exception(s"${e.getMessage} endpoint: $endpoint", e)
+    } finally {
+      client.close()
     }
   }
 
@@ -38,8 +40,12 @@ class LrsOAuthServiceImpl(implicit val bindingModule: BindingModule) extends Lrs
                               params: OAuthParams): OAuthAuthInfo = {
     val provider = getServiceProvider(endpoint)
     val consumer = new OAuthConsumer(null, clientId, clientSecret, provider)
-    val client = new LrsClient(consumer)
-    client.getAccessToken(params)
+    val client = new LrsOAuthClient(consumer)
+    try {
+      client.getAccessToken(params)
+    } finally {
+      client.close()
+    }
   }
 
   private def getServiceProvider(endpoint: String) = {

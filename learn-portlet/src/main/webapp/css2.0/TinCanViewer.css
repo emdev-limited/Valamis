@@ -87,3 +87,6 @@ table#courseLocations td.metric {}
     #TCAPIQueryText { width: 58%; }
     .statement {width: 45%}
 }
+.studentsStatements{
+    width:100%;
+}

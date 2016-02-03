@@ -22,7 +22,7 @@ object PermissionHelper {
     val user = UserLocalServiceUtil.getUserById(userId)
     preparePermissionChecker(user)
   }
-  
+
   def preparePermissionChecker(user: LUser): Unit = {
     val permissionChecker = PermissionCheckerFactoryUtil.create(user)
 

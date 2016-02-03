@@ -24,7 +24,7 @@ var TincanHelper = {
             .replace('{2}', encodeURIComponent(JSON.stringify({
                 "objectType":myTinCan.actor.objectType,
                 "name":myTinCan.actor.name,
-                "mbox":myTinCan.actor.mbox
+                "account": myTinCan.actor.account
             })));
     },
 

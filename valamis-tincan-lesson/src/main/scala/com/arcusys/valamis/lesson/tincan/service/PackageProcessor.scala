@@ -4,6 +4,7 @@ import java.io._
 import java.util.zip.ZipFile
 
 import com.arcusys.valamis.file.storage.FileStorage
+import com.arcusys.valamis.lesson.model.PackageScopeRule
 import com.arcusys.valamis.lesson.storage.PackageScopeRuleStorage
 import com.arcusys.valamis.lesson.tincan.service.parser.ActivitiesParser
 import com.arcusys.valamis.lesson.tincan.storage.{ TincanManifestActivityStorage, TincanPackageStorage }
@@ -39,8 +40,20 @@ class PackageProcessor(implicit val bindingModule: BindingModule) extends Inject
 
     val packageId = tincanPackageRepository.createAndGetID(packageTitle, packageSummary, courseId)
 
-    packageScopeRuleRepository.create(packageId, ScopeType.Instance, None, visibility = true, isDefault = false)
-    packageScopeRuleRepository.create(packageId, ScopeType.Site, courseId.map(_.toString), visibility = true, isDefault = false)
+    packageScopeRuleRepository.create(
+      PackageScopeRule(
+        packageId,
+        ScopeType.Instance,
+        None,
+        visibility = true,
+        isDefault = false))
+    packageScopeRuleRepository.create(
+      PackageScopeRule(
+        packageId,
+        ScopeType.Site,
+        courseId.map(_.toString),
+        visibility = true,
+        isDefault = false))
 
     activities.map(_.copy(packageId = packageId)).foreach(tincanManifestActivityStorage.createAndGetId)
 

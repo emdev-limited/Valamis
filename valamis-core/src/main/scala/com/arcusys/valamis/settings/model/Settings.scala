@@ -8,7 +8,6 @@ import com.arcusys.valamis.settings.model.SettingType.SettingType
  * @param value  setting value
  */
 case class Setting(
-  id: Int,
   key: SettingType.Value,
   value: String)
 
@@ -23,9 +22,10 @@ object SettingType extends Enumeration {
   val GoogleClientId = Value("GoogleClientId")
   val GoogleAppId = Value("GoogleAppId")
   val GoogleApiKey = Value("GoogleApiKey")
+  val License = Value("License")
 }
 
 object EmptySetting {
   def apply(settingType: SettingType,
-    defaultValue: String = "") = Setting(0, settingType, defaultValue)
+    defaultValue: String = "") = Setting(settingType, defaultValue)
 }

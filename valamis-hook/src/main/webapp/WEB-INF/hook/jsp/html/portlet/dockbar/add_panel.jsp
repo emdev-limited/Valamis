@@ -82,21 +82,46 @@
                             >
                         <c:if test="<%= hasAddContentAndApplicationsPermission %>">
                             <liferay-ui:section>
-                                <liferay-util:include page="/html/portlet/dockbar/add_content.jsp" />
+                                <liferay-util:buffer var="html">
+                                    <liferay-util:include
+                                            page="/html/portlet/dockbar/add_content.jsp"
+                                            useCustomPage="<%= false %>"
+                                            strict="<%= true %>"/>
+                                </liferay-util:buffer>
+                                <%= html %>
                             </liferay-ui:section>
 
                             <liferay-ui:section>
-                                <liferay-util:include page="/html/portlet/dockbar/add_application.jsp" />
+                                <liferay-util:buffer var="html">
+                                    <liferay-util:include
+                                            page="/html/portlet/dockbar/add_application.jsp"
+                                            useCustomPage="<%= false %>"
+                                            strict="<%= true %>"/>
+                                </liferay-util:buffer>
+                                <%= html %>
                             </liferay-ui:section>
                         </c:if>
 
                         <c:if test="<%= hasLayoutAddPermission %>">
                             <liferay-ui:section>
-                                <liferay-util:include page="/html/portlet/layouts_admin/add_layout.jsp" />
+                                <liferay-util:buffer var="html">
+                                    <liferay-util:include
+                                            page="/html/portlet/layouts_admin/add_layout.jsp"
+                                            useCustomPage="<%= false %>"
+                                            strict="<%= true %>"/>
+                                </liferay-util:buffer>
+                                <%= html %>
                             </liferay-ui:section>
                         </c:if>
+
                         <liferay-ui:section>
-                            <liferay-util:include page="/html/portlet/dockbar/add_site.jsp" />
+                            <liferay-util:buffer var="html">
+                                <liferay-util:include
+                                        page="/html/portlet/dockbar/add_site.jsp"
+                                        useCustomPage="<%= false %>"
+                                        strict="<%= true %>"/>
+                            </liferay-util:buffer>
+                            <%= html %>
                         </liferay-ui:section>
                     </liferay-ui:tabs>
                 </div>

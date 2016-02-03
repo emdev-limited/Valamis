@@ -1,3 +1,14 @@
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+// Set hash from query string if it doesn't exist
+var hash = getParameterByName("hash");
+if(window.location.hash == "" && hash) window.location.hash = hash;
+
 /*! elementQuery | Author: Tyson Matanich (http://matanich.com), 2013 | License: MIT */
 (function (window, document, undefined) {
     // Enable strict mode
@@ -145,6 +156,11 @@
 
     var processStyleSheet = function (styleSheet, force) {
 
+        var host_url = window.location.protocol + '//' + window.location.host;
+        if( styleSheet.href && styleSheet.href.indexOf( host_url ) === -1 ){
+            return;
+        }
+
         if (cssRules == null) {
             setCssRules();
         }
@@ -263,6 +279,10 @@
                 // For each matching element
                 for (ei = 0; ei < elements.length; ei++) {
                     element = elements[ei];
+
+                    if( element.getAttribute("data-elementquery-bypass") !== null ){
+                        continue;
+                    }
 
                     // For each min|max-width|height string
                     for (j in queryData[i]) {
@@ -455,7 +475,7 @@ var makeEqualHeight = function($tiles){
 };
 
 jQuery(window).resize(function(){
-    makeEqualHeight(jQuery('.portlet-learn-scorm .tiles > .tile'));
+    makeEqualHeight(jQuery('.portlet-learn-scorm .tiles .tile'));
 });
 
 jQuery(window).on('viewModeChanged', function(event, elem) {
@@ -467,10 +487,6 @@ jQuery(window).on('recompute:tile:sizes', function(event, elem) {
 });
 
 jQuery(window).on('portlet-ready', function(){
-    makeEqualHeight(jQuery('.portlet-learn-scorm .tiles > .tile'));
-
-//  jQuery(".portlet-learn-scorm .js-toggle-sidebar").unbind('click').click(function() {
-//    jQuery(this).parents('.portlet-wrapper').toggleClass("sidebar-hidden");
-//  });
+    makeEqualHeight(jQuery('.portlet-learn-scorm .tiles .tile'));
 
 });

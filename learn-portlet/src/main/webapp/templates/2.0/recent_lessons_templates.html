@@ -9,9 +9,17 @@
 <script type="text/template" id="recentLessonsItemViewTemplate">
     <div class="tile-content">
         <ul>
-            <li class="title recent_li">{{packageTitle}}</li>
-            <li class="recent_li"> {{inLabel}} <span class="status"><a href="/web{{courseUrl}}">{{courseTitle}}</a></span></li>
-            <li class="status recent_li"> {{throughDate}}  </li>
+            <li class="title"><a href="{{packageUrl}}">{{packageTitle}}</a></li>
+            <li class=""> {{inLabel}}
+                {{#courseUrl}}
+                <a href="{{courseUrl}}">
+                {{/courseUrl}}
+                    {{courseTitle}}
+                {{#courseUrl}}
+                </a>
+                {{/courseUrl}}
+            </li>
+            <li class="time-label"> {{throughDate}}  </li>
         </ul>
     </div>
 </script>

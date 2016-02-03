@@ -3,12 +3,10 @@ package com.arcusys.learn.models.request
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.learn.service.util.Parameter
 import com.arcusys.valamis.model.Order
-import com.arcusys.valamis.social.model.{Like, LikeSortByCriteria, LikeSortBy}
-import org.joda.time.DateTime
-import org.json4s.DefaultFormats
-import org.json4s.ext.EnumNameSerializer
-import org.scalatra.ScalatraServlet
 import com.arcusys.valamis.social
+import com.arcusys.valamis.social.model.{Like, LikeSortBy, LikeSortByCriteria}
+import org.json4s.DefaultFormats
+import org.scalatra.ScalatraServlet
 
 import scala.util.Try
 
@@ -23,13 +21,13 @@ object LikeRequest extends BaseRequest {
 
   implicit val serializationFormats = DefaultFormats ++ org.json4s.ext.JodaTimeSerializers.all
 
-  class Model(val controller: ScalatraServlet) extends OAuthModel {
+  class Model(val controller: ScalatraServlet) {
     implicit val scalatra = controller
-    def action = Parameter(Action).required
 
     def id = Parameter(Id).longRequired
     def userId = Parameter(UserId).longRequired
     def activityId = Parameter(ActivityId).longRequired
+    def courseId = Parameter(CourseId).longRequired
 
     def like = Like(
       id = Parameter(Id).longOption,
@@ -37,7 +35,7 @@ object LikeRequest extends BaseRequest {
       userId = Parameter(UserId).longRequired,
       activityId = Parameter(ActivityId).longRequired)
 
-    def likeRequest = social.model.LikeFilter(
+    def likeFilter = social.model.LikeFilter(
       companyId =  PortalUtilHelper.getCompanyId(controller.request),
       userId = Parameter(UserId).longOption,
       activityId = Parameter(ActivityId).longOption,

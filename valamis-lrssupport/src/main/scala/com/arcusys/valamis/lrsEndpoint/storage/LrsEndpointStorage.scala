@@ -1,10 +1,12 @@
 package com.arcusys.valamis.lrsEndpoint.storage
 
-import com.arcusys.valamis.lrsEndpoint.model.LrsEndpointSettings
+import com.arcusys.valamis.lrsEndpoint.model.AuthType.AuthType
+import com.arcusys.valamis.lrsEndpoint.model.LrsEndpoint
 
 trait LrsEndpointStorage {
-  def get: Option[LrsEndpointSettings]
-  def getDefault: Option[LrsEndpointSettings]
-  def set(lrs: Option[LrsEndpointSettings])
-  def renew()
+  def getAll: Seq[LrsEndpoint]
+  def get(auth: AuthType): Option[LrsEndpoint]
+  def deleteAll(): Unit
+  def deleteExternal(): Unit
+  def create(entity: LrsEndpoint): LrsEndpoint
 }

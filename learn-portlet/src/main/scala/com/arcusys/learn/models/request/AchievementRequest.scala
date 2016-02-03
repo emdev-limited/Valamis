@@ -1,10 +1,10 @@
 package com.arcusys.learn.models.request
 
-import com.arcusys.learn.service.util.{ AntiSamyHelper, Parameter }
 import com.arcusys.learn.models.request.AchievementActionType.AchievementActionType
 import com.arcusys.learn.models.request.AchievementActionTypeConverters._
-import org.scalatra.{ ScalatraKernel, ScalatraBase }
+import com.arcusys.learn.service.util.{AntiSamyHelper, Parameter}
 import org.joda.time.DateTime
+import org.scalatra.ScalatraBase
 
 /**
  * Created by Iliya Tryapitsin on 04.03.14.

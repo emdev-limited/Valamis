@@ -120,19 +120,94 @@ var Utils = {
       }
     }
 
-    window.LearnAjax.get(defaultLangURL, undefined, undefined, 'text').done(function (defaultData) {
-      window.LearnAjax.get(url, undefined, undefined, 'text').done(function (localizationData) {
-        parseData(defaultData, localizationData);
+    if (defaultLangURL == url)
+      window.LearnAjax.get(defaultLangURL, undefined, undefined, 'text').done(function (defaultData) {
+        parseData(defaultData, null);
       }).fail(function () {
+          parseData(null, null);
+      });
+    else
+      window.LearnAjax.get(defaultLangURL, undefined, undefined, 'text').done(function (defaultData) {
+        window.LearnAjax.get(url, undefined, undefined, 'text').done(function (localizationData) {
+          parseData(defaultData, localizationData);
+        }).fail(function () {
           parseData(defaultData, null);
         })
-    }).fail(function () {
+      }).fail(function () {
         window.LearnAjax.get(url, undefined, undefined, 'text').done(function (localizationData) {
           parseData(null, localizationData);
         }).fail(function () {
-            parseData(null, null);
-          })
+          parseData(null, null);
+        })
       });
+  },
+
+  getLangDictionaryTincanValue: function(value, lang) {
+    var langDict = value,
+        key;
+
+    if (typeof lang !== 'undefined' && typeof langDict[lang] !== 'undefined') {
+      return langDict[lang];
+    }
+    if (typeof langDict.und !== 'undefined') {
+      return langDict.und;
+    }
+    if (typeof langDict['en-US'] !== 'undefined') {
+      return langDict['en-US'];
+    }
+    for (key in langDict) {
+      if (langDict.hasOwnProperty(key)) {
+        return langDict[key];
+      }
+    }
+
+    return '';
+  },
+  makeUrl: function (string) {
+    var checker =
+        new RegExp(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/g);
+
+    return string.replace(checker, function (match) {
+      var href = match;
+      if (match.indexOf('://') < 0) href = 'http://' + match; //To prevent making relative links
+
+      return '<a href="' + href + '" target="_blank">' + match + '</a>';
+    })
+  },
+  getLanguage: function() {
+    var language = Liferay.ThemeDisplay.getLanguageId();
+    var index = language.indexOf('_');
+    if (index > 0)
+      language = language.substr(0, index);
+    return language;
+  },
+  loadLanguage: function(resourceName,onLanguageLoad) {
+    var defaultLanguage = 'en';
+    var language = Utils.getLanguage();
+
+    function onLanguageError() {
+      alert('Translation resource loading failed!');
+    }
+
+    var getPackSource = function (language) {
+      return Utils.getContextPath() + 'i18n/' + resourceName + '_' + language + '.properties';
+    };
+
+    var defaultURL = getPackSource(defaultLanguage);
+    var localizedURL = getPackSource(language);
+    Utils.i18nLoader(localizedURL, defaultURL, onLanguageLoad, onLanguageError);
+  },
+  getPackageUrl: function(id) {
+    return Liferay.ThemeDisplay.getPathMain()
+        + "/portal/learn-portlet/open_package"
+        + "?plid=" + Liferay.ThemeDisplay.getPlid()
+        + "&oid=" + id
+  },
+  getCertificateUrl: function(id) {
+    return Liferay.ThemeDisplay.getPathMain()
+        + "/portal/learn-portlet/open_certificate"
+        + "?plid=" + Liferay.ThemeDisplay.getPlid()
+        + "&oid=" + id
   }
 };
 
@@ -144,23 +219,41 @@ var LearnAjaxHelper = (function () {
   var headers = {};
 
   function LearnAjaxHelper() {
-    jQuery.each([ "get", "post" ], function (i, method) {
+    LearnAjaxHelper.prototype['get'] = function (url, data, callback, type) {
+      // shift arguments if data argument was omitted
+      if (jQuery.isFunction(data)) {
+        type = type || callback;
+        callback = data;
+        data = undefined;
+      }
+
+      return jQuery.ajax({
+        type: 'get',
+        url: url,
+        data: data,
+        success: callback,
+        dataType: type,
+        headers: headers
+      });
+    };
+
+    jQuery.each(['post', 'put', 'delete', 'patch'], function (i, method) {
       LearnAjaxHelper.prototype[ method ] = function (url, data, callback, type) {
-        // shift arguments if data argument was omitted
         if (jQuery.isFunction(data)) {
           type = type || callback;
           callback = data;
           data = undefined;
         }
-
+        _.extend(data,{'p_auth': Liferay.authToken});
         return jQuery.ajax({
           type: method,
           url: url,
           data: data,
           success: callback,
           dataType: type,
-          headers: headers,
-          cache: false
+          headers: {
+            'X-CSRF-Token': Liferay.authToken
+          }
         });
       };
     });
@@ -175,11 +268,20 @@ var LearnAjaxHelper = (function () {
       if (options.headers) options.headers = _.extend(options.headers, headers);
       else options.headers = headers;
 
+      if(options.type && options.type.toLowerCase() !== 'get'){
+        _.extend(options.headers, {'X-CSRF-Token': Liferay.authToken });
+        _.extend(options.data, {'p_auth': Liferay.authToken});
+      }
+
       return jQuery.ajax(options);
     }
   }
 
   LearnAjaxHelper.prototype.syncRequest = function (url, method, data) {
+    if(method && method.toLowerCase()!== 'get'){
+      _.extend(headers, {'X-CSRF-Token': Liferay.authToken });
+      _.extend(data, {'p_auth': Liferay.authToken});
+    }
     var resp = jQuery.ajax({
       url: url,
       async: false,

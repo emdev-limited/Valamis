@@ -8,10 +8,9 @@ LiferayImageModel = Backbone.Model.extend({
 LiferayImageGalleryService = new Backbone.Service({ url: path.root,
   sync: {
     'read': {
-      path: path.api.liferay,
+      path: path.api.liferay + "images/",
       'data': function (collection, options) {
         return {
-          action: 'GETIMAGES',
           courseId: Utils.getCourseId(),
           filter: options.filter,
           sortAscDirection: options.sort,
@@ -94,6 +93,13 @@ var GalleryContainer = Backbone.View.extend({
     var template = Mustache.to_html(jQuery('#liferayImageGalleryDialogView').html(), this.language);
     this.$el.html(template);
     this.$el.find('.dropdown').valamisDropDown();
+    this.$('.js-search')
+        .on('focus', function() {
+          jQuery(this).parent('.val-search').addClass('focus');
+        })
+        .on('blur', function() {
+          jQuery(this).parent('.val-search').removeClass('focus');
+        });
 
     var that = this;
     this.paginator = new ValamisPaginator({
@@ -137,15 +143,16 @@ var GalleryContainer = Backbone.View.extend({
   },
 
   fetchFirstPage: function () {
-    this.fetchGalleryCollection(1);
+    this.paginatorModel.set({'currentPage': 1});
+    this.fetchGalleryCollection();
   },
   fetchGallery: function () {
-    this.fetchGalleryCollection(this.paginator.currentPage());
+    this.fetchGalleryCollection();
   },
-  fetchGalleryCollection: function (page) {
+  fetchGalleryCollection: function () {
     this.collection.fetch({
       reset: true,
-      currentPage: page,
+      currentPage: this.paginator.currentPage(),
       itemsOnPage: this.paginator.itemsOnPage(),
       filter: this.$('#gallerySearch').val(),
       sort: this.$('#sortGallery').data('value')

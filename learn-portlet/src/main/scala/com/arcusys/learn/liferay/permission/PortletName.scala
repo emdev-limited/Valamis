@@ -11,7 +11,7 @@ sealed abstract class PortletName(val name: String) {
   }
 }
 
-object PortletName {
+object PortletName { //TODO: Enumeration?
 
   case object GradeBook extends PortletName("Gradebook")
 
@@ -22,8 +22,6 @@ object PortletName {
   case object LessonManager extends PortletName("PackageManager")
 
   case object LessonViewer extends PortletName("SCORMApplication")
-
-  case object LessonDesigner extends PortletName("SCORMQuizes")
 
   case object ContentManager extends PortletName("ContentManager")
 
@@ -37,7 +35,11 @@ object PortletName {
 
   case object ActivityToLRSMapper extends PortletName("SocialActivitiesTinCanMapper")
 
-  case object SlidesEditor extends PortletName("ValamisSlidesEditor")
+  case object LessonStudio extends PortletName("ValamisSlidesEditor")
+
+  case object CompetencesUser extends PortletName("CompetencesUser")
+
+  case object CompetencesAdmin extends PortletName("CompetencesAdmin")
 
   case object AchievedCertificates extends PortletName("AchievedCertificates")
 
@@ -47,5 +49,16 @@ object PortletName {
 
   case object LearningPaths extends PortletName("LearningPaths")
 
+  case object MyLessons extends PortletName("MyLessons")
+
+  case object ValamisStudySummary extends PortletName("ValamisStudySummary")
+
+  case object PhenomenizerStudio extends PortletName("PhenomenizerStudio")
+
+  case object PhenomenizerReport extends PortletName("PhenomenizerReport")
+
+  case object MyCertificates extends PortletName("MyCertificates")
+
+  case object MyCourses extends PortletName("MyCourses")
 }
 

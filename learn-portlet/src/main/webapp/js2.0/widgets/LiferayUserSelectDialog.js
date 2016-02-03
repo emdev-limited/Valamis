@@ -16,24 +16,15 @@ LiferayUserModel = Backbone.Model.extend({
   }
 });
 
-LiferayUserCollectionService = new Backbone.Service({ url: '/',
+LiferayUserCollectionService = new Backbone.Service({ url: path.root,
   sync: {
      'read': {
-       'path': function (collection, options) {
-         if (options.getAllUsers){
-           return path.api.users;
-         }
-         else {
-           return path.api.certificates + jQuery('#selectedCertificateID').val() + '/users';
-         }
-       },
+       'path': path.api.users,
        'data': function (collection, options) {
          var order = options.order;
          var sortBy = order.split(':')[0];
          var asc = order.split(':')[1];
-
-         if (options.getAllUsers)
-           return {
+         var params = {
              orgId: options.orgId,
              courseId: Utils.getCourseId(),
              filter: options.filter,
@@ -41,19 +32,9 @@ LiferayUserCollectionService = new Backbone.Service({ url: '/',
              sortAscDirection: asc,
              page: options.currentPage,
              count: options.itemsOnPage
-           }
-         else
-           return {
-             action: 'GETNOTCONTAINEDSTUDENTS',
-             courseId: Utils.getCourseId(),
-             orgId: options.orgId,
-             filter: options.filter,
-             sortBy: sortBy,
-             sortAscDirection: asc,
-             page: options.currentPage,
-             count: options.itemsOnPage
-           }
-
+         };
+         if (options.certificateId) _.extend(params, {certificateId: options.certificateId, isUserJoined: false});
+         return params;
        },
        'method': 'get'
      }
@@ -61,11 +42,10 @@ LiferayUserCollectionService = new Backbone.Service({ url: '/',
   targets: {
     saveToCertificate: {
       path: function (model, options) {
-        return path.api.certificates + jQuery('#selectedCertificateID').val();
+        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/users';
       },
       'data' : function(model, options){
         var params = {
-          action: 'ADDUSERS',
           courseId:  Utils.getCourseId(),
           userIDs : options.users
         };
@@ -115,10 +95,7 @@ LiferayUserListElement = Backbone.View.extend({
   },
   initialize: function (options) {
     this.$el = jQuery('<tr>');
-    if(typeof options.getAllUsers !== null && options.getAllUsers !== 'undefined')
-      this.getAllUsers = options.getAllUsers;
-    else
-      this.getAllUsers = false;
+    this.singleSelect = options.singleSelect;
   },
   render: function () {
     var template = Mustache.to_html(jQuery('#liferayUserElementView').html(), this.model.toJSON());
@@ -127,7 +104,7 @@ LiferayUserListElement = Backbone.View.extend({
   },
 
   toggleThis: function () {
-    if (this.getAllUsers)
+    if (this.singleSelect)
       this.trigger('lfUserSelected', this.model);
     else {
       this.model.trigger('unsetIsSelectedAll', this.model);
@@ -150,10 +127,8 @@ LiferayUserSelectDialog = Backbone.View.extend({
   },
   initialize: function (options) {
     this.language = options.language;
-    if(typeof options.getAllUsers !== null && options.getAllUsers !== 'undefined')
-        this.getAllUsers = options.getAllUsers;
-    else
-        this.getAllUsers = false;
+    this.singleSelect = options.singleSelect || false;
+    this.certificateId = options.certificateId || undefined;
 
     this.organizations = new LiferayOrganizationCollection();
     this.organizations.on('reset', this.appendOrganizations, this);
@@ -163,7 +138,7 @@ LiferayUserSelectDialog = Backbone.View.extend({
 
     this.inputTimeout = null;
 
-    this.collection = new LiferayUserCollection({getAllUsers: this.getAllUsers});
+    this.collection = new LiferayUserCollection();
 
     this.collection.on('reset', this.showAll, this);
     this.collection.on('unsetIsSelectedAll', this.unsetIsSelectedAll, this);
@@ -176,8 +151,15 @@ LiferayUserSelectDialog = Backbone.View.extend({
     this.isSelectedAll = false;
   },
   render: function () {
-    var renderedTemplate = Mustache.to_html(jQuery('#liferayUserDialogView').html(), _.extend({getAllUsers: this.getAllUsers}, this.language));
+    var renderedTemplate = Mustache.to_html(jQuery('#liferayUserDialogView').html(), _.extend({singleSelect: this.singleSelect}, this.language));
     this.$el.html(renderedTemplate);
+    this.$('.js-search')
+      .on('focus', function() {
+        jQuery(this).parent('.val-search').addClass('focus');
+      })
+      .on('blur', function() {
+        jQuery(this).parent('.val-search').removeClass('focus');
+      });
 
     this.organizations.fetch({reset: true});
 
@@ -231,7 +213,7 @@ LiferayUserSelectDialog = Backbone.View.extend({
     }
   },
   showUser: function (user) {
-    var view = new LiferayUserListElement({model: user, getAllUsers: this.getAllUsers});
+    var view = new LiferayUserListElement({model: user, singleSelect: this.singleSelect});
     var viewDOM = view.render();
     this.$('#userList').append(viewDOM);
     view.on('lfUserSelected', function (item) {
@@ -255,16 +237,17 @@ LiferayUserSelectDialog = Backbone.View.extend({
   reloadFirstPage: function () {
     jQuery('.js-addUsers').hide();
     jQuery('#noUsersLabel').hide();
-    this.fetchCollection(1);
+    this.paginatorModel.set({'currentPage': 1});
+    this.fetchCollection();
   },
   reload: function () {
-    this.fetchCollection(this.paginator.currentPage());
+    this.fetchCollection();
   },
-  fetchCollection: function (page) {
+  fetchCollection: function () {
     this.collection.fetch({
       reset: true,
-      currentPage: page,
-      getAllUsers: this.getAllUsers,
+      currentPage: this.paginator.currentPage(),
+      certificateId: this.certificateId,
       itemsOnPage: this.paginator.itemsOnPage(),
       filter: this.$('#searchUsers').val(),
       orgId: this.$('#userOrganization').data('value'),
@@ -273,7 +256,7 @@ LiferayUserSelectDialog = Backbone.View.extend({
   },
 
   selectAll: function () {
-    this.isSelectedAll = !this.isSelectedAll;
+    this.isSelectedAll = (this.collection.filter(function(item) {return item.get('selected')}).length !== this.collection.length);
     this.collection.each(this.setSelectAll, this);
   },
   setSelectAll: function (model) {

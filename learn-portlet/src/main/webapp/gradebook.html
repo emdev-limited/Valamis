@@ -163,7 +163,7 @@
     var StudentViewModal;
     var endpointData = {{{endpointData}}};
 
-    moment.lang('{{language}}');
+    moment.lang(Utils.getLanguage());
 
 
     TincanHelper.SetActor(JSON.parse(jQueryValamis("#tincanActor").val()));
@@ -172,10 +172,15 @@
     jQueryValamis(function () {
 
         // upload translations
-        var defaultURL = Utils.getContextPath() + 'i18n/gradebook_en.properties';
-        var localizedURL = Utils.getContextPath() + 'i18n/gradebook_{{language}}.properties';
-        Utils.i18nLoader(localizedURL, defaultURL, onGradebookLanguageLoad, onGradebookLanguageError);
-
+        Utils.loadLanguage('gradebook', onGradebookLanguageLoad);
+        var oldSync = Backbone.sync;
+        Backbone.sync = function(method, model, options){
+            _.extend(options.data,{'p_auth': Liferay.authToken});
+            options.beforeSend = function(xhr){
+                xhr.setRequestHeader('X-CSRF-Token', Liferay.authToken);
+            };
+            return oldSync(method, model, options);
+        };
 
         // Create a layout class
         var Layout = Marionette.LayoutView.extend({
@@ -220,6 +225,9 @@
             onRender: function () {
                 this.$('.edit-package-grade-view-dialog').append(this.args[0].view.render());
                 this.$('.bbm-modal').addClass('review');
+            },
+            onShow: function () {
+                this.$('#courseComment').focus();
             }
         });
 
@@ -288,10 +296,6 @@
         Backbone.emulateJSON = true;
         language = properties;
         initView();
-    }
-
-    function onGradebookLanguageError() {
-        alert('Translation resource loading failed!');
     }
 
     function onGradeListChanged() {

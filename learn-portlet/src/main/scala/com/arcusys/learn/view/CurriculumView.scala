@@ -1,5 +1,6 @@
 package com.arcusys.learn.view
 
+import java.io.PrintWriter
 import javax.portlet._
 
 import com.arcusys.learn.liferay.permission.{PermissionUtil, PublishPermission}
@@ -13,20 +14,18 @@ import com.arcusys.learn.view.liferay.LiferayHelpers
  */
 abstract class CurriculumAbstract extends OAuthPortlet with BaseView {
 
-  override def destroy() {}
-
-  def generateResponse(data: Map[String, Any], templateName: String) = {
-    getTemplate("/templates/2.0/curriculum_templates.html") +
-      getTemplate("/templates/2.0/paginator.html") +
-      getTemplate("/templates/2.0/site_select_templates.html") +
-      getTemplate("/templates/2.0/image_gallery_templates.html") +
-      getTemplate("/templates/2.0/user_select_templates.html") +
-      getTemplate("/templates/2.0/file_uploader.html") +
-      mustache(data, templateName)
+  def generateResponse(data: Map[String, Any], templateName: String)(implicit out: PrintWriter) = {
+    sendTextFile("/templates/2.0/curriculum_templates.html")
+    sendTextFile("/templates/2.0/paginator.html")
+    sendTextFile("/templates/2.0/site_select_templates.html")
+    sendTextFile("/templates/2.0/image_gallery_templates.html")
+    sendTextFile("/templates/2.0/user_select_templates.html")
+    sendTextFile("/templates/2.0/file_uploader.html")
+    sendMustacheFile(data, templateName)
   }
 
   def doEditViewHelper(request: RenderRequest, response: RenderResponse) {
-    val out = response.getWriter
+    implicit val out = response.getWriter
     val language = LiferayHelpers.getLanguage(request)
 
     val data = Map(
@@ -34,13 +33,13 @@ abstract class CurriculumAbstract extends OAuthPortlet with BaseView {
       "certificateActionURL" -> response.createResourceURL(),
       "companyID" -> PortalUtilHelper.getCompanyId(request),
       "portletID" -> request.getAttribute("PORTLET_ID"),
-      "contextPath" -> request.getContextPath
+      "contextPath" -> getContextPath(request)
     ) ++ getTranslation("curriculum", language)
-    out.println(
-      getTemplate("/templates/2.0/curriculum_templates.html") +
-        getTemplate("/templates/2.0/file_uploader.html") +
-        mustache(data, "curriculum_settings.html")
-    )
+    
+    sendTextFile("/templates/2.0/curriculum_templates.html") 
+    sendTextFile("/templates/2.0/file_uploader.html")
+    sendMustacheFile(data, "curriculum_settings.html")
+    
   }
 
   protected def doViewHelper(request: RenderRequest, response: RenderResponse): SecurityData = {
@@ -60,8 +59,7 @@ abstract class CurriculumAbstract extends OAuthPortlet with BaseView {
       Map(
         "root" -> url,
         "isAdmin" -> securityScope.permissionToModify,
-        "permissionToPublish" -> publishPermission,
-        "language" -> language
+        "permissionToPublish" -> publishPermission
       ) ++ translations
 
     securityScope
@@ -77,7 +75,7 @@ abstract class CurriculumAbstract extends OAuthPortlet with BaseView {
 class CurriculumAdmin extends CurriculumAbstract {
   override def doView(request: RenderRequest, response: RenderResponse) {
     val scope = super.doViewHelper(request: RenderRequest, response: RenderResponse)
-    response.getWriter.println(generateResponse(scope.data, "curriculum_admin.html"))
+    generateResponse(scope.data, "curriculum_admin.html")(response.getWriter)
   }
 
   override def doEdit(request: RenderRequest, response: RenderResponse) {
@@ -88,13 +86,7 @@ class CurriculumAdmin extends CurriculumAbstract {
 
 class CurriculumUser extends CurriculumAbstract {
   override def doView(request: RenderRequest, response: RenderResponse) {
-    val html = "curriculum_user.html"
     val scope = super.doViewHelper(request: RenderRequest, response: RenderResponse)
-    response.getWriter.println(generateResponse(scope.data, html))
+    generateResponse(scope.data, "curriculum_user.html")(response.getWriter)
   }
-
-  override def doEdit(request: RenderRequest, response: RenderResponse) {
-    doEditViewHelper(request, response)
-  }
-
 }

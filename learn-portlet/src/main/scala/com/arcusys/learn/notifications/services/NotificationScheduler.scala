@@ -1,11 +1,11 @@
 package com.arcusys.learn.notifications.services
 
-import org.quartz.impl.StdSchedulerFactory
-import org.quartz.{ Trigger, JobDetail }
 import org.quartz.CronScheduleBuilder.cronSchedule
 import org.quartz.JobBuilder.newJob
-import org.quartz.TriggerKey._
 import org.quartz.TriggerBuilder.newTrigger
+import org.quartz.TriggerKey._
+import org.quartz.impl.StdSchedulerFactory
+import org.quartz.{JobDetail, Trigger}
 
 object NotificationScheduler {
   private val sf = new StdSchedulerFactory()

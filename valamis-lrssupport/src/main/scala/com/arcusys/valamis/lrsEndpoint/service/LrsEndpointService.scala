@@ -1,17 +1,15 @@
 package com.arcusys.valamis.lrsEndpoint.service
 
-import com.arcusys.valamis.lrsEndpoint.model.LrsEndpointSettings
+import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
 
 /**
  * Created by igorborisov on 17.10.14.
  */
 trait LrsEndpointService {
 
-  def setTincanEndpoint(endpointSettings: LrsEndpointSettings): Unit
+  def setEndpoint(endpointSettings: LrsEndpoint): Unit
 
-  def removeTincanEndpoint(): Unit
-
-  def getTincanEndpoint(): Option[LrsEndpointSettings]
-
-  def getInternalTincanEndpoint(): Option[LrsEndpointSettings]
+  def getEndpoint: Option[LrsEndpoint]
+  
+  def switchToInternal(customHost: Option[String]): Unit
 }

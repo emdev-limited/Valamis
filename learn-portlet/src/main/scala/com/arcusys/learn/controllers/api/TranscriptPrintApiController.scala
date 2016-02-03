@@ -1,16 +1,12 @@
 package com.arcusys.learn.controllers.api
 
+import com.arcusys.learn.controllers.api.base.BaseApiController
 import com.arcusys.learn.facades.TranscriptPrintFacadeContract
-import com.arcusys.learn.models.request.{ PrintRequest, PrintActionType }
-import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.escalatesoft.subcut.inject.BindingModule
-import com.arcusys.learn.ioc.Configuration
+import com.arcusys.learn.models.request.{PrintActionType, PrintRequest}
 
-class TranscriptPrintApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  def this() = this(Configuration)
+class TranscriptPrintApiController extends BaseApiController {
 
-  val printFacade = inject[TranscriptPrintFacadeContract]
-  val lrsReader = inject[LrsClientManager]
+  lazy val printFacade = inject[TranscriptPrintFacadeContract]
 
   before() {
     response.setHeader("Pragma", "no-cache")
@@ -24,7 +20,6 @@ class TranscriptPrintApiController(configuration: BindingModule) extends BaseApi
   get("/print(/)")(action {
     val printRequest = PrintRequest(this)
 
-    lrsReader.statementApi(statementApi =>
       printRequest.actionType match {
         case PrintActionType.PrintTranscript =>
           val companyId = printRequest.companyId
@@ -32,7 +27,7 @@ class TranscriptPrintApiController(configuration: BindingModule) extends BaseApi
 
           val templatesPath = servletContext.getRealPath("WEB-INF/fop")
 
-          val out = printFacade.printTranscript(statementApi, companyId, userId, templatesPath)
+          val out = printFacade.printTranscript(companyId, userId, templatesPath)
 
           response.setContentLength(out.size())
           response.getOutputStream.write(out.toByteArray)
@@ -40,6 +35,6 @@ class TranscriptPrintApiController(configuration: BindingModule) extends BaseApi
           response.getOutputStream.close()
           out.close()
         case _ => new UnsupportedOperationException(s"Action ${printRequest.actionType} is not supported")
-      }, printRequest.lrsAuth)
+      }
   })
 }

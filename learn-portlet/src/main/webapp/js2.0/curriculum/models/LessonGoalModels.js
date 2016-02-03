@@ -25,11 +25,10 @@ LessonCollectionService = new Backbone.Service({ url: path.root,
   targets: {
     'saveToCertificate': {
       'path': function (collection, options) {
-        return path.api.certificates + options.certificateId;
+        return path.api.certificates + options.certificateId + '/packages';
       },
         'data': function(collection, options){
             var params = {
-                action: 'ADDPACKAGES',
                 courseId: Utils.getCourseId(),
                 packageIds: options.lessons
             };

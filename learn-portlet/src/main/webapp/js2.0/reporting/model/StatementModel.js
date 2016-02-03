@@ -2,7 +2,7 @@ var StatementModel = Backbone.Model.extend({
     defaults: {}
 });
 
-StatementModelCollectionService = new Backbone.Service({ url: '/',
+StatementModelCollectionService = new Backbone.Service({ url: path.root,
     sync: {
         'read':{
             path: path.api.report,

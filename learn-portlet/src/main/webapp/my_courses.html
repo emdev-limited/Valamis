@@ -1,0 +1,27 @@
+
+<div id="myCoursesAppRegion">
+</div>
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(document).ready(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var myCoursesPermission = { };
+
+        var myCoursesOptions = {
+            resourceName: 'dashboard',
+            permissions: myCoursesPermission,
+            app: myCourses,
+            appOptions: {}
+        };
+
+        valamisApp.execute('subapp:start', myCoursesOptions);
+
+    });
+
+</script>

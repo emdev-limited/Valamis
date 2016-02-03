@@ -1,6 +1,8 @@
 package com.arcusys.valamis.user.model
 
-case class User(id: Int,
+case class User(id: Long, name: String)
+
+case class ScormUser(id: Long,
   name: String = "",
   preferredAudioLevel: Float = 1,
   preferredLanguage: String = "",

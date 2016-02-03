@@ -1,54 +1,53 @@
 package com.arcusys.learn.liferay.services
 
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil
+import com.liferay.portal.util.PortalUtil
 import com.liferay.portlet.asset.model.AssetEntry
 import com.liferay.portlet.asset.service.{ AssetCategoryLocalServiceUtil, AssetEntryLocalServiceUtil }
-import java.util.Date
+import scala.collection.JavaConverters._
 
 object AssetEntryLocalServiceHelper {
-  def getAssetEntry(entryId: Long): AssetEntry = AssetEntryLocalServiceUtil.getAssetEntry(entryId)
+  def getAssetEntry(entryId: Long): AssetEntry = AssetEntryLocalServiceUtil.getEntry(entryId)
+
+  def getAssetEntry(className: String, classPK: Long): AssetEntry = AssetEntryLocalServiceUtil.getEntry(className, classPK)
+
+  def fetchAssetEntry(className: String, classPK: Long): Option[AssetEntry] = Option(AssetEntryLocalServiceUtil.fetchEntry(className, classPK))
+
+  def fetchAssetEntries(className: String, classPK: Seq[Long]): Seq[AssetEntry] = {
+    val classNameId = PortalUtil.getClassNameId(className);
+    classPK match {
+      case Nil => Seq()
+      case seq =>
+        val ids = seq.asJavaCollection
+        val query = AssetEntryLocalServiceUtil.dynamicQuery()
+          .add(RestrictionsFactoryUtil.eq("classNameId", classNameId))
+          .add(RestrictionsFactoryUtil.in("classPK", ids))
+
+        AssetEntryLocalServiceUtil.dynamicQuery(query).asScala
+          .map(_.asInstanceOf[AssetEntry])
+    }
+  }
 
   def deleteAssetEntry(entryId: Long): AssetEntry = AssetEntryLocalServiceUtil.deleteAssetEntry(entryId)
 
-  def updateEntry(userId: Long,
-    groupId: Long,
-    className: String,
-    classPK: Long,
-    classUuid: String,
-    classTypeId: Long,
-    categoryIds: Array[Long],
-    tagNames: Array[String],
-    visible: Boolean,
-    startDate: Date,
-    endDate: Date,
-    publishDate: Date,
-    expirationDate: Date,
-    mimeType: String,
-    title: String,
-    description: String,
-    summary: String,
-    url: String,
-    layoutUuid: String,
-    height: Int,
-    width: Int,
-    priority: java.lang.Integer,
-    sync: Boolean) =
-    AssetEntryLocalServiceUtil.updateEntry(userId, groupId, className, classPK, classUuid, classTypeId,
-      categoryIds, tagNames, visible, startDate, endDate, publishDate, expirationDate, mimeType, title,
-      description, summary, url, layoutUuid, height, width, priority, sync)
+  def createAssetEntry(entryId: Long) =
+    AssetEntryLocalServiceUtil.createAssetEntry(entryId)
 
-  def updateAssetEntry(assetEntry: AssetEntry): AssetEntry =
-    AssetEntryLocalServiceUtil.updateAssetEntry(assetEntry)
+  def updateAssetEntry(assetEntry: AssetEntry): AssetEntry = {
+    if(assetEntry.isNew) AssetEntryLocalServiceUtil.addAssetEntry(assetEntry)
+    else AssetEntryLocalServiceUtil.updateAssetEntry(assetEntry)
+  }
 
-  def setAssetCategories(entryId: Long, categoryIds: Array[Long]) = {
+  def setAssetCategories(entryId: Long, categoryIds: Array[Long]): Unit = {
     if (!categoryIds.isEmpty)
-      categoryIds.map(categoryId => AssetCategoryLocalServiceUtil.setAssetEntryAssetCategories(entryId, categoryIds))
+      categoryIds.foreach(categoryId => AssetCategoryLocalServiceUtil.setAssetEntryAssetCategories(entryId, categoryIds))
     else
       AssetCategoryLocalServiceUtil.clearAssetEntryAssetCategories(entryId)
   }
 
-  def addAssetCategories(entryId: Long, categoryIds: Array[Long]) =
-    categoryIds.map(categoryId => AssetCategoryLocalServiceUtil.addAssetEntryAssetCategories(entryId, categoryIds))
+  def addAssetCategories(entryId: Long, categoryIds: Array[Long]): Unit =
+    categoryIds.foreach(categoryId => AssetCategoryLocalServiceUtil.addAssetEntryAssetCategories(entryId, categoryIds))
 
-  def removeAssetCategories(entryId: Long, categoryIds: Array[Long]) =
-    categoryIds.map(categoryId => AssetCategoryLocalServiceUtil.deleteAssetEntryAssetCategories(entryId, categoryIds))
+  def removeAssetCategories(entryId: Long, categoryIds: Array[Long]): Unit =
+    categoryIds.foreach(categoryId => AssetCategoryLocalServiceUtil.deleteAssetEntryAssetCategories(entryId, categoryIds))
 }

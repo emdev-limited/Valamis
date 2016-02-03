@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 
 case class CertificateState(
   userId: Long,
-  status: CertificateStatus.Value,
+  status: CertificateStatuses.Value,
   statusAcquiredDate: DateTime,
   userJoinedDate: DateTime,
   certificateId: Long

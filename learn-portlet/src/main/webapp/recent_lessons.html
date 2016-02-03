@@ -4,42 +4,32 @@
 <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
 <script type="text/javascript">
-    var permissionActionsRecentLessons = {
-    };
 
     var Valamis = Valamis || {};
-    Valamis.currentUserId = parseInt("{{userID}}");
-    Valamis.permissions = Valamis.permissions || {};
-    _.extend(Valamis.permissions, permissionActionsRecentLessons);
 
-    window.Valamis.language = window.Valamis.language || {};
+    Valamis.additionalOptions = Valamis.additionalOptions || {};
+    _.extend(Valamis.additionalOptions, {
+        contextPath: '{{{contextPath}}}',
+        apiPath: path.root + path.api.prefix
+    });
 
     jQueryValamis(document).ready(function () {
-        var language = '{{language}}';
-        if(!valamisApp.started) { valamisApp.start(); }
 
-        var onBankLanguageLoad  = function(properties) {
-            _.extend(window.Valamis.language , properties);
-            recentLessons.start({languageBank: properties});
+        if (!valamisApp.started) {
+            valamisApp.start();
+        }
+
+        var permissionActionsRecentLessons = {
         };
 
-        var onBankLanguageError = function() {
-            alert('Translation resource loading failed!');
+        var recentLessonsOptions = {
+            resourceName: 'dashboard',
+            permissions: permissionActionsRecentLessons,
+            app: recentLessons,
+            appOptions: {}
         };
 
-        var getPackSource = function(language){
-            return Utils.getContextPath() + 'i18n/dashboard_' + language + '.properties';
-        };
-
-        var getLanguageBank = function (options) {
-            Backbone.emulateJSON = true;
-            var defaultURL = getPackSource('en');
-            var localizedURL = getPackSource(options.language);
-
-            Utils.i18nLoader(localizedURL, defaultURL, onBankLanguageLoad, onBankLanguageError);
-        };
-
-        getLanguageBank({language : language});
+        valamisApp.execute('subapp:start', recentLessonsOptions);
     });
 
 </script>

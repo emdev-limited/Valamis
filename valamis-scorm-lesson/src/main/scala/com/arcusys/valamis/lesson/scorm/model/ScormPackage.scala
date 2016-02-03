@@ -1,5 +1,6 @@
 package com.arcusys.valamis.lesson.scorm.model
 
+import com.arcusys.valamis.lesson.model.LessonType
 import com.arcusys.valamis.lesson.model.PackageBase
 import com.arcusys.valamis.lesson.scorm.model.manifest.Metadata
 import org.joda.time.DateTime
@@ -17,9 +18,10 @@ case class ScormPackage(
   title: String,
   summary: Option[String] = None,
   metadata: Option[Metadata] = None,
-  assetRefId: Option[Long] = None,
   courseID: Option[Int],
 
   logo: Option[String] = None,
   beginDate: Option[DateTime],
-  endDate: Option[DateTime]) extends PackageBase
+  endDate: Option[DateTime]) extends PackageBase {
+  def packageType = LessonType.Scorm
+}

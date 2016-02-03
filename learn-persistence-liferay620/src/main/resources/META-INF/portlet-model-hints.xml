@@ -168,15 +168,6 @@
 			<hint name="max-length">2000000</hint>
 		</field>
 	</model>
-	<model name="com.arcusys.learn.persistence.liferay.model.LFConfig">
-		<field name="id" type="long" />
-		<field name="dataKey" type="String">
-			<hint name="max-length">512</hint>
-		</field>
-		<field name="dataValue" type="String">
-			<hint name="max-length">512</hint>
-		</field>
-	</model>
 	<model name="com.arcusys.learn.persistence.liferay.model.LFCourse">
 		<field name="id" type="long" />
 		<field name="courseID" type="Integer" />
@@ -559,45 +550,6 @@
 			<hint name="max-length">512</hint>
 		</field>
 	</model>
-	<model name="com.arcusys.learn.persistence.liferay.model.LFSlide">
-		<field name="id" type="long" />
-		<field name="bgcolor" type="String" />
-		<field name="bgimage" type="String">
-			<hint name="max-length">512</hint>
-		</field>
-		<field name="title" type="String" />
-		<field name="slideSetId" type="Long" />
-		<field name="topSlideId" type="Long" />
-		<field name="leftSlideId" type="Long" />
-		<field name="statementVerb" type="String" />
-		<field name="statementObject" type="String" />
-		<field name="statementCategoryId" type="String" />
-	</model>
-	<model name="com.arcusys.learn.persistence.liferay.model.LFSlideEntity">
-		<field name="id" type="long" />
-		<field name="top" type="String" />
-		<field name="left" type="String" />
-		<field name="width" type="String" />
-		<field name="height" type="String" />
-		<field name="zIndex" type="String" />
-		<field name="content" type="String">
-			<hint name="max-length">2000000</hint>
-		</field>
-		<field name="entityType" type="String" />
-		<field name="slideId" type="Long" />
-		<field name="correctLinkedSlideId" type="Long" />
-		<field name="incorrectLinkedSlideId" type="Long" />
-		<field name="notifyCorrectAnswer" type="Boolean" />
-	</model>
-	<model name="com.arcusys.learn.persistence.liferay.model.LFSlideSet">
-		<field name="id" type="long" />
-		<field name="title" type="String" />
-		<field name="description" type="String">
-			<hint name="max-length">2000000</hint>
-		</field>
-		<field name="logo" type="String" />
-		<field name="courseId" type="Long" />
-	</model>
 	<model name="com.arcusys.learn.persistence.liferay.model.LFTCClntApiStorage">
 		<field name="id" type="long" />
 		<field name="name" type="String" />
@@ -625,6 +577,9 @@
 		</field>
 		<field name="secret" type="String">
 			<hint name="max-length">2000</hint>
+		</field>
+		<field name="customHost" type="String">
+			<hint name="max-length">255</hint>
 		</field>
 	</model>
 	<model name="com.arcusys.learn.persistence.liferay.model.LFTincanManifestAct">

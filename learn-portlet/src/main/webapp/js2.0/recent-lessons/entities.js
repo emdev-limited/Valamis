@@ -4,13 +4,12 @@ recentLessons.module('Entities', function(Entities, recentLessons, Backbone, Mar
     url: path.root,
     sync: {
       'read': {
-        'path': function (model, options) {
-          return path.api.packages+'getLastOpen';
-        },
+        'path': path.api.gradebooks,
         'data': function (collection, options) {
           var params = {
+            action: 'LAST_OPEN',
             courseId: Utils.getCourseId(),
-            countPackage: 4
+            packagesCount: 3
           };
           return params;
         },
@@ -20,7 +19,13 @@ recentLessons.module('Entities', function(Entities, recentLessons, Backbone, Mar
   });
 
   Entities.RecentCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({})
+    model: Backbone.Model.extend({}),
+    parse: function(response) {
+      return _.map(response, function(pkg) {
+        pkg['packageUrl'] = Utils.getPackageUrl(pkg.packageId);
+        return pkg;
+      });
+    }
   }).extend(RecentCollectionService);
 
 });

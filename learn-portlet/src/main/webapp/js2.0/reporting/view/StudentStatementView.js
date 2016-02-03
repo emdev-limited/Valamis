@@ -33,6 +33,16 @@ var StudentStatementView = Backbone.Marionette.ItemView.extend({
         },
         storedTime: function () {
             return this.stored.replace('Z', '');
+        },
+        tincanGrade: function () {
+            scaled = this.result.score.scaled;
+            if (scaled=== undefined) return '';
+            if (this.result.score.scaled<=1) {
+                return Math.floor(this.result.score.scaled*100)+'%'
+            }
+            else {
+                return Math.floor(this.result.score.scaled) + '%'
+            }
         }
     },
     events: {

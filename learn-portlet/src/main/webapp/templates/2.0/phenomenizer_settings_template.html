@@ -1,0 +1,10 @@
+<script type="text/template" id="default-story-selector">
+    <div class="val-select">
+        <select id="story-select">
+            <option value=""></option>
+            {{#models}}
+            <option value="{{id}}">{{title}}</option>
+            {{/models}}
+        </select>
+    </div>
+</script>

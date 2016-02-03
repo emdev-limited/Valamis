@@ -1,5 +1,5 @@
 <script type="text/html" id="contentManagerLayoutTemplate">
-
+    <div id="contentManagerTopbarView"></div>
     <div class="portlet-wrapper">
         <div class="portlet-sidebar">
             <div class="sidebar-content no-header">
@@ -11,6 +11,40 @@
     </div>
 </script>
 
+<script type="text/html" id="contentManagerTopbarTemplate">
+    <div class="div-row">
+        <div class="div-col">
+            <div class="div-table add-question-type">
+                <div class="div-row">
+                    <div class="div-col">
+                        <input type="radio" name="addType" value="{{defaultValue}}" {{^isRandom}} checked {{/isRandom}} > {{useLabel}}
+                    </div>
+                    <div class="div-col selected-amount text-center">
+                        {{selectedQuestions}}
+                    </div>
+                    <div class="div-col">
+                        {{defaultSelectedLabel}}
+                    </div>
+                </div>
+                <div class="div-row">
+                    <div class="div-col">
+                        <input type="radio" name="addType" value="{{randomValue}}" {{#isRandom}} checked {{/isRandom}}> {{useLabel}}
+                    </div>
+                    <div class="div-col text-center">
+                        <input type="text" class="onlyDigits js-digits-only js-random-amount" value="{{randomQuestions}}"
+                               placeholder="{{defaultRandomQuestions}}" {{^isRandom}} disabled="disabled" {{/isRandom}}>
+                    </div>
+                    <div class="div-col">
+                        {{randomSelectedLabel}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="div-col">
+            {{selectQuestionTypeHintLabel}}
+        </div>
+    </div>
+</script>
 
 <script type="text/html" id="contentManagerContentLayoutTemplate">
     <div class="min-height400 div-col contentManagerCenter">
@@ -21,7 +55,6 @@
             <div id="categoryContentView" class="clearfix">
 
             </div>
-            <div id="categoryContentQuestionsView"></div>
             <div class="val-paginator"></div>
         </div>
 
@@ -34,11 +67,36 @@
     </div>
 </script>
 
-<script type="text/html" id="contentManagerToolbarTemplate">
+<script type="text/html" id="contentManagerFilterToolbarTemplate">
     <div class="div-row">
         <div class="content-controls clearfix">
             <div class="val-icon-menu js-toggle-sidebar val-icon-with-label"></div>
-            {{#CM_MODIFY}}
+            <div>
+            <div class="val-search">
+                <input type="text" class="js-filter-by-title js-search" placeholder="{{searchPlaceholderLabel}}">
+            </div>
+            </div>
+
+            {{#ContentManager.MODIFY}}
+            <div class="dropdown js-filter-by-type" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{allTypesLabel}}</span>
+                    <span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="selected" data-value="">{{allTypesLabel}}</li>
+                    <li data-value="category">{{categoryTypeLabel}}</li>
+                    <li data-value="plaintext">{{contentTypeLabel}}</li>
+                    <li data-value="type0">{{choiceQuestionTypeLabel}}</li>
+                    <li data-value="type1">{{shortAnswerQuestionTypeLabel}}</li>
+                    <li data-value="type2">{{numericQuestionTypeLabel}}</li>
+                    <li data-value="type3">{{positioningQuestionTypeLabel}}</li>
+                    <li data-value="type4">{{matchingQuestionTypeLabel}}</li>
+                    <li data-value="type5">{{essayQuestionTypeLabel}}</li>
+                    <li data-value="type7">{{categorizationQuestionTypeLabel}}</li>
+                </ul>
+            </div>
+
             <div class="dropdown actions shift-right">
                     <button class="button medium primary">
                         <span class="dropdown-text">{{buttonNewLabel}}</span>
@@ -50,13 +108,26 @@
                         <li class="js-add-content" data-value=""><span class="val-icon-content"></span>{{buttonAddContentTooltipLabel}}</li>
                     </ul>
             </div>
-            {{/CM_MODIFY}}
+            {{/ContentManager.MODIFY}}
         </div>
     </div>
 
     <div class="div-row">
-        {{#CM_MODIFY}}
+        {{#ContentManager.MODIFY}}
         <div class="content-controls">
+            <div class="dropdown shift-right" data-value="1">
+                <button class="button medium simple">
+                    <span class="dropdown-text">
+                        {{sortByCurrent}}
+                    </span>
+                    <span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    {{#sortByList}}
+                    <li class="js-sortby-items{{#selected}} selected{{/selected}}" data-value="{{value}}">{{name}}</li>
+                    {{/sortByList}}
+                </ul>
+            </div>
             <div>
                 <button class="js-select-all button medium neutral">
                     <span class="val-icon-checkbutton"></span>{{selectAllLabel}}
@@ -74,15 +145,42 @@
                 </ul>
             </div>
         </div>
-        {{/CM_MODIFY}}
+        {{/ContentManager.MODIFY}}
     </div>
 </script>
+
+<script type="text/html" id="contentManagerToolbarTemplate">
+    <div class="div-row">
+        {{#ContentManager.MODIFY}}
+        <div class="content-controls">
+            <div>
+                <button class="js-select-all button medium neutral">
+                    <span class="val-icon-checkbutton"></span>{{selectAllLabel}}
+                </button>
+            </div>
+
+            <div class="dropdown actions shift-right">
+                <button class="button medium primary">
+                    <span class="dropdown-text">{{buttonNewLabel}}</span>
+                    <span class="val-icon-dropdown val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="js-add-category" data-value=""><span class="val-icon-folder"></span>{{buttonAddCategoryTooltipLabel}}</li>
+                    <li class="js-add-question" data-value=""><span class="val-icon-question"></span>{{buttonAddQuestionTooltipLabel}}</li>
+                    <li class="js-add-content" data-value=""><span class="val-icon-content"></span>{{buttonAddContentTooltipLabel}}</li>
+                </ul>
+            </div>
+        </div>
+        {{/ContentManager.MODIFY}}
+    </div>
+</script>
+
 
 <!-- content tree templates-->
 
 <script type="text/template" id="contentManagerContentRootNodeTemplate">
     <ul class="val-tree">
-        <li class="expanded js-root" data-id="{{id}}">
+        <li class="expanded js-root selected-entity" data-id="{{id}}">
             <span class="js-tree-item js-tree-root-item tree-item tree-root-item active">
                 <span class="js-tree-item-icon tree-item-icon"></span>
                 <span class="js-tree-item-title tree-parent-title tree-item-title" data-count="{{childrenAmount}}">{{title}}</span>
@@ -105,20 +203,24 @@
 
 <!--content list templates-->
 <script type="text/html" id="contentManagerContentListTemplate">
-        <ul class="js-content-list content-editor-sortable lesson-items" style="min-height: 100px;">
-
-        </ul>
+    <div class="val-row list-header">
+        <span class="val-row s-1 shift-left placeholder">#</span>
+        <span class="val-row s-4 title">{{questionTitleLabel}}</span>
+        <span class="val-row s-4 title">{{questionPreviewType}}</span>
+    </div>
+    <ul class="js-content-list content-editor-sortable lesson-items" style="min-height: 100px;">
+    </ul>
 </script>
 
 <script type="text/html" id="contentManagerContentCategoryTemplate">
     <span class="js-tree-item lesson-item val-row">
         <span class="lesson-item-controls content-manager-hide-mobile s-1 shift-left">
             <input type="checkbox" id="selectEntityCheckbox{{uniqueId}}" {{#selected}}checked{{/selected}} class="js-select-entity val-checkbox"/>
-            <label class="checkbox-label" for="selectEntityCheckbox{{uniqueId}}"></label>
+            <label class="checkbox-label js-select-entity-label" for="selectEntityCheckbox{{uniqueId}}"></label>
         </span>
-        <span class="js-content-entity lesson-item-title val-icon-folder s-4">{{title}} </span>
+        <span class="js-content-entity lesson-item-title val-icon-folder s-4">{{title}}</span>
         <span class="s-3" style="font-weight: normal;">Category</span>
-        {{#CM_MODIFY}}
+        {{#ContentManager.MODIFY}}
         <span class="lesson-item-controls shift-right">
             <button class="js-edit-content button medium simple no-text">
                 <span class="val-icon-edit"></span>
@@ -130,7 +232,7 @@
                 <span class="val-icon-trash"></span>
             </button>
         </span>
-        {{/CM_MODIFY}}
+        {{/ContentManager.MODIFY}}
     </span>
     <span class="js-tree-item-drag lesson-item-title" style="display:none; width:100px;">{{title}}</span>
 
@@ -140,11 +242,11 @@
     <span class="js-tree-item lesson-item val-row">
         <span class="lesson-item-controls s-1 shift-left content-manager-hide-mobile">
             <input type="checkbox" id="selectEntityCheckbox{{uniqueId}}" {{#selected}}checked{{/selected}} class="val-checkbox js-select-entity"/>
-            <label class="checkbox-label" for="selectEntityCheckbox{{uniqueId}}"></label>
+            <label class="checkbox-label js-select-entity-label" for="selectEntityCheckbox{{uniqueId}}"></label>
         </span>
         <span class="js-content-entity lesson-item-title s-4">{{title}}</span>
         <span class="s-3" style="font-weight: normal;">{{type}}</span>
-        {{#CM_MODIFY}}
+        {{#ContentManager.MODIFY}}
         <span class="lesson-item-controls shift-right">
             <button class="js-edit-content button medium simple no-text">
                 <span class="val-icon-edit"></span>
@@ -156,44 +258,52 @@
                 <span class="val-icon-trash"></span>
             </button>
         </span>
-        {{/CM_MODIFY}}
+        {{/ContentManager.MODIFY}}
     </span>
     <span class="js-tree-item-drag lesson-item-title" style="display:none; width:100px;">{{title}}</span>
 
 </script>
 
-
-
-<script type="text/html" id="categoryEditView">
+<script type="text/html" id="contentManagerCategoryEditView">
     <div class="val-info-table small">
         <div class="">
             <input type='text' title='{{requiredFieldTooltipLabel}}'
-                       class="js-category-title text-input valamis box-sizing" value='{{title}}' placeholder='{{newCategoryLabel}}'/>
+                   class="js-category-title text-input valamis box-sizing" value='{{title}}' placeholder='{{newCategoryLabel}}'/>
         </div>
     </div>
     <div class="text-center">
-        <button class="button big primary bbm-button js-saveCategory js-submit-button">{{overlayCategorySaveMessageLabel}}</button>
+        <button class="button big primary bbm-button js-saveCategory js-submit-button">{{overlayCategoryEditMessageLabel}}</button>
     </div>
 </script>
 
-
+<script type="text/html" id="contentManagerCategoryAddView">
+    <div class="val-info-table small">
+        <div class="">
+            <input type='text' title='{{requiredFieldTooltipLabel}}'
+                       class="js-category-title text-input valamis box-sizing" value='{{title}}' placeholder='{{newCategoryLabel}}' />
+        </div>
+    </div>
+    <div class="text-center">
+        <button class="button big primary bbm-button js-saveCategory js-submit-button">{{overlayAddCategoryMessageLabel}}</button>
+    </div>
+</script>
 
  <!--preview templates -->
 
 <script type="text/html" id="contentManagerPreviewLayoutTemplate">
-    {{#CM_MODIFY}}
+    {{#ContentManager.MODIFY}}
     <div class="preview-controls">
         <button class="js-edit button medium neutral">Edit</button>
         <button class="js-clone button medium neutral">Duplicate</button>
         <button class="js-delete button medium   danger shift-right">Delete</button>
     </div>
-    {{/CM_MODIFY}}
+    {{/ContentManager.MODIFY}}
     <div id="contentPreviewRegion"></div>
 </script>
 
 
 <script type="text/template" id="choiceQuestionPreviewAnswerTemplate">
-        <td>{{{answerText}}}</td>
+        <td class="ellipsis">{{{answerText}}}</td>
         <td class="preview-normal-text">{{score}} {{questionPreviewPts}}</td>
         <td class="preview-correct-color">{{#isCorrect}}Correct{{/isCorrect}}</td>
 </script>
@@ -228,9 +338,9 @@
         </tr>
     </table>
 
-    <h5 class="preview-normal-text"> {{questionPreviewOptions}} </h5>
+    <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text">
+    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
     </table>
 
     {{#forceCorrectCount}}
@@ -240,7 +350,7 @@
 </script>
 
 <script type="text/template" id="shortAnswerQuestionPreviewAnswerTemplate">
-    <td>{{{answerText}}}</td>
+    <td class="ellipsis">{{{answerText}}}</td>
     <td class="preview-normal-text"> {{score}} {{questionPreviewPoints}}</td>
 </script>
 <script type="text/template" id="shortAnswerQuestionPreviewTemplate">
@@ -274,9 +384,9 @@
         </tr>
     </table>
 
-    <h5 class="preview-normal-text"> {{questionPreviewOptions}} </h5>
+    <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text">
+    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
     </table>
 
     {{#isCaseSensitive}}
@@ -289,7 +399,7 @@
 </script>
 
 <script type="text/template" id="numericQuestionPreviewAnswerTemplate">
-    <td>{{rangeFrom}} - {{rangeTo}}</td>
+    <td class="ellipsis">{{rangeFrom}} - {{rangeTo}}</td>
     <td class="preview-normal-text">{{score}} {{questionPreviewPts}}</td>
 </script>
 <script type="text/template" id="numericQuestionPreviewTemplate">
@@ -322,13 +432,13 @@
         </tr>
     </table>
 
-    <h5 class="preview-normal-text"> {{questionPreviewOptions}} </h5>
-    <table class="js-answers val-table no-border small list preview-content-text">
+    <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
+    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
     </table>
 </script>
 
 <script type="text/template" id="positioningQuestionPreviewAnswerTemplate">
-    {{position}} {{{answerText}}}
+    {{{answerText}}}
 </script>
 <script type="text/template" id="positioningQuestionPreviewTemplate">
     <h3>{{title}}</h3>
@@ -360,7 +470,7 @@
         </tr>
     </table>
 
-    <h5 class="preview-normal-text"> {{questionPreviewOptions}} </h5>
+    <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
     <ol class="js-answers preview-bold-text preview-content-text">
     </ol>
 
@@ -368,7 +478,7 @@
 </script>
 
 <script type="text/template" id="matchingQuestionPreviewAnswerTemplate">
-    <td>{{{matchingText}}}</td>
+    <td class="ellipsis">{{{matchingText}}}</td>
     <td class="preview-normal-text">{{{answerText}}}</td>
     <td class="preview-normal-text"> {{score}} {{questionPreviewPts}}</td>
 </script>
@@ -403,9 +513,9 @@
         </tr>
     </table>
 
-    <h5 class="preview-normal-text"> {{questionPreviewOptions}} </h5>
+    <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text">
+    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
     </table>
 </script>
 
@@ -459,7 +569,7 @@
 </script>
 
 <script type="text/template" id="categorizationQuestionPreviewAnswerTemplate">
-    <td>{{{optionKey}}}</td>
+    <td class="ellipsis">{{{optionKey}}}</td>
     <td>
         <table class="js-answer-options val-table no-border small list"></table>
     </td>
@@ -495,15 +605,10 @@
         </tr>
     </table>
 
-    <h5 class="preview-normal-text"> {{questionPreviewOptions}} </h5>
+    <h5 class="preview-normal-text  preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text">
+    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
     </table>
-</script>
-
-<script type="text/template" id="contentManagerCategoryDetailsTemplate">
-    <h1>{{questionPreviewCategory}}</h1>
-    <h5 class="preview-normal-text"> {{title}}</h5>
 </script>
 
 <script type="text/html" id="contentManagerEditQuestionLayoutTemplate">

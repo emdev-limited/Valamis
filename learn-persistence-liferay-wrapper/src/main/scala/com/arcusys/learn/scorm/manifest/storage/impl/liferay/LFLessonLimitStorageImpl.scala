@@ -16,7 +16,7 @@ trait LFLessonLimitStorageImpl extends EntityStorage[LessonLimit] {
 
   def getOne(parameters: (String, Any)*): Option[LessonLimit] = {
     parameters match {
-      case Seq(("itemID", itemID: Int), ("itemType", lessonType: String)) => {
+      case Seq(("itemID", itemID: Int), ("itemType", lessonType: String)) =>
         return Try({
           val limit = LFLessonLimitLocalServiceUtil.findByID(itemID.toLong, lessonType)
           Some(new LessonLimit(itemID,
@@ -26,7 +26,6 @@ trait LFLessonLimitStorageImpl extends EntityStorage[LessonLimit] {
             PeriodTypes(limit.getRerunIntervalType)))
         }
         ).getOrElse(Some(new LessonLimit(itemID, LessonType.withName(lessonType), 0, 0, PeriodTypes.UNLIMITED)))
-      }
     }
     None
   }

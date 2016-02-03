@@ -29,7 +29,7 @@ class PackageImportProcessor(implicit val bindingModule: BindingModule) extends 
         try {
           val content = FileSystemUtil.getFileContent(new File(tempDirectory, p.logo))
           fileService.setFileContent("package_logo_" + packageId, newLogo, content)
-          packageService.updatePackageLogo(packageId, packageType, Option(newLogo))
+          packageService.updatePackageLogo(packageType, packageId, Option(newLogo))
         } catch {
           case _: Throwable => // if logo saving failed, no logo in package
         }

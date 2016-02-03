@@ -4,13 +4,13 @@ import com.arcusys.valamis.lesson.model.PackageScopeRule
 import com.arcusys.valamis.model.ScopeType
 
 trait PackageScopeRuleStorage {
-  def get(packageID: Long, scope: ScopeType.Value, scopeID: Option[String]): Option[PackageScopeRule]
-  def getAll(packageID: Long, scope: ScopeType.Value, scopeID: Option[String]): Seq[PackageScopeRule]
-  def getAllVisible(scope: ScopeType.Value, scopeID: Option[String]): Seq[PackageScopeRule]
-  def create(packageID: Long, scope: ScopeType.Value, scopeID: Option[String], visibility: Boolean, isDefault: Boolean): PackageScopeRule
-  def update(packageID: Long, scope: ScopeType.Value, scopeID: Option[String], visibility: Boolean, isDefault: Boolean): PackageScopeRule
-  //def updateIsDefaultProperty(packageID: Int, scope: ScopeType.Value, scopeID: Option[String], isDefault: Boolean)
-  def getDefaultPackageID(scope: ScopeType.Value, scopeID: Option[String]): Option[Int]
-  def delete(packageID: Long)
-  def renew()
+  def get(packageId: Long, scope: ScopeType.Value, scopeId: Option[String]): Option[PackageScopeRule]
+  def getAll(packageId: Long, scope: ScopeType.Value, scopeId: Option[String]): Seq[PackageScopeRule]
+  def getPackageIdVisible(scope: ScopeType.Value, scopeID: Option[String]): List[Long]
+  def create(entity: PackageScopeRule) : PackageScopeRule
+  def update(packageId: Long, scope: ScopeType.Value, scopeID: Option[String], visibility: Boolean, isDefault: Boolean): PackageScopeRule
+  def updatePackageIndex(packageId: Long, scope: ScopeType.Value, index: Long) : Unit
+  def getByScope(scope: ScopeType.Value): Map[Long, Long]
+  def getDefaultPackageID(scope: ScopeType.Value, scopeId: Option[String]): Option[Long]
+  def delete(packageId: Long)
 }

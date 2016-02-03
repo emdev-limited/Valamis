@@ -11,23 +11,38 @@ import org.joda.time.DateTime
  * @param title               Short title
  * @param description         More detailed description
  */
-case class Certificate(id: Int,
+case class Certificate(
+    id: Long,
     title: String,
     description: String,
     logo: String = "",
     isPermanent: Boolean = true,
     isPublishBadge: Boolean = false,
     shortDescription: String = "",
-    companyId: Int,
+    companyId: Long,
     validPeriodType: PeriodType = PeriodTypes.UNLIMITED,
     validPeriod: Int = 0,
     createdAt: DateTime,
     isPublished: Boolean = false,
-    scope: Option[Long] = None) {
-}
+    scope: Option[Long] = None)
+
 
 object CertificateActionType extends Enumeration {
   type CertificateActionType = Value
   val NEW = Value(2)
   val PASSED = Value(1)
 }
+
+case class CertificateUsersStatistic(
+    totalUsers: Int,
+    successUsers: Int,
+    failedUsers: Int,
+    overdueUsers: Int
+)
+
+case class CertificateItemsCount(
+    usersCount: Int,
+    coursesCount: Int,
+    statementsCount: Int,
+    activitiesCount: Int,
+    packagesCount: Int)

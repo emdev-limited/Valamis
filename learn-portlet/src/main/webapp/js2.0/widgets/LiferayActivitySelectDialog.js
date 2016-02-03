@@ -5,11 +5,11 @@ LiferayActivityModel = Backbone.Model.extend({
   }
 });
 
-LiferayActivityCollectionService = new Backbone.Service({ url: '/',
+LiferayActivityCollectionService = new Backbone.Service({ url: path.root,
   targets: {
     'saveToCertificate': {
       'path': function (model, options) {
-        return path.api.certificates + jQuery('#selectedCertificateID').val() + '?action=ADDACTIVITIES&courseId=' + Utils.getCourseId() + '&' + options.activities;
+        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/activities?courseId=' + Utils.getCourseId() + '&' + options.activities;
       },
       method: 'post'
     }

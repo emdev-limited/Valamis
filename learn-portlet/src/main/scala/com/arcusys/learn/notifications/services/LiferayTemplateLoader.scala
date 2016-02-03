@@ -1,9 +1,8 @@
 package com.arcusys.learn.notifications.services
 
 import com.arcusys.learn.liferay.util.PrefsPropsUtilHelper
-import com.arcusys.learn.notifications.{ CourseMessageService, MessageTemplateLoader, MessageType }
+import com.arcusys.learn.notifications.{CourseMessageService, MessageTemplateLoader, MessageType}
 import com.arcusys.valamis.util.mustache.Mustache
-import org.joda.time.DateTime
 
 import scala.util.matching.Regex
 

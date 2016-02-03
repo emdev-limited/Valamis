@@ -1,26 +1,28 @@
 package com.arcusys.learn.models.response.social
 
-import com.arcusys.learn.controllers.api.social.{ActivityInterpreter, ActivityInterpreterImpl}
+import com.arcusys.learn.controllers.api.social.ActivityInterpreter
 import com.arcusys.learn.liferay.model.Activity
-import com.arcusys.learn.models.response.users.{UserConverter, UserResponse}
-import com.arcusys.valamis.model.{SkipTake, Order}
+import com.arcusys.learn.models.response.users._
+import com.arcusys.valamis.model.{Order, SkipTake}
 import com.arcusys.valamis.social.model._
-import com.arcusys.valamis.social.service.{LikeService, CommentService}
+import com.arcusys.valamis.social.service.{CommentService, LikeService}
 import com.arcusys.valamis.user.service.UserService
 import com.escalatesoft.subcut.inject.BindingModule
 import org.ocpsoft.prettytime.PrettyTime
 
+import scala.util.Try
+
 case class ActivityResponse(
   id: Long,
-  user: UserResponse,
+  user: Option[UserResponse],
   verb: String,
   date: String,
   obj: ActivityObjectResponse,
   comments: Seq[CommentResponse],
-  userLiked: Set[UserResponse]
-)
+  userLiked: Set[UserResponse],
+  url: Option[String] = None)
 
-trait ActivityConverter extends UserConverter with CommentConverter {
+trait ActivityConverter extends CommentConverter {
   implicit protected val bindingModule: BindingModule
   protected def userService: UserService
   protected def commentService: CommentService
@@ -29,7 +31,7 @@ trait ActivityConverter extends UserConverter with CommentConverter {
 
   val prettyTime = new PrettyTime()
 
-  def toResponse(activity: Activity): ActivityResponse = {
+  def toResponse(activity: Activity, plId: Option[Long] = None): Option[ActivityResponse] = {
     val comments =
       commentService.getBy(
         CommentFilter(
@@ -49,16 +51,19 @@ trait ActivityConverter extends UserConverter with CommentConverter {
           ))
         .map(_.userId)
 
-    val userLiked = userService.byIds(activity.companyId, userLikedIds.toSet)
+    val userLiked = userService.getByIds(activity.companyId, userLikedIds.toSet)
 
-    ActivityResponse(
-      activity.id,
-      user = toResponse(userService.byId(activity.userId.toInt)),
-      verb = activityInterpreter.getVerb(activity.className, activity.activityType),
-      date = prettyTime.format(activity.createDate.toDate),
-      obj = activityInterpreter.getObj(activity.className, activity.classPK, activity.extraData),
-      comments = comments.map(toResponse),
-      userLiked = userLiked.map(toResponse)
-    )
+    activityInterpreter.getObj(activity.className, activity.classPK, activity.extraData, plId)
+      .map { obj =>
+        ActivityResponse(
+          activity.id,
+          user = Try(userService.getById(activity.userId.toInt)).toOption.map(u => new UserResponse(u)),
+          verb = activityInterpreter.getVerb(activity.className, activity.activityType),
+          date = prettyTime.format(activity.createDate.toDate),
+          obj = obj,
+          comments = comments.map(toResponse),
+          userLiked = userLiked.map(u => new UserResponse(u)).toSet
+        )
+      }
   }
 }

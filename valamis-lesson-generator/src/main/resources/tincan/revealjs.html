@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="jquery-ui-1.8.20.custom.css">
     <link rel="stylesheet" href="skins/polaris/polaris.css">
     <link rel="stylesheet" href="buttons.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Ubuntu:400,300,500' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300italic,400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     <style>
         .verticalSeparator {
             margin-right: 50px !important;
@@ -61,25 +64,22 @@
         </div>
     </script>
     <script type="text/html" id="genericElementTemplate">
-        <div class="item-content shift-left"><%
-            if(content === '') { %> <div class="content-icon-<%= slideEntityType %>">
-                <span class="val-icon-<%= slideEntityType %>"></span>
-            </div><% } %> <%
-            if(slideEntityType === 'text') { %> <%= content %> <% } %> <%
-            if(slideEntityType === 'image') {
-            %> <iframe width="100%" height="100%" style="display: none"></iframe> <% } %> <%
-            if(slideEntityType === 'iframe' || slideEntityType === 'pdf') {
-            %> <iframe class="slideset-iframe" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-pointer-lock"></iframe> <% } %> <%
-            if(slideEntityType === 'video') {
-            %> <iframe width="100%" height="100%" style="display: none"></iframe>
-               <video class="video-js vjs-default-skin" width="<%= width %>" height="<%= height %>"> <source src="" /> </video> <% } %>
-        </div>
+        <div class="item-content shift-left"></div>
     </script>
 
 {{#isSlideJsonAvailable}}
 <script>
     var slidesJson = {{{slidesJson}}};
     var questionsJson = {{{questionsJson}}};
+    var plaintextsJson = {{{plaintextsJson}}};
+    var randomQuestionJson = {{{randomQuestionJson}}};
+    var randomPlaintextJson = {{{randomPlaintextJson}}};
+    //TODO: get from back-end
+    var devicesJson = [
+        { id: 3, name: 'phone', minWidth: 375, maxWidth: 767, minHeight: 667 },
+        { id: 2, name: 'tablet', minWidth: 768, maxWidth: 1023, minHeight: 1024 },
+        { id: 1, name: 'desktop', minWidth: 1024, maxWidth: 0, minHeight: 768 }
+    ];
 </script>
 {{/isSlideJsonAvailable}}
 
@@ -96,50 +96,50 @@
     <link rel="stylesheet" href="{{{.}}}">
     {{/includeCSS}}
     <link rel="stylesheet" href="player_tincan_content.css">
+    <link rel="stylesheet" href="toastr.css">
+
+    <script src="head.min.js"></script>
+    <script src="tincan-min.js"></script>
+    <script src="toastr.min.js"></script>
 
     {{^includeFiles}}
     <script src="jquery-1.7.2.min.js"></script>
     <script src="jquery-ui-1.8.20.custom.min.js"></script>
-    <script src="base.js"></script>
     <script src="lodash.min.js"></script>
+    <script src="base.js"></script>
     {{/includeFiles}}
-    <script src="head.min.js"></script>
-    <script src="tincan-min.js"></script>
-    <script> {{{timerSource}}} </script>
 </head>
 
 <body onunload="onUnload()" style="overflow-y: auto;">
-<div class="portlet-learn-scorm portlet-learn-scorm-slides">
-    <div id="clock" style="position: absolute; left: 3px; font-weight: bold; font-size: large;"> </div>
+<div class="portlet-learn-scorm portlet-learn-scorm-slides reveal-scroll-wrapper">
+    <div class="reveal-scroll-container">
+        <div class="reveal-wrapper">
+            {{^isSlideJsonAvailable}}
+            <div class="reveal">
+                <!-- all questions here before start, needed questions will be moved to displayed slides-->
+                {{#isRandomized}}
+                <div style="display: none;" class="sectionBank" >
+                    {{{sections}}}
+                </div>
+                <!-- Any section element inside of this container is displayed as a slide -->
+                <div class="slides">
 
-    <!--FIXME: BEGIN -->
-    {{#isSlideJsonAvailable}}
-    <div class="reveal-wrapper"> </div>
-    {{/isSlideJsonAvailable}}
-    <!--FIXME: END -->
-
-    {{^isSlideJsonAvailable}}
-    <div class="reveal-wrapper">
-        <div class="reveal">
-            <!-- all questions here before start, needed questions will be moved to displayed slides-->
-            {{#isRandomized}}
-            <div style="display: none;" class="sectionBank" >
-                {{{sections}}}
+                </div>
+                {{/isRandomized}}
+                {{^isRandomized}}
+                <!-- Any section element inside of this container is displayed as a slide -->
+                <div class="slides">
+                    {{{sections}}}
+                </div>
+                {{/isRandomized}}
             </div>
-            <!-- Any section element inside of this container is displayed as a slide -->
-            <div class="slides">
-
-            </div>
-            {{/isRandomized}}
-            {{^isRandomized}}
-            <!-- Any section element inside of this container is displayed as a slide -->
-            <div class="slides">
-                {{{sections}}}
-            </div>
-            {{/isRandomized}}
+            {{/isSlideJsonAvailable}}
         </div>
     </div>
-    {{/isSlideJsonAvailable}}
+    <div id="show-package-duration" class = "active">
+        <span class="val-icon-clock active js-toggle-timer"></span>
+        <span id="packageDuration"></span>
+    </div>
 </div>
 {{#isRandomized}}
 
@@ -177,28 +177,14 @@
         document.write('<script src="reveal.min.js"><\x2fscript>');
     }
 
-    var ROOT_ACTIVITY_ID = '{{rootActivityId}}';
-    var SCORE_LIMIT = {{scoreLimit}};
+    ROOT_ACTIVITY_ID = '{{rootActivityId}}';
+    ROOT_ACTIVITY_TITLE = unescapeElement('{{title}}');
+    ROOT_ACTIVITY_DESCRIPTION = unescapeElement('{{description}}');
+    SCORE_LIMIT = {{scoreLimit}};
+    CAN_PAUSE = {{canPause}};
+    DURATION = {{duration}};
+    PLAYER_TITLE = '{{playerTitle}}';
     var currentTinCanState = undefined;
-    var testObj = {
-        id: ROOT_ACTIVITY_ID,
-        definition: {
-            name: {
-                "en-US": "{{title}}"
-            },
-            description: {
-                "en-US": "{{description}}"
-            },
-            type: "http://adlnet.gov/expapi/activities/assessment"
-        }
-    };
-
-    var tincan = new TinCan (
-        {
-            url: window.location.search,
-            activity: testObj
-        }
-    );
 
     // Full list of configuration options available here:
     // https://github.com/hakimel/reveal.js#configuration
@@ -208,6 +194,10 @@
         history: true,
         center: true,
         viewDistance: 2,
+        minScale: 0.2,
+        maxScale: 1.0,
+        postMessage: false,
+        postMessageEvents: false,
 
         //theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
         transition: 'slide', // default/cube/page/concave/zoom/linear/fade/none
@@ -221,6 +211,8 @@
         help: false
     };
 
+    var slidesViews = [];
+
     /*
      * Function to format seconds to a proper time string (HH:mm:ss)
      */
@@ -233,40 +225,20 @@
     }
 
     function onUnload() {
-        if (currentTinCanState) {
-            ProcessTinCan(currentTinCanState);
-        }
-        {{^isSlideJsonAvailable}}
 
-        var slidesCount = $(".slides section:not(.stack)").length;
-
-        {{/isSlideJsonAvailable}}
         {{#isSlideJsonAvailable}}
 
         if(slidesApp)
             _.each(slidesApp.playerCheckIntervals, function(interval) {
                 clearInterval(interval);
             });
-        var slidesCount = Object.keys(TinCanCourseModules).length;
 
         {{/isSlideJsonAvailable}}
 
-        var totalCount = 0;
-        for( var i in TinCanCourseResults) {
-            totalCount += TinCanCourseResults[i];
-        }
-
-        var score = 1;
-        if(slidesCount != 0)
-            score = totalCount/slidesCount;
-
-        var success = (score >= SCORE_LIMIT);
-
-        var slideId = $(Reveal.getCurrentSlide()).attr('id');
-        var slideTitle = $(Reveal.getCurrentSlide()).attr('title');
-
-        tincan.sendStatement(GetExperiencedStatement(slideId, slideTitle));
-        tincan.sendStatement(GetPackageCompletedStatement(score, success));
+        if (CAN_PAUSE && getTotalProgress()!= 1)
+            packageSuspend(currentTinCanState);
+        else
+            packageEnd(currentTinCanState);
     }
 
     function baseScale(divA, divB, centerY) {
@@ -335,85 +307,97 @@
         }
     }
 
+    function toggleNavigation(indexh, indexv) {
+        {{#isSlideJsonAvailable}}
+            if(top.navigationProxy != null){
+                top.navigationProxy.toggle2D(indexh, indexv);
+            }
+        {{/isSlideJsonAvailable}}
+        {{^isSlideJsonAvailable}}
+            if(top.navigationProxy != null){
+                top.navigationProxy.toggle1D(indexh);
+            }
+        {{/isSlideJsonAvailable}}
+    }
+
     function revealAttachEvents(eventName){
 
         switch(eventName){
             case "ready":
-                    Reveal.addEventListener( 'ready', function( event ) {
-                        //doScaleOnResize();
-                        doScale(event.currentSlide);
-                        currentTinCanState = jQuery(event.currentSlide).data('state');
-                        var currentSlide = document.querySelector(".slides>section");
-                        handleBackground(currentSlide);
-                        revealAttachEvents('slidechanged');
-                    });
-                break;
+                Reveal.addEventListener( 'ready', function( event ) {
+                    currentTinCanState = $(event.currentSlide).data('state');
+                    var currentSlide = document.querySelector(".slides>section"),
+                        currentSlideId = $(event.currentSlide).attr('id');
+                    handleBackground(currentSlide);
+                    slidesViews.push(currentSlideId);
+                    revealAttachEvents('slidechanged');
+
+                    toggleNavigation(event.indexh, event.indexv);
+                    checkIsLessonSummary();
+                });
+            break;
             case "slidechanged":
 
-                    Reveal.addEventListener( 'slidechanged', function( event ) {
+                Reveal.addEventListener( 'slidechanged', function( event ) {
 
-                        doScale(event.currentSlide);
-                        var prevStateID = jQuery(event.previousSlide).data('state');
-                        if (prevStateID) {
-                            ProcessTinCan(prevStateID);
-                        }
-                        currentTinCanState = jQuery(event.currentSlide).data('state');
+                    var prevStateID = $(event.previousSlide).data('state'),
+                        currentSlideId = $(event.currentSlide).attr('id');
+                    if (prevStateID) {
+                        ProcessTinCan(prevStateID);
+                    }
+                    currentTinCanState = $(event.currentSlide).data('state');
+                    checkIsLessonSummary();
 
-                        // event.previousSlide, event.currentSlide, event.indexh, event.indexv
+                    // event.previousSlide, event.currentSlide, event.indexh, event.indexv
 
-                        // pause background video when the slide leaved
-                        if(event.previousSlide.getAttribute('data-just-background') == 'true'){
-                            var el = document.querySelector('.reveal>.backgrounds>.slide-background.present iframe'); //.present because bg changes after event runs
+                    // pause background video when the slide leaved
+                    if(event.previousSlide.getAttribute('data-just-background') == 'true'){
+                        var el = document.querySelector('.reveal>.backgrounds>.slide-background.present iframe'); //.present because bg changes after event runs
 
-                            if (el){
-                                if(el.src.indexOf("youtube.com/embed/") > -1){
-                                    if (!el.hasAttribute('data-ignore') && typeof el.contentWindow.postMessage === 'function') {
-                                        el.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                                    }
-                                }
-                                if(el.src.indexOf("player.vimeo.com") > -1){
-                                    if(!el.hasAttribute( 'data-ignore' ) && typeof el.contentWindow.postMessage === 'function' ) {
-                                        el.contentWindow.postMessage( '{"method":"pause"}', '*' );
-                                    }
-                                } else {
-                                    var video = el.contentDocument.querySelector('video');
-                                    if (video) video.pause();
+                        if (el){
+                            if(el.src.indexOf("youtube.com/embed/") > -1){
+                                if (!el.hasAttribute('data-ignore') && typeof el.contentWindow.postMessage === 'function') {
+                                    el.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
                                 }
                             }
-                        }
-
-                        handleBackground(event.currentSlide);
-
-                        {{#isSlideJsonAvailable}}
-                        if(top.navigationProxy != null){
-                            top.navigationProxy.toggle2D(event);
-                            if(slidesApp && !slidesApp.initializing) {
-                                slidesApp.activeSlideModel = slidesApp.getSlideModel(parseInt($(Reveal.getCurrentSlide()).attr('id').replace('slide_', '')));
-                                var slideId = $(event.previousSlide).attr('id');
-                                var slideTitle = $(event.previousSlide).attr('title');
-                                tincan.sendStatement(GetExperiencedStatement(slideId, slideTitle));
+                            if(el.src.indexOf("player.vimeo.com") > -1){
+                                if(!el.hasAttribute( 'data-ignore' ) && typeof el.contentWindow.postMessage === 'function' ) {
+                                    el.contentWindow.postMessage( '{"method":"pause"}', '*' );
+                                }
+                            } else {
+                                var video = el.contentDocument.querySelector('video');
+                                if (video) video.pause();
                             }
                         }
-                        {{/isSlideJsonAvailable}}
-                        {{^isSlideJsonAvailable}}
-                        if(top.navigationProxy != null){
-                            top.navigationProxy.toggle1D(event)
-                        }
-                        {{/isSlideJsonAvailable}}
-                    });
-                break;
+                    }
+
+                    handleBackground(event.currentSlide);
+
+                    toggleNavigation(event.indexh, event.indexv);
+
+                    {{#isSlideJsonAvailable}}
+                    if(slidesApp && !slidesApp.initializing) {
+                        slidesApp.activeSlideModel = slidesApp.getSlideModel(parseInt($(Reveal.getCurrentSlide()).attr('id').replace('slide_', '')));
+                        var slideId = $(event.previousSlide).attr('id');
+                        var slideTitle = $(event.previousSlide).attr('title');
+
+                        onPackageSlideEnd(slideId, slideTitle);
+                    }
+                    {{/isSlideJsonAvailable}}
+
+                    if( $.inArray( currentSlideId, slidesViews ) == -1 ){
+                        slidesViews.push(currentSlideId);
+                    }
+
+                });
+            break;
         }
     }
 
     $(document).ready(function(){
 
-        $(window).resize(function(evt) {
-            //doScaleOnResize();
-        });
-
         {{^isSlideJsonAvailable}}
-        if ($(window).width() > 1024) Reveal.initialize($.extend({minScale: 1.0, maxScale: 1.0}, defaultParams));
-        else Reveal.initialize(defaultParams);
+            Reveal.initialize(defaultParams);
         {{/isSlideJsonAvailable}}
         {{#isSlideJsonAvailable}}
             slidesApp.start();
@@ -421,60 +405,25 @@
         {{/isSlideJsonAvailable}}
 
         revealAttachEvents('ready');
+        var showDuration = (DURATION || 0);
+        var timer = jQuery('#packageDuration');
+        if (showDuration > 0){
+            var duration = DURATION * 60;
+            startTimer(duration, timer);
+            jQuery('#show-package-duration').show();
+        }
+        else {
+            jQuery('#show-package-duration').hide();
+        }
 
-        tincan.sendStatement(GetPackageAttemptedStatement());
+        $(".js-toggle-timer").click(function(){
+            timer.toggle();
+            var isVisible = timer.is(":visible");
+            jQuery('#show-package-duration').toggleClass('active', isVisible);
+            jQuery('.val-icon-clock').toggleClass('active', isVisible);
+        });
+        packageBegin();
     });
-
-    // record the results of a question
-    function GetQuestionAnswerStatement(id, questionText, title, questionType, learnerResponse, correctAnswer, wasCorrect, score, questionScore){
-        //send question info
-        // and score
-        var scaledScore = score / 100;
-
-        var qObj = {
-            id: ROOT_ACTIVITY_ID +'/' + id,
-            definition: {
-                type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-                name: {
-                    'en-US': title
-                },
-                description: {
-                    'en-US': questionText
-                },
-                interactionType: questionType,
-                correctResponsesPattern: [
-                    String(correctAnswer)
-                ]
-            }
-        };
-
-
-        var stmt = {
-            verb: {
-                "id": "http://adlnet.gov/expapi/verbs/answered",
-                "display": {
-                    "en-US": "answered"
-                }
-            },
-            object: qObj,
-            result: {
-                score: {
-                    scaled: scaledScore,
-                    raw: score,
-                    min: 0,
-                    max: 100
-                },
-                response: String(learnerResponse),
-                success: wasCorrect,
-                extensions: {
-                    "http://valamislearning.com/question/score": questionScore || 0
-                }
-            },
-            context: getContext(ROOT_ACTIVITY_ID)
-        };
-
-        return stmt;
-    }
 
     function GetExperiencedStatement(activityID, title){
         var verb, object, category;
@@ -487,6 +436,7 @@
             verbName = verb.substr(verb.lastIndexOf('/') + 1);
         {{/isSlideJsonAvailable}}
         var stmt = {
+              actor: tincan.actor,
               verb: verb ? {
                 id: verbUri,
                 display: {
@@ -514,142 +464,12 @@
         return stmt;
     }
 
-    function GetPackageCompletedStatement(score, success){
-        return {
-            verb: {
 
-                "id": "http://adlnet.gov/expapi/verbs/completed",
-                "display": {
-                    "en-US": "completed"
-                }
-            },
-            object: {
-                id: ROOT_ACTIVITY_ID,
-                definition: {
-                    type: 'http://adlnet.gov/expapi/activities/course',
-                    name: { 'en-US': '{{title}}' }
-                }
-            },
-            result: {
-                score: { scaled: score },
-                success: success
-            },
-            context: getContext(ROOT_ACTIVITY_ID)
-        };
-    }
-
-    function GetPackageAttemptedStatement(){
-        return {
-            verb: {
-
-                    "id": "http://adlnet.gov/expapi/verbs/attempted",
-                    "display": {
-                    "en-US": "attempted"
-
-                }
-            },
-            object: {
-                id: ROOT_ACTIVITY_ID,
-                definition: {
-                    type: 'http://adlnet.gov/expapi/activities/course',
-                    name: { 'en-US': '{{title}}' }
-                }
-            },
-            context: getContext(ROOT_ACTIVITY_ID)
-        };
-    }
-
-    function GetVideoStatement(verbName, videoId, videoTitle, videoDuration, start, finish) {
-        var verbId = 'http://activitystrea.ms/schema/1.0/play';
-        var stmnt = {
-            verb: {
-                id: verbId,
-                display: {
-                    'en-US': verbName
-                }
-            },
-            object: {
-                id: 'http://www.youtube.com/watch?v=' + videoId,
-                definition: {
-                    type: 'http://activitystrea.ms/schema/1.0/video',
-                    name: {
-                        'en-US': videoTitle
-                    },
-                    extensions: {
-                        'http://id.tincanapi.com/extension/duration': videoDuration
-                    }
-                }
-            },
-            context: {
-                contextActivities: {
-                    grouping: {
-                        id: ROOT_ACTIVITY_ID
-                    },
-                    category: {
-                        id: 'http://id.tincanapi.com/recipe/video/base/1'
-                    }
-                }
-            }
-        };
-        switch(verbName) {
-            case 'play':
-                stmnt.context.extensions = {
-                    'http://id.tincanapi.com/extension/starting-point': start
-                };
-                break;
-            case 'paused':
-                stmnt.context.extensions = {
-                    'http://id.tincanapi.com/extension/ending-point': finish
-                };
-                stmnt.verb.id = 'http://activitystrea.ms/schema/1.0/pause';
-                break;
-            case 'watched':
-            case 'skipped':
-                stmnt.context.extensions = {
-                    'http://id.tincanapi.com/extension/starting-point': start,
-                    'http://id.tincanapi.com/extension/ending-point': finish
-                };
-                    if(verbName === 'watched')
-                        stmnt.verb.id = 'http://activitystrea.ms/schema/1.0/watch';
-                    else
-                        stmnt.verb.id = 'http://activitystrea.ms/schema/1.0/skipped';
-                break;
-            case 'completed':
-                stmnt.context.extensions = {
-                    'http://id.tincanapi.com/extension/ending-point': finish
-                };
-                stmnt.verb.id = 'http://activitystrea.ms/schema/1.0/complete';
-                break;
-        }
-        return stmnt;
-    }
-
-    function getContext(parentActivityId, category) {
-        if(category) {
-            var categoryUri = category.substr(0, category.lastIndexOf('/'));
-            var categoryName = category.substr(category.lastIndexOf('/') + 1);
-        }
-        var contextActivities = {
-            grouping: {
-                id: ROOT_ACTIVITY_ID
-            }
-        };
-        if(category)
-            contextActivities.category = {
-                id: categoryUri,
-                definition: {
-                    name: {
-                        'en-US': categoryName
-                    }
-                }
-            };
-        return { contextActivities: contextActivities };
-    }
 </script>
 <script>
     {{#isSlideJsonAvailable}}
         if(top.navigationProxy != null){
-            top.navigationProxy.display2DNavigation({{{slidesJson}}});
+            top.navigationProxy.display2DNavigation(slidesJson);
         }
     {{/isSlideJsonAvailable}}
     {{^isSlideJsonAvailable}}
@@ -673,6 +493,7 @@
 {{#questionScripts}}
 {{{.}}}
 {{/questionScripts}}
+{{{lessonSummaryScript}}}
 
 </body>
 </html>

@@ -17,8 +17,9 @@
 <script type="text/html" id="curriculumLayoutTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" id="certificateFilter_{{portletId}}" placeholder="{{searchLabel}}" class="js-certificate-filter">
+            <div class="val-search">
+                <input type="text" id="certificateFilter_{{portletId}}" placeholder="{{searchLabel}}" class="js-search js-certificate-filter">
+            </div>
         </div>
 
         {{#scopeAvailable}}
@@ -35,7 +36,7 @@
 
         {{#MODIFY}}
         <div class="filter-element shift-right">
-            <button id="addCertificate" class="button medium primary shift-right">{{addNewCertificateButtonLabel}}</button>
+            <button id="addCertificate" class="button medium primary shift-right">{{newCertificatePlaceholderLabel}}</button>
         </div>
         {{/MODIFY}}
     </div>
@@ -43,13 +44,20 @@
     <div class="val-row filters-row">
         <div class="shift-left filter-element paging-showing-label" id="certificateListPagingShowing"> </div>
 
-        <div id="certificateOrder_{{portletId}}" class="dropdown filter-element shift-right js-filter-dropdown" data-value="creationDate:false">
+        <div id="certificateOrder_{{portletId}}" class="dropdown filter-element shift-right js-filter-dropdown"
+            {{#isAdminView}} data-value="creationDate:false" {{/isAdminView}}
+            {{^isAdminView}} data-value="name:true" {{/isAdminView}} >
             <button class="button medium simple">
-                <span class="dropdown-text"> {{newestLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+                <span class="dropdown-text">
+                    {{#isAdminView}} {{newestLabel}} {{/isAdminView}}
+                    {{^isAdminView}} {{byNameAscLabel}} {{/isAdminView}}
+                </span><span class="val-icon-arrow-down val-icon-right"></span>
             </button>
             <ul class="dropdown-menu">
+                {{#isAdminView}}
                 <li class="selected" data-value="creationDate:false"> {{newestLabel}} </li>
                 <li data-value="creationDate:true"> {{oldestLabel}} </li>
+                {{/isAdminView}}
                 <li data-value="name:true"> {{byNameAscLabel}} </li>
                 <li data-value="name:false"> {{byNameDescLabel}} </li>
             </ul>
@@ -72,8 +80,8 @@
     <div class="tile-content with-action">
         <div class="image certificate"
         {{#logo}}
-        style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
-        {{/logo}}>
+        style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
+        {{/logo}} >
         </div>
         <ul>
             <li class="title">{{title}}</li>
@@ -143,15 +151,14 @@
             </div>
             <div class="div-col content-col">
                 <div class="{{#MODIFY}} js-upload-logo {{/MODIFY}} shift-left">
-                    <img class="val-img-logo" id='certificateIcon_{{id}}'
+                    <img class="val-img-logo js-certificate-icon"
                     {{#logo}}
-                    src="/delegate/files/images?folderId={{id}}&file={{logo}}"
+                    src="/delegate/certificates/{{id}}/logo?courseId={{courseId}}"
                     {{/logo}}
 
                     {{^logo}}
                     src="/learn-portlet/img/certificate-default.jpg"
-                    {{/logo}}
-                    >
+                    {{/logo}}/>
                 </div>
 
                 <div class="button-block shift-left">
@@ -284,10 +291,12 @@
     <div class="val-portlet">
         <div class="portlet-wrapper">
             <div class="portlet-sidebar">
-                <div class="sidebar-content no-header modal-sidebar">
-                    <div class="">
+                <div class="sidebar-content no-header modal-sidebar edit-goals-sidebar">
+                    <div class="val-row">
                         <label for="goalSearch"> {{searchByNameLabel}} </label>
-                        <input placeholder="{{searchPlaceholderLabel}}" type="text" id="goalSearch" class="form-input"/>
+                        <div class="val-search">
+                            <input placeholder="{{searchPlaceholderLabel}}" type="text" id="goalSearch" class="form-input js-search"/>
+                        </div>
                     </div>
                     <div class="val-row filter-by-type">
                         <label class="h4label valamis"> {{filterByTypeLabel}} </label>
@@ -447,14 +456,14 @@
     </td>
     {{/isActivity}}
     <td>{{#url}}
-        <a href="/web{{url}}" target="_blank">{{/url}}{{title}}{{#url}}</a>{{/url}}
+        <a href="{{url}}" target="_blank">{{/url}}{{title}}{{#url}}</a>{{/url}}
     </td>
 
     <td>
         {{^noDate}}
         <!--<label>{{duringLabel}} </label>-->
         <div class="clearfix val-during-period shift-right">
-            <input type="text" class="onlyDigits shift-left" id="duringPeriod" value="{{value}}"
+            <input type="text" class="onlyDigits shift-left" id="duringPeriod" value="{{periodValue}}"
             {{^MODIFY}} disabled="disabled" {{/MODIFY}}
             {{^adminView}} disabled="disabled" {{/adminView}} />
 
@@ -497,14 +506,14 @@
     </td>
 
     <td>
-        {{#url}}<a href="/web{{url}}" target="_blank">{{/url}}{{title}}{{#url}}</a>{{/url}}
+        {{#url}}<a href="{{url}}" target="_blank">{{/url}}{{title}}{{#url}}</a>{{/url}}
     </td>
 
     <td>
         {{^noDate}}
         <!--<label>{{duringLabel}} </label>-->
         <div class="clearfix val-during-period shift-right">
-            <input type="text" class="onlyDigits shift-left" id="duringPeriod" value="{{value}}"
+            <input type="text" class="onlyDigits shift-left" id="duringPeriod" value="{{periodValue}}"
             {{^MODIFY}} disabled="disabled" {{/MODIFY}}
             {{^adminView}} disabled="disabled" {{/adminView}} />
 
@@ -537,15 +546,16 @@
 <script type="text/html" id="certificateItemEditMembers">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" id="searchMembers" placeholder="{{searchPlaceholderLabel}}">
+            <div class="val-search">
+                <input type="text" id="searchMembers" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            </div>
         </div>
-        <div class="dropdown filter-element shift-left" id="memberOrganization" data-value="-1">
+        <div class="dropdown filter-element shift-left" id="memberOrganization" data-value="">
             <button class="button medium simple">
                 <span class="dropdown-text">{{allOrganizationsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
             </button>
             <ul class="dropdown-menu">
-                <li class="selected" data-value="-1">{{allOrganizationsLabel}}</li>
+                <li class="selected" data-value="">{{allOrganizationsLabel}}</li>
             </ul>
         </div>
         <div class="filter-element paging-showing-label shift-left" id="memberListPagingShowing"></div>
@@ -623,7 +633,7 @@
     </td>
     <td> {{name}}</td>
     <td class="text-right">
-        {{status}}
+        {{statusLabel}}
         <button class="button medium neutral no-text js-member-details">
             <span class="val-icon-preview"></span> {{viewDetailsLabel}}
         </button>
@@ -699,8 +709,9 @@
 <script type="text/html" id="selectStatementsDialogView">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" placeholder="{{certificateSearchPlaceholderLabel}}" id="statementsSearch">
+            <div class="val-search">
+                <input type="text" placeholder="{{certificateSearchPlaceholderLabel}}" id="statementsSearch" class="js-search">
+            </div>
         </div>
         <div class="filter-element shift-left">
             <button class="button medium neutral" id="selectAllStatements">
@@ -709,13 +720,15 @@
         </div>
         <div class="filter-element paging-showing-label shift-left" id="statementListPagingShowing"></div>
 
-        <div id="sortStatements" class="dropdown filter-element shift-right" data-value="true">
+        <div id="sortStatements" class="dropdown filter-element shift-right" data-value="creationDate:false">
             <button class="button medium simple">
-                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                <span class="dropdown-text">{{newestLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
             </button>
             <ul class="dropdown-menu">
-                <li class="selected" data-value="true"> {{byNameAscLabel}} </li>
-                <li data-value="false"> {{byNameDescLabel}} </li>
+                <li class="selected" data-value="creationDate:false"> {{newestLabel}} </li>
+                <li data-value="creationDate:true" id="oldest"> {{oldestLabel}} </li>
+                <li data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
             </ul>
         </div>
     </div>
@@ -746,8 +759,9 @@
 <script type="text/template" id="curriculum-select-lesson-goals-dialog">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" id="searchLesson" placeholder="{{searchPlaceholderLabel}}">
+            <div class="val-search">
+                <input type="text" id="searchLesson" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            </div>
         </div>
         <div class="dropdown filter-element shift-left" id="lessonListTags" data-value="">
             <button class="button medium simple">
@@ -795,8 +809,8 @@
     <div class="tile-content with-action">
         <div class="image certificate"
         {{#logo}}
-        style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
-        {{/logo}}>
+        style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
+        {{/logo}} >
     </div>
     <ul>
         <li class="title">{{title}}</li>
@@ -825,7 +839,6 @@
             <!--{{/isMyCollection}}-->
         </ul>
     </div>
-    </div>
 </script>
 
 <script type="text/html" id="userCertificateItemEditDetailsTemplate">
@@ -838,17 +851,8 @@
             <div class="div-col content-col">
                 <div class="certificate-image shift-left" id="userCertificateIcon_{{id}}"
                 {{#logo}}
-                style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
+                style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
                 {{/logo}}>
-
-                </div>
-
-                <div class="button-block">
-                    {{#isOpenBadgesIntegration}}
-                    {{#success}}
-                    <button id="issueBadge" class="button big primary">{{earnbadge}}</button>
-                    {{/success}}
-                    {{/isOpenBadgesIntegration}}
                 </div>
             </div>
         </div>
@@ -891,5 +895,21 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+
+        <!--{{#isOpenBadgesIntegration}}-->
+        <!--{{#success}}-->
+        <button id="issueBadge" class="button big primary">{{earnbadge}}</button>
+        <!--{{/success}}-->
+        <!--{{/isOpenBadgesIntegration}}-->
+
+        <!--{{^isJoint}}-->
+        <button class="button bbm-button big primary js-joinCertificateCommand">{{joinCertificate}}</button>
+        <!--{{/isJoint}}-->
+        <!--{{#isJoint}}-->
+        <button class="button bbm-button big danger js-leaveCertificateCommand">{{leaveCertificate}}</button>
+        <!--{{/isJoint}}-->
     </div>
 </script>

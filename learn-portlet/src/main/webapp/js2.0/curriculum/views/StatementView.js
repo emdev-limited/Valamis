@@ -48,14 +48,16 @@ StatementCollectionService = new Backbone.Service({ url: path.root,
   targets: {
     'saveToCertificate': {
       'path': function (collection, options) {
+        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/statements';
+      },
+      data: function(collection, options) {
         var stmnts = JSON.stringify( collection.map(function (item) {
           return {
             verb: item.get('verb'),
             obj: item.get('obj')
           };
         } ));
-
-        return path.api.certificates + jQuery('#selectedCertificateID').val() + '?action=ADDTINCANSTMNTS&courseId=' + Utils.getCourseId() + '&tincanStmnts=' + stmnts;
+        return {tincanStmnts: stmnts, courseId: Utils.getCourseId()};
       },
       method: 'post'
     }
@@ -94,7 +96,7 @@ StatementListElement = Backbone.View.extend({
       _.extend(this.model.toJSON(), this.language));
     this.$el.html(template);
       var plugins = new PluginCollection();
-      plugins.url = path.root + path.api.activities + '?courseId=' + + Utils.getCourseId();
+      plugins.url = path.root + path.api.activities + "search" + '?courseId=' + Utils.getCourseId();
 
       new AutoCompleteView({
           input: this.$("#objectSelection"), // your input field

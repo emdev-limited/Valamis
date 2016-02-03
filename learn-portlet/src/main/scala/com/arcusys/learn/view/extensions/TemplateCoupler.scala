@@ -1,41 +1,18 @@
 package com.arcusys.learn.view.extensions
 
-import javax.portlet.{ RenderRequest, GenericPortlet, PortletContext }
+import java.io.FileInputStream
+import javax.portlet.{GenericPortlet, PortletContext, RenderRequest}
 import javax.servlet.ServletContext
-import com.arcusys.learn.liferay.permission.{ PermissionUtil, ModifyPermission, ViewPermission }
+
+import com.arcusys.learn.liferay.permission.{ModifyPermission, PermissionUtil, ViewPermission}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.learn.view.liferay.LiferayHelpers
 import com.liferay.portal.kernel.portlet.LiferayPortletSession
 import com.liferay.portal.model.Company
 import com.liferay.portal.util.PortalUtil
-import org.scalatra._
-import java.io.FileInputStream
+import org.scalatra.{ScalatraFilter, ScalatraServlet}
 
 trait TemplateCoupler {
-
-  def getTemplate(path: String): String = {
-    if (isPortletContext) templateForPortlet(path, this.asInstanceOf[GenericPortlet].getPortletContext)
-    else {
-      val context = this match {
-        case f: ScalatraFilter  => f.servletContext
-        case s: ScalatraServlet => s.servletContext
-      }
-      templateForServlet(path, context)
-    }
-  }
-
-  private def isPortletContext = this.isInstanceOf[GenericPortlet] && this.asInstanceOf[GenericPortlet].getPortletConfig != null
-
-  private def templateForPortlet(templatePath: String, context: PortletContext) = templateFromRealPath(context.getRealPath(templatePath))
-
-  private def templateFromRealPath(templateRealPath: String) = {
-    val resourceStream = new FileInputStream(templateRealPath)
-    val template = scala.io.Source.fromInputStream(resourceStream).mkString
-    resourceStream.close()
-    template
-  }
-
-  private def templateForServlet(templatePath: String, context: ServletContext) = templateFromRealPath(context.getRealPath(templatePath))
 
   /**
    * data ( <br/>
@@ -51,7 +28,7 @@ trait TemplateCoupler {
    */
   def getSecurityData(request: RenderRequest): SecurityData = {
 
-    val contextPath = request.getContextPath
+    val contextPath = PortalUtilHelper.getPathContext(request)
     val themeDisplay = LiferayHelpers.getThemeDisplay(request)
     val portletId = PortalUtil.getPortletId(request)
     val courseId = themeDisplay.getScopeGroupId

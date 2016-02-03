@@ -41,20 +41,20 @@ public class LFQuestionCategoryLocalServiceClpInvoker {
     private String[] _methodParameterTypes14;
     private String _methodName15;
     private String[] _methodParameterTypes15;
-    private String _methodName216;
-    private String[] _methodParameterTypes216;
-    private String _methodName217;
-    private String[] _methodParameterTypes217;
-    private String _methodName222;
-    private String[] _methodParameterTypes222;
-    private String _methodName223;
-    private String[] _methodParameterTypes223;
-    private String _methodName224;
-    private String[] _methodParameterTypes224;
-    private String _methodName225;
-    private String[] _methodParameterTypes225;
-    private String _methodName226;
-    private String[] _methodParameterTypes226;
+    private String _methodName200;
+    private String[] _methodParameterTypes200;
+    private String _methodName201;
+    private String[] _methodParameterTypes201;
+    private String _methodName206;
+    private String[] _methodParameterTypes206;
+    private String _methodName207;
+    private String[] _methodParameterTypes207;
+    private String _methodName208;
+    private String[] _methodParameterTypes208;
+    private String _methodName209;
+    private String[] _methodParameterTypes209;
+    private String _methodName210;
+    private String[] _methodParameterTypes210;
 
     public LFQuestionCategoryLocalServiceClpInvoker() {
         _methodName0 = "addLFQuestionCategory";
@@ -139,35 +139,35 @@ public class LFQuestionCategoryLocalServiceClpInvoker {
                 "com.arcusys.learn.persistence.liferay.model.LFQuestionCategory"
             };
 
-        _methodName216 = "getBeanIdentifier";
+        _methodName200 = "getBeanIdentifier";
 
-        _methodParameterTypes216 = new String[] {  };
+        _methodParameterTypes200 = new String[] {  };
 
-        _methodName217 = "setBeanIdentifier";
+        _methodName201 = "setBeanIdentifier";
 
-        _methodParameterTypes217 = new String[] { "java.lang.String" };
+        _methodParameterTypes201 = new String[] { "java.lang.String" };
 
-        _methodName222 = "createLFQuestionCategory";
+        _methodName206 = "createLFQuestionCategory";
 
-        _methodParameterTypes222 = new String[] {  };
+        _methodParameterTypes206 = new String[] {  };
 
-        _methodName223 = "findByCourseId";
+        _methodName207 = "findByCourseId";
 
-        _methodParameterTypes223 = new String[] { "java.lang.Integer[][]" };
+        _methodParameterTypes207 = new String[] { "java.lang.Integer[][]" };
 
-        _methodName224 = "findByCourseIdAndParentId";
+        _methodName208 = "findByCourseIdAndParentId";
 
-        _methodParameterTypes224 = new String[] {
+        _methodParameterTypes208 = new String[] {
                 "java.lang.Integer[][]", "java.lang.Integer[][]"
             };
 
-        _methodName225 = "removeAll";
+        _methodName209 = "removeAll";
 
-        _methodParameterTypes225 = new String[] {  };
+        _methodParameterTypes209 = new String[] {  };
 
-        _methodName226 = "getLFQuestionCategory";
+        _methodName210 = "getLFQuestionCategory";
 
-        _methodParameterTypes226 = new String[] { "long" };
+        _methodParameterTypes210 = new String[] { "long" };
     }
 
     public Object invokeMethod(String name, String[] parameterTypes,
@@ -259,43 +259,43 @@ public class LFQuestionCategoryLocalServiceClpInvoker {
             return LFQuestionCategoryLocalServiceUtil.updateLFQuestionCategory((com.arcusys.learn.persistence.liferay.model.LFQuestionCategory) arguments[0]);
         }
 
-        if (_methodName216.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes216, parameterTypes)) {
+        if (_methodName200.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes200, parameterTypes)) {
             return LFQuestionCategoryLocalServiceUtil.getBeanIdentifier();
         }
 
-        if (_methodName217.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes217, parameterTypes)) {
+        if (_methodName201.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes201, parameterTypes)) {
             LFQuestionCategoryLocalServiceUtil.setBeanIdentifier((java.lang.String) arguments[0]);
 
             return null;
         }
 
-        if (_methodName222.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes222, parameterTypes)) {
+        if (_methodName206.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes206, parameterTypes)) {
             return LFQuestionCategoryLocalServiceUtil.createLFQuestionCategory();
         }
 
-        if (_methodName223.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes223, parameterTypes)) {
+        if (_methodName207.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes207, parameterTypes)) {
             return LFQuestionCategoryLocalServiceUtil.findByCourseId((java.lang.Integer[]) arguments[0]);
         }
 
-        if (_methodName224.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes224, parameterTypes)) {
+        if (_methodName208.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes208, parameterTypes)) {
             return LFQuestionCategoryLocalServiceUtil.findByCourseIdAndParentId((java.lang.Integer[]) arguments[0],
                 (java.lang.Integer[]) arguments[1]);
         }
 
-        if (_methodName225.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes225, parameterTypes)) {
+        if (_methodName209.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes209, parameterTypes)) {
             LFQuestionCategoryLocalServiceUtil.removeAll();
 
             return null;
         }
 
-        if (_methodName226.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes226, parameterTypes)) {
+        if (_methodName210.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes210, parameterTypes)) {
             return LFQuestionCategoryLocalServiceUtil.getLFQuestionCategory(((Long) arguments[0]).longValue());
         }
 

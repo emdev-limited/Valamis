@@ -47,9 +47,10 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
             { "endpoint", Types.VARCHAR },
             { "authType", Types.VARCHAR },
             { "key_", Types.VARCHAR },
-            { "secret", Types.VARCHAR }
+            { "secret", Types.VARCHAR },
+            { "customHost", Types.VARCHAR }
         };
-    public static final String TABLE_SQL_CREATE = "create table Learn_LFTincanLrsEndpoint (id_ LONG not null primary key,endpoint VARCHAR(2000) null,authType VARCHAR(2000) null,key_ VARCHAR(2000) null,secret VARCHAR(2000) null)";
+    public static final String TABLE_SQL_CREATE = "create table Learn_LFTincanLrsEndpoint (id_ LONG not null primary key,endpoint VARCHAR(2000) null,authType VARCHAR(2000) null,key_ VARCHAR(2000) null,secret VARCHAR(2000) null,customHost VARCHAR(255) null)";
     public static final String TABLE_SQL_DROP = "drop table Learn_LFTincanLrsEndpoint";
     public static final String ORDER_BY_JPQL = " ORDER BY lfTincanLrsEndpoint.id ASC";
     public static final String ORDER_BY_SQL = " ORDER BY Learn_LFTincanLrsEndpoint.id_ ASC";
@@ -74,6 +75,7 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
     private String _authType;
     private String _key;
     private String _secret;
+    private String _customHost;
     private LFTincanLrsEndpoint _escapedModel;
 
     public LFTincanLrsEndpointModelImpl() {
@@ -118,6 +120,7 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
         attributes.put("authType", getAuthType());
         attributes.put("key", getKey());
         attributes.put("secret", getSecret());
+        attributes.put("customHost", getCustomHost());
 
         return attributes;
     }
@@ -152,6 +155,12 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
 
         if (secret != null) {
             setSecret(secret);
+        }
+
+        String customHost = (String) attributes.get("customHost");
+
+        if (customHost != null) {
+            setCustomHost(customHost);
         }
     }
 
@@ -206,6 +215,16 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
     }
 
     @Override
+    public String getCustomHost() {
+        return _customHost;
+    }
+
+    @Override
+    public void setCustomHost(String customHost) {
+        _customHost = customHost;
+    }
+
+    @Override
     public ExpandoBridge getExpandoBridge() {
         return ExpandoBridgeFactoryUtil.getExpandoBridge(0,
             LFTincanLrsEndpoint.class.getName(), getPrimaryKey());
@@ -237,6 +256,7 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
         lfTincanLrsEndpointImpl.setAuthType(getAuthType());
         lfTincanLrsEndpointImpl.setKey(getKey());
         lfTincanLrsEndpointImpl.setSecret(getSecret());
+        lfTincanLrsEndpointImpl.setCustomHost(getCustomHost());
 
         lfTincanLrsEndpointImpl.resetOriginalValues();
 
@@ -324,12 +344,20 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
             lfTincanLrsEndpointCacheModel.secret = null;
         }
 
+        lfTincanLrsEndpointCacheModel.customHost = getCustomHost();
+
+        String customHost = lfTincanLrsEndpointCacheModel.customHost;
+
+        if ((customHost != null) && (customHost.length() == 0)) {
+            lfTincanLrsEndpointCacheModel.customHost = null;
+        }
+
         return lfTincanLrsEndpointCacheModel;
     }
 
     @Override
     public String toString() {
-        StringBundler sb = new StringBundler(11);
+        StringBundler sb = new StringBundler(13);
 
         sb.append("{id=");
         sb.append(getId());
@@ -341,6 +369,8 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
         sb.append(getKey());
         sb.append(", secret=");
         sb.append(getSecret());
+        sb.append(", customHost=");
+        sb.append(getCustomHost());
         sb.append("}");
 
         return sb.toString();
@@ -348,7 +378,7 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
 
     @Override
     public String toXmlString() {
-        StringBundler sb = new StringBundler(19);
+        StringBundler sb = new StringBundler(22);
 
         sb.append("<model><model-name>");
         sb.append(
@@ -374,6 +404,10 @@ public class LFTincanLrsEndpointModelImpl extends BaseModelImpl<LFTincanLrsEndpo
         sb.append(
             "<column><column-name>secret</column-name><column-value><![CDATA[");
         sb.append(getSecret());
+        sb.append("]]></column-value></column>");
+        sb.append(
+            "<column><column-name>customHost</column-name><column-value><![CDATA[");
+        sb.append(getCustomHost());
         sb.append("]]></column-value></column>");
 
         sb.append("</model>");

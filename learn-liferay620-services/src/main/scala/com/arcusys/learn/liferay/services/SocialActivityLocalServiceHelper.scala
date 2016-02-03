@@ -2,7 +2,7 @@ package com.arcusys.learn.liferay.services
 
 import java.util.Date
 import com.arcusys.learn.liferay.model.Activity
-import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil
+import com.liferay.portal.kernel.dao.orm.{QueryUtil, RestrictionsFactoryUtil}
 import com.liferay.portlet.social.service.SocialActivityLocalServiceUtil
 import com.liferay.portlet.social.model.SocialActivity
 import org.joda.time.DateTime
@@ -28,6 +28,11 @@ object SocialActivityLocalServiceHelper extends ActivityWithSetCreator {
       .map(toModel)
   }
 
+  def getById(activityId: Long): Activity ={
+    val socialActivity = SocialActivityLocalServiceUtil.getActivity(activityId)
+    toModel(socialActivity)
+  }
+
   def getActivities(className: String,
     start: Int,
     end: Int): Seq[SocialActivity] =
@@ -44,7 +49,7 @@ object SocialActivityLocalServiceHelper extends ActivityWithSetCreator {
   }
 
   def getActivities(userId: Long, afterDate: DateTime): Seq[SocialActivity] =
-    getUserActivities(userId, 0, SocialActivityLocalServiceUtil.getUserActivitiesCount(userId))
+    getUserActivities(userId, QueryUtil.ALL_POS, QueryUtil.ALL_POS)
       .filter(sa => new DateTime(sa.getCreateDate).isAfter(afterDate))
 
   def getUserActivities(userId: Long,

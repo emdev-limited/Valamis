@@ -17,11 +17,6 @@ object PackageEntityContainer extends MockEntityContainer[LFPackageLocalService,
   lazy val mockServiceBeanName = classOf[LFPackageLocalService].getName
   lazy val mockLocalService = mock[LFPackageLocalService]
 
-  mockLocalService.findByRefID(any) answers { id =>
-    val result = internalStorage.values.filter(entity => entity.getAssetRefID == id).headOption
-    if (result.isEmpty) null else result.get
-  }
-
   mockLocalService.getLFPackage(any) answers { ids =>
     val id = ids match {
       case x => x
@@ -59,7 +54,6 @@ object PackageEntityContainer extends MockEntityContainer[LFPackageLocalService,
     mockStringProperty(mockEntity.setBase(_), _.getBase)
     mockStringProperty(mockEntity.setResourcesBase(_), _.getResourcesBase)
     mockStringProperty(mockEntity.setSummary(_), _.getSummary)
-    mockLongProperty(mockEntity.setAssetRefID(_), _.getAssetRefID)
     mockIntegerProperty(mockEntity.setCourseID(_), _.getCourseID)
   }
 

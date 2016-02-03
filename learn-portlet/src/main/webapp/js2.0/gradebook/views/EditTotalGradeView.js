@@ -16,6 +16,7 @@ EditGradeView = Backbone.View.extend({
                 this.model.set('gradeTotal',res.value);
                 this.model.set('commentTotal',res.comment);
                 this.render();
+                this.$('#courseComment').focus();
             }, this),
             error: function (err, res) {
                 // do something in case of an error

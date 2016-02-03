@@ -10,18 +10,15 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.sax.SAXResult
 import javax.xml.transform.stream.StreamSource
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.models.CourseResponse
 import com.arcusys.learn.models.Gradebook.PackageGradeResponse
-import com.arcusys.learn.models.response.certificates.CertificateResponse
-import com.arcusys.learn.models.response.users.UserShortResponse
 import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.certificate.service.CertificateService
 import com.arcusys.valamis.certificate.storage.CertificateStateRepository
 import com.arcusys.valamis.gradebook.service.GradeBookService
-import com.arcusys.valamis.lrs.api.StatementApi
 import com.arcusys.valamis.lrs.tincan._
 import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.util.mustache.Mustache
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import org.apache.fop.apps.FopFactory
@@ -29,17 +26,14 @@ import org.apache.xmlgraphics.util.MimeConstants
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
-class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrintFacadeContract with Injectable {
-  def this() = this(Configuration)
-
-  implicit val bindingModule = configuration
+class TranscriptPrintFacade(implicit val bindingModule: BindingModule) extends TranscriptPrintFacadeContract with Injectable {
 
   private lazy val gradebookFacade = inject[GradebookFacadeContract]
   private lazy val gradeBookService = inject[GradeBookService]
   private lazy val certificateFacade = inject[CertificateFacadeContract]
   private lazy val certificateService = inject[CertificateService]
   private lazy val courseFacade = inject[CourseFacadeContract]
-  private lazy val userFacade = inject[UserFacadeContract]
+  private lazy val userService = inject[UserService]
   private lazy val certificateUserRepository = inject[CertificateStateRepository]
 
   def course2Map(course: CourseResponse) = Map(
@@ -49,7 +43,7 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
     "url" -> course.url
   )
 
-  def certificate2Map(statementApi: StatementApi, certificate: Certificate, i: Int, userID: Int) = Map(
+  def certificate2Map(certificate: Certificate, i: Int, userId: Int) = Map(
     "id" -> certificate.id,
     "title" -> certificate.title,
     "description" -> certificate.description,
@@ -57,75 +51,41 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
     "isPermanent" -> certificate.isPermanent,
     "shortDescription" -> certificate.shortDescription,
     "companyId" -> certificate.companyId,
-    "isEmpty" -> getCertificateIssueDate(statementApi, certificate.id, userID).keys.head,
-    "issueDate" -> DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").print(getCertificateIssueDate(statementApi, certificate.id, userID).head._2),
+    "isEmpty" -> getCertificateIssueDate(certificate.id.toInt, userId).isEmpty,
+    "issueDate" -> {
+      getCertificateIssueDate(certificate.id.toInt, userId) match {
+        case Some(date) => DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").print(date)
+        case _ => ""
+      }
+    },
     "expires" -> (certificate.validPeriodType match {
       case PeriodTypes.UNLIMITED =>
         false
       case _ =>
         true
     }),
-    "expirationDate" -> DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").print(getCertificateExpirationDate(certificate, userID))
+    "expirationDate" -> DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").print(getCertificateExpirationDate(certificate, userId))
   )
 
-  def package2Map(pack: PackageGradeResponse, i: Int, userID: Int) = Map(
+  def package2Map(pack: PackageGradeResponse, i: Int, userId: Int) = Map(
     "packageName" -> pack.packageName,
     "description" -> pack.description,
     "grade" -> pack.grade
   )
 
-  def statement2Map(statementApi: StatementApi, st: Statement, i: Int, userID: Int) = Map(
+  def statement2Map(st: Statement, i: Int, userId: Int) = Map(
     "actor" -> st.actor.name,
-    "verb" -> st.verb.display.values.head,
-    "object" -> st.obj.asInstanceOf[Activity].name.get.values.head,
-    "timestamp" -> st.timestamp.get.toString(DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    "verb" -> st.verb.display.values.headOption.getOrElse(""),
+    "object" -> Some(st.obj)
+      .collect { case obj: Activity => obj }
+      .flatMap { _.name }
+      .flatMap { _.values.headOption }
+      .getOrElse(""),
+    "timestamp" -> st.timestamp.toString(DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
   )
 
-  def getCertificateIssueDate(statementApi: StatementApi, certificateID: Int, userID: Int): Map[Boolean, DateTime] = {
-    val goalsStatuses = certificateFacade.getGoalsStatuses(statementApi, certificateID, userID)
-
-    val activitiesFinishDates = goalsStatuses.activities.toList.map { activity =>
-      activity.dateFinish.substring(activity.dateFinish.length - 2) match {
-        case "PM" =>
-          val date = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm").parseDateTime(activity.dateFinish.substring(0, activity.dateFinish.length - 3)).plusHours(12)
-          if (date.getYear < 1000) date.plusYears(2000) else date
-        case _ =>
-          val date = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm").parseDateTime(activity.dateFinish.substring(0, activity.dateFinish.length - 3))
-          if (date.getYear < 1000) date.plusYears(2000) else date
-      }
-    }
-
-    val coursesFinishDates = goalsStatuses.courses.toList.map { course =>
-      course.dateFinish.substring(course.dateFinish.length - 2) match {
-        case "PM" =>
-          val date = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm").parseDateTime(course.dateFinish.substring(0, course.dateFinish.length - 3)).plusHours(12)
-          if (date.getYear < 1000) date.plusYears(2000) else date
-        case _ =>
-          val date = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm").parseDateTime(course.dateFinish.substring(0, course.dateFinish.length - 3))
-          if (date.getYear < 1000) date.plusYears(2000) else date
-      }
-    }
-
-    val statementsFinishDates = goalsStatuses.statements.toList.map { statement =>
-      statement.dateFinish.substring(statement.dateFinish.length - 2) match {
-        case "PM" =>
-          val date = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm").parseDateTime(statement.dateFinish.substring(0, statement.dateFinish.length - 3)).plusHours(12)
-          if (date.getYear < 1000) date.plusYears(2000) else date
-        case _ =>
-          val date = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm").parseDateTime(statement.dateFinish.substring(0, statement.dateFinish.length - 3))
-          if (date.getYear < 1000) date.plusYears(2000) else date
-      }
-    }
-
-    val finishDates = activitiesFinishDates ++ coursesFinishDates ++ statementsFinishDates
-    finishDates.length match {
-      case 0 =>
-        Map(true -> DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parseDateTime(certificateFacade.getById(certificateID).asInstanceOf[CertificateResponse].users.filter(x => x._2.id == userID).head._1)
-        )
-      case _ =>
-        finishDates.sortBy(_.getMillis)
-        Map(false -> finishDates.head)
-    }
+  def getCertificateIssueDate(certificateId: Int, userId: Int): Option[DateTime] = {
+    certificateUserRepository.getBy(userId, certificateId).map(_.statusAcquiredDate)
   }
 
   def getCertificateExpirationDate(certificate: Certificate, userId: Int): DateTime = {
@@ -133,7 +93,7 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
     PeriodTypes.getEndDate(certificate.validPeriodType, Some(certificate.validPeriod), startDate)
   }
 
-  def getPackageFOTemplate[T](statementApi: StatementApi, templatePath: String, models: Seq[PackageGradeResponse], userID: Int) = {
+  def getPackageFOTemplate[T](templatePath: String, models: Seq[PackageGradeResponse], userId: Int) = {
     val modelTemplate = {
       val modelTemplateFileContents = scala.io.Source.fromFile(templatePath + "/package.fo").mkString
       new Mustache(modelTemplateFileContents)
@@ -143,12 +103,11 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
 
     models.map { model =>
       i += 1
-      val mappedPackage = package2Map(model, i, userID)
+      val mappedPackage = package2Map(model, i, userId)
       val mappedPackageStatements = getStatementsFOTemplate(
-        statementApi,
         templatePath,
-        gradeBookService.getStatementGrades(statementApi, model.id, userID),
-        userID
+        gradeBookService.getStatementGrades(model.id, userId),
+        userId
       )
       mappedPackageStatements match {
         case "" => mappedPackage + ("hasStatements" -> false)
@@ -158,15 +117,15 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
 
   }
 
-  def getStatementsFOTemplate[T](statementApi: StatementApi, templatePath: String, models: Seq[Statement], userID: Int) = {
-    var onlyActivities = models.filter(_.obj.isInstanceOf[Activity])
+  def getStatementsFOTemplate[T](templatePath: String, models: Seq[Statement], userId: Int) = {
+    val onlyActivities = models.filter(_.obj.isInstanceOf[Activity])
     var attemptStart = -1
     var attemptEnd = 0
     var j = -1
     var i = 0
     var statementsTemplate = ""
     onlyActivities.foreach { st =>
-      if (st.obj.asInstanceOf[Activity].theType.get.substring(st.obj.asInstanceOf[Activity].theType.get.length - 6) == "course") {
+      if (st.obj.asInstanceOf[Activity].theType.exists(_ endsWith "course")) {
         if (st.verb.id == "http://adlnet.gov/expapi/verbs/attempted") {
           i += 1
         }
@@ -175,7 +134,7 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
 
     onlyActivities.foreach { st =>
       j += 1
-      if (st.obj.asInstanceOf[Activity].theType.get.substring(st.obj.asInstanceOf[Activity].theType.get.length - 6) == "course") {
+      if (st.obj.asInstanceOf[Activity].theType.exists(_ endsWith "course")) {
         if (st.verb.id == "http://adlnet.gov/expapi/verbs/attempted") {
           attemptStart = j + 1
           val attemptStatements =
@@ -188,13 +147,13 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
 
           if (j < onlyActivities.length - 1) {
             if (onlyActivities(j + 1).verb.id == "http://adlnet.gov/expapi/verbs/completed"
-              && onlyActivities(j + 1).obj.asInstanceOf[Activity].theType.get.substring(onlyActivities(j + 1).obj.asInstanceOf[Activity].theType.get.length - 6) == "course")
+              && onlyActivities(j + 1).obj.asInstanceOf[Activity].theType.exists(_ endsWith "course"))
               attemptEnd = j + 1
             else
               attemptEnd = j
           }
 
-          statementsTemplate += getFOTemplate(statementApi, templatePath + "/statement.fo", attemptStatements, statement2Map, userID, i)
+          statementsTemplate += getFOTemplate(templatePath + "/statement.fo", attemptStatements, statement2Map, userId, i)
           i -= 1
         }
       }
@@ -202,7 +161,7 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
     statementsTemplate
   }
 
-  def getCourseFOTemplate(statementApi: StatementApi, templatePath: String, models: Seq[CourseResponse], userID: Int) = {
+  def getCourseFOTemplate(templatePath: String, models: Seq[CourseResponse], userId: Int) = {
     val modelTemplate = {
       val modelTemplateFileContents = scala.io.Source.fromFile(templatePath + "/course.fo").mkString
       new Mustache(modelTemplateFileContents)
@@ -217,10 +176,9 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
           i += 1
           var mappedCourse = course2Map(model)
           val mappedCoursePackages = getPackageFOTemplate(
-            statementApi,
             templatePath,
-            gradebookFacade.getGradesForStudent(statementApi, userID.toInt, model.id.toInt, -1, 0, false).packageGrades,
-            userID
+            gradebookFacade.getGradesForStudent(userId.toInt, model.id.toInt, -1, 0, false).packageGrades,
+            userId
           )
           if (i == 1)
             mappedCourse += ("showHeader" -> true)
@@ -234,7 +192,7 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
 
   }
 
-  def getFOTemplate[T](statementApi: StatementApi, modelTemplateFileName: String, models: Seq[T], model2MapFunc: (StatementApi, T, Int, Int) => Map[String, Any], userID: Int, which: Int) = {
+  def getFOTemplate[T](modelTemplateFileName: String, models: Seq[T], model2MapFunc: (T, Int, Int) => Map[String, Any], userId: Int, which: Int) = {
     val modelTemplate = {
       val modelTemplateFileContents = scala.io.Source.fromFile(modelTemplateFileName).mkString
       new Mustache(modelTemplateFileContents)
@@ -249,31 +207,29 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
           model =>
             i += 1
             if (i == 1 && which >= 0)
-              model2MapFunc(statementApi, model, i, userID) + ("showHeader" -> true) + ("which" -> which)
+              model2MapFunc(model, i, userId) + ("showHeader" -> true) + ("which" -> which)
             else
-              model2MapFunc(statementApi, model, i, userID)
+              model2MapFunc(model, i, userId)
         }.foldLeft("")((acc, model) => acc + modelTemplate.render(model))
     }
   }
 
-  override def printTranscript(statementApi: StatementApi, companyID: Int, userID: Int, templatesPath: String): ByteArrayOutputStream = {
+  override def printTranscript(companyId: Int, userId: Int, templatesPath: String): ByteArrayOutputStream = {
     val renderedCertificateFOTemplate = getFOTemplate(
-      statementApi,
       templatesPath + "/cert.fo",
-      certificateService.getForUserWithStatus(companyID, -1, 1, "", true, userID, true),
+      certificateService.getSuccessByUser(userId, companyId),
       certificate2Map,
-      userID,
+      userId,
       0
     )
 
     val renderedCourseFOTemplate = getCourseFOTemplate(
-      statementApi,
       templatesPath,
-      courseFacade.getByUserId(userID.toInt),
-      userID
+      courseFacade.getByUserId(userId.toInt),
+      userId
     )
 
-    val user = userFacade.byId(statementApi, userID, true, false).asInstanceOf[UserShortResponse]
+    val user = userService.getById(userId)
 
     val fopFactory = FopFactory.newInstance()
 
@@ -294,7 +250,7 @@ class TranscriptPrintFacade(configuration: BindingModule) extends TranscriptPrin
     val fileContents = scala.io.Source.fromFile(fullPath).mkString
     val template = new Mustache(fileContents)
     val viewModel = Map(
-      "username" -> user.name)
+      "username" -> user.getFullName)
 
     var renderedFOTemplate = template.render(viewModel)
 

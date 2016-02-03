@@ -30,17 +30,16 @@ class CourseGoalStorageImpl (val db: JdbcBackend#DatabaseDef,
                       courseId: Long,
                       arrangementIndex: Int,
                       periodValue: Int,
-                      periodType: PeriodType): CourseGoal =
-    create(CourseGoal(certificateId, courseId, periodValue, periodType, arrangementIndex))
-
-  def create(courseGoal: CourseGoal) = db.withSession { implicit session =>
-    courseGoals.insert(courseGoal)
-    get(courseGoal.certificateId, courseGoal.courseId).get
+                      periodType: PeriodType): CourseGoal = db.withSession { implicit session =>
+    courseGoals.insert(CourseGoal(certificateId, courseId, periodValue, periodType, arrangementIndex))
+    courseGoals.filter(ag => ag.certificateId === certificateId && ag.courseId === courseId).first
   }
 
-  def update(courseGoal: CourseGoal) = db.withSession{ implicit session =>
-    courseGoals.filter(ag => ag.certificateId === courseGoal.certificateId && ag.courseId === courseGoal.courseId).update(courseGoal)
-    get(courseGoal.certificateId, courseGoal.courseId).get
+  def update(courseGoal: CourseGoal) = db.withSession { implicit session =>
+    val filtered = courseGoals.filter(entity => entity.certificateId === courseGoal.certificateId && entity.courseId === courseGoal.courseId)
+
+    filtered.update(courseGoal)
+    filtered.first
   }
 
 
@@ -71,27 +70,22 @@ class CourseGoalStorageImpl (val db: JdbcBackend#DatabaseDef,
     }
 
 
-  override def getByCourseId(courseId: Long): Seq[CourseGoal] =
-    getBy(courseId = Some(courseId))
+  override def getByCourseId(courseId: Long): Seq[CourseGoal] = db.withSession { implicit session =>
+    courseGoals
+      .filter(_.courseId === courseId)
+      .run
+  }
 
-  override def getByCertificateId(certificateId: Long): Seq[CourseGoal] =
-    getBy(certificateId = Some(certificateId))
+  override def getByCertificateId(certificateId: Long): Seq[CourseGoal] = db.withSession { implicit session =>
+    courseGoals
+      .filter(_.certificateId === certificateId)
+      .run
+  }
 
-  override def getByCertificateIdCount(certificateId: Long): Int =
-    getCountBy(certificateId = Some(certificateId))
-
-  private def getBy(courseId: Option[Long] = None, certificateId: Option[Long] = None) = db.withSession(implicit session =>
-    composeQuery(courseId, certificateId).run
-  )
-
-  private def getCountBy(courseId: Option[Long] = None, certificateId: Option[Long] = None) = db.withSession(implicit session =>
-    composeQuery(courseId, certificateId).length.run
-  )
-
-  private def composeQuery(courseId: Option[Long] = None, certificateId: Option[Long] = None)
-                          (implicit session: JdbcBackend#Session) = {
-    val courseIdFiltered = if (courseId.isDefined) courseGoals.filter(_.courseId === courseId.get) else courseGoals
-    val certificateIdFiltered = if (certificateId.isDefined) courseIdFiltered.filter(_.certificateId === certificateId.get) else courseIdFiltered
-    certificateIdFiltered
+  override def getByCertificateIdCount(certificateId: Long): Int = db.withSession { implicit session =>
+    courseGoals
+      .filter(_.certificateId === certificateId)
+      .length
+      .run
   }
 }

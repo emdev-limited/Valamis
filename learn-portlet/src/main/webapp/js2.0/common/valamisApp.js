@@ -11,11 +11,20 @@ var ValamisApp = Marionette.Application.extend({
 
     },
     start: function(options){
+
+        var oldSync = Backbone.sync;
+        Backbone.sync = function(method, model, options){
+            _.extend(options.data,{'p_auth': Liferay.authToken});
+            options.beforeSend = function(xhr){
+                xhr.setRequestHeader('X-CSRF-Token', Liferay.authToken);
+            };
+            return oldSync(method, model, options);
+        };
+
         var appregionId = 'valamisAppRegion';
-        //var appregion = jQueryValamis(appregionName);
 
         if(jQueryValamis('#' + appregionId).length <= 0) {
-            var appregionHtml = '<div id="' + appregionId + '" class="portlet-learn-scorm"></div>';
+            var appregionHtml = '<div id="' + appregionId + '" class="portlet-learn-scorm portlet-learn-scorm-slides"></div>';
             jQueryValamis('body').append(appregionHtml);
         }
 
@@ -41,6 +50,10 @@ valamisApp.commands.setHandler('modal:close', function(modalView){
     valamisApp.mainRegion.currentView.modals.destroy(modalView);
 });
 
+valamisApp.commands.setHandler('modal:clear', function(){
+    valamisApp.mainRegion.currentView.modals.destroyAll();
+});
+
 valamisApp.commands.setHandler('update:tile:sizes', function(viewEl){
     jQueryValamis(window).trigger('recompute:tile:sizes', viewEl);
 });
@@ -58,20 +71,74 @@ valamisApp.commands.setHandler('delete:confirm', function(options, onConfirm){
     dialog.render();
 });
 
+valamisApp.commands.setHandler('save:confirm', function(options, onConfirm, onDecline){
+
+    var dialog = new valamisApp.Views.SaveConfirmationView(options);
+    dialog.on('saveConfirmed',function(){
+        if(onConfirm && _.isFunction(onConfirm)) {
+            onConfirm();
+        }
+        dialog.destroy();
+    });
+    dialog.on('saveDeclined',function(){
+        if(onDecline && _.isFunction(onDecline)) {
+            onDecline();
+        }
+        dialog.destroy();
+    });
+    dialog.render();
+});
+
+valamisApp.commands.setHandler('notify', function(notificationType, message, options, title){
+    var toastrFunc = getToastrFunc(notificationType);
+    options = options || {};
+    if(!toastr.options.positionClass && !(options && options.positionClass))
+        _.extend(options, { 'positionClass': 'toast-top-right' });
+    if(jQueryValamis('#toast-container').children().length > 0) {
+        toastr.options.hideDuration = 0;
+        toastr.clear();
+        toastr.options.hideDuration = 1000;
+    }
+    toastrFunc(message, title, options);
+
+    function getToastrFunc(type) {
+        switch(type) {
+            case 'success':
+                return toastr.success;
+                break;
+            case 'warning':
+                return toastr.warning;
+                break;
+            case 'error':
+                return toastr.error;
+                break;
+            case 'clear':
+                return toastr.clear;
+                break;
+            case 'info':
+            default:
+                return toastr.info;
+                break;
+        }
+    }
+});
+
 valamisApp.commands.setHandler('subapp:start', function(options){
     //TODO check required options!!!;
     var defaultLanguage = 'en';
-    var language = options.language;
     var resourceName = options.resourceName;
     var app = options.app;
     var appOptions = options.appOptions;
     var permissions = options.permissions;
+    var additionalOptions = options.options;
 
     Valamis = Valamis || {};
     Valamis.permissions = Valamis.permissions || {};
     _.extend(Valamis.permissions, permissions);
 
     Valamis.language = Valamis.language || {};
+    Valamis.additionalOptions = Valamis.additionalOptions || {};
+    _.extend(Valamis.additionalOptions, additionalOptions);
 
     var onBankLanguageLoad  = function(properties) {
         _.extend(Valamis.language , properties);
@@ -95,7 +162,7 @@ valamisApp.commands.setHandler('subapp:start', function(options){
         Utils.i18nLoader(localizedURL, defaultURL, onBankLanguageLoad, onBankLanguageError);
     };
 
-    getLanguageBank({language : language});
+    getLanguageBank({language : Utils.getLanguage()});
 });
 
 

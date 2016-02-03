@@ -1,8 +1,7 @@
 package com.arcusys.learn.scorm.manifest.storage.impl.liferay
 
 import com.arcusys.valamis.lesson.model.{ PackageScopeRule, LessonType }
-import com.arcusys.valamis.lesson.scorm.model
-import com.arcusys.valamis.lesson.scorm.model.{ ScormPackage, manifest }
+import com.arcusys.valamis.lesson.scorm.model.ScormPackage
 import com.arcusys.valamis.lesson.scorm.model.manifest.Manifest
 import com.arcusys.valamis.lesson.scorm.storage.ScormPackagesStorage
 import com.arcusys.valamis.lesson.storage.PackageScopeRuleStorage
@@ -16,9 +15,6 @@ import com.liferay.portal.kernel.dao.orm.{ PropertyFactoryUtil, RestrictionsFact
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-/**
- * Created by mminin on 15.10.14.
- */
 trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
 
   def packageScopeRuleRepository: PackageScopeRuleStorage
@@ -27,9 +23,9 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
     LFPackageLocalServiceUtil.removeAll()
   }
 
-  override def createAndGetID(entity: manifest.Manifest, courseID: Option[Int]): Long = {
-    val manifest = model.manifest.Manifest(0, entity.version, entity.base, entity.scormVersion, entity.defaultOrganizationID,
-      entity.resourcesBase, entity.title, entity.summary, entity.metadata, entity.assetRefId,
+  override def createAndGetID(entity: Manifest, courseID: Option[Int]): Long = {
+    val manifest = Manifest(0, entity.version, entity.base, entity.scormVersion, entity.defaultOrganizationID,
+      entity.resourcesBase, entity.title, entity.summary, entity.metadata,
       courseID, logo = entity.logo, isDefault = false, beginDate = None, endDate = None)
 
     import com.arcusys.learn.storage.impl.liferay.LiferayCommon._
@@ -40,7 +36,6 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
     newEntity.setBase(manifest.base.orNull)
     newEntity.setResourcesBase(manifest.resourcesBase.orNull)
     newEntity.setSummary(manifest.summary.orNull)
-    newEntity.setAssetRefID(manifest.assetRefId)
     newEntity.setCourseID(manifest.courseId)
     newEntity.setBeginDate(null)
     newEntity.setEndDate(null)
@@ -62,14 +57,14 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
 
     LFPackageLocalServiceUtil.deleteLFPackage(id)
 
-    packageScopeRuleRepository.delete(id.toInt)
+    packageScopeRuleRepository.delete(id)
   }
 
   override def getById(id: Long): Option[ScormPackage] = {
     Option(LFPackageLocalServiceUtil.fetchLFPackage(id)).map(extractPackage)
   }
 
-  override def getById(id: Long, courseID: Int, scope: ScopeType.Value, scopeID: String): Option[manifest.Manifest] = {
+  override def getById(id: Long, courseID: Int, scope: ScopeType.Value, scopeID: String): Option[Manifest] = {
     if (scope == ScopeType.Instance) {
       Option(LFPackageLocalServiceUtil.getLFPackage(id))
         .map(extract)
@@ -82,17 +77,20 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
     }
   }
 
-  override def getByRefID(refID: Long): Option[manifest.Manifest] = {
-    Option(LFPackageLocalServiceUtil.findByRefID(getLong(refID))) map extract
+  override def getAll: Seq[ScormPackage] = {
+    LFPackageLocalServiceUtil.getLFPackages(-1, -1).asScala map extractPackage
   }
 
-  override def getAll: Seq[manifest.Manifest] = {
-    LFPackageLocalServiceUtil.getLFPackages(-1, -1).asScala map extract
-  }
+  override def getByTitleAndCourseId(titlePattern: Option[String], courseIds: Seq[Long]): Seq[ScormPackage] = {
+    val ids = courseIds.map(_.toInt).toArray.map(i => i: java.lang.Integer)
+    val result = titlePattern match {
+      case Some(title) =>
+        LFPackageLocalServiceUtil.findByTitleAndCourseID(title + "%", ids)
+      case None =>
+        LFPackageLocalServiceUtil.findByInstance(ids)
+    }
 
-  override def getByTitleAndCourseId(titlePattern: String, courseIds: Seq[Int]): Seq[ScormPackage] = {
-    LFPackageLocalServiceUtil.findByTitleAndCourseID(titlePattern + "%", courseIds.toArray.map(i => i: java.lang.Integer)).asScala
-      .map(extractPackage)
+    result.asScala.map(extractPackage)
   }
 
   override def getCountByTitleAndCourseId(titlePattern: String, courseIds: Seq[Int]): Int = {
@@ -100,89 +98,96 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
   }
 
   // get all in course with visibility
-  override def getByCourseId(courseID: Option[Int]): Seq[manifest.Manifest] = {
-    courseID.map(courseID => getByScope(courseID, ScopeType.Site, courseID.toString)).getOrElse(Seq())
+  override def getManifestByCourseId(courseId: Long): Seq[Manifest] = {
+    getByScope(courseId.toInt, ScopeType.Site, courseId.toString)
+  }
+
+  override def getByCourseId(courseId: Long): Seq[ScormPackage] = {
+    LFPackageLocalServiceUtil.findByCourseID(courseId.toInt).asScala.map(extractPackage)
   }
 
   // get all in instance with visibility
-  override def getAllForInstance(courseIDs: List[Int]): Seq[manifest.Manifest] = {
-    LFPackageLocalServiceUtil.findByInstance(courseIDs.toArray.map(i => i: java.lang.Integer)).asScala
-      .map(extract)
-      .flatMap(fillManifestWithScopeValues())
+  override def getAllForInstance(courseIds: List[Long]): Seq[Manifest] = {
+    if (courseIds.isEmpty) {
+      Seq()
+    }
+    else {
+      LFPackageLocalServiceUtil.findByInstance(courseIds.map(_.toInt).toArray.map(i => i: java.lang.Integer)).asScala
+        .map(extract)
+        .flatMap(fillManifestWithScopeValues())
+    }
   }
 
   // get all in current course (liferay site) by scope with visibility
-  override def getByScope(courseID: Int, scope: ScopeType.Value, scopeID: String): Seq[manifest.Manifest] = {
+  override def getByScope(courseID: Int, scope: ScopeType.Value, scopeID: String): Seq[Manifest] = {
     LFPackageLocalServiceUtil.findByCourseID(courseID).asScala
       .map(extract)
       .flatMap(fillManifestWithScopeValues(scope, Option(scopeID)))
   }
 
-  override def getByExactScope(courseIDs: List[Int], scope: ScopeType.Value, scopeID: String): Seq[manifest.Manifest] = {
-    LFPackageLocalServiceUtil.findByInstance(courseIDs.toArray.map(i => i: java.lang.Integer)).asScala
+  override def getByExactScope(courseIds: List[Long], scope: ScopeType.Value, scopeID: String): Seq[Manifest] = {
+    LFPackageLocalServiceUtil.findByInstance(courseIds.map(_.toInt).toArray.map(i => i: java.lang.Integer)).asScala
       .map(extract)
       .flatMap(fillManifestWithScopeValuesWithFilter(scope, Option(scopeID)))
   }
 
   // for Player show only visible in current scope
   override def getOnlyVisible(scope: ScopeType.Value, scopeID: String, titlePattern: Option[String], date: DateTime): Seq[ScormPackage] = {
-    val visiblePackageIdQuery = PackageScopeRuleHelper.getPackageIdVisibleDynamicQuery(scope, Option(scopeID))
+    val visiblePackageIds = packageScopeRuleRepository.getPackageIdVisible(scope, Option(scopeID))
 
-    val packageQuery = LFPackageLocalServiceUtil.dynamicQuery()
-      .add(PropertyFactoryUtil.forName("id").in(visiblePackageIdQuery))
-      .add(RestrictionsFactoryUtil.or(
-        RestrictionsFactoryUtil.isNull("beginDate"),
-        RestrictionsFactoryUtil.le("beginDate", date.toDate))
-      )
-      .add(RestrictionsFactoryUtil.or(
-        RestrictionsFactoryUtil.isNull("endDate"),
-        RestrictionsFactoryUtil.ge("endDate", date.toDate))
-      )
-
-    var packages = LFPackageLocalServiceUtil.dynamicQuery(packageQuery).asScala.map(_.asInstanceOf[LFPackage])
-
-    packages = titlePattern.map(_.toLowerCase) match {
-      case Some(title) => packages.filter(_.getTitle.toLowerCase.contains(title))
-      case None        => packages
-    }
-
-    packages.map(extractPackage)
+    getPackages(visiblePackageIds, titlePattern, date)
   }
 
-  override def getInstanceScopeOnlyVisible(courseIDs: List[Int], titlePattern: Option[String], date: DateTime): Seq[ScormPackage] = {
-    if (courseIDs.isEmpty) return Seq()
-
-    val visiblePackageIdQuery = PackageScopeRuleHelper.getPackageIdVisibleDynamicQuery(ScopeType.Instance, None)
-
-    val packageQuery = LFPackageLocalServiceUtil.dynamicQuery()
-      .add(RestrictionsFactoryUtil.in("courseID", courseIDs.asJava))
-      .add(PropertyFactoryUtil.forName("id").in(visiblePackageIdQuery))
-      .add(RestrictionsFactoryUtil.or(
-        RestrictionsFactoryUtil.isNull("beginDate"),
-        RestrictionsFactoryUtil.le("beginDate", date.toDate))
-      )
-      .add(RestrictionsFactoryUtil.or(
-        RestrictionsFactoryUtil.isNull("endDate"),
-        RestrictionsFactoryUtil.ge("endDate", date.toDate))
-      )
-
-    var packages = LFPackageLocalServiceUtil.dynamicQuery(packageQuery).asScala.map(_.asInstanceOf[LFPackage])
-
-    packages = titlePattern.map(_.toLowerCase) match {
-      case Some(title) => packages.filter(_.getTitle.toLowerCase.contains(title))
-      case None        => packages
+  override def getInstanceScopeOnlyVisible(courseIds: List[Long], titlePattern: Option[String], date: DateTime): Seq[ScormPackage] = {
+    if (courseIds.isEmpty) {
+      Seq()
     }
-
-    packages.map(extractPackage)
+    else {
+      val visiblePackageIds = packageScopeRuleRepository.getPackageIdVisible(ScopeType.Instance, None)
+      getPackages(visiblePackageIds, titlePattern, date, Some(courseIds))
+    }
   }
 
-  override def getPackagesWithUserAttempts(userID: Int): Seq[manifest.Manifest] = {
+  private def getPackages(packageIds: Seq[Long],
+                          titlePattern: Option[String],
+                          date: DateTime,
+                          courseIds: Option[Seq[Long]] = None) = {
+    if (packageIds.isEmpty) {
+      Seq()
+    }
+    else {
+      val packageQuery = LFPackageLocalServiceUtil.dynamicQuery()
+        .add(PropertyFactoryUtil.forName("id").in(packageIds.toArray))
+        .add(RestrictionsFactoryUtil.or(
+        RestrictionsFactoryUtil.isNull("beginDate"),
+        RestrictionsFactoryUtil.le("beginDate", date.toDate))
+        )
+        .add(RestrictionsFactoryUtil.or(
+        RestrictionsFactoryUtil.isNull("endDate"),
+        RestrictionsFactoryUtil.ge("endDate", date.toDate))
+        )
+
+      for (ids <- courseIds)
+        packageQuery.add(RestrictionsFactoryUtil.in("courseID", ids.map(_.toInt).asJava))
+
+      var packages = LFPackageLocalServiceUtil.dynamicQuery(packageQuery).asScala.map(_.asInstanceOf[LFPackage])
+
+      packages = titlePattern.map(_.toLowerCase) match {
+        case Some(title) => packages.filter(_.getTitle.toLowerCase.contains(title))
+        case None => packages
+      }
+
+      packages.map(extractPackage)
+    }
+  }
+
+  override def getPackagesWithUserAttempts(userID: Int): Seq[Manifest] = {
     val packageIDs = LFAttemptLocalServiceUtil.findByUserID(userID).asScala.map(_.getPackageID.toLong.asInstanceOf[java.lang.Long]).toSet
     LFPackageLocalServiceUtil.findByPackageID(packageIDs.toArray).asScala.map(extract)
   }
 
   // These 2 methods is only for SCORM packages
-  override def getPackagesWithAttempts: Seq[manifest.Manifest] = {
+  override def getPackagesWithAttempts: Seq[Manifest] = {
     val packageIDs = LFAttemptLocalServiceUtil.getLFAttempts(-1, -1).asScala.map(_.getPackageID.toLong.asInstanceOf[java.lang.Long]).toSet
     LFPackageLocalServiceUtil.findByPackageID(packageIDs.toArray).asScala.map(extract)
   }
@@ -206,28 +211,6 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
     }
   }
 
-  override def setAssetRefID(id: Long, refID: Long): Unit = {
-    val entity = LFPackageLocalServiceUtil.getLFPackage(id)
-    entity.setAssetRefID(getLong(refID))
-    LFPackageLocalServiceUtil.updateLFPackage(entity)
-  }
-
-  private def getLong(value: Any): Long = {
-    value match {
-      case i: Int  => i.toLong
-      case l: Long => l
-      case _       => 0
-    }
-  }
-
-  private def getInt(value: Any): Int = {
-    value match {
-      case i: Int  => i
-      case l: Long => l.toInt
-      case _       => 0
-    }
-  }
-
   private def extractPackage(lfEntity: LFPackage): ScormPackage = {
     import com.arcusys.learn.storage.impl.liferay.LiferayCommon._
 
@@ -241,7 +224,6 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
       lfEntity.getTitle,
       Option(lfEntity.getSummary),
       None,
-      lfEntity.getAssetRefID.toOption,
       lfEntity.getCourseID.toOption,
       Option(lfEntity.getLogo),
       Option(lfEntity.getBeginDate).map(new DateTime(_)),
@@ -257,7 +239,7 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
     }
     ).getOrElse((0, 0, ""))
 
-    new manifest.Manifest(lfEntity.getId.toInt,
+    new Manifest(lfEntity.getId.toInt,
       None,
       lfEntity.getBase.toOption,
       "",
@@ -266,7 +248,6 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
       lfEntity.getTitle,
       Option(lfEntity.getSummary),
       None,
-      lfEntity.getAssetRefID.toOption,
       lfEntity.getCourseID.toOption,
       None,
       Option(lfEntity.getLogo),
@@ -279,7 +260,7 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
     )
   }
 
-  private def fillManifestWithScopeValues(scope: ScopeType.Value = ScopeType.Instance, scopeID: Option[String] = None): (manifest.Manifest) => Seq[manifest.Manifest] = {
+  private def fillManifestWithScopeValues(scope: ScopeType.Value = ScopeType.Instance, scopeID: Option[String] = None): (Manifest) => Seq[Manifest] = {
     manifest =>
       {
         val scopeRules = packageScopeRuleRepository.getAll(manifest.id.toInt, scope, scopeID)
@@ -291,7 +272,7 @@ trait ScormPackageRepositoryImpl extends ScormPackagesStorage {
       }
   }
 
-  private def fillManifestWithScopeValuesWithFilter(scope: ScopeType.Value = ScopeType.Instance, scopeID: Option[String] = None): (manifest.Manifest) => Seq[manifest.Manifest] = {
+  private def fillManifestWithScopeValuesWithFilter(scope: ScopeType.Value = ScopeType.Instance, scopeID: Option[String] = None): (Manifest) => Seq[Manifest] = {
     manifest =>
       {
         val scopeRules = packageScopeRuleRepository.getAll(manifest.id.toInt, scope, scopeID)

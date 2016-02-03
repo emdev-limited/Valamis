@@ -48,7 +48,6 @@ var ChartStatView = Backbone.Marionette.View.extend({
             width = width - 240;
 
         this.x = d3.time.scale()
-//            .range([0, this.defaults.width]);
             .range([0, width]);
 
         this.y = d3.scale.linear()
@@ -63,7 +62,6 @@ var ChartStatView = Backbone.Marionette.View.extend({
             .orient("left");
 
         this.svg = d3.select(this.el).append("svg")
-//            .attr("width", this.defaults.width + this.defaults.margin.left + this.defaults.margin.right)
             .attr("width", width + this.defaults.margin.left + this.defaults.margin.right)
             .attr("height", this.defaults.height + this.defaults.margin.top + this.defaults.margin.bottom)
             .append("g")
@@ -88,7 +86,6 @@ var ChartStatView = Backbone.Marionette.View.extend({
 
         this.triggerMethod("before:render", this);
         this.initializeRender();
-        this.updateData();
 
         this.bindUIElements();
 
@@ -104,14 +101,10 @@ var ChartStatView = Backbone.Marionette.View.extend({
         }
 
         var data = this.getData();
-        console.log(data);
 
         var nxExtent, barWidth;
         if (data.length > 1) {
-//            var barRawWidth = this.defaults.width / (d3.time[this.intervalType].range(data[0].date, data[data.length - 1].date).length + 2);
-            var barRawWidth = width / (d3.time[this.intervalType].range(data[0].date, data[data.length - 1].date).length + 2);
-            var barPadding = 5;
-            barWidth = 10;//barRawWidth - (barPadding * 2);
+            barWidth = 10;
 
             var xExtent = d3.extent(data, function (d) {
                 return d.date;
@@ -132,7 +125,6 @@ var ChartStatView = Backbone.Marionette.View.extend({
 
         this.svg.selectAll("g .x.axis")
             .transition()
-//            .duration(this.defaults.animationDuration)
             .duration(animationDuration)
             .call(this.xAxis)
             .selectAll("text")
@@ -143,7 +135,6 @@ var ChartStatView = Backbone.Marionette.View.extend({
 
         this.svg.selectAll("g .y.axis")
             .transition()
-//            .duration(this.defaults.animationDuration)
             .duration(animationDuration)
             .call(this.yAxis);
 
@@ -166,7 +157,6 @@ var ChartStatView = Backbone.Marionette.View.extend({
         }.bind(this));
 
         bars.transition()
-//            .duration(this.defaults.animationDuration)
             .duration(animationDuration)
             .attr("height", function (d) {
                 return this.defaults.height - this.y(d.amount);

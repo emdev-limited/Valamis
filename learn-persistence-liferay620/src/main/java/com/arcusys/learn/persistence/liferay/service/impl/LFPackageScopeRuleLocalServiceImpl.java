@@ -39,7 +39,7 @@ public class LFPackageScopeRuleLocalServiceImpl
 
     public LFPackageScopeRule findByScopeAndIsDefault(String scope, String scopeID, Boolean isDefault) throws
             com.arcusys.learn.persistence.liferay.NoSuchLFPackageScopeRuleException, SystemException{
-        return lfPackageScopeRulePersistence.findByScopeAndIsDefault(scope, scopeID, isDefault);
+        return lfPackageScopeRulePersistence.fetchByScopeAndIsDefault(scope, scopeID, isDefault);
     }
 
     public java.util.List<LFPackageScopeRule> findByScope(String scope, String scopeID) throws

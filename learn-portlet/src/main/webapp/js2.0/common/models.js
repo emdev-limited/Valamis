@@ -12,6 +12,20 @@ Valamis = (function(){
                 'method': "get"
             }
 
+        },
+        targets: {
+            'getPackagesTags': {
+                'path': path.api.packages + 'tags',
+                'data': function (collection, options) {
+                    var params = {
+                        courseId: options.courseId,
+                        pageID: options.pageId,
+                        playerID: options.playerId
+                    };
+                    return params;
+                },
+                'method': 'get'
+            }
         }
     });
 

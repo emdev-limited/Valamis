@@ -4,4 +4,6 @@ import com.liferay.portal.kernel.search.{ IndexerRegistryUtil, Indexer }
 
 object IndexerRegistryUtilHelper {
   def getIndexer(clazz: Class[_]): Indexer = IndexerRegistryUtil.getIndexer(clazz)
+
+  def getIndexer(className: String): Indexer = IndexerRegistryUtil.getIndexer(className)
 }

@@ -14,7 +14,14 @@ EditPackageGradeView = Backbone.View.extend({
     },
 
     render: function () {
-        var template = Mustache.to_html(jQueryValamis("#editPackageGradeTemplate").html(), _.extend(this.model.toJSON(), language, {contextPath: Utils.getContextPath()}));
+        var template = Mustache.to_html(
+                jQueryValamis("#editPackageGradeTemplate").html(),
+                _.extend(this.model.toJSON(), language, {
+                        contextPath: Utils.getContextPath(),
+                        apiPath: path.root + path.api.prefix
+                    }
+            )
+        );
         this.$el.html(template);
         var gradeSelect = this.$('#totalGradeChoice');
         gradeSelect.empty();

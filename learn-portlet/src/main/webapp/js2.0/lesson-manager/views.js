@@ -4,10 +4,19 @@
 
 lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionette, $, _) {
 
+    var DISPLAY_TYPE = {
+        LIST: 'list',
+        TILES: 'tiles'
+    };
+
     Views.EditPackageView = Marionette.ItemView.extend({
         template: '#packageManagerEditItemView',
+        templateHelpers :function () {
+            return {
+                'courseId': Utils.getCourseId
+            }
+        },
         events: {
-            'click .js-save-package': 'savePackage',
             'change .js-passing-limit-enable': 'togglePassingLimit',
             'change .js-rerun-interval-enable': 'toggleRerunInterval',
             'change .js-able-to-run-enable' : 'toggleIsAbleToRuns'
@@ -23,11 +32,16 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 'getFolderId': function(model){
                     return 'package_logo_' + model.get('id');
                 },
+                'getFileUploaderUrl': function (model) {
+                    return path.root + path.api.files + 'package/' + model.get('id') + '/logo';
+                },
                 'uploadLogoMessage' : function() { return Valamis.language['uploadLogoMessage'];},
                 'fileUploadModalHeader' : function() { return Valamis.language['fileUploadModalHeader']; }
             }
         },
-        initialize: function () { },
+        onShow: function() {
+            this.$('.js-package-title').focus();
+        },
         onValamisControlsInit: function () {
             var that = this;
             this.$('.js-is-able-from').datepicker({
@@ -157,13 +171,14 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             }
 
             var tagsElem = this.$el.find('.val-tags')[0].selectize;
-            var tags = tagsElem.getValue().split(",");
-            var taglist = [];
-            if(tags) {
-                _.forEach(tags, function (tagId) {
-                    if(tagId) {
-                        taglist.push(tagsElem.options[tagId].text);
-                    }
+
+            var tagsIds = tagsElem.getValue().split(',');
+
+            var tags = [], taglist = [];
+            if(tagsIds[0] != '') {
+                _.forEach(tagsIds, function (tagId) {
+                    taglist.push(tagsElem.options[tagId].text);
+                    tags.push({id: tagId, text: tagsElem.options[tagId].text});
                 });
             }
 
@@ -179,13 +194,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 tagsList: taglist.join(' • ')
             });
         },
-        savePackage: function () {
-            this.saveModelsTextValues();
-            this.triggerMethod('submit', this.model);
-        },
         onModelChanged: function () {
             this.saveModelsTextValues();
-            this.render();
         },
         onModelLogoChanged: function () {
             this.$('.js-logo').attr('src', this.model.get('logoSrc'));
@@ -238,6 +248,12 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             this.$('.js-category-filter').valamisDropDown('select', this.model.get('selectedCategories')[0]);
             this.$('.js-sort-filter').valamisDropDown('select', this.model.get('sort'));
             this.$('.js-search').val(this.model.get('searchtext'));
+
+            var displayMode = lessonManager.settings.get('displayMode');
+            if (displayMode === DISPLAY_TYPE.TILES)
+                this.$('.js-tile-view').addClass('active');
+            else
+                this.$('.js-list-view').addClass('active');
         },
         onShow: function(){},
         changePackageType: function(e){
@@ -270,11 +286,19 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         changeDisplayMode: function(displayMode){
             this.triggerMethod('toolbar:displaymode:change', displayMode);
             this.$('.js-display-option').removeClass('active');
+            lessonManager.settings.set('displayMode', displayMode);
+            lessonManager.settings.save();
         }
     });
 
     Views.PackageItemView = Marionette.ItemView.extend({
         template: '#packageManagerItemView',
+        templateHelpers :function () {
+            return {
+                'courseId': Utils.getCourseId,
+                'timestamp': Date.now()
+            }
+        },
         className: 'tile s-12 m-4 l-2',
         events: {
             'click .dropdown-menu > li.js-package-edit': 'editPackage',
@@ -291,7 +315,7 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         //},
         /* set the template used to display this view */
         modelEvents: {
-          'package:saved': 'render'
+          'model:change': 'render'
         },
         /* used to show the order in which these method are called */
         initialize: function(options){
@@ -307,7 +331,7 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         },
         deletePackage: function(){
             var that = this;
-            valamisApp.execute('delete:confirm', { message: Valamis.language['deleteConfirmationTitle'] }, function(){
+            valamisApp.execute('delete:confirm', { message: Valamis.language['warningDeletePackageMessageLabel'] }, function(){
                 that.deletePack();
             });
         },
@@ -337,14 +361,15 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
 
     // TODO create PagedCollectionView
     Views.Packages = Marionette.CollectionView.extend({
-        className: 'js-package-items val-row list',
+        className: 'js-package-items val-row',
         template: "#packageManagerPackageList",
         childView: Views.PackageItemView,
         initialize: function (options) {
             this.paginatorModel = options.paginatorModel;
         },
         onRender: function() {
-
+            var displayMode = lessonManager.settings.get('displayMode')|| DISPLAY_TYPE.LIST;
+            this.$el.addClass(displayMode);
         },
         onShow: function(){},
         childEvents: {
@@ -356,13 +381,32 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 })
             },
             "package:edit":function(childView){
-                this.triggerMethod('packagelist:edit:package', childView.model);
+                var editView = new Views.EditPackageView({model: childView.model});
+                var editModalView = new valamisApp.Views.ModalView({
+                    contentView: editView,
+                    header: Valamis.language['editPackageItemHeader'],
+                    submit: function () {
+                        editView.saveModelsTextValues();
+
+                        editView.trigger('view:submit:image', function(){
+                            lessonManager.execute('package:save', childView.model);
+                            childView.render();
+                        });
+                    }
+                });
+
+                valamisApp.execute('modal:show', editModalView);
             }
         }
     });
 
     Views.NewPackagesItemView = Marionette.ItemView.extend({
         template: '#packageManagerNewPackagesItemView',
+        templateHelpers :function () {
+            return {
+                'courseId': Utils.getCourseId
+            }
+        },
         tagName: 'tr',
         events: {
             'keyup .js-new-package-title': 'updateTitle',
@@ -379,6 +423,9 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 'postponeLoading': false,
                 'getFolderId': function(model){
                     return 'package_logo_' + model.get('id');
+                },
+                'getFileUploaderUrl': function (model) {
+                    return path.root + path.api.files + 'package/' + model.get('id') + '/logo';
                 },
                 'uploadLogoMessage' : function() { return Valamis.language['uploadLogoMessage'];},
                 'fileUploadModalHeader' : function() { return Valamis.language['fileUploadModalHeader']; }
@@ -412,14 +459,12 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         childView: Views.NewPackagesItemView,
         childViewContainer: ".js-new-package-items",
         events: {
-            'click .js-save-packages-data' : 'savePackages',
             'click .js-cancel-upload-data' : 'cancelUpload'
         },
         initialize: function (options) {
         },
-        savePackages: function(){
-
-            lessonManager.execute('packages:update', this.collection);
+        onShow: function() {
+            this.$('.js-new-package-title').focus();
         },
         cancelUpload: function () {
             lessonManager.execute('packages:remove', this.collection);
@@ -488,7 +533,10 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                         contentView: newPackagesView,
                         header: Valamis.language['uploadPackagesLabel'],
                         title: Valamis.language['newPackageTitle'],
-                        description: Valamis.language['newPackageDescription']
+                        description: Valamis.language['newPackageDescription'],
+                        submit: function(){
+                            lessonManager.execute('packages:update', newPackages);
+                        }
                     });
 
                     valamisApp.execute('modal:close', uploaderModalView);
@@ -496,27 +544,6 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 });
 
                 valamisApp.execute('modal:show', uploaderModalView);
-            },
-            'packagelist:edit:package': function(childView, model){
-                var editView = new Views.EditPackageView({model: model});
-                var editModalView = new valamisApp.Views.ModalView({
-                    contentView: editView,
-                    submitEl: '.js-save-package',
-                    header: Valamis.language['editPackageItemHeader']
-                });
-
-                valamisApp.execute('modal:show', editModalView);
-
-
-                editView.on('submit', function(model){
-                    this.trigger('view:submit:image', function(name) {
-                        if (name) {
-                            model.set('logo', name);
-                            model.updateLogo();
-                        }
-                        lessonManager.execute("package:save", model);
-                    });
-                });
             }
         },
         initialize: function() {

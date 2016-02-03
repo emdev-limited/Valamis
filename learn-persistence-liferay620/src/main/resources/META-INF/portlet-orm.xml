@@ -186,18 +186,6 @@
 			<transient name="primaryKeyObj" />
 		</attributes>
 	</mapped-superclass>
-	<mapped-superclass class="com.arcusys.learn.persistence.liferay.model.impl.LFConfigModelImpl">
-		<attributes>
-			<id name="id">
-				<column name="ID_" />
-			</id>
-			<basic name="dataKey" />
-			<basic name="dataValue" />
-			<transient name="modelAttributes" />
-			<transient name="primaryKey" />
-			<transient name="primaryKeyObj" />
-		</attributes>
-	</mapped-superclass>
 	<mapped-superclass class="com.arcusys.learn.persistence.liferay.model.impl.LFCourseModelImpl">
 		<attributes>
 			<id name="id">
@@ -622,65 +610,6 @@
 			<transient name="primaryKeyObj" />
 		</attributes>
 	</mapped-superclass>
-	<mapped-superclass class="com.arcusys.learn.persistence.liferay.model.impl.LFSlideModelImpl">
-		<attributes>
-			<id name="id">
-				<column name="ID_" />
-			</id>
-			<basic name="bgcolor" />
-			<basic name="bgimage" />
-			<basic name="title" />
-			<basic name="slideSetId" />
-			<basic name="topSlideId" />
-			<basic name="leftSlideId" />
-			<basic name="statementVerb" />
-			<basic name="statementObject" />
-			<basic name="statementCategoryId" />
-			<transient name="modelAttributes" />
-			<transient name="primaryKey" />
-			<transient name="primaryKeyObj" />
-		</attributes>
-	</mapped-superclass>
-	<mapped-superclass class="com.arcusys.learn.persistence.liferay.model.impl.LFSlideEntityModelImpl">
-		<attributes>
-			<id name="id">
-				<column name="ID_" />
-			</id>
-			<basic name="top">
-				<column name="TOP_" />
-			</basic>
-			<basic name="left">
-				<column name="LEFT_" />
-			</basic>
-			<basic name="width" />
-			<basic name="height" />
-			<basic name="zIndex" />
-			<basic name="content" />
-			<basic name="entityType" />
-			<basic name="slideId" />
-			<basic name="correctLinkedSlideId" />
-			<basic name="incorrectLinkedSlideId" />
-			<basic name="notifyCorrectAnswer" />
-			<transient name="ZIndex" />
-			<transient name="modelAttributes" />
-			<transient name="primaryKey" />
-			<transient name="primaryKeyObj" />
-		</attributes>
-	</mapped-superclass>
-	<mapped-superclass class="com.arcusys.learn.persistence.liferay.model.impl.LFSlideSetModelImpl">
-		<attributes>
-			<id name="id">
-				<column name="ID_" />
-			</id>
-			<basic name="title" />
-			<basic name="description" />
-			<basic name="logo" />
-			<basic name="courseId" />
-			<transient name="modelAttributes" />
-			<transient name="primaryKey" />
-			<transient name="primaryKeyObj" />
-		</attributes>
-	</mapped-superclass>
 	<mapped-superclass class="com.arcusys.learn.persistence.liferay.model.impl.LFTCClntApiStorageModelImpl">
 		<attributes>
 			<id name="id">
@@ -717,6 +646,7 @@
 				<column name="KEY_" />
 			</basic>
 			<basic name="secret" />
+			<basic name="customHost" />
 			<transient name="modelAttributes" />
 			<transient name="primaryKey" />
 			<transient name="primaryKeyObj" />
@@ -831,10 +761,6 @@
 		<table name="Learn_LFConditionRule" />
 		<attributes />
 	</entity>
-	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFConfigImpl" name="LFConfig">
-		<table name="Learn_LFConfig" />
-		<attributes />
-	</entity>
 	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFCourseImpl" name="LFCourse">
 		<table name="Learn_LFCourse" />
 		<attributes />
@@ -937,18 +863,6 @@
 	</entity>
 	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFSiteDependentConfigImpl" name="LFSiteDependentConfig">
 		<table name="Learn_LFSiteDependentConfig" />
-		<attributes />
-	</entity>
-	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFSlideImpl" name="LFSlide">
-		<table name="Learn_LFSlide" />
-		<attributes />
-	</entity>
-	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFSlideEntityImpl" name="LFSlideEntity">
-		<table name="Learn_LFSlideEntity" />
-		<attributes />
-	</entity>
-	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFSlideSetImpl" name="LFSlideSet">
-		<table name="Learn_LFSlideSet" />
 		<attributes />
 	</entity>
 	<entity class="com.arcusys.learn.persistence.liferay.model.impl.LFTCClntApiStorageImpl" name="LFTCClntApiStorage">

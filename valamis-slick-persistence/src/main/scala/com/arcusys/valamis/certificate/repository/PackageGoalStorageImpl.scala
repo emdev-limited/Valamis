@@ -22,31 +22,48 @@ class PackageGoalStorageImpl @Inject() (val db: JdbcBackend#DatabaseDef,
 
   def create(packageGoal: PackageGoal) = db.withSession { implicit session =>
     packageGoals.insert(packageGoal)
-    get(packageGoal.certificateId, packageGoal.packageId).get
-  }
-  override def get(certificateId: Long, packageId: Long) = db.withSession(implicit session => packageGoals.filter(ag => ag.certificateId === certificateId && ag.packageId === packageId).firstOption)
-  def getBy(packageId: Option[Long] = None, certificateId: Option[Long] = None) = db.withSession(implicit session => composeQuery(packageId, certificateId).run)
-  def getCountBy(packageId: Option[Long] = None, certificateId: Option[Long] = None) = db.withSession(implicit session => composeQuery(packageId, certificateId).length.run)
-  def update(packageGoal: PackageGoal) = db.withSession{ implicit session =>
-    packageGoals.filter(ag => ag.certificateId === packageGoal.certificateId && ag.packageId === packageGoal.packageId).update(packageGoal)
-    get(packageGoal.certificateId, packageGoal.packageId).get
-  }
-  override def delete(certificateId: Long, packageId: Long) = db.withSession(implicit session => packageGoals.filter(ag => ag.certificateId === certificateId && ag.packageId === packageId).delete)
-
-  def composeQuery(packageId: Option[Long] = None, certificateId: Option[Long] = None)(implicit session: JdbcBackend#Session) = {
-    val collection = packageGoals
-    val courseIdFiltered = if(packageId.isDefined) collection.filter(_.packageId === packageId.get) else collection
-
-    if(certificateId.isDefined) courseIdFiltered.filter(_.certificateId === certificateId.get) else courseIdFiltered
+    packageGoals.filter(ag => ag.certificateId === packageGoal.certificateId && ag.packageId === packageGoal.packageId).first
   }
 
-  override def create(certificateId: Long, packageId: Long, periodValue: Int, periodType: PeriodType): PackageGoal = create(PackageGoal(certificateId, packageId, periodValue, periodType))
+  override def get(certificateId: Long, packageId: Long) = db.withSession { implicit session =>
+    packageGoals.filter(ag => ag.certificateId === certificateId && ag.packageId === packageId).firstOption
+  }
 
-  override def modify(certificateId: Long, packageId: Long, periodValue: Int, periodType: PeriodType): PackageGoal = update(PackageGoal(certificateId, packageId, periodValue, periodType))
+  override def delete(certificateId: Long, packageId: Long) = db.withSession { implicit session =>
+    packageGoals.filter(ag => ag.certificateId === certificateId && ag.packageId === packageId).delete
+  }
 
-  override def getByPackageId(packageId: Long): Seq[PackageGoal] = getBy(packageId = Some(packageId))
+  override def create(certificateId: Long, packageId: Long, periodValue: Int, periodType: PeriodType): PackageGoal = {
+    val packageGoal = PackageGoal(certificateId, packageId, periodValue, periodType)
 
-  override def getByCertificateId(certificateId: Long): Seq[PackageGoal] = getBy(certificateId = Some(certificateId))
+    db.withSession { implicit session =>
+      packageGoals.insert(packageGoal)
+      packageGoals.filter(ag => ag.certificateId === packageGoal.certificateId && ag.packageId === packageGoal.packageId).first
+    }
+  }
 
-  override def getByCertificateIdCount(certificateId: Long): Int = getCountBy(certificateId = Some(certificateId))
+  override def modify(certificateId: Long, packageId: Long, periodValue: Int, periodType: PeriodType): PackageGoal = {
+    val packageGoal = PackageGoal(certificateId, packageId, periodValue, periodType)
+
+    db.withSession { implicit session =>
+      val filtered =
+        packageGoals
+          .filter(entity => entity.certificateId === certificateId && entity.packageId === packageId)
+
+      filtered.update(packageGoal)
+      filtered.first
+    }
+  }
+
+  override def getByPackageId(packageId: Long): Seq[PackageGoal] = db.withSession { implicit session =>
+    packageGoals.filter(_.packageId === packageId).run
+  }
+
+  override def getByCertificateId(certificateId: Long): Seq[PackageGoal] = db.withSession { implicit session =>
+    packageGoals.filter(_.certificateId === certificateId).run
+  }
+
+  override def getByCertificateIdCount(certificateId: Long): Int = db.withSession { implicit session =>
+    packageGoals.filter(_.certificateId === certificateId).length.run
+  }
 }

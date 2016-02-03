@@ -7,15 +7,15 @@ import org.joda.time.DateTime
 trait TincanPackageStorage {
   def createAndGetID(title: String, summary: String, courseID: Option[Int]): Long
 
-  def getByRefID(refID: Long): Option[TincanManifest]
+  def getAll: Seq[TincanPackage]
 
-  def getAll: Seq[TincanManifest]
+  def getManifestByCourseId(courseId: Long, onlyVisible: Boolean = false): Seq[TincanManifest]
 
-  def getByCourseId(courseID: Option[Int], onlyVisible: Boolean = false): Seq[TincanManifest]
+  def getByCourseId(courseId: Long): Seq[TincanPackage]
 
-  def getAllForInstance(courseIDs: List[Int]): Seq[TincanManifest]
+  def getAllForInstance(courseIds: List[Long]): Seq[TincanManifest]
 
-  def getInstanceScopeOnlyVisible(courseIDs: List[Int], titlePattern: Option[String], date: DateTime): Seq[TincanPackage]
+  def getInstanceScopeOnlyVisible(courseIds: List[Long], titlePattern: Option[String], date: DateTime): Seq[TincanPackage]
 
   def getOnlyVisible(scope: ScopeType.Value, scopeID: String, titlePattern: Option[String], date: DateTime): Seq[TincanPackage]
 
@@ -23,16 +23,15 @@ trait TincanPackageStorage {
 
   def getByScope(courseID: Int, scope: ScopeType.Value, scopeID: String): Seq[TincanManifest]
 
-  def getByExactScope(courseIDs: List[Int], scope: ScopeType.Value, scopeID: String): Seq[TincanManifest]
+  def getByExactScope(courseIds: List[Long], scope: ScopeType.Value, scopeID: String): Seq[TincanManifest]
 
-  def getByTitleAndCourseId(titlePattern: String, courseIds: Seq[Int]): Seq[TincanPackage]
+  def getByTitleAndCourseId(titlePattern: Option[String], courseIds: Seq[Long]): Seq[TincanPackage]
 
-  def getCountByTitleAndCourseId(titlePattern: String, courseIds: Seq[Int]): Int
+  def getCountByTitleAndCourseId(titlePattern: String, courseIds: List[Long]): Int
 
   def delete(id: Long)
 
   def modify(id: Long, title: String, summary: String, beginDate: Option[DateTime], endDate: Option[DateTime]): TincanPackage
-  def setLogo(id: Long, logo: Option[String])
 
-  def setAssetRefID(id: Long, refID: Long): TincanPackage
+  def setLogo(id: Long, logo: Option[String])
 }

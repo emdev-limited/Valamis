@@ -40,17 +40,6 @@ NavigationNodeCollection = Backbone.Collection.extend({
         toggleModel.setComplete();
         if(this.previouslyToggled != null) this.previouslyToggled.toggleActive();
         this.previouslyToggled = toggleModel;
-    },
-    initialToggle: function() {
-        function findFirstElem(elem) {
-            if(elem.models[0].get('elementType') == 'directory')
-                return findFirstElem(elem.models[0].internalCollection);
-            else return elem.models[0];
-        }
-        var toggleModel = findFirstElem(this);
-        toggleModel.toggleActive();
-        toggleModel.setComplete();
-        this.previouslyToggled = toggleModel;
     }
 });
 

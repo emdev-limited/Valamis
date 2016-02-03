@@ -24,4 +24,7 @@ object OrganizationLocalServiceHelper {
     serviceContext: ServiceContext) =
     OrganizationLocalServiceUtil.addOrganization(userId, parentOrganizationId, name, orgType, recursable, regionId,
       countryId, statusId, comments, site, serviceContext)
+
+  def getGroupOrganizations (groupId: Long) = OrganizationLocalServiceUtil.getGroupOrganizations(groupId)
+  def getGroupOrganizationCount (groupId: Long) = OrganizationLocalServiceUtil.getGroupOrganizationsCount(groupId)
 }

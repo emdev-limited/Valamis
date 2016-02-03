@@ -1,9 +1,8 @@
-CertificateService = new Backbone.Service({ url: '/',
+CertificateService = new Backbone.Service({ url: path.root,
   sync: {
     'create': {
       'path': path.api.certificates,
       'data':  {
-            action: 'ADD',
             courseId:  Utils.getCourseId(),
             companyID: jQuery('#curriculumCompanyID').val()
       },
@@ -14,86 +13,55 @@ CertificateService = new Backbone.Service({ url: '/',
         return path.api.certificates + model.id
       },
       'data': function (model) {
-        parameters = {
-            action: 'UPDATE',
-            courseId:  Utils.getCourseId()
-        }
-        _.extend(parameters, model.toJSON())
+        var parameters = {courseId: Utils.getCourseId()};
+        _.extend(parameters, model.toJSON());
         return parameters
       },
-      'method': 'post'
+      'method': 'put'
     },
     'read': {
       'path': function (model) {
         return path.api.certificates + model.id;
       },
-      'data': function (model) {
-        return {
-          action: 'GETBYID',
-          courseId: Utils.getCourseId()
-        }
-      },
-      'method': 'get'
+      'data': {courseId: Utils.getCourseId()}
     },
     'delete': {
       'path': function (model) {
         return path.api.certificates + model.id
       },
-      'data': function (model) {
-        return {
-            action:'DELETE',
-            courseId: Utils.getCourseId()
-        }
-      },
-          'method': 'post'
+      'data': {courseId: Utils.getCourseId()},
+      'method': 'delete'
     }
   },
 
   targets: {
     'clone': {
       'path': function (model) {
-        return path.api.certificates + model.id
+        return path.api.certificates + model.id + '/do/clone'
       },
-      'data': function (model) {
-        return {
-            action: 'CLONE',
-            courseId: Utils.getCourseId()
-
-        }
-      },
-      method: 'post'
+      'data': {courseId: Utils.getCourseId()},
+      'method': 'post'
     },
     'publish': {
       'path': function (model) {
-        return path.api.certificates + model.id
+        return path.api.certificates + model.id + '/do/publish'
       },
-      'data': function (model) {
-        return {
-            action:'PUBLISH',
-            courseId: Utils.getCourseId()
-        }
-      },
-      method: 'post'
+      'data': {courseId: Utils.getCourseId()},
+      'method': 'post'
     },
     'unpublish': {
       'path': function (model) {
-        return path.api.certificates + model.id
+        return path.api.certificates + model.id + '/do/unpublish'
       },
-      'data': function (model) {
-        return {
-            action: 'UNPUBLISH',
-            courseId: Utils.getCourseId()
-        }
-      },
-      method: 'post'
+      'data': {courseId: Utils.getCourseId()},
+      'method': 'post'
     },
     'join' : {
       'path': function (model) {
-        return path.api.certificates + model.id
+        return path.api.certificates + model.id + "/user"
       },
       'data': function (model) {
         return {
-            action: 'ADDUSER',
             userID: jQuery('#curriculumStudentID').val(),
             courseId: Utils.getCourseId()
         }
@@ -102,16 +70,15 @@ CertificateService = new Backbone.Service({ url: '/',
     },
     'leave' : {
       'path': function (model) {
-        return path.api.certificates + model.id
+        return path.api.certificates + model.id + "/user"
       },
       'data': function (model) {
         return {
-            action: 'DELETEUSER',
             userID: jQuery('#curriculumStudentID').val(),
             courseId: Utils.getCourseId()
         }
       },
-      method: 'post'
+      method: 'delete'
     }
   }
 });
@@ -139,7 +106,6 @@ CertificateCollectionService = new Backbone.Service({ url: path.root,
         var sortBy = order.split(':')[0];
         var asc = order.split(':')[1];
         return {
-          action: 'GETALL',
           companyID: jQuery('#curriculumCompanyID').val(),
           page: options.currentPage,
           count: options.itemsOnPage,
@@ -148,7 +114,8 @@ CertificateCollectionService = new Backbone.Service({ url: path.root,
           sortBy: sortBy,
           sortAscDirection: asc,
           resultAs: "short",
-          courseId: Utils.getCourseId()
+          courseId: Utils.getCourseId(),
+          additionalData: 'itemsCount'
         }
       },
       method: 'get'
@@ -207,8 +174,7 @@ AvailableCertificateCollectionService = new Backbone.Service({ url: path.root,
   sync: {
     'read': {
       'path': function (e, options) {
-        return path.api.users + jQuery('#curriculumStudentID').val() + '/certificates' +
-            ''
+        return path.api.users + jQuery('#curriculumStudentID').val() + '/certificates'
       },
       'data': function (e, options) {
         var order = options.order;

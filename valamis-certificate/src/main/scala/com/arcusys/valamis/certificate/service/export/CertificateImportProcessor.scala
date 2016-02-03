@@ -5,21 +5,18 @@ import java.io.File
 import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.certificate.model.goal.{ ActivityGoal, CourseGoal, PackageGoal, StatementGoal }
 import com.arcusys.valamis.certificate.storage._
+import com.arcusys.valamis.course.CourseService
 import com.arcusys.valamis.export.ImportProcessor
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.gradebook.service.CourseGradeService
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.util.FileSystemUtil
 import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
 import org.joda.time.DateTime
 
-/**
- * Created by mminin on 08.09.14.
- */
 class CertificateImportProcessor(implicit val bindingModule: BindingModule) extends ImportProcessor[CertificateExportModel] with Injectable {
 
   private lazy val fileFacade = inject[FileService]
-  private lazy val courseFacade = inject[CourseGradeService]
+  private lazy val courseService = inject[CourseService]
 
   private lazy val certificateStorage = inject[CertificateRepository]
   private lazy val courseGoalStorage = inject[CourseGoalStorage]
@@ -68,7 +65,7 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
       certificateInfo.isPermanent,
       certificateInfo.isOpenBadgesIntegration,
       certificateInfo.shortDescription,
-      companyId.toInt,
+      companyId,
       PeriodTypes.parse(certificateInfo.validPeriodType),
       certificateInfo.validPeriod,
       DateTime.now()
@@ -76,7 +73,7 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
   }
 
   private def importCourseGoal(goalInfo: CourseGoalExport, certificate: Certificate, companyId: Long): Option[CourseGoal] = {
-    val courseOption = courseFacade.getAllCourses(companyId)
+    val courseOption = courseService.getByCompanyId(companyId)
       .find(c => c.getDescriptiveName == goalInfo.title && c.getFriendlyURL == goalInfo.url)
 
     courseOption.map(course => courseGoalStorage.create(

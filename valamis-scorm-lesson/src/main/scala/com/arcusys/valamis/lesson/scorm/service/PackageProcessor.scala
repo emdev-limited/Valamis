@@ -4,6 +4,7 @@ import java.io._
 import java.util.zip.ZipFile
 
 import com.arcusys.valamis.file.storage.FileStorage
+import com.arcusys.valamis.lesson.model.PackageScopeRule
 import com.arcusys.valamis.lesson.scorm.model.manifest.Activity
 import com.arcusys.valamis.lesson.scorm.service.parser.ManifestParser
 import com.arcusys.valamis.lesson.scorm.storage.{ ActivityStorage, ResourcesStorage, ScormPackagesStorage }
@@ -35,8 +36,20 @@ class PackageProcessor(implicit val bindingModule: BindingModule) extends Inject
     val root = XML.loadFile(new File(tempDirectory, "imsmanifest.xml"))
     val doc = new ManifestParser(root, packageTitle, packageSummary).parse
     val packageId = scormRepository.createAndGetID(doc.manifest.copy(logo = logo), courseId)
-    packageScopeRuleRepository.create(packageId, ScopeType.Instance, None, true, false)
-    packageScopeRuleRepository.create(packageId, ScopeType.Site, courseId.map(_.toString), true, false)
+    packageScopeRuleRepository.create(
+      PackageScopeRule(
+        packageId,
+        ScopeType.Instance,
+        None,
+        visibility = true,
+        isDefault = false))
+    packageScopeRuleRepository.create(
+      PackageScopeRule(
+        packageId,
+        ScopeType.Site,
+        courseId.map(_.toString),
+        visibility = true,
+        isDefault = false))
 
     for (organizationNode <- doc.organizations) {
       activityRepository.create(packageId, organizationNode.item)

@@ -1,14 +1,14 @@
 package com.arcusys.learn.facades
 
-import com.arcusys.learn.models.response.PieData
-import com.arcusys.valamis.gradebook.model.GradebookUserSortBy
-import GradebookUserSortBy.GradebookUserSortBy
 import com.arcusys.learn.models.Gradebook._
-import com.arcusys.valamis.lrs.api.StatementApi
+import com.arcusys.learn.models.response.{CollectionResponse, PieData}
+import com.arcusys.valamis.gradebook.model.GradebookUserSortBy
+import com.arcusys.valamis.gradebook.model.GradebookUserSortBy.GradebookUserSortBy
+import com.arcusys.valamis.lesson.model.RecentLesson
+import com.arcusys.valamis.model.SkipTake
 
 trait GradebookFacadeContract {
-  def getStudents(statementApi: StatementApi,
-                  courseId: Int,
+  def getStudents(courseId: Long,
                   skip: Int,
                   count: Int,
                   nameFilter: String,
@@ -16,44 +16,31 @@ trait GradebookFacadeContract {
                   sortBy: GradebookUserSortBy,
                   sortAZ: Boolean,
                   detailed: Boolean = false,
-                  packageIds: Seq[Int] = Seq()): Seq[StudentResponse]
+                  packageIds: Seq[Long] = Seq()): Seq[StudentResponse]
 
   def getStudentsCount(courseId: Int,
     nameFilter: String,
     orgNameFilter: String): Int
 
-  def getGradesForStudent(statementApi: StatementApi,
-                          studentId: Int,
+  def getGradesForStudent(studentId: Int,
                           courseId: Int,
                           skip: Int,
                           count: Int,
                           sortAsc: Boolean = false,
                           withStatements: Boolean = true): StudentResponse
 
-  /** See the body, name not descriptive */
-  def getUnfinishedPackages(
-    statementApi: StatementApi,
-    userId: Long): Seq[GradedPackageResponse]
+  def getBy(userId: Long, isCompeted: Boolean, skipTake: Option[SkipTake]): CollectionResponse[GradedPackageResponse]
 
-  def getCompletedPackagesCount(statementApi: StatementApi, userId: Long): Int
 
-  def getCompletedPackages(statementApi: StatementApi, userId: Long): Seq[PieData]
+  def getPieDataWithCompletedPackages(userId: Long): (Seq[PieData], Int)
 
   def getTotalGradeForStudent(studentId: Int,
     courseId: Int): TotalGradeResponse
 
-  def changeTotalGrade(studentId: Int,
-    courseId: Int,
-    totalGrade: String,
-    comment: Option[String])
+  def getLastModified(courseId: Long, userId: Long): String
 
-  def changePackageGrade(studentId: Int,
-    packageId: Int,
-    totalGrade: String,
-    comment: Option[String])
+  def getLastPackages(userId: Long, count: Int): Seq[RecentLesson]
 
-  def getLastModified(statementApi: StatementApi, courseId: Int, userId: Long): String
-
-  def getPackageGradeWithStatements(statementApi: StatementApi, valamisUserId: Int,
-    packageId: Long): PackageGradeResponse
+  def getPackageGradeWithStatements(valamisUserId: Long,
+    packageId: Long, gradeAuto: Option[String] = None): PackageGradeResponse
 }

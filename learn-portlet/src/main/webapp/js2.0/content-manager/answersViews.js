@@ -73,13 +73,20 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         updateAnswerViewPositions: function(){
             var that = this;
             that.updateModels();
+            var isChanged = false;
 
             var sorted = that.$('.js-answers').sortable('toArray');
             this.collection.comparator = function(model){
                 return sorted.indexOf(model.cid);
             };
 
+            this.collection.on('change', function(){
+                isChanged = true;
+            });
             this.collection.sort();
+            if (!isChanged) {
+                this.render();
+            }
         },
         //TODO validate answers
         validate: function(){

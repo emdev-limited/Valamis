@@ -38,4 +38,8 @@ trait SettingService {
   def getGoogleApiKey(): String
 
   def setDBVersion(value: String): Unit
+
+  def setLicense(value: String): Unit
+
+  def getLicense: String
 }

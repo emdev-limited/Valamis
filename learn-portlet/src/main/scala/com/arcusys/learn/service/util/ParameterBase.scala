@@ -1,15 +1,15 @@
 package com.arcusys.learn.service.util
 
+import java.util.Date
+import javax.servlet.http.HttpServletResponse
+
 import com.thoughtworks.paranamer.ParameterNamesNotFoundException
+import org.apache.http.ParseException
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.scalatra.ScalatraBase
 
-//import scala.tools.cmd.CommandLineParser.ParseException
-import scala.tools.cmd.Parser.ParseException
-import scala.util.{ Failure, Success, Try }
-import java.util.Date
-import javax.servlet.http.HttpServletResponse
+import scala.util.{Failure, Success, Try}
 
 class ParameterBase(name: String, kernel: ScalatraBase) {
   import kernel._
@@ -88,9 +88,20 @@ class ParameterBase(name: String, kernel: ScalatraBase) {
     case None        => Seq[String]()
   }
 
+  def multiLong: Seq[Long] = {
+    kernel.multiParams.get(name) match {
+      case Some(values) => Try(values.map(_.toLong))
+        .getOrElse(throw new ParseException(s"Multi long parameter '$name' could not be parsed"))
+      case None => Seq()
+    }
+  }
+
   def contains: Boolean = kernel.multiParams.contains(name)
 
   def option: Option[String] = kernel.params.get(name)
+  def option(none: String): Option[String] = {
+    kernel.params.get(name).filterNot(_ == none)
+  }
 
   def intOption: Option[Int] = Try(intRequired).toOption
   def intOption(none: String): Option[Int] = {
@@ -101,6 +112,9 @@ class ParameterBase(name: String, kernel: ScalatraBase) {
   def intOption(none: Int): Option[Int] = intOption(none.toString)
 
   def longOption: Option[Long] = Try(longRequired).toOption
+  def longOption(none: Long): Option[Long] = {
+    longOption.filterNot(_ == none)
+  }
 
   def bigDecimalOption(none: String): Option[BigDecimal] = {
     val value = params.getOrElse(name, none)

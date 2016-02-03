@@ -219,10 +219,13 @@ CKEDITOR.config.font_names = 'Arial/Arial, Helvetica, sans-serif;' +
 	'Courier New/Courier New, Courier, monospace;' +
 	'Georgia/Georgia, serif;' +
 	'Lucida Sans Unicode/Lucida Sans Unicode, Lucida Grande, sans-serif;' +
+	'Roboto/Roboto;'+
+	'Source Sans Pro/Source Sans Pro, sans-serif;'+
 	'Tahoma/Tahoma, Geneva, sans-serif;' +
 	'Times New Roman/Times New Roman, Times, serif;' +
 	'Trebuchet MS/Trebuchet MS, Helvetica, sans-serif;' +
-	'Verdana/Verdana, Geneva, sans-serif';
+	'Ubuntu/Ubuntu;' +
+	'Verdana/Verdana, Geneva, sans-serif;';
 
 /**
  * The text to be displayed in the Font combo is none of the available values

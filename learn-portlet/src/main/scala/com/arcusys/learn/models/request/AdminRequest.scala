@@ -1,10 +1,10 @@
 package com.arcusys.learn.models.request
 
-import com.arcusys.learn.service.util.Parameter
 import com.arcusys.learn.models.request.AdminActionType.AdminActionType
+import com.arcusys.learn.service.util.Parameter
 import com.arcusys.valamis.lrsEndpoint.model.AuthorizationType
+import com.arcusys.valamis.lrsEndpoint.model.AuthorizationType.AuthorizationType
 import org.scalatra.ScalatraBase
-import AuthorizationType.AuthorizationType
 
 object AdminRequest extends BaseRequest {
   val IssuerName = "issuerName"
@@ -13,6 +13,7 @@ object AdminRequest extends BaseRequest {
   val IssuerEmail = "issuerEmail"
   val SendMessages = "sendMessages"
   val IsExternalLRS = "isExternalLrs"
+  val CustomHost= "internalLrsCustomHost"
   val Endpoint = "endpoint"
   val AuthType = "authType"
   val CommonCredentials = "commonCredentials"
@@ -40,6 +41,8 @@ object AdminRequest extends BaseRequest {
     def actionType: AdminActionType = AdminActionType.withName(Parameter(AdminRequest.Action).required.toUpperCase)
     def isExternalLrs: Boolean = Parameter(AdminRequest.IsExternalLRS).booleanRequired
     def courseId = Parameter(CourseId).intRequired
+
+    def customHost = Parameter(AdminRequest.CustomHost).option("")
 
     def endPoint: String = {
       if (isExternalLrs) {

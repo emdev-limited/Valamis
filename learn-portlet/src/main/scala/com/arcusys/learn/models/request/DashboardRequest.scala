@@ -10,7 +10,7 @@ object DashboardRequest extends BaseRequest {
 
   def apply(controller: ScalatraServlet) = new Model(controller)
 
-  class Model(val scalatra: ScalatraBase) extends BaseCollectionFilteredRequestModel(scalatra) with OAuthModel  {
+  class Model(val scalatra: ScalatraBase) extends BaseCollectionFilteredRequestModel(scalatra) {
 
   }
 }

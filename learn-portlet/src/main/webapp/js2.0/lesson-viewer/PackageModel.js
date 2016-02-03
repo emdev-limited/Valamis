@@ -2,13 +2,36 @@ PlayerPackageModelService = new Backbone.Service({
   url: path.root,
   targets: {
     sharePackage: {
-      'path': path.api.valamisActivity,
+      'path': path.api.activities,
       'data': function(model, options){
         var params =  {
           action: 'SHARELESSON',
           packageId: model.get('id'),
           comment: options.comment,
           courseId: Utils.getCourseId()
+        };
+        return params;
+      },
+      'method': 'post'
+    },
+    ratePackage: {
+      'path': path.api.packages + 'rate/',
+      'data': function(model, options){
+        var params =  {
+          action: 'UPDATERATING',
+          id: model.get('id'),
+          ratingScore: options.ratingScore
+        };
+        return params;
+      },
+      'method': 'post'
+    },
+    deletePackageRating: {
+      'path': path.api.packages + 'rate/',
+      'data': function(model){
+        var params =  {
+          action: 'DELETERATING',
+          id: model.get('id')
         };
         return params;
       },
@@ -35,22 +58,38 @@ PlayerPackageCollectionService = new Backbone.Service({ url: path.root,
         var order = jQueryValamis('#playerPackageOrder').data('value');
         var sortBy = order.split(':')[0];
         var asc = order.split(':')[1];
-        var tagID = jQueryValamis('#playerPackageTags').data('value');
-        return {
-          action: 'VISIBLE',
-          page: options.currentPage,
-          count: options.itemsOnPage,
-          courseId: Utils.getCourseId(),
-          pageID: jQueryValamis('#pageID').val(),
-          playerID: jQueryValamis('#playerID').val(),
-          filter: jQueryValamis('#playerPackageFilter').val(),
-          sortBy: sortBy,
-          sortAscDirection: asc,
-          tagID: tagID
+        var tagId = jQueryValamis('#playerPackageTags').data('value');
 
-        }
+        var params = {
+            action: 'VISIBLE',
+            courseId: Utils.getCourseId(),
+            pageID: jQueryValamis('#pageID').val(),
+            playerID: jQueryValamis('#playerID').val(),
+            filter: jQueryValamis('#playerPackageFilter').val(),
+            sortBy: sortBy,
+            sortAscDirection: asc,
+            tagId: tagId
+        };
+
+        if (options.currentPage != undefined) params.page = options.currentPage;
+        if (options.itemsOnPage != undefined) params.count = options.itemsOnPage;
+
+        return params;
       },
       'method': 'get'
+    }
+  },
+  targets: {
+    updateIndex: {
+      'path': path.api.packages + 'order/',
+      'data': function (model, options) {
+        var params = {
+            playerID: options.playerId,
+            packageIds: options.index
+            };
+        return params;
+      },
+      'method': 'post'
     }
   }
 });

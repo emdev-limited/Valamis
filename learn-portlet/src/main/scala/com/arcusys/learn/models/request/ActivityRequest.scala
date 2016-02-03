@@ -13,12 +13,16 @@ object ActivityRequest extends BaseRequest {
   val Content = "content"
   val Comment = "comment"
   val PackageId = "packageId"
+  val GetMyActivities = "getMyActivities"
+  val Id = "id"
+  val ActivityName = "activity"
+  val PlId = "plid"
 
   implicit val serializationFormats = DefaultFormats + new EnumNameSerializer(Activities) ++ org.json4s.ext.JodaTimeSerializers.all
 
   def apply(controller: ScalatraServlet) = new Model(controller)
 
-  class Model(val controller: ScalatraServlet) extends OAuthModel {
+  class Model(val controller: ScalatraServlet) extends BaseCollectionFilteredRequestModel(controller) {
     implicit val scalatra = controller
 
     def action = Parameter(Action).required
@@ -27,5 +31,11 @@ object ActivityRequest extends BaseRequest {
     def comment = Parameter(Comment).option
     def packageId = Parameter(PackageId).longRequired
     def userIdServer = PermissionUtil.getUserId
+    def getMyActivities = Parameter(GetMyActivities).booleanOption.getOrElse(false)
+    def id = Parameter(Id).longRequired
+    def activityName = Parameter(ActivityName).required
+    def plId = Parameter(PlId).longRequired
+
+
   }
 }

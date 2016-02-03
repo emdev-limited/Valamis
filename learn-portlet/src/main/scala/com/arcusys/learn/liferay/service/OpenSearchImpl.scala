@@ -2,11 +2,11 @@ package com.arcusys.learn.liferay.service
 
 import com.arcusys.learn.liferay.LiferayClasses.LHitsOpenSearchImpl
 import com.arcusys.learn.liferay.util.IndexerRegistryUtilHelper
-import com.arcusys.valamis.lesson.scorm.model.manifest.Manifest
+import com.arcusys.valamis.lesson.model.BaseManifest
 
 class OpenSearchImpl extends LHitsOpenSearchImpl {
-  val SEARCH_PATH = "/c/projectlearn/open_search"
-  val TITLE = "Project Learn Search: "
+  val SEARCH_PATH = "/c/valamis/open_search"
+  val TITLE = "Valamis Search: "
 
   def getSearchPath = SEARCH_PATH
 
@@ -14,5 +14,5 @@ class OpenSearchImpl extends LHitsOpenSearchImpl {
 
   def getTitle(keywords: String) = TITLE + keywords
 
-  override def getIndexer = IndexerRegistryUtilHelper.getIndexer(classOf[Manifest])
+  override def getIndexer = IndexerRegistryUtilHelper.getIndexer(classOf[BaseManifest].getName)
 }

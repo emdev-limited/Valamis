@@ -41,3 +41,35 @@ function getAPI() {
     };
 
 })(jQuery);
+
+var escapeArray = {
+    '<': "&lt;",
+    '>': "&gt;",
+    '&': "&amp;",
+    '"': "&quot;",
+    '\'': "&#39;",
+    '\\': "&#92;",
+    '\\\\\\\"': "\\\\\"", //Small fix if str has \"
+
+    //Scandinavian letters
+    'Ä': "&Auml;",
+    'Ö': "&Ouml;",
+    'Å': "&Aring;",
+    'ä': "&auml;",
+    'ö': "&ouml;",
+    'å': "&aring;"
+};
+
+var unescapeElement = function(str) {
+    _.each(escapeArray, function (value, key) {
+        str = str.split(value).join(key)
+    });
+    return str;
+};
+
+var escapeElement = function(str) {
+    _.each(escapeArray, function (value, key) {
+        str = str.split(key).join(value)
+    });
+    return str;
+};

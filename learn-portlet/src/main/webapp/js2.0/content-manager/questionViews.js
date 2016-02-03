@@ -13,11 +13,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             'question': '#contentManagerQuestionRegion'
         },
         events: {
-            'change .js-question-type': 'onQuestionTypeChanged',
-            'click .js-saveQuestion': 'saveQuestion'
-        },
-        initialize: function(){
-
+            'change .js-question-type': 'onQuestionTypeChanged'
         },
         onRender: function(){
             var questionType = this.model.get('questionType');
@@ -31,7 +27,6 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         onQuestionTypeChanged: function(){
             var questionType = this.$('.js-question-type').val().replace('type', '');
 
-
             this.model.set('questionType', questionType);
 
             var questionView = new questionViews[questionType]({
@@ -40,11 +35,11 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
 
             this.question.show(questionView);
         },
-        saveQuestion: function(){
-            if(!this.question.currentView.validate()) return false;
-
+        validate: function(){
+            return this.question.currentView.validate();
+        },
+        updateModel: function(){
             this.question.currentView.updateModel();
-            this.triggerMethod('submit', this.model);
         }
     });
 
@@ -63,17 +58,21 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             if(this.$('.js-right-answer')) this.$('.js-right-answer').val(this.model.get('rightAnswerText'));
             if(this.$('.js-wrong-answer')) this.$('.js-wrong-answer').val(this.model.get('wrongAnswerText'));
 
+        },
+        onShow:function(){
             var that = this;
-            setTimeout(function(){
-                that.activateEditor();
-            }, 100);
 
-            if(this.haveOptions) {
-                this.renderAnserOptions();
-            }
+            that.activateEditor().done(function(){
+                if(that.haveOptions) {
+                    that.renderAnswerOptions();
+                }
 
+                that.$('.js-title').focus();
+            });
         },
         activateEditor: function () {
+            var editorDeffered = $.Deferred();
+            setTimeout(function(){
             CKEDITOR.replace('contentManagerQuestionTextView', {
                 toolbarLocation: 'bottom',
                 height: 100,
@@ -85,10 +84,17 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                     { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
                     { name: 'insert', items: [ 'Image'] }
                 ]});
+
+                editorDeffered.resolve();
+             }, 100);
+
+            return editorDeffered.promise();
         },
-        renderAnserOptions: function(){
-            var answers = eval(this.model.get('answers'));
-            this.optionCollections = new contentManager.Entities.AnswerModelCollection(answers);
+        renderAnswerOptions: function(){
+            if (!this.optionCollections) {
+                var answers = eval(this.model.get('answers'));
+                this.optionCollections = new contentManager.Entities.AnswerModelCollection(answers);
+            }
 
             var answerCollectionView = new this.optionsView({
                 collection : this.optionCollections
@@ -98,12 +104,12 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         collectAnswers: function(){
             this.answersRegion.currentView.updateModels();
-            return JSON.stringify(this.optionCollections);
+            return this.optionCollections.toJSON();
         },
         validate: function(){
             var title = this.$('.js-title').val();
             if(title.length === 0){
-                toastr.warning(Valamis.language['overlayWarningMessageLabel']);
+                valamisApp.execute('notify', 'warning', Valamis.language['titleIsEmptyError']);
                 return false;
             }
 
@@ -123,10 +129,10 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             var rightAnswer = this.$('.js-right-answer').val();
             var wrongAnswer = this.$('.js-wrong-answer').val();
 
-            if(!rightAnswer) rightAnswer = Valamis.language['questionRightAnswerDefault'];
-            if(!wrongAnswer) wrongAnswer = Valamis.language['questionWrongAnswerDefault'];
+            if(!rightAnswer) rightAnswer = Valamis.language['questionRightAnswerDefaultLabel'];
+            if(!wrongAnswer) wrongAnswer = Valamis.language['questionWrongAnswerDefaultLabel'];
 
-            var answers = '[]';
+            var answers = [];
             if(this.haveOptions) {
                 answers = this.collectAnswers();
             }
@@ -197,11 +203,14 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         onRender:function(){
             Views.BaseEditQuestionView.prototype.onRender.apply(this, arguments);
-
         },
         onValamisControlsInit: function(){
+
+            var answers = eval(this.model.get('answers'));
+            this.optionCollections = new contentManager.Entities.AnswerModelCollection(answers);
+
             var score = 0;
-            if(!this.optionCollections.isEmpty()) {
+            if(this.optionCollections && !this.optionCollections.isEmpty()) {
                 score = this.optionCollections.at(0).get('score');
             }
 
@@ -217,7 +226,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             });
 
             this.answersRegion.currentView.updateModels();
-            return JSON.stringify(this.optionCollections);
+            return this.optionCollections.toJSON();
         }
     });
 
@@ -255,9 +264,9 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         collectAnswers: function(){
             this.answersRegion.currentView.updateModels();
-            return JSON.stringify(this.answersRegion.currentView.collectAnswers());
+            return this.answersRegion.currentView.collectAnswers();
         },
-        renderAnserOptions: function(){
+        renderAnswerOptions: function(){
             var answers = eval(this.model.get('answers'));
 
             var groupedAnswers = _.groupBy( answers, function(item) { return item.answerText ;});
@@ -273,6 +282,24 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             });
 
             this.answersRegion.show(answerCollectionView);
+        },
+        validate: function() {
+            this.updateModel();
+            var answers, message;
+            answers = this.model.get('answers');
+
+            message = _.isEmpty(answers)
+                ? 'haveNoAnswersError'
+                : _.every(answers, function(item) { return _.isEmpty(item.matchingText); })
+                    ? 'haveNoMatchingElementError'
+                    : null;
+
+            if (message) {
+                valamisApp.execute('notify', 'warning', Valamis.language[message]);
+                return false;
+            }
+            else
+                return Views.BaseEditQuestionView.prototype.validate.apply(this, arguments);
         }
     });
 
@@ -280,20 +307,11 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
     Views.EditPlainTextQuestionView =  Views.BaseEditQuestionView.extend({
         template: '#contentManagerPlainTextQuestion',
         className: '',
-        events: {
-            'click .js-saveContent': 'saveContent'
-        },
         onRender:function(){
             Views.BaseEditQuestionView.prototype.onRender.apply(this, arguments);
         },
         updateModel: function(){
             this.updateCommonFieldsModel();
-        },
-        saveContent: function(){
-            if(!this.validate()) return false;
-
-            this.updateModel();
-            this.triggerMethod('submit', this.model);
         }
     });
 

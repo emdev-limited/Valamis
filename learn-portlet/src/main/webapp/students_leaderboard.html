@@ -4,18 +4,15 @@
 <div>
     <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
-    <div id='leaderboardLoading'>
-        <img src="{{contextPath}}/img/loading.gif" alt="Loading">
+    <div id='leaderboardLoading' class="loading-container">
     </div>
     <div id="leaderboard" class="board"></div>
     <div id="paginationBoard" class="leaderboardPagination"></div>
 </div>
 <script type="text/javascript">
     // upload translations
-    var defaultURL = Utils.getContextPath() + 'i18n/statementReport_en.properties';
-    var localizedURL = Utils.getContextPath() + 'i18n/statementReport_{{language}}.properties';
-    Utils.i18nLoader(localizedURL, defaultURL, onReportLanguageLoad, onReportLanguageError);
-    moment.lang('{{language}}');
+    Utils.loadLanguage('statementReport', onReportLanguageLoad);
+    moment.lang(Utils.getLanguage());
 
     Backbone.Marionette.TemplateCache.prototype.compileTemplate = function (template) {
         Mustache.parse(template);
@@ -115,10 +112,6 @@
     function onReportLanguageLoad(properties) {
         language = properties;
         initView();
-    }
-
-    function onReportLanguageError() {
-        alert('Translation resource loading failed!');
     }
 
     function showLoader() {

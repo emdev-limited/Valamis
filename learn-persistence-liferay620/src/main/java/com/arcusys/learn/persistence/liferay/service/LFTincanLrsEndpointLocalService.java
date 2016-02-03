@@ -243,6 +243,7 @@ public interface LFTincanLrsEndpointLocalService extends BaseLocalService,
         throws com.liferay.portal.kernel.exception.SystemException;
 
     public void setEndpoint(java.lang.String endpoint,
-        java.lang.String authType, java.lang.String key, java.lang.String secret)
+        java.lang.String authType, java.lang.String key,
+        java.lang.String secret, java.lang.String host)
         throws com.liferay.portal.kernel.exception.SystemException;
 }

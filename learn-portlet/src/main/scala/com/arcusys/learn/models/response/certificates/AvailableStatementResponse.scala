@@ -4,4 +4,5 @@ case class AvailableStatementResponse(
   verb: String,
   verbName: Map[String, String],
   obj: String,
-  objName: Map[String, String])
+  objName: Map[String, String],
+  timestamp: String)

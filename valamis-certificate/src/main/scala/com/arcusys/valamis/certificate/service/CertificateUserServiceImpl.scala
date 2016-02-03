@@ -2,14 +2,14 @@ package com.arcusys.valamis.certificate.service
 
 import java.security.MessageDigest
 
-import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.learn.liferay.services.{PermissionHelper, UserLocalServiceHelper}
-import com.arcusys.valamis.certificate.model.CertificateSortBy.CertificateSortBy
-import com.arcusys.valamis.certificate.model.badge._
+import com.arcusys.learn.liferay.services.{SocialActivityLocalServiceHelper, UserLocalServiceHelper}
 import com.arcusys.valamis.certificate.model._
+import com.arcusys.valamis.certificate.model.badge._
 import com.arcusys.valamis.certificate.service.util.OpenBadgesHelper
-import com.arcusys.valamis.certificate.storage.{CertificateStateRepository, CertificateRepository}
-import com.arcusys.valamis.lrs.api.StatementApi
+import com.arcusys.valamis.certificate.storage.{CertificateRepository, CertificateStateRepository}
+import com.arcusys.valamis.exception.EntityNotFoundException
+import com.arcusys.valamis.lesson.model.CertificateActivityType
+import com.arcusys.valamis.model.{SkipTake, RangeResult}
 import com.arcusys.valamis.settings.model
 import com.arcusys.valamis.settings.model.SettingType
 import com.arcusys.valamis.settings.storage.SettingStorage
@@ -17,7 +17,6 @@ import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.util.HexHelper
 import com.escalatesoft.subcut.inject.Injectable
 import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 
 //TODO refactor, move badge client code to BadgeClient class
 trait CertificateUserServiceImpl extends Injectable with CertificateService {
@@ -32,249 +31,164 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
   private lazy val checker = inject[CertificateStatusChecker]
   //new CertificateStatusChecker(bindingModule)
 
-  def addUser(certificateId: Int, userId: Int) = {
-    val certificate = certificateRepository.getById(certificateId)
-    val user = userService.byId(userId)
+  def addUser(certificateId: Long, userId: Long, addActivity: Boolean = false, courseId:Option[Long] = None) = {
+    val (certificate, counts) = certificateRepository.getByIdWithItemsCount(certificateId)
+      .getOrElse(throw new EntityNotFoundException(s"no certificate with id: $certificateId"))
 
-    certificateToUserRepository.create(CertificateState(user.getUserId, CertificateStatus.InProgress, DateTime.now, DateTime.now, certificate.id))//create(certificate, (DateTime.now, user.getUserId))
+    val userStatus = counts match {
+      case CertificateItemsCount(_, 0, 0, 0, 0) if certificate.isPublished =>
+        CertificateStatuses.Success
+      case _ =>
+        CertificateStatuses.InProgress
+    }
+
+    val user = userService.getById(userId)
+    val now = DateTime.now
+
+    certificateToUserRepository.create(
+      CertificateState(user.getUserId, userStatus, now, now, certificate.id)
+    )
+
+    if (addActivity) {
+      SocialActivityLocalServiceHelper.addWithSet(certificate.companyId, userId,
+        className = CertificateActivityType.getClass.getName,
+        courseId = courseId,
+        classPK = Some(certificateId),
+        `type` = Some(CertificateActivityType.UserJoined.id)
+      )
+    }
   }
 
-  def deleteUser(certificateId: Int, userId: Int) = {
+  def deleteUser(certificateId: Long, userId: Long) = {
     val certificate = certificateRepository.getById(certificateId)
-    val user = userService.byId(userId)
+    val user = userService.getById(userId)
 
     certificateToUserRepository.delete(user.getUserId, certificate.id)
   }
 
-  def getForUser(companyId: Int, skip: Int, take: Int, filter: String, sortAZ: Boolean,
-    userId: Int, isOnlyPublished: Boolean): Seq[Certificate] = {
-    var certificates = getForUser(userId).filter(c => if (isOnlyPublished) c.isPublished else true)
-    certificates = filtering(certificates, filter)
+  def getForUser(userId: Long,
+                 companyId: Long,
+                 sortAZ: Boolean,
+                 skipTake: Option[SkipTake],
+                 titlePattern: Option[String],
+                 isPublished: Option[Boolean]): RangeResult[Certificate] = {
+
+    var certificates = getForUser(userId, companyId, isPublished, titlePattern)
       .sortBy(_.title.toLowerCase)
-    if (!sortAZ) certificates = certificates.reverse
-    if (skip < 0)
-      certificates
-    else
-      certificates.drop(skip).take(take)
-  }
-
-  def forUserCount(companyId: Int, filter: String, userId: Int, isOnlyPublished: Boolean): Int = {
-    val certificates = getForUser(userId).filter(c => if (isOnlyPublished) c.isPublished else true)
-    val filteredCertificates = filtering(certificates, filter)
-    filteredCertificates.length
-  }
-
-  private def filtering(certificates: Seq[Certificate], titleFilter: String) = {
-    if (titleFilter.isEmpty)
-      certificates
-    else {
-      certificates.filter(i => i.title.toLowerCase.contains(titleFilter.toLowerCase))
-    }
-  }
-
-  def availableForUserCount(companyId: Int, userId: Int, filter: String, isOnlyPublished: Boolean, scope: Option[Long]): Int = {
-    val certificates = scope match {
-      case Some(value) => getAvailableForUser(companyId, userId, isOnlyPublished)
-        .filter(x => x.scope.isDefined)
-        .filter(x => x.scope.get == value)
-
-      case None => getAvailableForUser(companyId, userId, isOnlyPublished)
-    }
-
-    val filteredCertificates = filtering(certificates, filter)
-
-    filteredCertificates.length
-  }
-
-  def getForUserWithStatus(companyId: Int, skip: Int, take: Int, filter: String, sortAZ: Boolean,
-    userId: Int, isOnlyPublished: Boolean): Seq[Certificate] = {
-
-    var certificates = getForUser(userId).filter(c => if (isOnlyPublished) c.isPublished else true)
-    certificates = filtering(certificates, filter)
-      .sortBy(_.title.toLowerCase)
+    val total = certificates.length
 
     if (!sortAZ) certificates = certificates.reverse
 
-    if (skip < 0)
-      certificates
-    else
-      certificates.drop(skip).take(take)
+    for (SkipTake(skip, take) <- skipTake)
+      certificates = certificates.slice(skip, skip + take)
+
+    RangeResult(total, certificates)
   }
 
-  def getForUser(userId: Int): Seq[Certificate] =
-    certificateRepository.getByIds(certificateToUserRepository.getBy(CertificateStateFilter(userId = Some(userId))).map(_.certificateId).toSet)
-
-  private def getAvailableForUser(companyId: Int, userId: Int, isOnlyPublished: Boolean): Seq[Certificate] = {
-    val usersCertificates = getForUser(userId)
-
-    val all = certificateRepository.getBy(companyId = companyId)
-      .filter(c => if (isOnlyPublished) c.isPublished else true)
-
-    all.filter(certificate => !usersCertificates.exists(c => c.id == certificate.id)).toSeq
+  private def getForUser(userId: Long, companyId: Long, isPublished: Option[Boolean], title: Option[String]): Seq[Certificate] = {
+    certificateRepository.getByState(
+      CertificateFilter(companyId, title, isPublished = isPublished),
+      CertificateStateFilter(userId = Some(userId))
+    )
   }
 
-  def getAvailableForUser(companyId: Int, skip: Int, take: Int, filter: String, sortAZ: Boolean, userId: Int,
-    isOnlyPublished: Boolean, scope: Option[Long]): Seq[Certificate] = {
-    var certificates = scope match {
-      case Some(value) => getAvailableForUser(companyId, userId, isOnlyPublished)
-        .filter(x => x.scope.isDefined)
-        .filter(x => x.scope.get == value)
+  def getSuccessByUser(userId: Long, companyId: Long, titlePattern: Option[String]): Seq[Certificate] = {
+    certificateRepository.getByState(
+      CertificateFilter(companyId, titlePattern),
+      CertificateStateFilter(userId = Some(userId), statuses = CertificateStatuses.inProgressAndSuccess)
+    )
+      .filter(c => checker.checkAndGetStatus(c.id, userId) == CertificateStatuses.Success)
+      .sortBy(_.title.toLowerCase)
+  }
 
-      case None => getAvailableForUser(companyId, userId, isOnlyPublished)
+  private def getOpenBadges(userId: Long,
+                            companyId: Long,
+                            titlePattern: Option[String]) = {
+    val userEmail = userService.getById(userId).getEmailAddress
+
+    var openbadges = OpenBadgesHelper.getOpenBadges(userEmail)
+      .map(x => Certificate(id = -1, title = x("title").toString, description = x("description").toString, logo = x("logo").toString, companyId = companyId, createdAt = DateTime.now))
+
+    if (titlePattern.isDefined) {
+      val title = titlePattern.get.toLowerCase
+      openbadges = openbadges.filter(_.title.toLowerCase contains title)
     }
 
-    certificates = filtering(certificates, filter)
+    openbadges
       .sortBy(_.title.toLowerCase)
+  }
+
+  def hasUser(certificateId: Long, userId: Long): Boolean = {
+    certificateToUserRepository.getBy(userId, certificateId).isDefined
+  }
+
+  def getAvailableForUser(userId:Long,
+                          filter: CertificateFilter,
+                          skipTake: Option[SkipTake],
+                          sortAZ: Boolean
+                           ): RangeResult[Certificate] = {
+
+    val userCertificateIds = certificateToUserRepository.getByUserId(userId)
+      .map(_.certificateId)
+
+    var certificates = certificateRepository.getBy(filter).sortBy(_.title.toLowerCase)
+
+    certificates = certificates.filter(certificate => !userCertificateIds.contains(certificate.id))
+
+
+    val total = certificates.length
 
     if (!sortAZ) certificates = certificates.reverse
 
-    if (skip < 0)
-      certificates
-    else
-      certificates.drop(skip).take(take)
+    for (SkipTake(skip, take) <- skipTake)
+      certificates = certificates.slice(skip, skip + take)
+
+    RangeResult(total, certificates)
   }
 
-  def getJoinedUsers(certificateId: Int, filterName: String, orgId: Int, sortBy: CertificateSortBy,
-    sortAscDirection: Boolean, skip: Int, take: Int): Iterable[(String, LUser)] = {
-    val certificate = certificateRepository.getById(certificateId)
-    val certificateStudents = certificateToUserRepository.getBy(CertificateStateFilter(certificateId = Some(certificateId)))
-    val studentUserIds = certificateStudents.map(_.userId)
-    val formatter = ISODateTimeFormat.dateTime()
-    var users = userService
-      .all(certificate.companyId)
-      .filter(user => studentUserIds.contains(user.getUserId.toInt))
-      .filter(user => if (orgId != -1) user.getOrganizationIds.contains(orgId) else true)
-      .filter(user => {
-        if (filterName != "")
-          user.getFullName.toLowerCase.contains(filterName.toLowerCase)
-        else
-          true
-      })
-      .map(user => {
-        PermissionHelper.preparePermissionChecker(user)
+  def getCertificatesByUserWithOpenBadges(userId: Long,
+                                          companyId: Long,
+                                          sortAZ: Boolean,
+                                          skipTake: Option[SkipTake],
+                                          titlePattern: Option[String]
+                                           ): RangeResult[Certificate] = {
 
-        (formatter.print(certificateStudents.find(v => v.userId == user.getUserId).head.userJoinedDate), user)
-      })
-      .sortBy(u => sortBy match {
-        case CertificateSortBy.UserJoined => u._1
-        case _                            => u._2.getFullName
-      })
-
-    if (!sortAscDirection) users = users.reverse
-    if (skip < 0) {
-      users
-    } else {
-      users.drop(skip).take(take)
-    }
-  }
-
-  def getJoinedUsersCount(certificateId: Int, filterName: String, orgId: Int): Int = {
-    val certificate = certificateRepository.getById(certificateId)
-    val certificateStudents = certificateToUserRepository.getBy(CertificateStateFilter(certificateId = Some(certificateId)))
-    val studentUserIds = certificateStudents.map(student => student.userId)
-
-    userService
-      .all(certificate.companyId)
-      .filter(user => studentUserIds.contains(user.getUserId.toInt))
-      .filter(user => if (orgId != -1) user.getOrganizationIds.contains(orgId) else true).count(user =>
-        if (filterName != "")
-          user.getFullName.toLowerCase.contains(filterName.toLowerCase)
-        else
-          true)
-  }
-
-  def getFreeStudents(certificateId: Int, filterName: String, orgId: Int, sortBy: CertificateSortBy,
-    sortAscDirection: Boolean, skip: Int, take: Int): Iterable[LUser] = {
-    val certificate = certificateRepository.getById(certificateId)
-    val certificateStudents = certificateToUserRepository.getBy(CertificateStateFilter(certificateId = Some(certificateId)))
-    val studentUserIds = certificateStudents.map(student => student.userId)
-
-    var users = userService
-      .all(certificate.companyId)
-      .filter(user => !studentUserIds.contains(user.getUserId.toInt))
-      .filter(user => if (orgId != -1) user.getOrganizationIds.contains(orgId) else true)
-      .filter(user => !user.getFullName.isEmpty)
-    users = users.filter(user => {
-      if (filterName != "")
-        user.getFullName.toLowerCase.contains(filterName.toLowerCase)
-      else
-        true
-    })
-
-    if (!sortAscDirection) users = users.reverse
-    users.drop(skip).take(take)
-  }
-
-  def getFreeStudentsCount(certificateId: Int, orgId: Int, filterName: String): Int = {
-    val certificate = certificateRepository.getById(certificateId)
-    val certificateStudents = certificateToUserRepository.getBy(CertificateStateFilter(certificateId = Some(certificateId)))
-    val studentUserIds = certificateStudents.map(student => student.userId)
-
-    var users = userService
-      .all(certificate.companyId)
-      .filter(user => !studentUserIds.contains(user.getUserId.toInt))
-      .filter(user => if (orgId != -1) user.getOrganizationIds.contains(orgId) else true)
-    users = users.filter(user => {
-      if (filterName != "")
-        user.getFullName.toLowerCase.contains(filterName.toLowerCase)
-      else
-        true
-    })
-    users.count(p => true)
-  }
-
-  def getCertificatesByUserWithOpenBadges(statementApi: StatementApi, companyId: Int, skip: Int, take: Int, filter: String, sortAZ: Boolean,
-    userId: Int, isOnlyPublished: Boolean): Seq[Certificate] = {
-
-    var certificates = getCertificatesByUserWithOpenBadges(statementApi, companyId, userId, isOnlyPublished)
-
-    if (!filter.isEmpty)
-      certificates = certificates.filter(i => i.title.toLowerCase.contains(filter.toLowerCase))
+    var certificates = getCertificatesByUserWithOpenBadges(userId, companyId, titlePattern)
+    val total = certificates.length
 
     if (!sortAZ)
       certificates = certificates.reverse
 
-    certificates.drop(skip).take(take)
+    for (SkipTake(skip, take) <- skipTake)
+      certificates = certificates.slice(skip, skip + take)
+
+    RangeResult(total, certificates)
   }
 
-  def getCertificatesByUserWithOpenBadges(statementApi: StatementApi, companyId: Int, userId: Int, isOnlyPublished: Boolean): Seq[Certificate] = {
-    val all = getForUser(userId)
-      .filter(c => if (isOnlyPublished) c.isPublished else true)
-      .filter(c => checker.getStatus(statementApi, c.id, userId) == CertificateStatus.Success)
+  def getCertificatesByUserWithOpenBadges(userId: Long, companyId: Long, titlePattern: Option[String]): Seq[Certificate] = {
+    val certificates = getSuccessByUser(userId, companyId, titlePattern)
 
-    val allSortedAZ = all.sortBy(_.title.toLowerCase)
+    //Backbone squash models with the same ids to one, so we set different negative ids
+    val openBadges = getOpenBadges(userId, companyId, titlePattern).zipWithIndex
+      .filter { case (badge, index) => !certificates.exists(c => c.title == badge.title) }
+      .map { case (badge, index) => badge.copy(id = -index - 1) }
 
-    val userEmail = userService.byId(userId).getEmailAddress
-
-    val openbadges = OpenBadgesHelper.getOpenBadges(userEmail)
-      .map(x => Certificate(id = -1, title = x("title").toString, description = x("description").toString, logo = x("logo").toString, companyId = companyId, createdAt = DateTime.now))
-      .filter(p => !allSortedAZ.exists(c => c.title == p.title))
-
-    allSortedAZ ++ openbadges
+    certificates ++ openBadges
   }
 
-  def getCertificatesCountByUserWithOpenBadges(statementApi: StatementApi, companyId: Int, filter: String, userId: Int, isOnlyPublished: Boolean): Int = {
-    val all = getCertificatesByUserWithOpenBadges(statementApi, companyId, userId, isOnlyPublished)
-    val allFiltered = if (filter.isEmpty)
-      all
-    else
-      all.filter(i => i.title.toLowerCase.contains(filter.toLowerCase))
 
-    allFiltered.length
-  }
-
-  def getIssuerBadge(certificateId: Int, liferayUserId: Int, rootUrl: String): BadgeResponse = {
+  def getIssuerBadge(certificateId: Long, liferayUserId: Long, rootUrl: String): BadgeResponse = {
     val recipient = "sha256$" + hashEmail(userLocalServiceHelper.getUser(liferayUserId).getEmailAddress)
     val issueOn = DateTime.now.toString("yyyy-MM-dd")
 
     val identity = IdentityModel(recipient)
-    val badgeUrl = "%s/delegate/certificates/%s?action=GETBADGEMODEL&userID=%s&rootUrl=%s".format(
+    val badgeUrl = "%s/delegate/certificates/%s/issue_badge/badge?userID=%s&rootUrl=%s".format(
       rootUrl,
       certificateId,
       liferayUserId,
       rootUrl)
 
-    val verificationUrl = "%s/delegate/certificates/%s?action=GETISSUEBADGE&userID=%s&rootUrl=%s".format(
+    val verificationUrl = "%s/delegate/certificates/%s/issue_badge?userID=%s&rootUrl=%s".format(
       rootUrl,
       certificateId,
       liferayUserId,
@@ -284,13 +198,7 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
     BadgeResponse(certificateId.toString, identity, badgeUrl, verification, issueOn)
   }
 
-  private def hashEmail(email: String) = {
-    val md = MessageDigest.getInstance("SHA-256")
-    md.update(email.getBytes)
-    HexHelper().toHexString(md.digest())
-  }
-
-  def getBadgeModel(certificateId: Int, rootUrl: String): BadgeModel = {
+  def getBadgeModel(certificateId: Long, rootUrl: String): BadgeModel = {
     val certificate = certificateRepository.getById(certificateId)
 
     val name = certificate.title.replaceAll("%20", " ")
@@ -300,7 +208,7 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
       "%s/delegate/files/images?folderId=%s&file=%s".format(rootUrl, certificate.id, certificate.logo)
 
     val description = certificate.shortDescription.replaceAll("%20", " ")
-    val issuerUrl = "%s/delegate/certificates/%s?action=GETISSUERMODEL&rootUrl=%s".format(
+    val issuerUrl = "%s/delegate/certificates/%s/issue_badge/issuer?rootUrl=%s".format(
       rootUrl,
       certificateId,
       rootUrl)
@@ -326,7 +234,15 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
     IssuerModel(issuerName, issuerUrl, issuerEmail)
   }
 
-  def getUsers(c: Certificate) = certificateToUserRepository.getBy(CertificateStateFilter(certificateId = Some(c.id))).map(p => (p.userJoinedDate, UserLocalServiceHelper().getUser(p.userId)))
+  def getUsers(c: Certificate) = {
+    certificateToUserRepository
+      .getBy(CertificateStateFilter(certificateId = Some(c.id)))
+      .map(p => (p.userJoinedDate, UserLocalServiceHelper().getUser(p.userId)))
+  }
 
-  def getUsersCount(c: Certificate) = certificateToUserRepository.getBy(CertificateStateFilter(certificateId = Some(c.id))).size
+  private def hashEmail(email: String) = {
+    val md = MessageDigest.getInstance("SHA-256")
+    md.update(email.getBytes)
+    HexHelper().toHexString(md.digest())
+  }
 }

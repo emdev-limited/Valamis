@@ -1,8 +1,8 @@
 package com.arcusys.learn.controllers.auth
 
 import com.escalatesoft.subcut.inject.Injectable
-import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
-import org.scalatra.{ RequestResponseScope, ScalatraBase }
+import org.scalatra.auth.{ScentryConfig, ScentrySupport}
+import org.scalatra.{RequestResponseScope, ScalatraBase}
 
 trait AuthSupport[T <: AuthUser] extends ScentrySupport[T]
     with RequestResponseScope

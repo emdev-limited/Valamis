@@ -9,11 +9,9 @@ import com.arcusys.valamis.settings.service.SiteDependentSettingServiceImpl
 class SocialActivitiesTinCanMapperView extends GenericPortlet with BaseView {
   lazy val siteSettingsManager = inject[SiteDependentSettingServiceImpl]
 
-  override def destroy() {}
-
   override def doView(request: RenderRequest, response: RenderResponse) {
 
-    val out = response.getWriter
+    implicit val out = response.getWriter
 
     val themeDisplay = LiferayHelpers.getThemeDisplay(request)
     val language = LiferayHelpers.getLanguage(request)
@@ -27,18 +25,19 @@ class SocialActivitiesTinCanMapperView extends GenericPortlet with BaseView {
       "com.liferay.calendar.model.CalendarBooking",
       "com.liferay.portlet.bookmarks.model.BookmarksEntry"
     ).map(id => {
-        Map("activityID" -> id,
+        Map(
+          "activityID" -> id,
           "value" -> siteSettingsManager.getSetting(siteID.toInt, id))
       })
 
     val translations = getTranslation("socialActivitiesMapper", language)
-    val data = Map("contextPath" -> request.getContextPath,
-      "language" -> language,
+    val data = Map(
+      "contextPath" -> getContextPath(request),
       "siteID" -> siteID,
       "settings" -> settings) ++ translations
 
-    out.println(getTemplate("/templates/2.0/social_activities_mapper_templates.html") +
-      mustache(data, "social_activities_mapper.html"))
+    sendTextFile("/templates/2.0/social_activities_mapper_templates.html")
+    sendMustacheFile(data, "social_activities_mapper.html")
   }
 }
 

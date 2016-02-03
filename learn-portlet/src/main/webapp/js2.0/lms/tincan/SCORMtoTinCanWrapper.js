@@ -10,8 +10,9 @@ var valueStorage = {}, //stores values.
     initialDuration = "PT0S", // initial duration at the start session
     offsetDuration = "PT0S"; // offset duration between sessions
 
-var scoredSum = 0,
-    scoredCount = 0;
+var currentPage = 0,
+    scoredCount = 0,
+    scores = [];
 
 var currentActivityID = -1, // current activity id
     currentPackageID = -1, // current package id
@@ -36,19 +37,32 @@ function SetActor() {
 // Clear and init global vars
 function InitVars() {
     valueStorage = {},
-        interactionIndex = -1,
-        questionCount = 0,
-        attemptCompleted = false,
-        resultChanged = false,
-        initialDuration = "PT0S",
-        offsetDuration = "PT0S";
+    interactionIndex = -1,
+    questionCount = 0,
+    attemptCompleted = false,
+    resultChanged = false,
+    initialDuration = "PT0S",
+    offsetDuration = "PT0S",
+    scoreAdded = false,
+    scoredCount = scormPlayer.navigationNodeCollection.length; //TODO: Is there other way to get page count?
 
     registrationId = null;
+
+    currentPage = scormPlayer.navigationNodeCollection.indexOf (
+        scormPlayer.navigationNodeCollection.find (function(el) {
+                return el.get('active')
+            }
+        )
+    );
+    scoredCount = scormPlayer.navigationNodeCollection.length; //TODO: Is there other way to get page count?
+    //Filling in empty scores
+    if (scores.length < scoredCount)
+        while(scores.length < scoredCount)
+            scores.push(-1);
 }
 
 function StartPackageAttempt(packageID, packageName, packageDesc) {
     currentPackageID = packageID;
-    scoredSum = 0; // TODO: cache this variables when package paused
     scoredCount = 0;
 
     // set actor from user view
@@ -112,6 +126,9 @@ function FinishPackageAttempt(sendCompleteStatement) {
 
         var result = new TinCan.Result();
         if(scoredCount>0) {
+            var scoredSum = _.reduce(scores, function (memo, el) {
+                return memo + ((el == -1) ? 0 : el);
+            }, 0);
             var grade = scoredSum / scoredCount;
             result.score = new TinCan.Score;
             result.score.scaled = grade;

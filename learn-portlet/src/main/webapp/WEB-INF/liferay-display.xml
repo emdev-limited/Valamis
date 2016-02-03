@@ -24,10 +24,9 @@
     <category name="Valamis Lesson tools">
         <portlet id="SCORMApplication">SCORMApplication</portlet>
         <portlet id="Gradebook">Gradebook</portlet>
-        <portlet id="SCORMQuizes">SCORMQuizes</portlet>
         <portlet id="ContentManager">ContentManager</portlet>
         <portlet id="PackageManager">PackageManager</portlet>
-        <portlet id="ValamisSlidesEditor">ValamisSlidesEditor</portlet>
+        <portlet id="ValamisSlidesEditor">Lesson Studio</portlet>
     </category>
 
     <category name="Valamis Administration">
@@ -43,5 +42,7 @@
         <portlet id="ValamisActivities">Valamis Activities</portlet>
         <portlet id="RecentLessons">Recent</portlet>
         <portlet id="ValamisStudySummary">Valamis Study Summary</portlet>
+        <portlet id="MyCertificates">My Certificates</portlet>
+        <portlet id="MyCourses">My Courses</portlet>
     </category>
 </display>

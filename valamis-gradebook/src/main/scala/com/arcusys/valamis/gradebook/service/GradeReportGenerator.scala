@@ -4,8 +4,6 @@ import com.arcusys.valamis.lesson.scorm.model.manifest.{ LeafActivity, Container
 import com.arcusys.valamis.lesson.scorm.model.tracking.Attempt
 import com.arcusys.valamis.lesson.scorm.storage.ActivityStorage
 import com.arcusys.valamis.lesson.scorm.storage.tracking.{ ActivityStateTreeStorage, AttemptStorage, DataModelStorage }
-import com.arcusys.valamis.questionbank.storage.QuestionStorage
-import com.arcusys.valamis.quiz.storage.QuizQuestionStorage
 import com.arcusys.valamis.util.TreeNode
 import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
 
@@ -14,8 +12,7 @@ class GradeReportGenerator(implicit val bindingModule: BindingModule) extends In
   val activityTreeStorage = inject[ActivityStateTreeStorage]
   val attemptStorage = inject[AttemptStorage]
   val dataModelStorage = inject[DataModelStorage]
-  val questionStorage = inject[QuestionStorage]
-  val quizQuestionStorage = inject[QuizQuestionStorage]
+
 
   private def get(attempt: Attempt, organizationID: String) = {
     val grades = dataModelStorage.getValuesByKey(attempt.id, "cmi.success_status") ++ dataModelStorage.getValuesByKey(attempt.id, "cmi.core.lesson_status")

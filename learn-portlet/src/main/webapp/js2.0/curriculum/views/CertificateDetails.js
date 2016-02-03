@@ -38,6 +38,7 @@ var CertificateDetailsView = Backbone.View.extend({
         _.extend({
           scopeName: scopeName,
           contextPath: Utils.getContextPath,
+          courseId: Utils.getCourseId,
           decodedDescription: description}, this.model.toJSON(), this.language, permissionActionsCurriculum)));
     this.$el.html(renderedTemplate);
     if (this.model.get('isPublished')){
@@ -138,7 +139,7 @@ var CertificateDetailsView = Backbone.View.extend({
     }
     var data = {
         title: this.$('#certificateTitle').val() || this.language['newCertificatePlaceholderLabel'],
-        description: this.$('#certificateDescription').val() || this.language['descriptionPlaceholderLabel'],
+        description: this.$('#certificateDescription').val() || "",
         shortDescription: this.$('#shortDescription').val(),
         publishBadge: this.$('#openBadgeIntegration').prop('checked'),
         isPermanent: isPermanent,
@@ -151,18 +152,11 @@ var CertificateDetailsView = Backbone.View.extend({
     this.model.save({}, {
       success: function (model, response) {
         jQuery('#selectedCertificateID').val(that.model.id);
-        curriculumLogoData.setFolderId(that.model.id);
 
+        curriculumLogoData.setPortletFileUploaderUrl(path.root + path.api.files + 'certificate/'  + that.model.id + '/logo');
         if(curriculumLogoData.isReadyToSubmit()) {
           curriculumLogoData.submitData(function (name) {
-              window.LearnAjax.post(
-                  path.root + path.api.certificates + that.model.id +
-                  '?action=UPDATELOGO' +
-                  '&courseId=' + Utils.getCourseId() +
-                  '&logo=' + curriculumLogoData.getFileName()
-              ).done(function() {
-                  that.afterSave(that, trigName, data);
-                });
+            that.afterSave(that, trigName, data);
           });
         }
         else {

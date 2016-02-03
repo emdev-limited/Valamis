@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    var dataToCompare = JSON.parse('{{{answerData}}}');
+    var dataToCompare = JSON.parse('{{{answerData}}}'.replace(/\="/gi, "='").replace(/\">/gi, "'>"));
     /*{{^isPreview}}*/
     jQuery(document).ready(function () {
         getAPI().Initialize("");
@@ -22,7 +22,7 @@
         });
 
         for (var i = 0; i< dataToCompare.length; i++) {
-            correctResponse.push([dataToCompare[i].answerText, dataToCompare[i].matchingText].join('[.]'));
+            correctResponse.push([dataToCompare[i].answerText.replace(/\'/gi, '"'), dataToCompare[i].matchingText].join('[.]').replace(/\'/gi, '"'));
             for (var j = 0; j< userAnswers.length; j++) {
                 if (dataToCompare[i].answerText == userAnswers[j].answerText
                     && dataToCompare[i].matchingText == userAnswers[j].matchingText) {

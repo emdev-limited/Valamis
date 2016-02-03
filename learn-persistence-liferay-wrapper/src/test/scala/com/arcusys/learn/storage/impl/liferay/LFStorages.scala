@@ -1,7 +1,5 @@
 package com.arcusys.learn.storage.impl.liferay
 
-import com.arcusys.learn.quiz.storage.impl.QuizQuestionCategoryEntityStorage
-import com.arcusys.learn.quiz.storage.impl.liferay._
 import com.arcusys.learn.questionbank.storage.impl.liferay._
 import com.arcusys.learn.scorm.manifest.sequencing.storage.impl._
 import com.arcusys.learn.scorm.sequencing.storage.impl.liferay._
@@ -11,7 +9,6 @@ import com.arcusys.learn.scorm.manifest.sequencing.storage.impl.liferay._
 import com.arcusys.learn.scorm.tracking.storage.impl.liferay._
 import com.arcusys.learn.scorm.course.impl.liferay.CourseEntityContainer
 import com.arcusys.valamis.lesson.scorm.storage.sequencing.{SequencingPermissionsStorage, RuleConditionStorage}
-import com.arcusys.valamis.quiz.storage.QuizQuestionCategoryStorage
 
 /**
  * User: dkudinov
@@ -39,9 +36,6 @@ object LFStorages {
   PlayerScopeRuleEntityContainer.mockLocalService
   QuestionCategoryMockEntityContainer.mockLocalService
   QuestionMockEntityContainer.mockLocalService
-  QuizMockEntityContainer.mockLocalService
-  QuizQuestionCategoryMockEntityContainer.mockLocalService
-  QuizQuestionMockEntityContainer.mockLocalService
   ResourceEntityContainer.mockLocalService
   RollupContributionEntityContainer.mockLocalService
   RollupRuleEntityContainer.mockLocalService
@@ -50,8 +44,6 @@ object LFStorages {
   SequencingPermissionsEntityContainer.mockLocalService
   SequencingTrackingEntityContainer.mockLocalService
   UserEntityContainer.mockLocalService
-
-  val quizCategoryStorage: QuizQuestionCategoryStorage = new QuizQuestionCategoryEntityStorage with LFQuizQuestionCategoryStorageImpl
 
   val ruleConditionStorage: RuleConditionStorage = new RuleConditionEntityStorage with LFRuleConditionStorageImpl
   val sequencingPermissionsStorage: SequencingPermissionsStorage = new SequencingPermissionsEntityStorage with LFSequencingPermissionsStorageImpl

@@ -1,29 +1,29 @@
 package com.arcusys.valamis.certificate.service
 
-import com.arcusys.learn.liferay.services.{SocialActivityCounterLocalServiceHelper, SocialActivityLocalServiceHelper, PermissionHelper}
-import com.arcusys.valamis.certificate.model.goal.{GoalStatuses, GoalDeadline, ActivityGoal, GoalStatus}
-import com.arcusys.valamis.certificate.storage.ActivityGoalStorage
+import com.arcusys.learn.liferay.services.{PermissionHelper, SocialActivityCounterLocalServiceHelper, SocialActivityLocalServiceHelper}
+import com.arcusys.valamis.certificate.model.goal._
+import com.arcusys.valamis.certificate.storage.{ActivityGoalStorage, CertificateStateRepository}
 import com.arcusys.valamis.model.PeriodTypes
 import com.liferay.portlet.social.model.SocialActivity
 import org.joda.time.DateTime
 
 trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
-  protected def certificateStateService: CertificateStateService
+  protected def certificateStateRepository: CertificateStateRepository
   protected def activityGoalStorage: ActivityGoalStorage
 
-  override def getActivityGoalsStatus(certificateId: Int, userId: Int): Seq[GoalStatus[ActivityGoal]] = {
+  override def getActivityGoalsStatus(certificateId: Long, userId: Long): Seq[GoalStatus[ActivityGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
 
-    val certificateState = certificateStateService.getBy(userId, certificateId).get
+    val certificateState = certificateStateRepository.getBy(userId, certificateId).get
     val goals = activityGoalStorage.getByCertificateId(certificateId)
-    val socialActivities = SocialActivityLocalServiceHelper.getActivities(userId, certificateState.userJoinedDate)
+    lazy val socialActivities = SocialActivityLocalServiceHelper.getActivities(userId, certificateState.userJoinedDate)
 
     goals.map { goal =>
       val status = checkActivityGoal(userId, socialActivities, certificateState.userJoinedDate)(goal)
       val finishDate =
         if (isCounterActivity(goal) || status != GoalStatuses.Success) None
         else Some(new DateTime(
-          SocialActivityLocalServiceHelper.getActivities(userId, certificateState.userJoinedDate)
+          socialActivities
             .sortBy(_.getCreateDate)
             .take(goal.count)
             .last
@@ -33,10 +33,10 @@ trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
     }
   }
 
-  override def getActivityGoalsDeadline(certificateId: Int, userId: Int): Seq[GoalDeadline[ActivityGoal]] = {
+  override def getActivityGoalsDeadline(certificateId: Long, userId: Long): Seq[GoalDeadline[ActivityGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
 
-    val startDate = certificateStateService.getBy(userId, certificateId).get.userJoinedDate
+    val startDate = certificateStateRepository.getBy(userId, certificateId).get.userJoinedDate
     activityGoalStorage.getByCertificateId(certificateId)
       //.filterNot(isCounterActivity) They have unlimited period type, shouldn't check
       .map { goal =>
@@ -44,28 +44,30 @@ trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
     }
   }
 
+  override def getActivityGoalsStatistic(certificateId: Long, userId: Long): GoalStatistic = {
+    getActivityGoalsStatus(certificateId, userId)
+      .foldLeft(GoalStatistic.empty)(_ add _.status)
+  }
+
   protected def checkActivityGoal(userId: Long, activities: Seq[SocialActivity], userJoinedDate: DateTime)
-                                 (activityGoal: ActivityGoal): GoalStatuses.Value = {
-    val lastCountedActivityDateOrNow = activities match {
-      case Nil => DateTime.now
-      case v =>
-        if (v.length < activityGoal.count) DateTime.now
-        else new DateTime(v.take(activityGoal.count).last.getCreateDate)
-    }
+                                 (goal: ActivityGoal): GoalStatuses.Value = {
 
-    val isTimeOut =
-      PeriodTypes
-        .getEndDate(activityGoal.periodType, activityGoal.periodValue, userJoinedDate)
-        .isBefore(lastCountedActivityDateOrNow)
+    val endDate = PeriodTypes.getEndDate(goal.periodType, goal.periodValue, userJoinedDate)
 
-    lazy val activitiesCount = if (isCounterActivity(activityGoal))
+    lazy val goalActivities = activities
+      .filter(a => new DateTime(a.getCreateDate) isBefore endDate)
+      .filter(_.getClassName == goal.activityName)
+
+    lazy val activitiesCount = if (isCounterActivity(goal))
       SocialActivityCounterLocalServiceHelper
-        .getUserValue(userId, activityGoal.activityName)
+        .getUserValue(userId, goal.activityName)
         .getOrElse(0)
-    else activities.count(_.getClassName == activityGoal.activityName)
+    else goalActivities.size
 
-    if (isTimeOut) GoalStatuses.Failed
-    else if (activityGoal.count <= activitiesCount) GoalStatuses.Success
+    lazy val isTimeout = DateTime.now isAfter endDate
+
+    if (activitiesCount >= goal.count) GoalStatuses.Success
+    else if (isTimeout) GoalStatuses.Failed
     else GoalStatuses.InProgress
   }
 

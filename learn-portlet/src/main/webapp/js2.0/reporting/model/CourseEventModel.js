@@ -1,4 +1,4 @@
-var CourseEventModelService = new Backbone.Service({ url: '/',
+var CourseEventModelService = new Backbone.Service({ url: path.root,
     sync: {
         'read':{
             'path':  path.api.report,

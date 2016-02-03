@@ -4,15 +4,36 @@
 
 contentManager.module("Entities", function (Entities, contentManager, Backbone, Marionette, $, _) {
 
+    Entities.options = {
+        sortby: ['title','type'],
+        sortbyIndex: 0
+    };
+
+    Entities.TopbarModel = Backbone.Model.extend({
+        defaults: {
+            selectedQuestions: 0,
+            isRandom: false,
+            defaultRandomQuestions: 1
+        }
+    });
+
+    Entities.Filter = Backbone.Model.extend({
+        defaults: {
+            titlePattern: '',
+            type: '',
+            typeValue: ''
+        }
+    });
+
     var CategoryService = new Backbone.Service({
         url: path.root,
         targets: {
             'move': {
-                'path': path.api.category,
+                'path': function (model) {
+                    return path.api.category+"move/"+model.get('id');
+                },
                 'data': function (model, options) {
                     return {
-                        action: 'move',
-                        id: model.get('id'),
                         parentId: options.parentId,
                         index: options.index,
                         courseId: model.get('courseId')
@@ -67,10 +88,11 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
                 'method': 'post'
             },
             'update': {
-                'path': path.api.category,
+                'path': function (model) {
+                    return path.api.category+"update/"+model.get('id');
+                },
                 'data': function (model) {
                     var params = {
-                        action: 'update'
                     };
                     _.extend(params, model.toJSON());
                     return params;
@@ -78,11 +100,11 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
                 'method': 'post'
             },
             'delete': {
-                'path': path.api.category,
+                'path': function (model) {
+                    return path.api.category+"delete/"+model.get('id');
+                },
                 'data': function (model) {
                     var params = {
-                        action: 'delete',
-                        id: model.get('id'),
                         courseId: model.get('courseId')
                     };
 
@@ -111,38 +133,41 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
         }
     });
 
+    // TODO: use string names from scala enumeration instead numbers
     var QuestionType = {
-        "ChoiceQuestion": 0,
-        "ShortAnswerQuestion": 1,
-        "NumericQuestion": 2,
-        "PositioningQuestion": 3,
-        "MatchingQuestion": 4,
-        "EssayQuestion": 5,
-        "EmbeddedAnswerQuestion": 6,
-        "CategorizationQuestion": 7,
-        "PlainText": 8,
-        "PurePlainText": 9
+        ChoiceQuestion: 0,
+        ShortAnswerQuestion: 1,
+        NumericQuestion: 2,
+        PositioningQuestion: 3,
+        MatchingQuestion: 4,
+        EssayQuestion: 5,
+        CategorizationQuestion: 7,
+        PlainText: 8
     };
 
     var QuestionAnswerType = {
-        "ChoiceQuestion": Entities.ChoiceAnswer,
-        "ShortAnswerQuestion": Entities.ShortAnswer,
-        "NumericQuestion": Entities.NumericAnswer,
-        "PositioningQuestion": Entities.PositioningAnswer,
-        "MatchingQuestion": Entities.MatchingAnswer,
-        "CategorizationQuestion": Entities.CategorizationAnswer
+        ChoiceQuestion: Entities.ChoiceAnswer,
+        ShortAnswerQuestion: Entities.ShortAnswer,
+        NumericQuestion: Entities.NumericAnswer,
+        PositioningQuestion: Entities.PositioningAnswer,
+        MatchingQuestion: Entities.MatchingAnswer,
+        CategorizationQuestion: Entities.CategorizationAnswer
     };
 
     var QuestionService = new Backbone.Service({
         url: path.root,
         targets: {
             'move': {
-                'path': path.api.questions,
+                'path': function(model) {
+                    if (parseInt(model.get('questionType'))==QuestionType.PlainText) {
+                        return path.api.plainText+"move/"+model.get('id');
+                    } else {
+                        return path.api.questions+"move/"+model.get('id');
+                    }
+                },
                 'method': 'post',
                 'data': function (model, options) {
                     return {
-                        'action': 'move',
-                        'id': model.get('id'),
                         'parentID': options.parentId,
                         'index': options.index,
                         'courseId': model.get('courseId')
@@ -153,11 +178,14 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
         sync: {
             'read': {
                 'path': function (model) {
-                    return path.api.questions + model.id;
+                    if (parseInt(model.get('questionType'))==QuestionType.PlainText) {
+                        return path.api.plainText + model.get('id')
+                    } else {
+                        return path.api.questions + model.get('id')
+                    }
                 },
                 'data': function (model) {
                     var params = {
-                        'action': 'getById',
                         'courseId': model.get('courseId')
                     };
 
@@ -166,34 +194,70 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
                 'method': 'get'
             },
             'create': {
-                'path': path.api.questions,
-                'data': function (model) {
-                    var params = {
-                        'action': 'add'
-                    };
+                // TODO: split to questions and plaintext
+                'path': function (model) {
+                    //console.log(model);
+                    switch (parseInt(model.get('questionType'))) {
+                        // plain text content
+                        case QuestionType.PlainText:
+                            return path.api.plainText + "add";
 
-                    _.extend(params, model.toJSON());
+                        // questions content
+                        case QuestionType.ChoiceQuestion:
+                            return path.api.questions + "add/choice/";
+                        case QuestionType.ShortAnswerQuestion:
+                            return path.api.questions + "add/text/";
+                        case QuestionType.NumericQuestion:
+                            return path.api.questions + "add/numeric/";
+                        case QuestionType.PositioningQuestion:
+                            return path.api.questions + "add/positioning/";
+                        case QuestionType.MatchingQuestion:
+                            return path.api.questions + "add/matching/";
+                        case QuestionType.EssayQuestion:
+                            return path.api.questions + "add/essay/";
+                        case QuestionType.CategorizationQuestion:
+                            return path.api.questions + "add/categorization/";
+
+                        default:
+                            return path.api.questions + this.get('questionType') + "/";
+                    }
+                },
+                'data': function (model) {
+                    var params = {};
+
+                    _.extend(params, model.toJSON(), {
+                        answers: JSON.stringify(model.get('answers'))
+                    });
+
                     return params;
                 },
                 'method': 'post'
             },
             'update': {
                 'path': function (model) {
-                    return path.api.questions + model.get('id');
+                    if (parseInt(model.get('questionType'))==QuestionType.PlainText) {
+                        return path.api.plainText + "update/" + model.get('id');
+                    } else {
+                        return path.api.questions + "update/" + model.get('id');
+                    }
                 },
                 'data': function (model) {
-                    var params = {
-                        'action': 'update'
-                    };
+                    var params = {};
+                    _.extend(params, model.toJSON(), {
+                        answers: JSON.stringify(model.get('answers'))
+                    });
 
-                    _.extend(params, model.toJSON());
                     return params;
                 },
                 'method': 'post'
             },
             'delete': {
                 'path': function (model) {
-                    return path.api.questions + model.get('id');
+                    if (parseInt(model.get('questionType'))==QuestionType.PlainText) {
+                        return path.api.plainText + "delete/" + model.get('id');
+                    } else {
+                        return path.api.questions + "delete/" + model.get('id');
+                    }
                 },
                 'data': function (model) {
                     var params = {
@@ -270,9 +334,12 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
             description: '',
             parentId: null,
             arrangementIndex: 0,
+            defaultIndex: null,
             contentType: 'category',
+            level: 1,
             selected: false,
-            courseId: ''
+            courseId: '',
+            hidden: false
         }
     }).extend(CategoryService);
 
@@ -289,9 +356,16 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
             isCaseSensitive: false,
             answers: '[]',
             type: '',
+            arrangementIndex: 0,
+            defaultIndex: null,
             contentType: 'question',
+            level: 2,
             selected: false,
-            courseId: ''
+            courseId: '',
+            hidden: false
+        },
+        isContent: function(){
+            return this.get('questionType') == '8';
         },
         initialize: function () {
             this.updateAnswerModel();
@@ -361,24 +435,12 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
                 default:
                     this.answerModel = null;
             }
-        },
-        getParentId: function () {
-            return this.get('categoryID');
-        }//,
-        //idAttribute: 'uniqueId'
+        }
     }).extend(QuestionService);
 
-
     Entities.TreeNode = {
-        //defaults: {
-        //    title: '',
-        //    arrangementIndex: 0,
-        //    nodes: [],
-        //    parentId: ''
-        //},
         idAttribute: 'uniqueId',
-        getParentId: function () {
-        },
+        getParentId: function () {},
         isNode: function () {
             return true;
         },
@@ -409,25 +471,65 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
                     return item.get('id') == id && item.isNode();
                 })[0] || {};
         },
-        fetchChildren: function () {
-        }
+        fetchChildren: function () { }
     };
 
     Entities.TreeNodes = Backbone.Collection.extend({
         model: Entities.TreeNode,
-        comparator: function (a, b) {
-            if (a.isNode() && b.isLeaf()) {
-                return -1;
-            } else if (a.isLeaf() && b.isNode()) {
-                return 1;
-            }
+        comparator: function (a,b) {
+            var sortByIndex = Entities.options.sortby[ Entities.options.sortbyIndex ]
+                ? Entities.options.sortbyIndex
+                : 0;
 
-            var arrangementIndexA = a.get('arrangementIndex');
-            var arrangementIndexB = b.get('arrangementIndex');
-
-            return arrangementIndexA - arrangementIndexB;
+            var sortBy = Entities.options.sortby[ sortByIndex ],
+                sortConfig = [
+                    {
+                        field: 'level',
+                        order: 'asc'
+                    },
+                    {
+                        field: sortBy,
+                        order: 'asc'
+                    }
+                ];
+            return this.multiFieldComparator( sortConfig, a, b );
         },
-        idAttribute: 'uniqueId'
+        multiFieldComparator: function(sortConfig, a, b) {
+            for (var i = 0; i < sortConfig.length; i++) {
+                if (a.get(sortConfig[i].field) > b.get(sortConfig[i].field)) {
+                    return (sortConfig[i].order != 'desc') ? 1 : -1;
+                } else if (a.get(sortConfig[i].field) == b.get(sortConfig[i].field)) {
+                    // do nothing, go to next comparison
+                } else {
+                    return (sortConfig[i].order != 'desc') ? -1 : 1;
+                }
+            }
+            return 0;
+        },
+        prepareSorting: function(){
+            this.forEach(function(model,i){//set default index
+                model.set('defaultIndex', i);
+            });
+           // this.sort();
+        },
+        filterNodes: function(filter) {
+            this.forEach(function(model) {
+                var patternMatch = _.contains(model.get('title').toLowerCase(), filter.titlePattern.toLowerCase());
+                var typeMatch = (filter.type) ? model.get('contentType') === filter.type : true;
+
+                // fix for just added plaintext content
+                if (filter.type === 'plaintext') {
+                   typeMatch = typeMatch ||
+                       (model.get('contentType') === 'question' && model.get('questionType') === QuestionType.PlainText);
+                }
+
+                var valueMatch = (filter.type === 'question')
+                    ? model.get('questionType') === parseInt(filter.typeValue)
+                    : true;
+
+                model.set('hidden', !(patternMatch && typeMatch && valueMatch));
+            });
+        }
     });
 
     Entities.TreeContentItems = Entities.TreeNodes.extend({
@@ -437,9 +539,10 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
                     return new Entities.TreeCategory(attrs, options);
                 case 'question' :
                     return new Entities.TreeQuestion(attrs, options);
+                case 'plaintext':
+                    return new Entities.TreeQuestion(attrs, options);
             }
         },
-        idAttribute: "uniqueId",
         hasChildNodes: function () {
             return this.some(function (item) {
                 return item.isNode();
@@ -457,32 +560,60 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
     });
 
     Entities.TreeCategory = Entities.Category.extend(Entities.TreeNode).extend({
+        defaults: {
+            title: '',
+            description: '',
+            parentId: null,
+            arrangementIndex: 0,
+            defaultIndex: null,
+            contentType: 'category',
+            level: 1,
+            selected: false,
+            courseId: ''
+        },
         getParentId: function () {
             return this.get('parentId');
         },
-        initialize: function (args) {
+        updateContentAmount: function() {
             var that = this;
-            this.nodes = new Entities.TreeContentItems(args.children);
-            this.nodes.on('add', function () {
-                that.updateContentAmount();
-            });
-            this.nodes.on('remove', function () {
-                that.updateContentAmount();
-            });
-
-            this.nodes.on('change:childrenAmount', function () {
-                that.updateContentAmount();
-            });
-        },
-        updateContentAmount: function () {
-            var that = this;
-            this.getContentAmount().then(function (data) {
+            that.getContentAmount().then(function (data) {
                 that.set('childrenAmount', data || 0);
             });
         },
-        fetchChildren: function () {
-            this.updateContentAmount();
-            return this.nodes.fetch({parentId: this.get('id') || '', courseId: this.get('courseId'), reset: true});
+        initialize: function (args, options) {
+            var that = this;
+            that.nodes = new Entities.TreeContentItems(args.children);
+            that.nodes.prepareSorting();
+
+            that.nodes.on('add', function () {
+                that.updateContentAmount();
+            });
+            that.nodes.on('remove', function (model) {
+                model.once('sync', function(){
+                    that.updateContentAmount();
+                });
+            });
+
+            that.nodes.on('change:title', function(){
+                that.nodes.sort();
+            });
+
+            that.nodes.on('change:childrenAmount', function(){
+                that.updateContentAmount();
+            });
+        },
+        isNode: function () {
+            return true;
+        },
+        fetchChildren: function (opts) {
+            var options = {parentId: this.get('id') || '', courseId: this.get('courseId')};
+            _.extend(options, opts);
+            options.success = function(collection){
+                collection.prepareSorting();
+                //collection.sort();
+            };
+            return this.nodes.fetch(options);
         }
     });
+
 });

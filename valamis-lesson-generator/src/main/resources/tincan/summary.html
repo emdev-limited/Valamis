@@ -1,0 +1,90 @@
+<section>
+    <div id="lesson-summary">
+        <div class="js-complete-title"> You have <b>successfully</b> passed the lesson! </div>
+        <div class="js-failed-title"> This time you did not pass the lesson. </div>
+        <br/><br/>
+        <!--<div class="lesson-summary-results">-->
+            <div class="val-progress-bar">
+                <b>Progress:</b>
+                <div class="val-progress js-progress-percent">
+                    <span></span>
+                </div>
+                <span class="val-percentage prompt-small js-lesson-progress"></span>
+            </div>
+            <br/>
+            <span class="prompt-small">(Opened pages)</span>
+            <br/><br/>
+
+            <div class="val-progress-bar js-hide-progress">
+                <b>Correctly answered:</b>
+                <div class="val-progress js-results-percent">
+                    <span></span>
+                </div>
+                <span class="val-percentage prompt-small js-lesson-result"></span>
+            </div>
+            <br/>
+
+        <!--</div>-->
+        <br/><br/>
+        <span class="js-hide-progress prompt-bold">Your results:</span>
+        <div class="lesson-questions">
+            <table class="prompt-bold js-hide-progress">
+                <tbody class="js-lesson-questions">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script>
+
+    ComposeLessonSummarySlide = function() {
+        var slideElement = jQuery('#lesson-summary', Reveal.getCurrentSlide());
+        var summary  = prepareLessonSummary();
+        var progressPercent, lessonPercent, progressResultColor, lessonResultColor;
+
+        jQuery('.js-hide-progress', slideElement).toggleClass('hidden', !summary.hasQuestion);
+        jQuery('.js-complete-title', slideElement).toggleClass('hidden', !summary.success);
+        jQuery('.js-failed-title', slideElement).toggleClass('hidden', summary.success);
+
+        progressPercent = summary.progress*100|0;
+        if (progressPercent == 100)
+            progressResultColor = 'green';
+        else if (progressPercent > 0)
+                progressResultColor = 'red';
+        if (progressPercent >= 0)
+            jQuery('.js-progress-percent').addClass(progressResultColor).find('span').css('width', progressPercent + '%');
+
+        jQuery('.js-lesson-progress', slideElement).text(progressPercent + '%');
+
+        lessonPercent = summary.score*100|0;
+        lessonResultColor = (summary.success) ? 'green' : 'red';
+
+        if (lessonPercent >= 0)
+            jQuery('.js-results-percent').addClass(lessonResultColor).find('span').css('width', lessonPercent + '%');
+
+        jQuery('.js-lesson-result', slideElement).text(lessonPercent + '%');
+
+        var target = jQuery('.js-lesson-questions', slideElement);
+        target.html('');
+
+        _.keys(TinCanCourseQuestions).forEach(function(key) {
+            var result, resultText, resultColor, resultIcon;
+            resultIcon = 'val-icon-checkbox';
+
+            if (TinCanCourseResults.hasOwnProperty(key)) {
+                result = TinCanCourseResults[key];
+                resultColor = (result) ? 'success' : 'failed';
+                resultIcon = (resultColor == 'failed') ? 'val-icon-exit' : 'val-icon-checkbox';
+            }
+            else
+                resultColor = 'inprogress';
+
+            resultText = '<td class="progress-col ' + resultColor +'"><div class="checkmark"><span class="val-icon ' + resultIcon +'"></span></div></td>';
+            target.append(jQuery('<tr>').html(resultText + '<td class="prompt-small">' + TinCanCourseQuestionsContent[key] + '</td>'));
+        });
+        if( typeof slidesApp != 'undefined' && slidesApp.editorArea )
+            slidesApp.editorArea.currentView.fitContent();
+    }
+
+</script>

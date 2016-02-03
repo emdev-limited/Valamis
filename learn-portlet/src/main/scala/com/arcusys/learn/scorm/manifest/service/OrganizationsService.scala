@@ -1,14 +1,11 @@
 package com.arcusys.learn.scorm.manifest.service
 
-import com.arcusys.learn.controllers.api.BaseApiController
+import com.arcusys.learn.controllers.api.base.BaseApiController
+import com.arcusys.learn.web.ServletBase
 import com.arcusys.valamis.lesson.scorm.model.manifest.Organization
 import com.arcusys.valamis.lesson.service.ActivityServiceContract
-import com.escalatesoft.subcut.inject.BindingModule
-import com.arcusys.learn.web.ServletBase
-import com.arcusys.learn.ioc.Configuration
 
-class OrganizationsService(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase {
-  def this() = this(Configuration)
+class OrganizationsService extends BaseApiController with ServletBase {
 
   val activityManager = inject[ActivityServiceContract]
 

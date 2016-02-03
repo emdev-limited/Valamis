@@ -73,9 +73,9 @@ var FormDataHelper = Backbone.Model.extend({
     return (this.fileName == null) ? '' : this.fileName;
   },
   submitData: function(options) {
-      options || (options = {});
-      var success = _.isFunction(options)? options : options.success;
-      var error = options.error;
+    options || (options = {});
+    var success = _.isFunction(options)? options : options.success;
+    var error = options.error;
 
     if (this.supports() && this.contentType != null) {
       var formData = new FormData();
@@ -84,16 +84,29 @@ var FormDataHelper = Backbone.Model.extend({
       formData.append(IMAGE_PARAM_TYPE.FILE_ENTRY_ID, this.fileEntryID);
       formData.append(IMAGE_PARAM_TYPE.FILE_VERSION, this.fileVersion);
       formData.append(IMAGE_PARAM_TYPE.INPUT_BASE64, this.inputBase64);
+      formData.append('courseId', Utils.getCourseId());
+      formData.append('p_auth', Liferay.authToken);
+
+      var url =
+        this.portletFileUploaderUrl ?
+        this.portletFileUploaderUrl :
+        path.root + path.api.files + '?action=ADD&folderId=' + this.folderId;
 
       jQuery.ajax({
-        url: this.portletFileUploaderUrl || path.root + path.api.files + '?action=ADD&courseId='+ Utils.getCourseId() +'&folderId=' + this.folderId,
+        url: url,
         type: "POST",
         data: formData,
         processData: false,
         contentType: false,
+        headers: {
+          'X-CSRF-Token': Liferay.authToken
+        },
         success: function (data) {
             if(_.isFunction(success)){
-                success(data.name);
+              if(data)
+                success(data.name || data);
+              else
+                success();
             }
         },
         error: function (jqXHR, textStatus, errorMessage) {
@@ -101,7 +114,7 @@ var FormDataHelper = Backbone.Model.extend({
                 error();
             }
         }
-      });
+      })
     }
     else success('');
   },

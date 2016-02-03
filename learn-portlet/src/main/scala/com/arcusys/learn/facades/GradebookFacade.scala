@@ -1,24 +1,30 @@
 package com.arcusys.learn.facades
 
+import java.net.URI
+
 import com.arcusys.learn.exceptions.AccessDeniedException
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.LiferayClasses.LUser
+import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.permission.PermissionUtil._
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.learn.liferay.util.CountryUtilHelper
-import com.arcusys.learn.models.CourseResponse
 import com.arcusys.learn.models.Gradebook._
-import com.arcusys.learn.models.response.PieData
 import com.arcusys.learn.models.response.users.UserResponseUtils
+import com.arcusys.learn.models.response.{CollectionResponse, PieData}
+import com.arcusys.learn.utils.LiferayGroupExtensions._
+import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.grade.service.{CourseGradeService, PackageGradeService}
 import com.arcusys.valamis.gradebook.model.GradebookUserSortBy.GradebookUserSortBy
 import com.arcusys.valamis.gradebook.model._
-import com.arcusys.valamis.gradebook.service.{CourseGradeService, GradeBookService, PackageGradeService}
-import com.arcusys.valamis.lesson.model.{ValamisTag, BaseManifest}
-import com.arcusys.valamis.lesson.service.{TagServiceContract, ValamisPackageService}
-import com.arcusys.valamis.lrs.api.StatementApi
-import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.tincan.StatementResult
+import com.arcusys.valamis.gradebook.service.GradeBookService
+import com.arcusys.valamis.lesson._
+import com.arcusys.valamis.lesson.model._
+import com.arcusys.valamis.lesson.service.{LessonStatementReader, TagServiceContract, ValamisPackageService}
+import com.arcusys.valamis.lrs.serializer.{AgentSerializer, StatementSerializer}
+import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrs.tincan.{Statement, StatementResult}
 import com.arcusys.valamis.lrs.util.{TinCanVerbs, TincanHelper}
+import com.arcusys.valamis.lrs.util.TincanHelper._
+import com.arcusys.valamis.model.SkipTake
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.util.Joda._
 import com.arcusys.valamis.util.serialization.JsonHelper
@@ -29,54 +35,75 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.Try
 
-/**
- * Gradebook Facade class
- */
-class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContract with Injectable {
-  implicit val bindingModule = configuration
+class GradebookFacade(implicit val bindingModule: BindingModule)
+  extends GradebookFacadeContract
+  with Injectable
+  with GradedPackageConverter{
+
   private lazy val userService = inject[UserService]
   private lazy val packageService = inject[ValamisPackageService]
-  private lazy val gradeService = new PackageGradeService()
-  private lazy val courseService = inject[CourseGradeService]
+  protected lazy val gradeService = inject[PackageGradeService]
+  protected lazy val packageChecker = inject[PackageChecker]
+  private lazy val courseGradeService = inject[CourseGradeService]
+  private lazy val courseService = inject[CourseService]
   private lazy val gradeBookService = inject[GradeBookService]
   private lazy val userFacade = inject[UserFacadeContract]
-  private lazy val userLocalService = UserLocalServiceHelper()
   private lazy val tagService = inject[TagServiceContract]
+  private lazy val lrsClient = inject[LrsClientManager]
+  private lazy val statementReader = inject[LessonStatementReader]
 
-
-  def this() = this(Configuration)
-
-  private[facades] def getTotalGrade(courseId: Int, valamisUserId: Int): Float = courseService.get(courseId, valamisUserId) match {
-    case Some(value) => Try(value.grade.toFloat).getOrElse(0)
-    case None => 0
+  private[facades] def getTotalGrade(courseId: Long, valamisUserId: Long): Float = {
+    courseGradeService.get(courseId, valamisUserId).flatMap(_.grade).getOrElse(0)
   }
 
-  private def getTotalComment(courseId: Int, valamisUserId: Int): String = courseService.get(courseId, valamisUserId) match {
-    case Some(value) => value.comment
-    case None => ""
+  private def getTotalComment(courseId: Long, valamisUserId: Long): String = {
+    courseGradeService.get(courseId, valamisUserId).map(_.comment).getOrElse("")
   }
 
-  private[facades] def getPackageGrades(statementApi: StatementApi, courseId: Int,
-                                        valamisUserId: Int,
-                                        packageIds: Option[Seq[Int]],
+  private[facades] def getPackageGrades(courseId: Long,
+                                        valamisUserId: Long,
+                                        packageIds: Option[Seq[Long]],
                                         skip: Int,
                                         count: Int,
                                         sortAsc: Boolean = false,
                                         withStatements: Boolean = true): Seq[PackageGradeResponse] = {
+    val agent = UserLocalServiceHelper().getUser(valamisUserId).getAgentByUuid
+
+    val autoGradePackage = lrsClient.scaleApi{ api =>
+      api.getMaxActivityScale(
+        JsonHelper.toJson(agent, new AgentSerializer),
+        new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Completed))
+      )
+    } get
+
+
+    val autoGradePackagePassed = lrsClient.scaleApi{ api =>
+      api.getMaxActivityScale(
+        JsonHelper.toJson(agent, new AgentSerializer),
+        new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Passed))
+      )
+    } get
+
     var packages = packageService
       .getPackagesByCourse(courseId)
-      .filter(p => !packageIds.isDefined || packageIds.get.contains(p.id))
+      .filter(p => packageIds.isEmpty || packageIds.get.contains(p.id))
       .sortBy(_.title)
 
     if (!sortAsc)
       packages = packages.reverse
 
     if (skip != -1 && count != -1)
-      packages = packages.drop(skip).take(count)
+      packages = packages.slice(skip, skip + count)
 
     packages.map(pack => {
-      if (withStatements)
-        getPackageGradeWithStatements(statementApi, valamisUserId, pack.id)
+      val gradeCompleted = packageChecker.getPackageAutoGrade(pack, valamisUserId, autoGradePackage)
+      val gradeAuto = gradeCompleted match {
+        case Some(x) => x.toString
+        case _ => packageChecker.getPackageAutoGrade(pack, valamisUserId, autoGradePackagePassed).getOrElse("").toString
+      }
+
+        if (withStatements)
+        getPackageGradeWithStatements(valamisUserId, pack.id, Some(gradeAuto))
       else {
         val result = gradeService.getPackageGrade(valamisUserId, pack.id)
 
@@ -85,10 +112,10 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
           packageLogo = pack.logo.getOrElse(""),
           packageName = pack.title,
           description = pack.summary.getOrElse(""),
-          finished = result.isDefined && result.get.grade != "",
-          grade = result.map(_.grade).getOrElse(""),
-          gradeAuto = "",
-          activityIds = packageService.getRootActivityIds(pack.id),
+          finished = result.flatMap(_.grade).isDefined,
+          grade = result.flatMap(_.grade).map(_.toString).getOrElse(""),
+          gradeAuto = gradeAuto,
+          activityId = packageService.getRootActivityId(pack.id),
           statements = "",
           comment = if (result.isDefined) Try(result.get.comment).get else ""
         )
@@ -96,32 +123,25 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
     })
   }
 
-  def getPackageGradeWithStatements(statementApi: StatementApi, valamisUserId: Int,
-                                    packageId: Long): PackageGradeResponse = {
+  def getPackageGradeWithStatements(valamisUserId: Long,
+                                    packageId: Long,
+                                    gradeAuto: Option[String] = None): PackageGradeResponse = {
     val pack = packageService
       .getPackage(packageId)
 
-
-
     val result = gradeService.getPackageGrade(valamisUserId, pack.id)
 
-    val statements = gradeBookService.getStatementGrades(statementApi, pack.id, valamisUserId, sortAsc = false, shortMode = true)
-    val gradeAuto = statements
-      .filter(st => TincanHelper.isVerbType(st.verb, TinCanVerbs.Completed))
-      .map(TincanHelper.getScoreScaled)
-      .filter(_.isDefined)
-      .map(grade => if (grade.get <= 1) grade.get * 100 else grade.get)
-      .headOption
+    val statements = gradeBookService.getStatementGrades(pack.id, valamisUserId, sortAsc = false, shortMode = true)
 
     PackageGradeResponse(
       id = pack.id,
       packageLogo = pack.logo.getOrElse(""),
       packageName = pack.title,
       description = pack.summary.getOrElse(""),
-      finished = result.isDefined && result.get.grade != "",
-      grade = result.map(_.grade).getOrElse(""),
-      gradeAuto = gradeAuto.map(_.toInt.toString).getOrElse(""),
-      activityIds = packageService.getRootActivityIds(pack.id),
+      finished = result.flatMap(_.grade).isDefined,
+      grade = result.flatMap(_.grade).map(_.toString).getOrElse(""),
+      gradeAuto = gradeAuto.getOrElse(""),
+      activityId = packageService.getRootActivityId(pack.id),
       statements = JsonHelper.toJson(StatementResult(statements, ""), new StatementSerializer),
       comment = if (result.isDefined) Try(result.get.comment).get else ""
     )
@@ -134,16 +154,15 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
     else
       adr.getCity + ", " + CountryUtilHelper.getName(adr.getCountry)
 
-  def getLastModified(statementApi: StatementApi, courseId: Int, userId: Long): String = {
+  def getLastModified(courseId: Long, userId: Long): String = {
 
     val result = packageService
       .getPackagesByCourse(courseId)
-      .map(p => packageService.getStatements(p.id, userId.toInt, statementApi))
-      .flatMap(s => s)
+      .flatMap(p => statementReader.getLast(userId, p))
       .distinct
       .sortBy(s => s.stored)
       .lastOption
-      .map(s => s.timestamp.getOrElse(new DateTime()))
+      .map(s => s.timestamp)
 
     if (result.isDefined)
       new DateTime(result.get).toString
@@ -152,7 +171,7 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
 
   }
 
-  def getStudents(statementApi: StatementApi, courseId: Int,
+  def getStudents(courseId: Long,
                   skip: Int,
                   count: Int,
                   nameFilter: String,
@@ -160,12 +179,12 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
                   sortBy: GradebookUserSortBy,
                   sortAZ: Boolean,
                   detailed: Boolean = false,
-                  packageIds: Seq[Int] = Seq()): Seq[StudentResponse] = {
+                  packageIds: Seq[Long] = Seq()): Seq[StudentResponse] = {
     val lastModifiedCache = mutable.HashMap[Long, String]()
 
     def getOrganizationNames(user: LUser): String = user.getOrganizations.asScala.map(_.getName).mkString(", ")
     def getLastModifiedField(user: LUser): DateTime = {
-      val date = getLastModified(statementApi, courseId, user.getUserId)
+      val date = getLastModified(courseId, user.getUserId)
       lastModifiedCache.put(user.getUserId, date)
       if (date.nonEmpty) DateTime.parse(date) else new DateTime(0)
     }
@@ -176,19 +195,19 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
     }
 
     var students = userService
-      .all(courseId, -1, -1, nameFilter, sortAZ = true)
+      .all(courseId, nameFilter, sortAZ = true)
       .filter(user =>
       if (orgNameFilter != "")
         user.getOrganizations.asScala.exists(org => org.getName.toLowerCase.contains(orgNameFilter.toLowerCase))
       else true)
-      .filter(user => userFacade.canView(user, viewAll = false))
+      .filter(user => userFacade.canView(courseId, user, viewAll = false))
       .sorted(sorting)
 
     if (!sortAZ)
       students = students.reverse
 
     if (skip != -1 && count != -1)
-      students.drop(skip).take(count)
+      students.slice(skip, skip + count)
 
     students
       .map(student => StudentResponse(
@@ -200,22 +219,21 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
       lastModified = lastModifiedCache.getOrElse(student.getUserId, ""), //getLastModified(courseId, student.getUserId),
       gradeTotal = getTotalGrade(courseId, student.getUserId.toInt),
       commentTotal = getTotalComment(courseId, student.getUserId.toInt),
-      completedPackagesCount = if (detailed) 0 else gradeService.getCompletedPackagesCount(courseId, student.getUserId.toInt),
+      completedPackagesCount = if (detailed) 0 else packageChecker.getCompletedPackagesCount(courseId, student.getUserId.toInt),
       packagesCount = packageService.getPackagesCount(courseId),
-      packageGrades = if (detailed) getPackageGrades(statementApi, courseId, student.getUserId.toInt, Option(packageIds), -1, -1, sortAsc = true, withStatements = false) else null)
+      packageGrades = if (detailed) getPackageGrades(courseId, student.getUserId.toInt, Option(packageIds), -1, -1, sortAsc = true, withStatements = false) else null)
       )
 
   }
 
-  def getGradesForStudent(statementApi: StatementApi,
-                          studentId: Int,
+  def getGradesForStudent(studentId: Int,
                           courseId: Int,
                           skip: Int,
                           count: Int,
                           sortAsc: Boolean = false,
                           withStatements: Boolean = true): StudentResponse = {
-    val student = userService.byId(studentId)
-    if (!userFacade.canView(getUserId, viewAll = false))
+    val student = userService.getById(studentId)
+    if (!userFacade.canView(getCourseId, getUserId, viewAll = false))
       throw AccessDeniedException()
 
     StudentResponse(
@@ -227,111 +245,112 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
       lastModified = "last modified",
       gradeTotal = getTotalGrade(courseId, student.getUserId.toInt),
       commentTotal = getTotalComment(courseId, student.getUserId.toInt),
-      completedPackagesCount = gradeService.getCompletedPackagesCount(courseId, student.getUserId.toInt),
+      completedPackagesCount = packageChecker.getCompletedPackagesCount(courseId, student.getUserId.toInt),
       packagesCount = packageService.getPackagesCount(courseId),
-      packageGrades = getPackageGrades(statementApi, courseId, student.getUserId.toInt, None, skip, count, sortAsc, withStatements))
+      packageGrades = getPackageGrades(courseId, student.getUserId.toInt, None, skip, count, sortAsc, withStatements))
   }
 
-  private def lastCompleted(statementApi: StatementApi, pack: BaseManifest, userId: Long) = {
-    val statements = gradeBookService.getStatementGrades(statementApi, pack.id, userId.toInt, true)
+  protected def lastCompleted(pack: BaseManifest, userId: Long): Option[Statement] = {
+    val statements = gradeBookService.getStatementGrades(pack.id, userId.toInt, true)
     statements
       .filter(st => TincanHelper.isVerbType(st.verb, TinCanVerbs.Completed))
       .lastOption
   }
 
-  def getUnfinishedPackages(statementApi: StatementApi, userId: Long): Seq[GradedPackageResponse] = {
-    val lUser = userLocalService.getUser(userId)
-    courseService.getByUserId(userId).flatMap { lGroup =>
+  def getLastPackages(userId: Long, count: Int): Seq[RecentLesson] = {
+    var recentLesson = Seq[RecentLesson]()
+    courseService.getByUserId(userId).foreach(lGroup => {
+      packageService
+        .getByCourse(lGroup.getGroupId).foreach(pack => {
+        if (pack.visibility.contains(true)) {
+          for (statement <- statementReader.getLastAttempted(userId, pack))
+            recentLesson = recentLesson :+ RecentLesson(
+              pack.id,
+              pack.title,
+              statement.timestamp.toString,
+              lGroup.getDescriptiveName,
+              lGroup.getCourseFriendlyUrl
+            )
+        }
+      })
+    })
+    recentLesson.sortBy(_.throughDate).reverse.take(count)
+  }
+
+  def getBy(userId: Long, isCompleted: Boolean, skipTake: Option[SkipTake]): CollectionResponse[GradedPackageResponse] = {
+    lazy val agent = UserLocalServiceHelper().getUser(userId).getAgentByUuid
+    lazy val autoGradePackage = lrsClient.scaleApi{ api =>
+      api.getMaxActivityScale(
+        JsonHelper.toJson(agent, new AgentSerializer),
+        new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Completed))
+      )
+    }.get
+
+    lazy val autoGradePackagePassed = lrsClient.scaleApi{ api =>
+      api.getMaxActivityScale(
+        JsonHelper.toJson(agent, new AgentSerializer),
+        new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Passed))
+      )
+    }.get
+
+    val gradedPackageResponses = courseService.getByUserId(userId).flatMap { lGroup =>
       val unfinishedPackages =
         packageService
-          .getPackagesByCourse(lGroup.getGroupId.toInt)
+          .getByCourse(lGroup.getGroupId)
           .filter { pack =>
-          val isAutograded =
-            lastCompleted(statementApi, pack, userId)
-              .flatMap(_.result)
-              .flatMap(_.success)
-              .getOrElse(false)
+            val isVisible = pack.visibility.getOrElse(false)
+            if (isVisible) {
+              lazy val isAutograded = packageChecker.isPackageComplete(pack, userId, autoGradePackage) match{
+                case true => true
+                case _ => packageChecker.isPackageComplete(pack, userId, autoGradePackagePassed)
+              }
+              lazy val isGradedByTeacher = gradeService.getPackageGrade(userId, pack.id).flatMap(_.grade).exists(_ > LessonSuccessLimit)
 
-          val isGradedByTeacher = gradeService.isCompleted(userId, pack.id)
+              if (isCompleted) isGradedByTeacher || isAutograded
+              else !isGradedByTeacher && !isAutograded
+            }
+            else {
+              false
+            }
+          }
 
-          !(isAutograded || isGradedByTeacher)
-        }
-
-      unfinishedPackages.map { pack =>
-        val course =
-          CourseResponse(
-            lGroup.getGroupId,
-            lGroup.getDescriptiveName,
-            lGroup.getFriendlyURL,
-            lGroup.getDescription.replace("\n", " "))
-        val grade =
-          gradeService
-            .getPackageGrade(lUser.getUserId.toInt, pack.id)
-            .map(_.grade.toFloat)
-        val autoGrade =
-          lastCompleted(statementApi, pack, userId)
-            .flatMap(_.result)
-            .flatMap(_.score)
-            .flatMap(_.scaled)
-            .map(_ * 100)
-
-        GradedPackageResponse(
-          id = pack.id,
-          title = pack.title,
-          description = pack.summary,
-          course = course,
-          grade = grade,
-          autoGrade = autoGrade
-        )
-      }
-    }
-  }
-
-  def getCompletedPackagesCount(statementApi: StatementApi, userId: Long): Int = {
-    courseService.getByUserId(userId).map { lGroup =>
-      val packages =
-        packageService.getPackagesByCourse(lGroup.getGroupId.toInt)
-          .filter { pack =>
-          val isAutograded =
-            lastCompleted(statementApi, pack, userId)
-              .flatMap(_.result)
-              .flatMap(_.success)
-              .getOrElse(false)
-
-          val isGradedByTeacher = gradeService.isCompleted(userId, pack.id)
-
-          isAutograded || isGradedByTeacher
-        }
-
-      packages.length
-
-    }.sum
-  }
-
-  def getCompletedPackages(statementApi: StatementApi, userId: Long): Seq[PieData] = {
-    val completedPackages = courseService.getByUserId(userId).flatMap { lGroup =>
-      val packages = packageService.getPackagesByCourse(lGroup.getGroupId.toInt)
-        .filter { pack =>
-        val isAutograded =
-          lastCompleted(statementApi, pack, userId)
-            .flatMap(_.result)
-            .flatMap(_.success)
-            .getOrElse(false)
-
-        val isGradedByTeacher = gradeService.isCompleted(userId, pack.id)
-
-        isAutograded || isGradedByTeacher
-      }
-
-      packages
+      unfinishedPackages.map( toResponse(lGroup, userId)(_, autoGradePackage ++ autoGradePackagePassed)).sortBy(_.sortGrade).reverse
     }
 
-    val tags  = completedPackages.flatMap(pack => {
-      val packTags = pack.assetRefId.map(tagService.getEntryTags)
+    val total = gradedPackageResponses.length
+    val records = skipTake match {
+      case None => gradedPackageResponses
+      case Some(SkipTake(skip, take)) =>
+        gradedPackageResponses.slice(skip, skip + take)
+    }
+
+    CollectionResponse(
+      0,
+      records,
+      total
+    )
+  }
+
+
+  def getPieDataWithCompletedPackages(userId: Long): (Seq[PieData], Int) = {
+    val agent = UserLocalServiceHelper().getUser(userId).getAgentByUuid
+    val autoGradePackage = lrsClient.scaleApi{ api =>
+      api.getMaxActivityScale(
+        JsonHelper.toJson(agent, new AgentSerializer),
+        new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Completed))
+      )
+    } get
+
+    val completedPackages = courseService.getByUserId(userId)
+      .flatMap { lGroup => packageService.getPackagesByCourse(lGroup.getGroupId) }
+      .filter { lesson => packageChecker.isPackageComplete(lesson, userId, autoGradePackage) }
+
+    val tags = completedPackages.flatMap(pack => {
+      val packTags = tagService.getEntryTags(pack)
 
       packTags match {
-        case None | Some(Seq()) => Seq(ValamisTag(id= 0, text = ""))
-        case Some(seq) => seq
+        case Seq() => Seq(ValamisTag(id = 0, text = ""))
+        case seq => seq
       }
     })
 
@@ -340,14 +359,14 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
       case (name, amounts) => PieData(name, amounts.size * 100 / total)
     } .toSeq
 
-    if(total < 6) all
+    if(total < 5) (all, autoGradePackage.length)
     else {
       val orderedWithoutOther = all.filter(x => !x.label.isEmpty).sortBy(x => x.value).reverse
-      val showed = orderedWithoutOther.take(5)
+      val showed = orderedWithoutOther.take(4)
       val toOther = all.filter(p => !showed.contains(p))
       val other = PieData("", toOther.map(p => p.value).sum )
 
-      showed :+ other
+      (showed :+ other, autoGradePackage.length)
     }
   }
 
@@ -356,27 +375,6 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
                               courseId: Int): TotalGradeResponse = TotalGradeResponse(
     getTotalGrade(courseId, studentId),
     getTotalComment(courseId, studentId), None, None)
-
-  def changeTotalGrade(studentId: Int,
-                       courseId: Int,
-                       totalGrade: String,
-                       comment: Option[String]): Unit = {
-
-    val course = courseService.get(courseId, studentId)
-    if (course.isDefined) {
-      val courseGrade = course.get.copy(grade = totalGrade.toString, comment = if (comment.isDefined) comment.get else "")
-      courseService.modify(courseGrade)
-    } else {
-      val courseGrade = CourseGrade(courseId, studentId, totalGrade.toString, if (comment.isDefined) comment.get else "", None)
-      courseService.create(courseGrade)
-    }
-  }
-
-  def changePackageGrade(studentId: Int,
-                         packageId: Int,
-                         grade: String,
-                         comment: Option[String]) =
-    gradeService.updatePackageGrade(studentId, packageId, grade, comment.getOrElse(""))
 
   override def getStudentsCount(courseId: Int,
                                 nameFilter: String,
@@ -387,7 +385,7 @@ class GradebookFacade(configuration: BindingModule) extends GradebookFacadeContr
         .getGroupUsers(courseId)
         .asScala
         .filter(u => u.isActive && u.getFullName != "")
-        .filter(user => userFacade.canView(user, viewAll = false))
+        .filter(user => userFacade.canView(courseId, user, viewAll = false))
 
     val nameFiltered = if (nameFilter != "")
       users.filter(u => u.getFullName.contains(nameFilter))

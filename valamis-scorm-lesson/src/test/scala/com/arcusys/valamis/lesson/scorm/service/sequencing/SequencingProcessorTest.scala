@@ -3,7 +3,7 @@ package com.arcusys.valamis.lesson.scorm.service.sequencing
 import com.arcusys.valamis.lesson.scorm.model.manifest.{ Activity, Organization }
 import com.arcusys.valamis.lesson.scorm.model.sequencing.{ NavigationRequestType, NavigationResponseInvalid }
 import com.arcusys.valamis.lesson.scorm.model.tracking.{ ActivityStateTree, Attempt }
-import com.arcusys.valamis.user.model.User
+import com.arcusys.valamis.user.model.{ScormUser, User}
 import com.arcusys.valamis.util.TreeNode
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.scalamock.scalatest.MockFactory
@@ -17,7 +17,7 @@ class SequencingProcessorTest extends FlatSpec with Matchers with MockFactory {
 
   val someAttempt = new Attempt(
     id = 1,
-    user = new User(12, "Me"),
+    user = new ScormUser(12, "Me"),
     packageID = 13,
     organizationID = "org1",
     isComplete = false

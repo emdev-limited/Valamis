@@ -117,6 +117,21 @@ public interface LFTincanLrsEndpointModel extends BaseModel<LFTincanLrsEndpoint>
      */
     public void setSecret(String secret);
 
+    /**
+     * Returns the custom host of this l f tincan lrs endpoint.
+     *
+     * @return the custom host of this l f tincan lrs endpoint
+     */
+    @AutoEscape
+    public String getCustomHost();
+
+    /**
+     * Sets the custom host of this l f tincan lrs endpoint.
+     *
+     * @param customHost the custom host of this l f tincan lrs endpoint
+     */
+    public void setCustomHost(String customHost);
+
     @Override
     public boolean isNew();
 

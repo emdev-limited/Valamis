@@ -43,4 +43,27 @@ object StreamUtil {
       outputStream.close()
     }
   }
+
+  def ToString(is : InputStream) : String = {
+    def inner(reader : BufferedReader, sb : StringBuilder) : String = {
+      val line = reader.readLine()
+      if(line != null) {
+        try {
+          inner(reader, sb.append(line + "\n"))
+        } catch {
+          case e : IOException =>
+        } finally {
+          try {
+            is.close()
+          } catch {
+            case e : IOException =>
+          }
+        }
+
+      }
+      sb.toString()
+    }
+
+    inner(new BufferedReader(new InputStreamReader(is)), new StringBuilder())
+  }
 }

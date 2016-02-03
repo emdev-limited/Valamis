@@ -31,7 +31,7 @@ public class LFTincanURILocalServiceImpl extends LFTincanURILocalServiceBaseImpl
     }
 
     public LFTincanURI findURI(String objId, String objType) throws SystemException, NoSuchLFTincanURIException {
-        return lfTincanURIPersistence.findByURI(objId, objType);
+        return lfTincanURIPersistence.fetchByURI(objId, objType);
     }
 
 }

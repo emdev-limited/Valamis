@@ -12,7 +12,7 @@
                 <td class="grade center-text"> {{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}
                 </td> 
                 <td class="edit-button-td">
-                    <button class="button medium neutral no-text">
+                    <button class="js-action-edit button medium neutral no-text">
                         <span class="val-icon-edit"></span>
                         {{{grade}}}
                     </button>
@@ -92,21 +92,11 @@
     </div>
 </script>
 
-<script type="text/html" id="studentTotalGradeViewTemplate">
-    <div>{{totalGradeLabel}}: <b>{{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}</b></div>
-    <button class="button medium neutral edit-total-grade">
-
-        {{#isAdmin}}{{{editLabel}}}{{/isAdmin}}
-        {{^isAdmin}}{{{viewLabel}}}{{/isAdmin}}
-    </button>
-</script>
-
 <script type="text/html" id="studentViewTemplate">
-    <table class="val-table medium no-border">
-        <tbody>
+    <tbody>
         <tr>
             <td style="width:1%;">
-                <img src="{{avatarUrl}}" class="img-circle" style="max-width:64px;max-height:64px;"/>
+                <img src="{{avatarUrl}}" class="img-circle" style="max-width:64px;max-height:64px;width:64px;height:64px;"/>
             </td>
             <td>
                 <h3>{{fullname}}</h3>
@@ -124,13 +114,22 @@
                 {{/organizationNames.length}}
             </td>
             <td class="text-right" id="studentTotalGrade">
+                <div>{{totalGradeLabel}}: <b>{{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}</b></div>
+                <button class="button medium neutral edit-total-grade">
 
+                    {{#isAdmin}}{{{editLabel}}}{{/isAdmin}}
+                    {{^isAdmin}}{{{viewLabel}}}{{/isAdmin}}
+                </button>
             </td>
         </tr>
-        </tbody>
+    </tbody>
+</script>
 
-    </table>
-    <div class="shift-left filter-element paging-showing-label" id="packageGradesPagingShowing"> </div>
+<script type="text/html" id="studentViewLayoutTemplate">
+    <table class="val-table medium no-border js-student-view-table"></table>
+
+    <div class="shift-left filter-element paging-showing-label" id="packageGradesPagingShowing"></div>
+
     <table class="val-table medium grade-table">
         <thead>
         <tr>
@@ -142,6 +141,7 @@
         <tbody id="studentGradeGrid">
         </tbody>
     </table>
+
     <div id="loading-packages"> </div>
     <div class="val-paginator text-center" id="packageGradesListPaginator"></div>
 </script>
@@ -247,10 +247,10 @@
         <div class="expand-text">{{packageName}}</div>
     </td>
     <td class="autograde center-text">
-        {{gradeAuto}}{{#gradeAuto}}%{{/gradeAuto}}
+        {{#gradeAuto}}{{gradeAutoShowing}}%{{/gradeAuto}}
     </td>
     <td class="grade center-text">
-        {{grade}}{{#grade}}%{{/grade}}
+        {{#grade}}{{gradeShowing}}%{{/grade}}
     </td>
     <td class="edit-button-td">
         <button class="button medium neutral no-text edit-button">
@@ -325,7 +325,7 @@
         <tbody>
         <tr>
             <td style="width:1%;">
-                <img src="{{avatarUrl}}" class="img-circle" style="max-width:64px;max-height:64px;"/>
+                <img src="{{avatarUrl}}" class="img-circle" style="max-width:64px;max-height:64px;width:64px;height:64px;"/>
             </td>
             <td>
                 <h3>{{fullname}}</h3>
@@ -450,7 +450,7 @@
                 src="{{contextPath}}img/imgo.jpg"
                 {{/packageLogo}}
 
-                style="max-width:64px;max-height:64px;" />
+                style="max-width:64px;max-height:64px;width:64px;height:64px;" />
             </td>
             <td>
                 <h3 class="package-name-title">{{packageName}}</h3>

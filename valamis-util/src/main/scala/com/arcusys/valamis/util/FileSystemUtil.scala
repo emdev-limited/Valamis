@@ -70,12 +70,6 @@ object FileSystemUtil {
   }
 
   def getFileContent(file: File): Array[Byte] = {
-    //    val contentSource = scala.io.Source.fromFile(file)(scala.io.Codec.ISO8859)
-    //    try {
-    //      contentSource.map(_.toByte).toArray
-    //    } finally {
-    //      contentSource.close()
-    //    }
     val inputStream = new FileInputStream(file)
     try {
       StreamUtil.toByteArray(inputStream)

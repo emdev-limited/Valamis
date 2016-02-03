@@ -1,10 +1,11 @@
 package com.arcusys.valamis.certificate.schema
 
 import com.arcusys.valamis.certificate.model.Certificate
+import com.arcusys.valamis.certificate.repository.CertificateUpdate
 import com.arcusys.valamis.core.DbNameUtils._
 import com.arcusys.valamis.core.SlickProfile
+import com.arcusys.valamis.joda.JodaDateTimeMapper
 import com.arcusys.valamis.model.PeriodTypes
-import com.github.tototoshi.slick.GenericJodaSupport
 import org.joda.time.DateTime
 
 import scala.slick.driver.JdbcDriver
@@ -18,8 +19,7 @@ trait CertificateTableComponent { self: SlickProfile =>
       s => PeriodTypes.withName(s)
     )
 
-    val jodaMapper = new GenericJodaSupport(driver.asInstanceOf[JdbcDriver])
-    import jodaMapper._
+    implicit val jodaMapper = new JodaDateTimeMapper(driver.asInstanceOf[JdbcDriver]).typeMapper
 
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def title = column[String]("TITLE")
@@ -35,16 +35,34 @@ trait CertificateTableComponent { self: SlickProfile =>
     def isPublished = column[Boolean]("IS_PUBLISHED")
     def scope = column[Option[Long]]("SCOPE")
 
-    private def customTupled(tuple: Tuple13[Long, String, String, String, Boolean, Boolean, String, Long, PeriodTypes.PeriodType, Int, DateTime, Boolean, Option[Long]]) = tuple match {
-      case (id: Long, title: String, description: String, logo: String, isPermanent: Boolean, isPublishBadge: Boolean, shortDescription: String, companyId: Long, validPeriodType: PeriodTypes.PeriodType, validPeriod: Int, createdAt: DateTime, isPublished: Boolean, scope: Option[Long]) =>
-        Certificate(id.toInt, title, description, logo, isPermanent, isPublishBadge, shortDescription, companyId.toInt, validPeriodType, validPeriod, createdAt, isPublished, scope)
-    }
-    private def customUnapply(certificate: Certificate) = certificate match{
-      case Certificate(id, title, description, logo, isPermanent, isPublishBadge, shortDescription, companyId, validPeriodType, validPeriod, createdAt, isPublished, scope) =>
-        Some(id.toLong, title, description, logo, isPermanent, isPublishBadge, shortDescription, companyId.toLong, validPeriodType, validPeriod, createdAt, isPublished, scope)
-    }
+    def * = (
+      id,
+      title,
+      description,
+      logo,
+      isPermanent,
+      isPublishBadge,
+      shortDescription,
+      companyId,
+      validPeriodType,
+      validPeriod,
+      createdAt,
+      isPublished,
+      scope) <> (Certificate.tupled, Certificate.unapply)
 
-    def * = (id, title, description, logo, isPermanent, isPublishBadge, shortDescription, companyId, validPeriodType, validPeriod, createdAt, isPublished, scope) <> (customTupled, customUnapply)
+    def update = (
+      title,
+      description,
+      logo,
+      isPermanent,
+      isPublishBadge,
+      shortDescription,
+      companyId,
+      validPeriodType,
+      validPeriod,
+      createdAt,
+      isPublished,
+      scope) <> (CertificateUpdate.tupled, CertificateUpdate.unapply)
   }
 
   val certificates = TableQuery[CertificateTable]

@@ -1,12 +1,12 @@
 package com.arcusys.learn.liferay.update
 
 import com.arcusys.learn.liferay.update.migration.{CertificateStorageMigration2303, FileStorageMigration2303}
+import com.arcusys.learn.liferay.update.version240.certificate._
+import com.arcusys.learn.liferay.update.version240.file._
+import com.arcusys.learn.liferay.update.version240.lesson._
+import com.arcusys.learn.liferay.update.version240.lrs._
 import com.arcusys.valamis.core.{SlickDBInfo, SlickProfile}
-import com.arcusys.valamis.version240.certificate._
-import com.arcusys.valamis.version240.file._
-import com.arcusys.valamis.version240.lrs._
-import com.arcusys.valamis.version240.lesson._
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 
 class SlickMigration2303(

@@ -41,26 +41,26 @@ public class LFTincanPackageLocalServiceClpInvoker {
     private String[] _methodParameterTypes14;
     private String _methodName15;
     private String[] _methodParameterTypes15;
-    private String _methodName216;
-    private String[] _methodParameterTypes216;
-    private String _methodName217;
-    private String[] _methodParameterTypes217;
-    private String _methodName222;
-    private String[] _methodParameterTypes222;
-    private String _methodName223;
-    private String[] _methodParameterTypes223;
-    private String _methodName224;
-    private String[] _methodParameterTypes224;
-    private String _methodName225;
-    private String[] _methodParameterTypes225;
-    private String _methodName226;
-    private String[] _methodParameterTypes226;
-    private String _methodName227;
-    private String[] _methodParameterTypes227;
-    private String _methodName228;
-    private String[] _methodParameterTypes228;
-    private String _methodName229;
-    private String[] _methodParameterTypes229;
+    private String _methodName200;
+    private String[] _methodParameterTypes200;
+    private String _methodName201;
+    private String[] _methodParameterTypes201;
+    private String _methodName206;
+    private String[] _methodParameterTypes206;
+    private String _methodName207;
+    private String[] _methodParameterTypes207;
+    private String _methodName208;
+    private String[] _methodParameterTypes208;
+    private String _methodName209;
+    private String[] _methodParameterTypes209;
+    private String _methodName210;
+    private String[] _methodParameterTypes210;
+    private String _methodName211;
+    private String[] _methodParameterTypes211;
+    private String _methodName212;
+    private String[] _methodParameterTypes212;
+    private String _methodName213;
+    private String[] _methodParameterTypes213;
 
     public LFTincanPackageLocalServiceClpInvoker() {
         _methodName0 = "addLFTincanPackage";
@@ -145,49 +145,49 @@ public class LFTincanPackageLocalServiceClpInvoker {
                 "com.arcusys.learn.persistence.liferay.model.LFTincanPackage"
             };
 
-        _methodName216 = "getBeanIdentifier";
+        _methodName200 = "getBeanIdentifier";
 
-        _methodParameterTypes216 = new String[] {  };
+        _methodParameterTypes200 = new String[] {  };
 
-        _methodName217 = "setBeanIdentifier";
+        _methodName201 = "setBeanIdentifier";
 
-        _methodParameterTypes217 = new String[] { "java.lang.String" };
+        _methodParameterTypes201 = new String[] { "java.lang.String" };
 
-        _methodName222 = "createLFTincanPackage";
+        _methodName206 = "createLFTincanPackage";
 
-        _methodParameterTypes222 = new String[] {  };
+        _methodParameterTypes206 = new String[] {  };
 
-        _methodName223 = "findByRefID";
+        _methodName207 = "findByRefID";
 
-        _methodParameterTypes223 = new String[] { "java.lang.Long" };
+        _methodParameterTypes207 = new String[] { "java.lang.Long" };
 
-        _methodName224 = "findByPackageID";
+        _methodName208 = "findByPackageID";
 
-        _methodParameterTypes224 = new String[] { "java.lang.Long[][]" };
+        _methodParameterTypes208 = new String[] { "java.lang.Long[][]" };
 
-        _methodName225 = "findByInstance";
+        _methodName209 = "findByInstance";
 
-        _methodParameterTypes225 = new String[] { "java.lang.Integer[][]" };
+        _methodParameterTypes209 = new String[] { "java.lang.Integer[][]" };
 
-        _methodName226 = "findByCourseID";
+        _methodName210 = "findByCourseID";
 
-        _methodParameterTypes226 = new String[] { "java.lang.Integer" };
+        _methodParameterTypes210 = new String[] { "java.lang.Integer" };
 
-        _methodName227 = "findByTitleAndCourseID";
+        _methodName211 = "findByTitleAndCourseID";
 
-        _methodParameterTypes227 = new String[] {
+        _methodParameterTypes211 = new String[] {
                 "java.lang.String", "java.lang.Integer[][]"
             };
 
-        _methodName228 = "countByTitleAndCourseID";
+        _methodName212 = "countByTitleAndCourseID";
 
-        _methodParameterTypes228 = new String[] {
+        _methodParameterTypes212 = new String[] {
                 "java.lang.String", "java.lang.Integer[][]"
             };
 
-        _methodName229 = "getLFTincanPackage";
+        _methodName213 = "getLFTincanPackage";
 
-        _methodParameterTypes229 = new String[] { "long" };
+        _methodParameterTypes213 = new String[] { "long" };
     }
 
     public Object invokeMethod(String name, String[] parameterTypes,
@@ -279,57 +279,57 @@ public class LFTincanPackageLocalServiceClpInvoker {
             return LFTincanPackageLocalServiceUtil.updateLFTincanPackage((com.arcusys.learn.persistence.liferay.model.LFTincanPackage) arguments[0]);
         }
 
-        if (_methodName216.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes216, parameterTypes)) {
+        if (_methodName200.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes200, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.getBeanIdentifier();
         }
 
-        if (_methodName217.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes217, parameterTypes)) {
+        if (_methodName201.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes201, parameterTypes)) {
             LFTincanPackageLocalServiceUtil.setBeanIdentifier((java.lang.String) arguments[0]);
 
             return null;
         }
 
-        if (_methodName222.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes222, parameterTypes)) {
+        if (_methodName206.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes206, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.createLFTincanPackage();
         }
 
-        if (_methodName223.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes223, parameterTypes)) {
+        if (_methodName207.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes207, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.findByRefID((java.lang.Long) arguments[0]);
         }
 
-        if (_methodName224.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes224, parameterTypes)) {
+        if (_methodName208.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes208, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.findByPackageID((java.lang.Long[]) arguments[0]);
         }
 
-        if (_methodName225.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes225, parameterTypes)) {
+        if (_methodName209.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes209, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.findByInstance((java.lang.Integer[]) arguments[0]);
         }
 
-        if (_methodName226.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes226, parameterTypes)) {
+        if (_methodName210.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes210, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.findByCourseID((java.lang.Integer) arguments[0]);
         }
 
-        if (_methodName227.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes227, parameterTypes)) {
+        if (_methodName211.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes211, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.findByTitleAndCourseID((java.lang.String) arguments[0],
                 (java.lang.Integer[]) arguments[1]);
         }
 
-        if (_methodName228.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes228, parameterTypes)) {
+        if (_methodName212.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes212, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.countByTitleAndCourseID((java.lang.String) arguments[0],
                 (java.lang.Integer[]) arguments[1]);
         }
 
-        if (_methodName229.equals(name) &&
-                Arrays.deepEquals(_methodParameterTypes229, parameterTypes)) {
+        if (_methodName213.equals(name) &&
+                Arrays.deepEquals(_methodParameterTypes213, parameterTypes)) {
             return LFTincanPackageLocalServiceUtil.getLFTincanPackage(((Long) arguments[0]).longValue());
         }
 

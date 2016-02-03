@@ -12,7 +12,7 @@ valamisApp.module("Entities", function(Entities, contentManager, Backbone, Mario
         }
     });
 
-    var LiferaySiteCollectionService = new Backbone.Service({ url: '/',
+    var LiferaySiteCollectionService = new Backbone.Service({ url: path.root,
         sync: {
             'read':{
                 'path': path.api.courses,
@@ -21,12 +21,15 @@ valamisApp.module("Entities", function(Entities, contentManager, Backbone, Mario
                     var sort = 'true';
                     if (options.sort) sort = options.sort;
 
-                    return {
+                    var result ={
                         filter: filter,
-                        sortAscDirection: sort,
-                        page: options.currentPage,
-                        count: options.itemsOnPage
-                    }
+                        sortAscDirection: sort
+                    };
+
+                    if(options.currentPage) result.page = options.currentPage;
+                    if(options.itemsOnPage) result.count = options.itemsOnPage;
+
+                    return result;
                 }
             }
         }

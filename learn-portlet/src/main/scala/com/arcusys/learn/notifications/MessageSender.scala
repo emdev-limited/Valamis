@@ -1,9 +1,9 @@
 package com.arcusys.learn.notifications
 
+import javax.mail.internet.InternetAddress
+
 import com.liferay.mail.service.MailServiceUtil
 import com.liferay.portal.kernel.mail.MailMessage
-
-import javax.mail.internet.InternetAddress
 
 trait MessageSender {
   def from = "no-reply@valamis.fi"

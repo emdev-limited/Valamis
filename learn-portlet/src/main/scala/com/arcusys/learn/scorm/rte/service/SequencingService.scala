@@ -1,48 +1,43 @@
 package com.arcusys.learn.scorm.rte.service
 
-import com.arcusys.learn.controllers.api.BaseApiController
-import com.arcusys.learn.liferay.permission.PermissionUtil
-import com.arcusys.learn.models.request.OAuthRequest
-import com.arcusys.valamis.lesson.scorm.model.manifest.{ ResourceUrl, LeafActivity }
-import com.arcusys.valamis.lesson.scorm.model.sequencing.{ ProcessorResponseEndSession, ProcessorResponseDelivery }
-import com.arcusys.valamis.lesson.scorm.service.sequencing.SequencingProcessor
-import com.arcusys.valamis.lesson.service.{ ValamisPackageService, ActivityServiceContract, LessonLimitChecker }
-import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.escalatesoft.subcut.inject.BindingModule
-import com.arcusys.learn.web.ServletBase
-import com.arcusys.learn.ioc.Configuration
 import java.net.URLDecoder
-import PermissionUtil._
+import com.arcusys.learn.controllers.api.base.BaseApiController
+import com.arcusys.learn.liferay.permission.PermissionUtil._
+import com.arcusys.learn.web.ServletBase
+import com.arcusys.valamis.lesson.scorm.model.manifest.{LeafActivity, ResourceUrl}
+import com.arcusys.valamis.lesson.scorm.model.sequencing.{ProcessorResponseDelivery, ProcessorResponseEndSession}
+import com.arcusys.valamis.lesson.scorm.service.sequencing.SequencingProcessor
+import com.arcusys.valamis.lesson.service.{ActivityServiceContract, LessonLimitChecker, ValamisPackageService}
+import com.arcusys.valamis.util.serialization.JsonHelper
+import org.scalatra.SinatraRouteMatcher
 
-class SequencingService(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase {
-  def this() = this(Configuration)
+class SequencingService extends BaseApiController with ServletBase {
 
-  val passingLimitChecker = inject[LessonLimitChecker]
+  lazy val passingLimitChecker = inject[LessonLimitChecker]
 
-  val packageManager = inject[ValamisPackageService]
-  val activityManager = inject[ActivityServiceContract]
-  val lrsReader = inject[LrsClientManager]
+  lazy val packageManager = inject[ValamisPackageService]
+  lazy val activityManager = inject[ActivityServiceContract]
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)
   }
+
+  implicit override def string2RouteMatcher(path: String) = new SinatraRouteMatcher(path)
 
   // get possible navigation types, check which navigation controls should be hidden
   get("/sequencing/NavigationRules/:packageID/:currentScormActivityID") {
     val packageID = parameter("packageID").intRequired
     val activityID = parameter("currentScormActivityID").required
     val activity = activityManager.getActivity(packageID, activityID)
-    json("hiddenUI" -> activity.hiddenNavigationControls.map(_.toString)).get
+    JsonHelper.toJson("hiddenUI" -> activity.hiddenNavigationControls.map(_.toString))
   }
 
   post("/sequencing/Tincan/:packageID") {
     val packageID = parameter("packageID").intRequired
 
-    val params = OAuthRequest(this)
-    val mainFileName = lrsReader.statementApi(packageManager.getTincanLaunchWithLimitTest(packageID, getLiferayUser, _),
-      params.lrsAuth)
+    val mainFileName = packageManager.getTincanLaunchWithLimitTest(packageID, getLiferayUser)
 
-    json(Map("launchURL" -> mainFileName)).get
+    JsonHelper.toJson(Map("launchURL" -> mainFileName))
   }
 
   get("/sequencing/NavigationRequest/:currentScormPackageID/:currentOrganizationID/:sequencingRequest") {
@@ -50,9 +45,7 @@ class SequencingService(configuration: BindingModule) extends BaseApiController(
     val packageID = parameter("currentScormPackageID").intRequired
     val organizationID = parameter("currentOrganizationID").required
 
-    val params = OAuthRequest(this)
-    val isAvaliable = lrsReader.statementApi(passingLimitChecker.checkScormPackage(getLiferayUser, packageID, _),
-      params.lrsAuth)
+    val isAvaliable = passingLimitChecker.checkScormPackage(getLiferayUser, packageID)
 
     if (!isAvaliable) ""
     else {
@@ -63,7 +56,7 @@ class SequencingService(configuration: BindingModule) extends BaseApiController(
 
       val sequencingRequest = URLDecoder.decode(parameter("sequencingRequest").required, "UTF-8")
 
-      val jsonData = json(processor.process(sequencingRequest) match {
+      val jsonData = JsonHelper.toJson(processor.process(sequencingRequest) match {
         case ProcessorResponseDelivery(tree) => {
           activityManager.updateActivityStateTree(currentAttempt.id, tree)
           val currentActivityID = tree.currentActivity.map(_.item.activity.id).getOrElse("")
@@ -75,7 +68,7 @@ class SequencingService(configuration: BindingModule) extends BaseApiController(
           val currentActivityID = tree.currentActivity.map(_.item.activity.id).getOrElse("")
           Map("currentActivity" -> currentActivityID, "endSession" -> true) ++ getActivityData(packageID, currentActivityID)
         }
-      }).get
+      })
 
       contentType = "text/html"
       val headScriptData = scala.xml.Unparsed(

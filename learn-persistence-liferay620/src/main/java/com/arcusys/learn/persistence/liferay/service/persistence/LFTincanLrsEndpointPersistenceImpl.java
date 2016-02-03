@@ -340,6 +340,7 @@ public class LFTincanLrsEndpointPersistenceImpl extends BasePersistenceImpl<LFTi
         lfTincanLrsEndpointImpl.setAuthType(lfTincanLrsEndpoint.getAuthType());
         lfTincanLrsEndpointImpl.setKey(lfTincanLrsEndpoint.getKey());
         lfTincanLrsEndpointImpl.setSecret(lfTincanLrsEndpoint.getSecret());
+        lfTincanLrsEndpointImpl.setCustomHost(lfTincanLrsEndpoint.getCustomHost());
 
         return lfTincanLrsEndpointImpl;
     }

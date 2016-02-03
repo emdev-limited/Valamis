@@ -2,7 +2,7 @@ var StudentLeaderboardModel = Backbone.Model.extend({
     defaults: {}
 });
 
-StudentLeaderboardModelCollectionService = new Backbone.Service({ url: '/',
+StudentLeaderboardModelCollectionService = new Backbone.Service({ url: path.root,
     sync: {
         'read': {
             path: path.api.report,

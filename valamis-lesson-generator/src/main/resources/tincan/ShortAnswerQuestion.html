@@ -1,21 +1,24 @@
-<section data-state="short_{{id}}">
-<div class="SCORMPlayerContentDisplay content{{id}}">
+<section data-state="short_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
+<div class="SCORMPlayerContentDisplay content{{id}}_{{questionNumber}}">
     <div class="playerHeader">
         <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
     </div>
     <div class="playerMainArea">
-        <input class="playerShortAnswerField" id="scormShortAnswer{{id}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
+        <input class="playerShortAnswerField" id="scormShortAnswer{{id}}_{{questionNumber}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
     </div>
     <!--{{#autoShowAnswer}} -->
-    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton" onclick="TinCanCourseHelpers['shortShowAnswers_{{id}}']()">Check</button>
+    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+            onclick="TinCanCourseHelpers['shortShowAnswers_{{id}}_{{questionNumber}}']()">
+        Check
+    </button>
     <!--{{/autoShowAnswer}} -->
 </div>
 <!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}" style="display: none;">
-    <h2><span id="answerCorrectness{{id}}" style="vertical-align: baseline !important;"></span></h2>
+<div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
+    <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
 
-    <div id="answerComparison{{id}}" style="display: none;">
-        <strong>Your answer is <span id="usersAnswers{{id}}"></span></strong>
+    <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
+        <strong>Your answer is <span id="usersAnswers{{id}}_{{questionNumber}}"></span></strong>
         <div>
             <!-- {{#isCaseSensitive}} -->
             <p>But correct answers (case sensitive):</p>
@@ -23,7 +26,7 @@
             <!-- {{^isCaseSensitive}} -->
             <p>But correct answers:</p>
             <!-- {{/isCaseSensitive}} -->
-            <div id="correctAnswers{{id}}"></div>
+            <div id="correctAnswers{{id}}_{{questionNumber}}"></div>
         </div>
         <br class="clear"/>
         <br>
@@ -38,42 +41,47 @@
 </section>
 <script type="text/javascript">
     /*{{#autoShowAnswer}}*/
-    TinCanCourseHelpers['shortShowAnswers_{{id}}'] = function() {
-        var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
-        var dataToCompare = JSON.parse('{{{answers}}}');
+    TinCanCourseHelpers['shortShowAnswers_{{id}}_{{questionNumber}}'] = function() {
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
+        //Replace all tags with /> to >, as we get not closed tags in answer
+        var dataToCompare = JSON.parse(unescapeElement('{{answers}}').replace(/[\s]+\/>/gi, '>'));
 
-        jQuery('.answers{{id}}').show();
-        jQuery('.content{{id}}').hide();
+        jQuery('.answers{{id}}_{{questionNumber}}').show();
+        jQuery('.content{{id}}_{{questionNumber}}').hide();
+
+        var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
+        parent_el.prevAll('.rj-element').hide();
+        parent_el.nextAll('.rj-element').hide();
 
         var correct = answers.isPassed;
         var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
         if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
-        jQuery("#answerCorrectness{{id}}").html(correctness);
+        jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
         if (!correct) {
-            jQuery("#answerComparison{{id}}").show();
+            jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
             var learnerResponse = answers.learnerResponse;
 
-            jQuery("#usersAnswers{{id}}").html(learnerResponse);
+            jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(learnerResponse);
 
             var correctResponse = [];
             for (var i = 0; i<dataToCompare.length; i++) {
                 correctResponse.push(dataToCompare[i].text);
             }
-            jQuery("#correctAnswers{{id}}").append(jQuery("<div>").addClass("matchedLine").html(correctResponse.join(', ')));
+            jQuery("#correctAnswers{{id}}_{{questionNumber}}").append(jQuery("<div>").addClass("matchedLine").html(correctResponse.join(', ')));
         }
         doScale();
     };
     /*{{/autoShowAnswer}}*/
 
-    TinCanCourseHelpers['collectAnswers_{{id}}'] = function() {
-        var dataToCompare = JSON.parse('{{{answers}}}');
+    TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function() {
+        var dataToCompare = JSON.parse(unescapeElement('{{answers}}').replace(/[\s]+\/>/gi, '>'));
         var isCaseSensitive = JSON.parse('{{{isCaseSensitive}}}');
         var score = 0,
             hasScore = false;
 
         // this will check is user answer right
-        var userAnswer = jQuery("#scormShortAnswer{{id}}").val();
+        var userAnswer = jQuery("#scormShortAnswer{{id}}_{{questionNumber}}").val();
 
         var isPassed = false;
         var correctResponses = [];
@@ -107,17 +115,24 @@
         }
     };
 
-    TinCanCourseModules['short_{{id}}'] = function(tincan) {
-        var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
+    TinCanCourseModules['short_{{id}}_{{questionNumber}}'] = function(tincan) {
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
 
-        var taskID = 'task{{id}}';
+        var taskID = 'task{{id}}_{{questionNumber}}';
 
         if (answers.isPassed) {
-            tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'fill-in', answers.learnerResponse, answers.correctResponse, true, 100, answers.score));
+            tincan.sendStatement(GetQuestionAnswerStatement(taskID, unescapeElement('{{text}}'), '{{title}}', 'fill-in', answers.learnerResponse, answers.correctResponse, true, 100, answers.score));
             return 1;
         } else {
-            tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'fill-in', answers.learnerResponse, answers.correctResponse, false, 0, answers.score));
+            tincan.sendStatement(GetQuestionAnswerStatement(taskID, unescapeElement('{{text}}'), '{{title}}', 'fill-in', answers.learnerResponse, answers.correctResponse, false, 0, answers.score));
             return 0;
         }
-    }
+    };
+
+    TinCanCourseSetAnswers['short_{{id}}_{{questionNumber}}'] = function(userAnswer) {
+        jQuery("#scormShortAnswer{{id}}_{{questionNumber}}").val(userAnswer);
+    };
+
+    TinCanCourseQuestionsAll['short_{{id}}_{{questionNumber}}'] = unescapeElement('{{title}}');
+    TinCanCourseQuestionsContent['short_{{id}}_{{questionNumber}}'] = unescapeElement('{{text}}');
 </script>

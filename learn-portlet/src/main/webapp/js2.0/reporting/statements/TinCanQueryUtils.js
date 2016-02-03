@@ -86,6 +86,10 @@ TINCAN.MultiLRSStatementStream.prototype = {
         var stmt, statements = [];
         stmt = this.getNextStatement();
         while (stmt !== null) {
+            if (_.isEmpty(stmt.verb.display)) {
+                var verbId = stmt.verb.id;
+                stmt.verb.display["en-US"] = verbId.toString().substr(verbId.lastIndexOf('/') + 1)
+            }
             statements.push(stmt);
             stmt = this.getNextStatement();
         }
@@ -96,7 +100,6 @@ TINCAN.MultiLRSStatementStream.prototype = {
     // those statements are ready passing in this multi stream object as the argument
     loadStatements: function (queryObj, callback) {
         var multiStream = this,
-            isMoreQuery = (queryObj === "more"),
             lrsListToUse = this.lrsList,
             lrsId,
             lrsState,
@@ -108,32 +111,31 @@ TINCAN.MultiLRSStatementStream.prototype = {
             _requestCfg,
             requestCfg = null;
 
-        if (isMoreQuery) {
-            // If we're continuing some query, only query lrs's that have more statements
-            lrsListToUse = [];
-            for (lrsId in this.getIdMap()) {
-                lrsState = this.state[lrsId];
-                if (lrsState.statements.length <= 10 && lrsState.moreUrl !== null) {
-                    lrsListToUse.push(this.state[lrsId].lrs);
-                }
-            }
-        } else {
-            // If this is not a continuation query, make sure to reset moreUrls
-            this.initializeState();
-        }
+
+        this.initializeState();
+
 
         // Capture total count of lrs's to help w/ multiple callbacks below
         callbackCount = lrsListToUse.length;
 
         // Setup a function which will create a callback for this lrs fetch
         createCallback = function (lrsId) {
-            return function (err, stResult) {
+            return function (err, xhr) {
+
+                stResult = JSON.parse(xhr.response);
+                stResultStatement = _.map(stResult.statements, function (st) {
+                        var statement = TinCan.Statement.fromJSON(JSON.stringify(st));
+                        statement.originalJSON = JSON.stringify(st, "", 4);
+                        return statement;
+
+                    }
+                )
                 var streamState = multiStream.state[lrsId];
                 callbackCount--;
 
                 if (err === null) {
                     // Capture this lrs's statements into state, note more url
-                    Array.prototype.push.apply(streamState.statements, stResult.statements);
+                    Array.prototype.push.apply(streamState.statements, stResultStatement);
                     streamState.moreUrl = stResult.more;
                 }
 
@@ -150,27 +152,26 @@ TINCAN.MultiLRSStatementStream.prototype = {
             lrs = lrsListToUse[i];
             lrsId = this.getLrsId(lrs);
 
-            if (!isMoreQuery) {
-                _requestCfg = lrs.queryStatements(
-                    {
-                        params: queryObj,
-                        callback: createCallback(lrsId)
-                    }
-                );
-                if (requestCfg === null) {
-                    requestCfg = _requestCfg;
+            _requestCfg = lrs.sendRequest(
+                {
+                    url: "statements",
+                    method: "GET",
+                    params: queryObj,
+                    callback: createCallback(lrsId)
+
                 }
-            } else {
-                lrs.moreStatements(
-                    {
-                        url: this.state[lrsId].moreUrl,
-                        callback: createCallback(lrsId)
-                    }
-                );
+            )
+
+            if (requestCfg === null) {
+                requestCfg = _requestCfg;
             }
         }
-
-        return requestCfg;
+        return {
+            url: "statements",
+            method: "GET",
+            params: queryObj,
+            callback: createCallback(lrsId)
+        }
     },
 
     // Load more statements from the saved multiple LRSs and current query

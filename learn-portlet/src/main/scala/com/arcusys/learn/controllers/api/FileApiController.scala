@@ -2,35 +2,46 @@ package com.arcusys.learn.controllers.api
 
 import java.io.InputStream
 import javax.servlet.http._
+
+import com.arcusys.learn.controllers.api.base.BaseApiController
 import com.arcusys.learn.facades._
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission._
-import com.arcusys.learn.liferay.services.{PermissionHelper, FileEntryServiceHelper}
-import com.arcusys.learn.models.FileResponse
+import com.arcusys.learn.liferay.permission.PermissionUtil
+import com.arcusys.learn.liferay.services.FileEntryServiceHelper
 import com.arcusys.learn.models.request._
 import com.arcusys.learn.models.response.CollectionResponse
+import com.arcusys.learn.models.FileResponse
+import com.arcusys.learn.policies.api.FilePolicy
+import com.arcusys.learn.service.util.ImageProcessor
 import com.arcusys.learn.web.FileUploading
-import com.arcusys.valamis.slide.service.SlideSetServiceContract
-import com.escalatesoft.subcut.inject.BindingModule
+import com.arcusys.valamis.certificate.service.CertificateService
+import com.arcusys.valamis.lesson.service.ValamisPackageService
+import com.arcusys.valamis.slide.service.{SlideElementServiceContract, SlideServiceContract, SlideSetServiceContract}
 import com.liferay.portal.util.PortalUtil
 import org.joda.time.DateTime
 import org.scalatra.servlet.MultipartConfig
 
-class FileApiController(configuration: BindingModule) extends BaseApiController(configuration) with FileUploading {
+class FileApiController
+  extends BaseApiController
+  with FileUploading
+  with FilePolicy {
+
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(30 * 1024 * 1024)))
 
   private lazy val packageFacade = inject[PackageFacadeContract]
   private lazy val certificateFacade = inject[CertificateFacadeContract]
   private lazy val questionFacade = inject[QuestionFacadeContract]
-  private lazy val quizFacade = inject[QuizFacadeContract]
   private lazy val fileFacade = inject[FileFacadeContract]
+
+  private lazy val imageProcessor = inject[ImageProcessor]
+
+  private lazy val certificateService = inject[CertificateService]
+  private lazy val packageService = inject[ValamisPackageService]
   private lazy val slideSetService = inject[SlideSetServiceContract]
+  private lazy val slideService = inject[SlideServiceContract]
+  private lazy val slideElementService = inject[SlideElementServiceContract]
 
-  def this() = this(Configuration)
-
-  before() {
-    scentry.authenticate(LIFERAY_STRATEGY_NAME)
-  }
+  private val LogoWidth  = 360
+  private val LogoHeight = 240
 
   get("/files/images")(action {
     response.reset()
@@ -59,12 +70,12 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
     <html>
       <head>
         <style>
-          { styles }
+          {styles}
         </style>
       </head>
       <body style="margin:0; background: black;">
         <video width="100%" height="100%" controls="true">
-          <source src={ videosrcDL }/>
+          <source src={videosrcDL}/>
         </video>
       </body>
     </html>
@@ -74,7 +85,7 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
   get("/files/packages/(:" + FileRequest.FileId + ")")(action {
     val fileRequest = FileRequest(this)
     fileRequest.action match {
-      case FileActionType.All => {
+      case FileActionType.All =>
         val packages = fileFacade.getPackages(
           fileRequest.skip,
           fileRequest.count,
@@ -90,8 +101,7 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
           fileRequest.page,
           packages,
           total)
-      }
-      case FileActionType.Scorm => {
+      case FileActionType.Scorm =>
         if (fileRequest.id.isDefined)
           fileFacade.getScormPackage(fileRequest.id.get)
         else {
@@ -111,8 +121,7 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
             packages,
             total)
         }
-      }
-      case FileActionType.Tincan => {
+      case FileActionType.Tincan =>
         if (fileRequest.id.isDefined)
           fileFacade.getTincanPackage(fileRequest.id.get)
         else {
@@ -132,7 +141,6 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
             packages,
             total)
         }
-      }
     }
   })
 
@@ -146,48 +154,30 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
 
     val data = FileExportRequest(this)
     data.contentType match {
-      case FileExportRequest.Package => {
-        PermissionUtil.requirePermissionApi(ExportPermission, PortletName.LessonManager)
+      case FileExportRequest.Package =>
         data.action match {
-          case FileExportRequest.ExportAll => getZipStream(packageFacade.exportAllPackages(data.courseId), "exportAllPackages")
-
-          case FileExportRequest.Export     => getZipStream(packageFacade.exportPackages(data.idsLong), "exportPackages")
-        }
-      }
-      case FileExportRequest.Certificate => {
-        data.action match {
-          case FileExportRequest.ExportAll => getZipStream(certificateFacade.exportCertificates(data.companyID), "exportAllCertificates")
-
-          case FileExportRequest.Export     => getZipStream(certificateFacade.exportCertificate(data.companyID, data.id), "exportCertificates")
-        }
-      }
-      case FileExportRequest.Question => {
-        data.action match {
-          case FileExportRequest.ExportAll => getZipStream(questionFacade.exportAllQuestionsBase(Option(data.courseId)), "exportAllQuestionBase")
+          case FileExportRequest.ExportAll =>
+            getZipStream(packageFacade.exportAllPackages(data.courseId), "exportAllPackages")
 
           case FileExportRequest.Export =>
-            getZipStream(questionFacade.exportQuestions(data.categoryIds, data.ids, Option(data.courseId)), "exportQuestions")
+            getZipStream(packageFacade.exportPackages(data.ids), "exportPackages")
         }
-      }
-      case FileExportRequest.Lesson => {
+      case FileExportRequest.Certificate =>
         data.action match {
-          case FileExportRequest.ExportAll => getZipStream(quizFacade.exportAllLessonsBase(data.courseId), "exportAllLessons")
+          case FileExportRequest.ExportAll =>
+            getZipStream(certificateFacade.exportCertificates(data.companyID), "exportAllCertificates")
 
-          case FileExportRequest.Export     => getZipStream(quizFacade.exportLessons(data.ids), "exportLessons")
-
-          case FileExportRequest.Download =>
-            response.setHeader("Content-Type", "application/zip")
-            response.setHeader("Content-Disposition", "attachment; filename=Lesson" + data.id + ".zip")
-            quizFacade.download(data.id, data.courseId, data.publishType, data.theme, data.randomOrdering, data.questionPerUser, data.scoreLimit)
-
-          case FileExportRequest.DownloadExternal =>
-            response.setHeader("Content-Type", "application/zip")
-            response.setHeader("Content-Disposition", "attachment; filename=Lesson" + data.id + ".zip")
-
-            val portalURL = PortalUtil.getPortalURL(PortalUtil.getCompany(request).getVirtualHostname, PortalUtil.getPortalPort(false), false)
-            quizFacade.downloadExternal(data.id, data.courseId, data.publishType, data.theme, data.randomOrdering, data.questionPerUser, data.scoreLimit, portalURL)
+          case FileExportRequest.Export =>
+            getZipStream(certificateFacade.exportCertificate(data.companyID, data.id), "exportCertificates")
         }
-      }
+      case FileExportRequest.Question =>
+        data.action match {
+          case FileExportRequest.ExportAll =>
+            getZipStream(questionFacade.exportAllQuestionsBase(data.courseId), "exportAllQuestionBase")
+
+          case FileExportRequest.Export =>
+            getZipStream(questionFacade.exportQuestions(data.categoryIds, data.ids, data.plainTextIds,Option(data.courseId)), "exportQuestions")
+        }
       case FileExportRequest.SlideSet =>
         data.action match {
           case FileExportRequest.Export => getZipStream(slideSetService.exportSlideSet(data.id), "ExportedSlideSet")
@@ -196,70 +186,98 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
   })
 
   post("/files(/)")(jsonAction {
-
     val fileRequest = FileRequest(this)
     fileRequest.action match {
-      case FileActionType.Add    => addFile(fileRequest)
+      case FileActionType.Add => addFile(fileRequest)
       case FileActionType.Update => updateFile(PackageFileRequest(this))
-      case FileActionType.Delete =>
-        PermissionUtil.requirePermissionApi(ModifyPermission,
-          PortletName.CertificateManager,
-          PortletName.LessonDesigner,
-          PortletName.LessonManager,
-          PortletName.ContentManager)
-        fileFacade.remove(fileRequest.id.get)
+      case FileActionType.Delete => fileFacade.remove(fileRequest.id.get)
     }
   })
 
+  post("/files/certificate/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    val (name, data) = readSendImage
+    certificateService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+  })
+
+  post("/files/package/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    val (name, data) = readSendImage
+    packageService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+  })
+
+  post("/files/slideset/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    val (name, data) = readSendImage
+    slideSetService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+  })
+
+  post("/files/slide/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    val (name, data) = readSendImage
+    slideService.setLogo(id, name, data)
+  })
+
+  post("/files/slideentity/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    val (name, data) = readSendImage
+    slideElementService.setLogo(id, name, data)
+  })
+
+  private def readSendImage: (String, Array[Byte]) = {
+    val fileRequest = FileRequest(this)
+    fileRequest.contentType match {
+      case UploadContentType.Icon => (
+        fileRequest.fileName,
+        fileRequest.fileContent
+      )
+      case UploadContentType.DocLibrary => (
+        fileRequest.file,
+        FileEntryServiceHelper.getFile(fileRequest.fileEntryId, fileRequest.fileVersion)
+      )
+      case UploadContentType.Base64Icon => (
+        FileRequest.DefaultIconName,
+        fileRequest.base64Content
+      )
+    }
+  }
+
   private def addFile(fileRequest: FileRequest.Model) = {
     fileRequest.contentType match {
-
       case UploadContentType.Base64Icon =>
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
         fileFacade.saveFile(
           fileRequest.folder,
           FileRequest.DefaultIconName,
           fileRequest.base64Content)
 
       case UploadContentType.Icon =>
-        PermissionUtil.requirePermissionApi(
-          Permission(ModifyPermission, List(PortletName.CertificateManager, PortletName.LessonDesigner, PortletName.LessonManager)),
-          Permission(ViewPermission, List(PortletName.SlidesEditor))
-        )
         fileFacade.saveFile(
           fileRequest.folder,
           fileRequest.fileName,
           fileRequest.fileContent)
 
-      case UploadContentType.RevealJs =>
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonDesigner)
-        fileFacade.uploadRevealJS(
-          fileRequest.fileContent,
-          fileRequest.quizId,
-          fileRequest.categoryId,
-          fileRequest.fileName
-        )
-
       case UploadContentType.Pdf =>
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonDesigner)
-        fileFacade.uploadPDF(
+        fileFacade.saveFile(
+          s"slideData${fileRequest.entityId}",
+          fileRequest.fileName,
+          fileRequest.fileContent)
+
+      case UploadContentType.ImportFromPdf =>
+        slideService.parsePDF(
           fileRequest.fileContent,
-          fileRequest.quizId,
-          fileRequest.categoryId,
+          fileRequest.slideId,
+          fileRequest.slideSetId
+        )
+
+      case UploadContentType.ImportFromPptx =>
+        slideService.parsePPTX(
+          fileRequest.fileContent,
+          fileRequest.slideId,
+          fileRequest.slideSetId,
           fileRequest.fileName
         )
 
-      case UploadContentType.Pptx =>
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonDesigner)
-        fileFacade.uploadPPTX(
-          fileRequest.fileContent,
-          fileRequest.quizId,
-          fileRequest.categoryId,
-          fileRequest.fileName
-        )
-
-      case UploadContentType.Package => {
-        PermissionUtil.requirePermissionApi(UploadPermission, PortletName.LessonManager)
+      case UploadContentType.Package =>
         val packageRequest = PackageFileRequest(this)
         if (fileRequest.fileName.endsWith(".zip")) {
           fileFacade.uploadPackage(
@@ -280,56 +298,36 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
             )
           }
         }
-      }
 
-      case UploadContentType.DocLibrary => {
-        PermissionUtil.requirePermissionApi(
-          Permission(ModifyPermission, List(PortletName.CertificateManager, PortletName.LessonDesigner, PortletName.LessonManager)),
-          Permission(ViewPermission, List(PortletName.SlidesEditor))
-        )
-        val userId = PermissionUtil.getUserId
-        PermissionHelper.preparePermissionChecker(userId)
-
+      case UploadContentType.DocLibrary =>
         val content = FileEntryServiceHelper.getFile(fileRequest.fileEntryId, fileRequest.fileVersion)
         fileFacade.saveFile(
           fileRequest.folder,
           fileRequest.file,
           content)
 
-      }
-
-      case UploadContentType.ImportLesson => {
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonDesigner)
-        fileFacade.importLessons(
-          fileRequest.courseId,
-          fileRequest.stream)
-      }
-
-      case UploadContentType.ImportQuestion=> {
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.ContentManager)
+      case UploadContentType.ImportQuestion =>
         fileFacade.importQuestions(
           fileRequest.courseId,
           fileRequest.stream)
-      }
 
-      case UploadContentType.ImportCertificate => {
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
+      case UploadContentType.ImportMoodleQuestion =>
+        fileFacade.importMoodleQuestions(
+          fileRequest.courseId,
+          fileRequest.stream)
+
+      case UploadContentType.ImportCertificate =>
         fileFacade.importCertificates(
           fileRequest.companyIdRequired,
           fileRequest.stream)
-      }
 
-      case UploadContentType.ImportPackage => {
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonManager)
-        val userId = PermissionUtil.getUserId
+      case UploadContentType.ImportPackage =>
         fileFacade.importPackages(
           fileRequest.courseId,
           fileRequest.stream,
-          userId)
-      }
+          PermissionUtil.getUserId)
 
-      case UploadContentType.ImportSlideSet => {
-        PermissionUtil.requirePermissionApi(ViewPermission, PortletName.SlidesEditor)
+      case UploadContentType.ImportSlideSet =>
         slideSetService.importSlideSet(
           fileRequest.stream,
           fileRequest.courseId
@@ -338,29 +336,21 @@ class FileApiController(configuration: BindingModule) extends BaseApiController(
           "SlideSet",
           "SlideSet",
           "")
-      }
-
     }
   }
 
   private def updateFile(packageRequest: PackageFileRequest.Model) {
     packageRequest.contentType match {
-
-      case UploadContentType.Icon | UploadContentType.Base64Icon => {
-        PermissionUtil.requirePermissionApi(ModifyPermission,
-          PortletName.CertificateManager, PortletName.LessonDesigner, PortletName.LessonManager)
+      case UploadContentType.Icon | UploadContentType.Base64Icon =>
         fileFacade.attachImageToPackage(
           packageRequest.id.get,
           packageRequest.imageID)
-      }
 
-      case UploadContentType.Package => {
-        PermissionUtil.requirePermissionApi(UploadPermission, PortletName.LessonManager)
+      case UploadContentType.Package =>
         fileFacade.updatePackage(
           packageRequest.id.get,
           packageRequest.title,
           packageRequest.summary)
-      }
     }
   }
 }

@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    var dataToCompare = JSON.parse('{{{answers}}}');
+    var dataToCompare = JSON.parse('{{{answers}}}'.replace(/\="/gi, "='").replace(/\">/gi, "'>"));
     jQuery(document).ready(function () {
         /*{{^isPreview}}*/
         getAPI().Initialize("");
@@ -40,7 +40,7 @@
             groupedAnswers[group].push(dataToCompare[i]);
 
             if(dataToCompare[i].matchingText == null || dataToCompare[i].matchingText == "") continue; // We are trying to compare to an empty category -> always true
-            var cmpString = dataToCompare[i].text + "[.]" + dataToCompare[i].matchingText;
+            var cmpString = dataToCompare[i].text.replace(/\'/gi, '"') + "[.]" + dataToCompare[i].matchingText.replace(/\'/gi, '"');
             patterAnswers.push(cmpString);
             var found = false;
             for (var j = 0; j < userAnswers.length; j++) {

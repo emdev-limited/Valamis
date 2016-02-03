@@ -42,6 +42,7 @@ public class LFTincanLrsEndpointWrapper implements LFTincanLrsEndpoint,
         attributes.put("authType", getAuthType());
         attributes.put("key", getKey());
         attributes.put("secret", getSecret());
+        attributes.put("customHost", getCustomHost());
 
         return attributes;
     }
@@ -76,6 +77,12 @@ public class LFTincanLrsEndpointWrapper implements LFTincanLrsEndpoint,
 
         if (secret != null) {
             setSecret(secret);
+        }
+
+        String customHost = (String) attributes.get("customHost");
+
+        if (customHost != null) {
+            setCustomHost(customHost);
         }
     }
 
@@ -197,6 +204,26 @@ public class LFTincanLrsEndpointWrapper implements LFTincanLrsEndpoint,
     @Override
     public void setSecret(java.lang.String secret) {
         _lfTincanLrsEndpoint.setSecret(secret);
+    }
+
+    /**
+    * Returns the custom host of this l f tincan lrs endpoint.
+    *
+    * @return the custom host of this l f tincan lrs endpoint
+    */
+    @Override
+    public java.lang.String getCustomHost() {
+        return _lfTincanLrsEndpoint.getCustomHost();
+    }
+
+    /**
+    * Sets the custom host of this l f tincan lrs endpoint.
+    *
+    * @param customHost the custom host of this l f tincan lrs endpoint
+    */
+    @Override
+    public void setCustomHost(java.lang.String customHost) {
+        _lfTincanLrsEndpoint.setCustomHost(customHost);
     }
 
     @Override

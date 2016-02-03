@@ -43,6 +43,14 @@ Download Valamis CE source code from this repository and compile the application
 Liferay 6.1 EE bundled with Tomcat 7 can throw errors while accessing uploaded content. To avoid this problems just turn off GZip conmpression:
 `com.liferay.portal.servlet.filters.gzip.GZipFilter=false`
 
+## Version 2.6 Update 3.2.2016
+
+The new release includes new features, especially for Lesson Studio, and general UX improvement. One of the biggest changes has been done to Lesson Studio, which now enables responsive content design for three device types: mobile, tablet and desktop. 
+
+Other features and improvements include, for example, managing studio elements and slide titles, using Liferay articles as text element and arranging lessons manually. Moreover, importing questions from Moodle to Valamis environment is now possible.
+
+Check full release notes for 2.6 version on Valamis website: [http://docs.valamis.arcusys.com/valamis-2.6-enterprise-edition](http://docs.valamis.arcusys.com/valamis-2.6-enterprise-edition)
+
 ## Version 2.4 Update 26.6.2015
  - New Valamis login page with new design
  - Valamis site automatically created with Dashboard page when application is deployed

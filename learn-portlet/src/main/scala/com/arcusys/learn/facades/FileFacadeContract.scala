@@ -2,7 +2,7 @@ package com.arcusys.learn.facades
 
 import java.io.InputStream
 
-import com.arcusys.learn.models.{ PPTXResponse, FileResponse }
+import com.arcusys.learn.models.FileResponse
 
 /**
  * Created by Iliya Tryapitsin on 13.03.14.
@@ -11,10 +11,6 @@ trait FileFacadeContract {
   def attachImageToPackage(packageId: Int, imageId: Int)
 
   def saveFile(folder: String, name: String, content: Array[Byte]): FileResponse
-
-  def uploadRevealJS(content: Array[Byte], quizID: Int, categoryID: Option[String], title: String): FileResponse
-  def uploadPDF(content: Array[Byte], quizID: Int, categoryID: Option[String], title: String): FileResponse
-  def uploadPPTX(content: Array[Byte], quizID: Int, categoryID: Option[String], title: String): PPTXResponse
 
   def uploadPackage(title: String,
     summary: String,
@@ -69,13 +65,13 @@ trait FileFacadeContract {
     take: Int,
     filter: String): Int
 
-  def importLessons(
-    courseId: Int,
-    stream: InputStream): FileResponse
-
   def importQuestions(
     courseId: Int,
     stream: InputStream): FileResponse
+
+  def importMoodleQuestions(
+                       courseId: Int,
+                       stream: InputStream): FileResponse
 
   def importCertificates(
     companyId: Int,

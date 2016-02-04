@@ -6,8 +6,7 @@ import com.liferay.portal.model.User
 import com.liferay.portal.service.{ ServiceContext, UserLocalServiceUtil }
 import java.util.Locale
 import com.liferay.portal.webserver.WebServerServletTokenUtil
-import com.liferay.portal.kernel.util.DigesterUtil
-import com.liferay.portal.kernel.util.HttpUtil
+import com.liferay.portal.kernel.util.{OrderByComparator, DigesterUtil, HttpUtil}
 
 import scala.collection.JavaConverters._
 
@@ -16,6 +15,27 @@ object UserLocalServiceHelper {
 }
 
 trait UserLocalServiceHelper {
+
+  def dynamicQuery = {
+    UserLocalServiceUtil.dynamicQuery()
+  }
+
+  def dynamicQuery(dynamicQuery: DynamicQuery) = {
+    UserLocalServiceUtil.dynamicQuery(dynamicQuery)
+  }
+
+  def dynamicQuery(dynamicQuery: DynamicQuery, start: Int, end: Int) = {
+    UserLocalServiceUtil.dynamicQuery(dynamicQuery, start, end)
+  }
+
+  def dynamicQuery(dynamicQuery: DynamicQuery, start: Int, end: Int, order: OrderByComparator) = {
+    UserLocalServiceUtil.dynamicQuery(dynamicQuery, start, end, order)
+  }
+
+  def dynamicQueryCount(dynamicQuery: DynamicQuery) = {
+    UserLocalServiceUtil.dynamicQueryCount(dynamicQuery)
+  }
+
   def getCompanyUsers(companyId: Long, start: Int, end: Int): java.util.List[User] =
     UserLocalServiceUtil.getCompanyUsers(companyId, start, end)
 
@@ -39,28 +59,11 @@ trait UserLocalServiceHelper {
   def getGroupUsers(groupId: Long): java.util.List[User] =
     UserLocalServiceUtil.getGroupUsers(groupId)
 
-  def getGroupUserIds(groupId: Long): Seq[Long] = {
+  def getGroupUserIds(groupId: Long): Seq[Long] =
+    UserLocalServiceUtil.getGroupUserIds(groupId)
 
-    val userIdsInGroup = UserLocalServiceUtil.getGroupUserIds(groupId).toSeq.asJavaCollection
-
-    if (userIdsInGroup.isEmpty) Seq()
-    else {
-      val userQuery = UserLocalServiceUtil.dynamicQuery()
-      userQuery
-        .add(RestrictionsFactoryUtil.in("userId", userIdsInGroup))
-        .add(RestrictionsFactoryUtil.eq("status", WorkflowConstants.STATUS_APPROVED))
-        .add(RestrictionsFactoryUtil
-          .or(RestrictionsFactoryUtil.ne("firstName", ""),
-            RestrictionsFactoryUtil.ne("lastName", "")))
-        .addOrder(OrderFactoryUtil.asc("lastName"))
-        .addOrder(OrderFactoryUtil.asc("firstName"))
-
-      userQuery.setProjection(ProjectionFactoryUtil.projectionList()
-        .add(ProjectionFactoryUtil.property("userId")))
-
-      UserLocalServiceUtil.dynamicQuery(userQuery).asScala.map(_.asInstanceOf[Long])
-    }
-  }
+  def getOrganizationUserIds(orgId: Long): Seq[Long] =
+    UserLocalServiceUtil.getOrganizationUserIds(orgId)
 
   def getDefaultUserId(companyId: Long): Long = UserLocalServiceUtil.getDefaultUserId(companyId)
 

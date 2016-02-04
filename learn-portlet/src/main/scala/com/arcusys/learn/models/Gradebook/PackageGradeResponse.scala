@@ -10,6 +10,6 @@ case class PackageGradeResponse(id: Long,
   finished: Boolean,
   grade: String,
   gradeAuto: String,
-  activityIds: Seq[String],
+  activityId: String,
   statements: String,
   comment: String = "")

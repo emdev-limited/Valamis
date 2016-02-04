@@ -9,12 +9,13 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
 
   private val fileStorage = inject[FileStorage]
 
-  private def getPath(folder: String, name: String): String = {
-    ("files/" + folder + "/" + name).replace("//", "/")
-  }
-  private def getPath(folder: String): String = {
-    ("files/" + folder + "/").replace("//", "/")
-  }
+  private def getPath(folder: String, name: String): String =
+    s"files/$folder/$name".replace("//", "/")
+
+  private def getFolderPath(folder: String): String =
+    s"files/$folder/".replace("//", "/")
+
+  private def getPath(name: String): String = s"files/$name"
 
   //TODO: method should not remove all folder, need to check references and fix
   override def setFileContent(folder: String,
@@ -25,7 +26,7 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
     val filePath = getPath(folder, name)
 
     if (deleteFolder)
-      fileStorage.delete(getPath(folder), asDirectory = true)
+      fileStorage.delete(getFolderPath(folder), asDirectory = true)
     else
       fileStorage.delete(filePath, asDirectory = false)
 
@@ -66,13 +67,15 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
     setFileContent(destFolder, destName, getFileContent(sourceFolder, sourceName), deleteFolder)
   }
 
-  override def deleteFile(name: String): Unit = {
+  @deprecated("""Shouldn't require "files/" in path. see deleteFile""")
+  override def deleteFileStoryTree(name: String): Unit =
     fileStorage.delete(name, asDirectory = false)
-  }
 
-  override def deleteFile(folder: String, name: String): Unit = {
-    deleteFile(getPath(folder, name))
-  }
+  override def deleteFile(name: String): Unit =
+    fileStorage.delete(getPath(name))
+
+  override def deleteByPrefix(prefix: String): Unit =
+    fileStorage.delete(getFolderPath(prefix), asDirectory = true)
 
   override def addToDocumentLibrary(filename: String,
                                     groupId: Long,

@@ -1,52 +1,51 @@
 package com.arcusys.learn.notifications
 
-import com.arcusys.learn.facades.{ CertificateFacadeContract, CourseFacadeContract, UserFacadeContract }
+import com.arcusys.learn.facades.{CertificateFacadeContract, CourseFacadeContract, UserFacadeContract}
+import com.arcusys.learn.liferay.permission.PermissionUtil
 import com.arcusys.learn.models.CourseResponse
 import com.arcusys.learn.models.response.certificates.CertificateResponse
 import com.arcusys.learn.notifications.MessageTemplateLoader.MessageTemplate
-import com.arcusys.valamis.gradebook.service.PackageGradeService
+import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.grade.service.PackageGradeService
 import com.arcusys.valamis.lesson.model.BaseManifest
-import com.arcusys.valamis.lesson.service.ValamisPackageService
-import com.arcusys.valamis.lrs.api.StatementApi
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lesson.service.{LessonStatementReader, ValamisPackageService}
 import com.arcusys.valamis.lrs.tincan.Statement
 import com.arcusys.valamis.settings.service.SettingService
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
-import org.joda.time.{ DateTime, Days }
+import com.escalatesoft.subcut.inject.Injectable
+import org.joda.time.{DateTime, Days}
 
 trait CourseMessageService extends Injectable with MessageSender {
   import com.arcusys.learn.notifications.CourseMessageService._
 
-  implicit def bindingModule: BindingModule
-
   private val templates = inject[MessageTemplateLoader]
   private val packages = inject[ValamisPackageService]
-  private val grades = new PackageGradeService()
+  private val grades = inject[PackageGradeService]
   private val users = inject[UserFacadeContract]
-  private val courses = inject[CourseFacadeContract]
+  private val courses = inject[CourseService]
+  private val courseFacade = inject[CourseFacadeContract]
   private val certificates = inject[CertificateFacadeContract]
   private val settingsManager = inject[SettingService]
-  private val lrsReader = inject[LrsClientManager]
+  private val statementReader = inject[LessonStatementReader]
 
-  private lazy val students = users.allCanView(viewAll = false)
-  private lazy val teachers = users.allCanView(viewAll = true)
+  private def students = users.allCanView(PermissionUtil.getCourseId, viewAll = false)
+  private def teachers = users.allCanView(PermissionUtil.getCourseId, viewAll = true)
 
-  def sendCourseMessages(statementApi: StatementApi) {
+  def sendCourseMessages() {
     val enrollmentTemplate = templates.getFor(MessageType.EnrolledStudent)
     val learningTemplate = templates.getFor(MessageType.FinishedLearningModule)
 
-    val coursesWithPackages = (courses.all map { course =>
-      (course, packages.getPackagesByCourse(course.id.toInt).filter(_.visibility == Some(true)))
+    val coursesWithPackages = (courses.getAll map { course =>
+      (course, packages.getByCourse(course.getGroupId).filter(_.visibility == Some(true)))
     }).toMap.view
 
     val startedCourses = (coursesWithPackages map {
-      case (course, pkgs) => (course.id, pkgs.flatMap(pkg => getEnrolledStudents(statementApi, pkg)).toSet)
+      case (course, pkgs) => (course.getGroupId, pkgs.flatMap(pkg => getEnrolledStudents(pkg)).toSet)
     }).toMap
 
     val finishedPackages = (students flatMap { student =>
       coursesWithPackages map {
         case (course, pkgs) =>
-          (course.id, student.name,
+          (course.getGroupId, student.name,
             pkgs.collect { case pkg if isFinishedPackage(student.id.toInt, pkg.id) => pkg.title }
           )
       }
@@ -61,7 +60,7 @@ trait CourseMessageService extends Injectable with MessageSender {
               views._1 :+ StudentRenderView(course.title, startedCourses.get(course.id).get.map(_.name).toSeq)
             else
               views._1,
-            if (finishedPackages.filter(p => p._1 == course.id).nonEmpty)
+            if (finishedPackages.exists(p => p._1 == course.id))
               views._2 ++ finishedPackages.filter(p => p._1 == course.id).map(p => PackagesRenderView(p._2, p._3.toList))
             else
               views._2
@@ -80,7 +79,7 @@ trait CourseMessageService extends Injectable with MessageSender {
 
     students foreach { student =>
       val cs = (companies flatMap { companyId =>
-        certificates.getForUser(companyId.toInt, student.id.toInt, isShortResult = false)
+        certificates.getForUser(student.id, companyId, isShortResult = false).items
           .collect { case cr: CertificateResponse => cr }
       }).view
 
@@ -94,7 +93,7 @@ trait CourseMessageService extends Injectable with MessageSender {
       }
 
       val deadlineData = cs map { certificate =>
-        val goals = certificates.getGoalsDeadlines(certificate.id, student.id.toInt)
+        val goals = certificates.getGoalsDeadlines(certificate.id.toInt, student.id.toInt)
 
         val tobeDeadlined = (
           goals.activities.filter(a => isDeadlineComing(a.deadline)).view,
@@ -105,7 +104,9 @@ trait CourseMessageService extends Injectable with MessageSender {
         DeadlineRenderView(
           title = certificate.title,
           activities = tobeDeadlined._1.map(r => Deadline(r.name, difference(today, r.deadline.get), r.deadline.get)).toList,
-          courses = tobeDeadlined._2.map(c => Deadline(courses.getCourse(c.id).title, difference(today, c.deadline.get), c.deadline.get)).toList,
+          courses = tobeDeadlined._2.map(c =>
+            Deadline(courses.getById(c.id).map(_.getDescriptiveName).getOrElse(""), difference(today, c.deadline.get), c.deadline.get)
+          ).toList,
           statements = tobeDeadlined._3.map(s => Deadline(s"${s.obj} ${s.verb}", difference(today, s.deadline.get), s.deadline.get)).toList
         )
       } filter (cv => cv.activities.nonEmpty && cv.courses.nonEmpty && cv.statements.nonEmpty)
@@ -115,31 +116,30 @@ trait CourseMessageService extends Injectable with MessageSender {
     }
   }
 
-  private def sendMessage[T](emailAddress: Option[String], tpl: Option[MessageTemplate], data: Seq[T]) {
+  private def sendMessage[T](emailAddress: String, tpl: Option[MessageTemplate], data: Seq[T]) {
     for {
-      email <- emailAddress
       tpl <- tpl
       if data.nonEmpty && isSendable
     } yield {
       val body = templates.render(tpl, Map("data" -> data, "date" -> todayFormatted))
-      send Message (tpl.subject, body, email)
+      send Message (tpl.subject, body, emailAddress)
     }
   }
 
   private def isSendable = settingsManager.getSendMessages()
 
-  private def getEnrolledStudents(statementApi: StatementApi, pkg: BaseManifest) = {
+  private def getEnrolledStudents(pkg: BaseManifest) = {
     (students filter { student =>
-      val statement = packages.getStatements(pkg.id, student.id.toInt, statementApi).headOption
+      val statement = statementReader.getLast(student.id.toInt, pkg)
       statement collect { case s => isNewlyStarted(s) } getOrElse false
     }).toList
   }
 
-  private def getTeacherCourses(userId: Long): Seq[CourseResponse] = courses.getByUserId(userId)
+  private def getTeacherCourses(userId: Long): Seq[CourseResponse] = courseFacade.getByUserId(userId)
 
   private def isDeadlineComing(date: Option[DateTime]) = date.fold(false)(isExpiringSoon)
 
-  private def isNewlyStarted(s: Statement) = s.stored.fold(false) { date => isValid(new DateTime(date)) }
+  private def isNewlyStarted(s: Statement) = isValid(s.stored)
 
   private def isFinishedPackage(userId: Int, packageId: Long) = {
     val grade = grades.getPackageGrade(userId, packageId)

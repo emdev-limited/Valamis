@@ -1,5 +1,6 @@
 package com.arcusys.learn.tincan.manifest.storage.impl.liferay
 
+import com.arcusys.learn.persistence.liferay.NoSuchLFTincanManifestActException
 import com.arcusys.learn.persistence.liferay.model.LFTincanManifestAct
 import com.arcusys.learn.persistence.liferay.service.LFTincanManifestActLocalServiceUtil
 import com.arcusys.valamis.lesson.tincan.model.ManifestActivity
@@ -7,12 +8,18 @@ import com.arcusys.valamis.lesson.tincan.storage.TincanManifestActivityStorage
 import scala.collection.JavaConverters._
 
 class TincanManifestActivityRepositoryImpl extends TincanManifestActivityStorage {
-  override def renew(): Unit = {
-    LFTincanManifestActLocalServiceUtil.removeAll()
-  }
-
   override def getByPackageId(packageID: Long): Seq[ManifestActivity] = {
     LFTincanManifestActLocalServiceUtil.findByPackageID(packageID).asScala.map(extract)
+  }
+
+  override def getByTincanId(tincanId: String): Option[ManifestActivity] = {
+    val entity = try {
+      Some(LFTincanManifestActLocalServiceUtil.findByTincanID(tincanId))
+    } catch {
+      case e: NoSuchLFTincanManifestActException => None
+    }
+
+    entity map extract
   }
 
   override def deleteByPackageId(packageID: Long) = {

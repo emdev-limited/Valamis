@@ -5,4 +5,6 @@ object SlideActionType {
   val Delete = "DELETE"
   val Update = "UPDATE"
   val Create = "CREATE"
+  val Clone = "CLONE"
+  val CopyFile = "COPYFILE"
 }

@@ -2,30 +2,37 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
 
   var ActivitiesModelService = new Backbone.Service({
     url: path.root,
+    sync: {
+      'delete': {
+        'path': function(model){
+          return path.api.activities + model.get('id')
+        },
+        'data': {},
+        'method': 'delete'
+      }
+    },
     targets: {
       'likeActivity': {
         'path': path.api.valamisActivityLike,
         'data': function (model) {
-          var params = {
-            action: 'CREATE',
+          return {
             userId: Valamis.currentUserId,
-            activityId: model.get('id')
+            activityId: model.get('id'),
+            courseId: Utils.getCourseId()
           };
-          return params;
         },
         'method': 'post'
       },
       'unlikeActivity': {
         'path': path.api.valamisActivityLike,
         'data': function (model) {
-          var params = {
-            action: 'DELETE',
+          return {
             userId: Valamis.currentUserId,
-            activityId: model.get('id')
+            activityId: model.get('id'),
+            courseId: Utils.getCourseId()
           };
-          return params;
         },
-        'method': 'post'
+        'method': 'delete'
       },
       'commentActivity': {
         'path': path.api.valamisActivityComment,
@@ -34,14 +41,27 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
             action: 'CREATE',
             userId: Valamis.currentUserId,
             activityId: model.get('id'),
-            content: options.content
+            content: options.content,
+            courseId: Utils.getCourseId()
+          };
+          return params;
+        },
+        'method': 'post'
+      },
+      'deleteComment': {
+        'path': path.api.valamisActivityComment,
+        'data': function (model, options) {
+          var params = {
+            action: 'DELETE',
+            id: model.get('id'),
+            courseId: Utils.getCourseId()
           };
           return params;
         },
         'method': 'post'
       },
       shareActivity: {
-        'path': path.api.valamisActivity,
+        'path': path.api.activities,
         'data': function(model){
           var params =  {
             action: 'SHARELESSON' ,
@@ -71,7 +91,17 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
     url: path.root,
     sync: {
       'read': {
-        'path': path.api.valamisActivity,
+        'path': path.api.activities,
+        'data':  function (collection, options) {
+          var params = {
+            courseId: Utils.getCourseId,
+            page: options.page,
+            count: options.count,
+            getMyActivities: options.getMyActivities,
+            plid: themeDisplay.getPlid()
+          };
+          return params;
+        },
         'method': 'get'
       }
     }
@@ -88,22 +118,19 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
         'path': function (model, options) {
           return path.api.users + options.userId;
         },
-        'data': function (collection) {
-          var params = {
-            courseId: Utils.getCourseId(),
-            resultAs: 'detailed'
-          };
-          return params;
+        'data': {
+          courseId: Utils.getCourseId()
         },
         'method': 'get'
       }
     },
     targets: {
       'postStatus': {
-        'path': path.api.valamisActivity,
+        'path': path.api.activities,
         'data': function (model, options) {
           var params = {
             action: 'CREATEUSERSTATUS',
+            courseId: Utils.getCourseId(),
             content: options.content
           };
           return params;
@@ -114,10 +141,6 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
   });
 
   Entities.LiferayUserModel = Backbone.Model.extend({
-    parse: function (response) {
-      delete response['certificates'];
-      return response;
-    }
   }).extend(LiferayUserModelService);
 
   Entities.LiferayUserCollection = Backbone.Collection.extend({

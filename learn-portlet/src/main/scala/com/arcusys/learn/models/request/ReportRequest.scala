@@ -1,9 +1,9 @@
 package com.arcusys.learn.models.request
 
+import com.arcusys.learn.exceptions.BadRequestException
+import com.arcusys.learn.models.request.ReportActionType._
 import com.arcusys.learn.service.util.Parameter
 import org.scalatra.ScalatraBase
-import com.arcusys.learn.models.request.ReportActionType._
-import com.arcusys.learn.exceptions.BadRequestException
 
 object ReportRequest extends BaseCollectionFilteredRequest with BaseRequest {
 
@@ -19,7 +19,7 @@ object ReportRequest extends BaseCollectionFilteredRequest with BaseRequest {
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
 
-  class Model(val scalatra: ScalatraBase) extends BaseCollectionFilteredRequestModel(scalatra) with OAuthModel {
+  class Model(val scalatra: ScalatraBase) extends BaseCollectionFilteredRequestModel(scalatra) {
 
     def actionType: ReportActionType = ReportActionType.withName(Parameter(Action).required.toUpperCase)
 

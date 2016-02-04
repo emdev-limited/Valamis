@@ -1,7 +1,7 @@
 package com.arcusys.learn.models.request
 
-import org.scalatra.{ ScalatraServlet, ScalatraBase }
 import com.arcusys.learn.service.util.Parameter
+import org.scalatra.{ScalatraBase, ScalatraServlet}
 
 object URIRequest extends BaseCollectionFilteredRequest {
   val Type = "type"

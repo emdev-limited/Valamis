@@ -46,11 +46,14 @@
         };
 
         var lessonManagerOptions = {
-            language: '{{language}}',
             resourceName: 'lessonManager',
             permissions: permissionActionsLessonManager,
             app: lessonManager,
-            appOptions: {}
+            appOptions: {},
+            options: {
+                contextPath: '{{{contextPath}}}',
+                apiPath: path.root + path.api.prefix
+            }
         };
 
         valamisApp.execute('subapp:start', lessonManagerOptions);

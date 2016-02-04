@@ -1,29 +1,48 @@
-<section data-state="essay_{{id}}">
+<section data-state="essay_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
 <div class="SCORMPlayerContentDisplay">
     <div class="playerHeader">
         <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
     </div>
     <div class="playerMainArea">
-        <textarea class="playerLongAnswerField" id="scormAnswer{{id}}" rows="15" cols="60" placeholder="{{typeYourAnswerLabelLabel}}"></textarea>
+        <textarea class="playerLongAnswerField" id="scormAnswer{{id}}_{{questionNumber}}" rows="15" cols="60" placeholder="{{typeYourAnswerLabelLabel}}"></textarea>
     </div>
 </div>
 </section>
 <script>
 
-    TinCanCourseModules['essay_{{id}}'] = function(tincan) {
-        // this will check is user answer right
-        var userAnswer = jQuery("#scormAnswer{{id}}").val();
+    TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function() {
+        var userAnswer =  jQuery("#scormAnswer{{id}}_{{questionNumber}}").val();
 
-        var taskID = 'task{{id}}';
+        return {
+            learnerResponse: userAnswer,
+            correctResponse: '',
+            isPassed: (userAnswer && userAnswer.length > 0),
+            score: undefined
+        };
+    };
+
+    TinCanCourseModules['essay_{{id}}_{{questionNumber}}'] = function(tincan) {
+        // this will check is user answer right
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
+
+        var taskID = 'task{{id}}_{{questionNumber}}';
         tincan.sendStatement(GetQuestionAnswerStatement(
-            taskID, '{{{text}}}', '{{title}}', 'long-fill-in', userAnswer, '', undefined)
+            taskID, unescapeElement('{{text}}'), '{{title}}', 'long-fill-in', answers.learnerResponse, answers.correctResponse, answers.score)
         );
 
-        if (userAnswer && userAnswer.length > 0) {
+        if (answers.isPassed) {
             return 1;
         }
         else{
             return 0;
         }
-    }
+    };
+
+    TinCanCourseSetAnswers['essay_{{id}}_{{questionNumber}}'] = function(userAnswer) {
+        jQuery("#scormAnswer{{id}}_{{questionNumber}}").val(userAnswer);
+    };
+
+    TinCanCourseQuestionsAll['essay_{{id}}_{{questionNumber}}'] = unescapeElement('{{title}}');
+    TinCanCourseQuestionsContent['essay_{{id}}_{{questionNumber}}'] = unescapeElement('{{text}}');
+
 </script>

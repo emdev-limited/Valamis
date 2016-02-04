@@ -25,10 +25,11 @@ public class LFTincanLrsEndpointCacheModel implements CacheModel<LFTincanLrsEndp
     public String authType;
     public String key;
     public String secret;
+    public String customHost;
 
     @Override
     public String toString() {
-        StringBundler sb = new StringBundler(11);
+        StringBundler sb = new StringBundler(13);
 
         sb.append("{id=");
         sb.append(id);
@@ -40,6 +41,8 @@ public class LFTincanLrsEndpointCacheModel implements CacheModel<LFTincanLrsEndp
         sb.append(key);
         sb.append(", secret=");
         sb.append(secret);
+        sb.append(", customHost=");
+        sb.append(customHost);
         sb.append("}");
 
         return sb.toString();
@@ -75,6 +78,12 @@ public class LFTincanLrsEndpointCacheModel implements CacheModel<LFTincanLrsEndp
             lfTincanLrsEndpointImpl.setSecret(secret);
         }
 
+        if (customHost == null) {
+            lfTincanLrsEndpointImpl.setCustomHost(StringPool.BLANK);
+        } else {
+            lfTincanLrsEndpointImpl.setCustomHost(customHost);
+        }
+
         lfTincanLrsEndpointImpl.resetOriginalValues();
 
         return lfTincanLrsEndpointImpl;
@@ -87,6 +96,7 @@ public class LFTincanLrsEndpointCacheModel implements CacheModel<LFTincanLrsEndp
         authType = objectInput.readUTF();
         key = objectInput.readUTF();
         secret = objectInput.readUTF();
+        customHost = objectInput.readUTF();
     }
 
     @Override
@@ -116,6 +126,12 @@ public class LFTincanLrsEndpointCacheModel implements CacheModel<LFTincanLrsEndp
             objectOutput.writeUTF(StringPool.BLANK);
         } else {
             objectOutput.writeUTF(secret);
+        }
+
+        if (customHost == null) {
+            objectOutput.writeUTF(StringPool.BLANK);
+        } else {
+            objectOutput.writeUTF(customHost);
         }
     }
 }

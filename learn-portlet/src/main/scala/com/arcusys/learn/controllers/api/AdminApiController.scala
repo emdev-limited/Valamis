@@ -1,29 +1,27 @@
 package com.arcusys.learn.controllers.api
 
-import com.arcusys.learn.ioc.Configuration
+import com.arcusys.learn.controllers.api.base.BaseApiController
 import com.arcusys.learn.liferay.permission.{PermissionUtil, PortletName, ViewPermission}
 import com.arcusys.learn.models.request.{AdminActionType, AdminRequest}
 import com.arcusys.learn.web.ServletBase
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrs.service.LrsRegistration
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
 import com.arcusys.valamis.lrsEndpoint.model._
 import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.settings.service.SettingService
-import com.escalatesoft.subcut.inject.BindingModule
 
-class AdminApiController(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase {
-  def this() = this(Configuration)
+class AdminApiController extends BaseApiController with ServletBase {
 
   lazy val endpointService = inject[LrsEndpointService]
   lazy val settingsManager = inject[SettingService]
-  private val lrsClientManager = inject[LrsClientManager]
+  lazy val lrsRegistration = inject[LrsRegistration]
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)
   }
 
   get("/administering/TincanLrsSettings") {
-    jsonAction(lrsClientManager.getLrsEndpointInfo(AuthorizationScope.All, Some(request)))
+    jsonAction(lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All, Some(request)))
   }
 
   post("/administering/TincanLrsSettings")(jsonAction {
@@ -31,22 +29,25 @@ class AdminApiController(configuration: BindingModule) extends BaseApiController
 
     val adminRequest = AdminRequest(this)
     if (!adminRequest.isExternalLrs) {
-      endpointService.removeTincanEndpoint()
+      val customHost = adminRequest.customHost
+      endpointService.switchToInternal(customHost)
     } else {
-      val settings = adminRequest.authType match {
+      val endpoint = adminRequest.authType match {
 
-        case AuthorizationType.BASIC => BasicAuthorization(
-          adminRequest.login,
-          adminRequest.password)
+        case AuthorizationType.BASIC => LrsEndpoint(
+          endpoint = adminRequest.endPoint,
+          auth = AuthType.BASIC,
+          key = adminRequest.login,
+          secret = adminRequest.password)
 
-        case AuthorizationType.OAUTH => OAuthAuthorization(
-          adminRequest.clientId,
-          adminRequest.clientSecret)
+        case AuthorizationType.OAUTH => LrsEndpoint(
+          endpoint = adminRequest.endPoint,
+          auth = AuthType.OAUTH,
+          key = adminRequest.clientId,
+          secret = adminRequest.clientSecret)
       }
 
-      endpointService.setTincanEndpoint(
-        LrsEndpointSettings(adminRequest.endPoint, settings)
-      )
+      endpointService.setEndpoint(endpoint)
       true
     }
   })
@@ -56,8 +57,8 @@ class AdminApiController(configuration: BindingModule) extends BaseApiController
 
     val adminRequest = AdminRequest(this)
     adminRequest.actionType match {
-      case AdminActionType.UpdateIssuerSettings    => updateIssuerSettings(adminRequest)
-      case AdminActionType.UpdateEmailSettings     => updateEmailSettings(adminRequest)
+      case AdminActionType.UpdateIssuerSettings => updateIssuerSettings(adminRequest)
+      case AdminActionType.UpdateEmailSettings => updateEmailSettings(adminRequest)
       case AdminActionType.UpdateGoogleAPISettings => updateGoogleAPISettings(adminRequest)
     }
   })

@@ -11,12 +11,12 @@
                 var elem = $(this);
 
                 var actionButton = elem.find(".button");
-                var dropdwonMenu = elem.find('.dropdown-menu');
+                var dropdownMenu = elem.find('.dropdown-menu');
                 actionButton.unbind('click').on('click', function(){
-                    dropdwonMenu.toggleClass("dropdown-visible");
+                    dropdownMenu.toggleClass("dropdown-visible");
                 });
 
-                var dropdownItems = dropdwonMenu.find("li");
+                var dropdownItems = dropdownMenu.find("li");
 
                 dropdownItems.each(function(ind, itm){
                         var item =$(itm);
@@ -28,7 +28,7 @@
                                         .find('.dropdown-text').html(item.html());
                                 }
 
-                                dropdwonMenu.removeClass('dropdown-visible');
+                                dropdownMenu.removeClass('dropdown-visible');
                             }
                         );
                     }
@@ -36,7 +36,7 @@
 
                 $('body').on('click', function(e){
                     if (elem.has(e.target).length === 0) {
-                        dropdwonMenu.removeClass('dropdown-visible');
+                        dropdownMenu.removeClass('dropdown-visible');
                     }
                 });
             });
@@ -82,7 +82,7 @@
 })(jQuery);
 
 //digits only
-(function(){
+(function($){
     // methods
     var methods = {
         init : function(params) {
@@ -275,4 +275,249 @@
         }
     }
 
+})(jQuery);
+
+// valamis infinite scroll TODO: add valamisView with infinite scroll
+(function($){
+    var fetchCollection = function(collection, options) {
+      collection.fetch(options);
+    };
+
+  $.fn.valamisInfiniteScroll = function(collection, options) {
+    var page = 1;
+    var that = this;
+    var itemsCount = options.count;
+
+    var elem = this.find('.js-scroll-bounded');
+    var waitForResponse = false;
+    elem.on('scroll', function () {
+      var scrolltop =   elem.scrollTop();
+      var difference = elem.find('> .js-scroll-list').height() - elem.height();
+
+      if (scrolltop >= difference * 0.9 && !waitForResponse) {
+        waitForResponse = true;
+        that.find('.js-loading-gif').removeClass('hidden');
+        page++;
+
+        fetchCollection(collection, _.extend(options, {page: page}));
+      }
+    });
+
+    collection.on('sync', function() {
+      if (collection.length < itemsCount) {
+        elem.off('scroll');
+      }
+
+      that.find('.js-loading-gif').addClass('hidden');
+      waitForResponse = false;
+    });
+
+    fetchCollection(collection, _.extend(options, {page: page}));
+  }
+})(jQuery);
+
+// valamis canvas background
+(function($){
+
+  $.fn.valamisCanvasBackground = function(canvasWidth, canvasHeight) {
+    var canvas = this.find('#canvas-grid');
+    canvas.attr('width', canvasWidth);
+    canvas.attr('height', canvasHeight);
+    var context = canvas[0].getContext("2d");
+
+    var zonesAmount = 4;
+
+    var labelsDiv = this.find('#canvas-labels');
+    context.setLineDash([5, 5]);
+    context.beginPath();
+    var elemWidth = Math.floor(canvas.width() / 2);
+    var step = Math.floor(canvas.width() / (2 * zonesAmount));
+
+    var text, shift;
+
+    for (var x = elemWidth, i = 0; x <= canvas.width(); x += step, i++) {
+      if (i === zonesAmount)
+        x = canvas.width();
+
+      context.moveTo(x, 0);
+      context.lineTo(x, canvas.height());
+
+      text = (i === zonesAmount) ? 100 : Math.floor(100 * i / zonesAmount);
+      shift = (i === zonesAmount) ? 20 : 10;
+      labelsDiv.append('<span style="left: ' + (x - shift) + 'px;" >' + text + '%</span>');
+    }
+
+    context.strokeStyle = "#DEDEDE";
+    context.lineWidth = 1;
+    context.stroke();
+  }
+})(jQuery);
+
+// valamis popup panel
+(function($){
+    $.fn.valamisPopupPanel = function() {
+        this.each(function(){
+            var elem = $(this);
+            var actionButton = elem.find('.js-valamis-popup-button');
+            var popupPanel = elem.find('.js-valamis-popup-panel');
+            var closeButton = elem.find('.js-valamis-popup-close');
+
+            actionButton.unbind('click').on('click', function(){
+                popupPanel.toggle();
+            });
+
+            closeButton.unbind('click').on('click', function(){
+                popupPanel.hide();
+            });
+
+            $('body').on('click', function(e){
+                if (elem.has(e.target).length === 0) {
+                    popupPanel.hide();
+                }
+            });
+        });
+    };
+})(jQuery);
+
+// valamis rating
+(function ($) {
+
+  var defaults = {
+    stars: 5,
+    score: 0,
+    average: 0
+  };
+
+// methods
+  var methods = {
+    init: function (params) {
+
+      var ratingScore, ratingStarsAmount, ratingAverage;
+
+      var options = $.extend({}, defaults, params);
+      ratingStarsAmount = options.stars;
+      ratingScore = parseInt(options.score);
+      ratingAverage = methods._round(options.average);
+
+      var that = this;
+
+      return this.each(function () {
+        var starHtml = '<span class="val-icon rating-star default js-rating-star"></span>';
+        var elem = $(this);
+
+        elem.html('');
+
+        for (var i = 1; i <= ratingStarsAmount; i++) {
+          var newStar = $(starHtml);
+          newStar.attr('data-value', i);
+
+          newStar.unbind('mouseover').mouseover(function (e) {
+            elem.addClass('hovered');
+            methods._fillStars.call(that, elem, $(e.target).attr('data-value'));
+          });
+
+          newStar.unbind('mouseleave').mouseleave(function (e) {
+            elem.removeClass('hovered');
+            methods._fillStars.call(that, elem, elem.attr('data-value'));
+          });
+
+          newStar.unbind('click').click(function (e) {
+            elem.removeClass('hovered');
+            var newValue = parseInt($(e.target).attr('data-value'));
+            var oldValue = parseInt(elem.attr('data-value'));
+            if (elem.hasClass('voted') && newValue === oldValue) {
+              elem.removeClass('voted');
+              elem.trigger('valamisRating:deleted');
+            } else {
+              elem.addClass('voted');
+              methods._setScore.call(that, elem, newValue);
+              elem.trigger('valamisRating:changed', newValue);
+            }
+
+          });
+
+          elem.append(newStar);
+        }
+
+        methods._setScore.call(this, elem, ratingScore || ratingAverage);
+        if (ratingScore > 0) elem.addClass('voted');
+      })
+    },
+
+    _round: function(number) {
+      return Math.ceil(parseFloat(number) * 100) / 100;
+    },
+
+    _fillStars: function (elem, score) {
+      var elemStars = elem.find('.js-rating-star');
+      var scoreRound = Math.round(score);
+
+      for (var i = 0; i < elemStars.length; i++) {
+        $(elemStars[i]).toggleClass('default', i >= scoreRound);
+        $(elemStars[i]).removeClass('half-star');
+      }
+
+      var isHalf = (score - scoreRound) > 0;
+      if (isHalf) $(elemStars[scoreRound]).addClass('half-star');
+    },
+
+    _setScore: function (elem, score) {
+      elem.attr('data-value', score);
+      methods._fillStars.call(this, elem, score);
+    },
+
+    score: function (score) {
+      if (score != undefined)
+        methods._setScore.call(this, $(this), parseInt(score));
+      else
+        return parseInt($(this).attr('data-value'));
+    },
+
+    average: function (average) {
+      if (average != undefined)
+        methods._setScore.call(this, $(this), methods._round(average));
+    },
+
+    destroy: function () {
+      return this.each(function () {
+        var elem = $(this);
+        elem.find('.js-rating-star')
+          .unbind('mouseover')
+          .unbind('mouseleave')
+          .unbind('click');
+        elem.destroy();
+      });
+    }
+
+  };
+
+  $.fn.valamisRating = function (method) {
+
+    if (methods[method]) {
+      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+    } else if (typeof method === 'object' || !method) {
+      return methods.init.apply(this, arguments);
+    } else {
+      $.error('Method ' + method + ' does not exist in jQuery.valamisRating');
+    }
+
+  }
+
+})(jQuery);
+
+//valamis search field
+(function ($) {
+  $.fn.valamisSearch = function () {
+
+    this.each(function () {
+      var elem = $(this);
+      elem
+        .on('focus', function () {
+          elem.parent('.val-search').addClass('focus');
+        })
+        .on('blur', function () {
+          elem.parent('.val-search').removeClass('focus');
+        });
+    });
+  };
 })(jQuery);

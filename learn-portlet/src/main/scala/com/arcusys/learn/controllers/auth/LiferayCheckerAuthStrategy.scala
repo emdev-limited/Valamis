@@ -1,6 +1,6 @@
 package com.arcusys.learn.controllers.auth
 
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.arcusys.learn.liferay.services.PermissionHelper
 import com.liferay.portal.security.auth.CompanyThreadLocal
@@ -32,8 +32,8 @@ class LiferayCheckerAuthStrategy(protected val app: ScalatraBase)(implicit reque
 
     val user = PortalUtil.getUser(request)
     if (user == null) {
-      val defaultCompanyId = PortalUtil.getDefaultCompanyId()
-      UserLocalServiceUtil.getDefaultUser(defaultCompanyId)
+      val companyId = PortalUtil.getCompanyId(request)
+      UserLocalServiceUtil.getDefaultUser(companyId)
     } else user
 
   }

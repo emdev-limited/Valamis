@@ -6,7 +6,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
     <!-- Listeners -->
-    <bean id="valamis.main.lrsDeployed.listener" class="com.arcusys.learn.liferay.update.LrsDeployedMessageListener" />
+    <bean id="valamis.main.lrsDeployed.listener" class="com.arcusys.learn.liferay.LrsDeployedMessageListener" />
     <!-- Destinations -->
     <bean id="valamis.main.lrsDeployed.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
         <property name="name" value="valamis/main/lrsDeployed" />

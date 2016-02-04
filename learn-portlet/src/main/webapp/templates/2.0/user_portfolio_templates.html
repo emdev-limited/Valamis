@@ -16,12 +16,14 @@
     <div class="tile s-12 m-4 l-2">
         <div class="tile-content">
             <div class="image certificate js-open-goals cursor-pointer" data-certificate="{{id}}"
+            {{#logo}}
                  {{#isLocal}}
                  style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
                  {{/isLocal}}
                 {{^isLocal}}
                 style="background-image: url('{{logo}}')"
-                {{/isLocal}}>
+                {{/isLocal}}
+            {{/logo}} >
             </div>
             <ul>
                 <li class="title">{{title}}</li>
@@ -96,7 +98,7 @@
     </td>
     {{/isActivity}}
     <td>{{#url}}
-        <a href="/web{{url}}" target="_blank">{{/url}}{{title}}{{#url}}</a>{{/url}}
+        <a href="{{url}}" target="_blank">{{/url}}{{title}}{{#url}}</a>{{/url}}
     </td>
 
     <td class="text-right status-col">

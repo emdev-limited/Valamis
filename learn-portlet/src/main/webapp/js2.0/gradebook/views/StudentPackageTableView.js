@@ -33,8 +33,12 @@ StudentPackageTableView = Backbone.View.extend({
     addStatement: function (statement) {
         var view = new StudentPackageTableRowView({
             language: this.options.language,
-            activityIds: this.options.activityIds,
-            model: statement
+            activityId: this.options.activityId,
+            model: statement,
+            parent: {
+                studentId: this.options.packageModel.get('studentId'),
+                packageTitle: this.options.packageModel.get('packageName')
+            }
         });
         this.$('#statementsGrid').append(view.render());
         this.views[statement.id] = view;
@@ -42,20 +46,22 @@ StudentPackageTableView = Backbone.View.extend({
 
     loadComments: function() {
         var comments = [];
-        this.options.activityIds.forEach(function (actId){
+        var actId = this.options.activityId;
+        if(actId) {
             var query = {
-                params:{
-                    verb: {id:TincanHelper.getVerbId('commented')},
-                    activity: {id:actId},
+                params: {
+                    verb: {id: TincanHelper.getVerbId('commented')},
+                    activity: {id: actId},
                     related_activities: true,
                     ascending: true
                 }
             };
             var result = TincanHelper.getStatements(query);
-            result.statementsResult.statements.forEach(function (st){
+            result.statementsResult.statements.forEach(function (st) {
                 comments.push(st);
             }, this);
-        }, this);
+        }
+
 
         comments.filter(function (st) {
             return st.target.objectType == 'StatementRef';
@@ -65,7 +71,7 @@ StudentPackageTableView = Backbone.View.extend({
                 language: this.options.language,
                 stmtRef: comment.target.id,
                 stmt: comment,
-                activityIds: this.options.activityIds,
+                activityId: this.options.activityId,
                 isNew: false
             });
             if(this.views[comment.target.id])
@@ -280,8 +286,9 @@ StudentPackageTableRowView = Backbone.View.extend({
         var view = new CommentRowView({
             language: this.options.language,
             stmtRef: this.model.id,
-            activityIds: this.options.activityIds,
-            isNew: true
+            activityId: this.options.activityId,
+            isNew: true,
+            packageModel: this.options.packageModel
         });
         this.$('.comment-list:first').append(view.render());
         view.$el.slideDown(500);
@@ -345,7 +352,7 @@ CommentRowView = Backbone.View.extend({
             actor: new TinCan.Agent(JSON.parse(jQueryValamis('#tincanActor').val())),
             verb: TincanHelper.createVerb('commented'),
             target: new TinCan.StatementRef({objectType:'StatementRef',id:this.stmtRef}),
-            context: new TinCan.Context({contextActivities: {grouping:[{id:this.options.activityIds[0], objectType: 'Activity'}]}})
+            context: new TinCan.Context({contextActivities: {grouping:[{id:this.options.activityId, objectType: 'Activity'}]}})
         })):this.options.stmt;
 
         this.comment = this.stmt.result?this.stmt.result.response:'';
@@ -367,7 +374,7 @@ CommentRowView = Backbone.View.extend({
         var view = new CommentRowView({
             language: this.options.language,
             stmtRef: this.stmt.id,
-            activityIds: this.options.activityIds,
+            activityId: this.options.activityId,
             isNew: true
         });
         this.$('.comment-list:first').append(view.render());
@@ -405,5 +412,11 @@ CommentRowView = Backbone.View.extend({
 
     sendCommentStatement: function() {
         TincanHelper.sendStatement(this.stmt);
+        if(this.options.parent)
+            window.LearnAjax.post(path.root + path.api.notifications + 'gradebook/', {
+                targetId: this.options.parent.studentId,
+                courseId: Utils.getCourseId(),
+                packageTitle: this.options.parent.packageTitle
+            });
     }
 });

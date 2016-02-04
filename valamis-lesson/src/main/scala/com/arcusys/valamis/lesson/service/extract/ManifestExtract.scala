@@ -39,7 +39,6 @@ trait ManifestExtract {
       tincanPackage.title,
       tincanPackage.summary,
       tincanPackage.courseID,
-      tincanPackage.assetRefId,
       scopeRule.map(_.visibility),
       tincanPackage.logo,
       scopeRule.exists(_.isDefault), // false by default
@@ -75,7 +74,6 @@ trait ManifestExtract {
       scormPackage.title,
       scormPackage.summary,
       scormPackage.metadata,
-      scormPackage.assetRefId,
       scormPackage.courseID,
       scopeRule.map(_.visibility),
       scormPackage.logo,

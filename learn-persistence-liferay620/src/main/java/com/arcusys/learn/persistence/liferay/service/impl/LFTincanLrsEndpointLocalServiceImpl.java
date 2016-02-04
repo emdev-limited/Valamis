@@ -42,7 +42,7 @@ public class LFTincanLrsEndpointLocalServiceImpl
         }
     }
 
-    public void setEndpoint(String endpoint, String authType, String key, String secret) throws SystemException {
+    public void setEndpoint(String endpoint, String authType, String key, String secret, String host) throws SystemException {
         //lfTincanLrsEndpointPersistence.removeAll();
 
         LFTincanLrsEndpoint newEntity = lfTincanLrsEndpointPersistence.create(counterLocalService.increment(LFTincanLrsEndpoint.class.getName()));
@@ -51,6 +51,7 @@ public class LFTincanLrsEndpointLocalServiceImpl
         newEntity.setAuthType(authType);
         newEntity.setKey(key);
         newEntity.setSecret(secret);
+        newEntity.setCustomHost(host);
 
         lfTincanLrsEndpointPersistence.update(newEntity, true);
     }

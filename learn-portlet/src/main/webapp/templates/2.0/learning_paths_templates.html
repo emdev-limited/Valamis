@@ -11,11 +11,11 @@
         <div class="tile-content top-corner-status">
             <div class="image certificate img-square"
                 {{#logo}}
-                style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
+                style="background-image: url('{{{apiPath}}}files/images?folderId={{id}}&file={{logo}}')"
                 {{/logo}}>
             </div>
             <ul>
-                <li class="title">{{title}}</li>
+                <li class="title"><a href="{{url}}">{{title}}</a></li>
                 <li class="description">{{description}}</li>
                 <li class="categories">
                     <span class="js-achieved-amount"></span> {{ofLabel}} <span class="js-total-goals"></span> {{goalsAchievedLabel}}
@@ -57,17 +57,17 @@
 
 <script type="text/template" id="goalItemViewTemplate">
   <td class="progress-col {{status}}">
-      <i class="checkmark"></i>
+      <div class="checkmark"> <span class="val-icon val-icon-checkbox"> </span> </div>
   </td>
   <td>
-      {{#url}}<a href="/web{{{url}}}" target="_blank">{{/url}}
+      {{#url}}<a href="{{{url}}}" target="_blank">{{/url}}
           {{title}}
       {{#url}}</a>{{/url}}
   </td>
   <td class="info-col">
       {{#isPackage}}
           {{inLabel}}
-          {{#packageCourseUrl}}<a href="/web{{{packageCourseUrl}}}" target="_blank">{{/packageCourseUrl}}
+          {{#packageCourseUrl}}<a href="{{{packageCourseUrl}}}" target="_blank">{{/packageCourseUrl}}
           {{packageCourseName}}
           {{#packageCourseUrl}}</a>{{/packageCourseUrl}}
       {{/isPackage}}

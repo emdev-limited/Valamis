@@ -7,14 +7,14 @@ LiferaySiteModel = Backbone.Model.extend({
   }
 });
 
-LiferaySiteCollectionService = new Backbone.Service({ url: '/',
+LiferaySiteCollectionService = new Backbone.Service({ url: path.root,
   sync: {
     'read': {
       path: path.api.courses,
       'data': function (collection, options) {
         var filter = options.filter || '';
         var sort = 'true';
-        if (options.sort)
+        if (options.sort != undefined)
           sort = options.sort;
         return {
           companyID: jQuery('#curriculumCompanyID').val(),
@@ -88,6 +88,13 @@ LiferaySitesContainer = Backbone.View.extend({
     var template = Mustache.to_html(jQuery('#liferaySiteDialogView').html(), _.extend({singleSelect: this.singleSelect}, this.language));
     this.$el.html(template);
     this.$el.find('.dropdown').valamisDropDown();
+    this.$('.js-search')
+      .on('focus', function() {
+        jQuery(this).parent('.val-search').addClass('focus');
+      })
+      .on('blur', function() {
+        jQuery(this).parent('.val-search').removeClass('focus');
+      });
 
     var that = this;
     this.collection.on("siteCollection:updated", function (details) {

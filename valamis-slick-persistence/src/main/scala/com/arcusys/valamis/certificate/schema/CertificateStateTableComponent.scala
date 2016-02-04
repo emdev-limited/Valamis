@@ -1,8 +1,9 @@
 package com.arcusys.valamis.certificate.schema
 
-import com.arcusys.valamis.certificate.model.{CertificateStatus, CertificateState}
+import com.arcusys.valamis.certificate.model.{CertificateState, CertificateStatuses}
 import com.arcusys.valamis.core.DbNameUtils._
 import com.arcusys.valamis.core.SlickProfile
+import com.arcusys.valamis.joda.JodaDateTimeMapper
 import org.joda.time.DateTime
 
 import scala.slick.driver.JdbcDriver
@@ -11,15 +12,16 @@ trait CertificateStateTableComponent extends CertificateTableComponent{ self: Sl
     import driver.simple._
 
     class CertificateStateTable(tag: Tag) extends Table[CertificateState](tag, tblName("CERT_STATE")) {
-      val jodaMapper = new com.github.tototoshi.slick.GenericJodaSupport(driver.asInstanceOf[JdbcDriver])
-      import jodaMapper._
-      implicit val CertificateStatusTypeMapper = MappedColumnType.base[CertificateStatus.Value, String](
+      implicit val jodaMapper = new JodaDateTimeMapper(driver.asInstanceOf[JdbcDriver]).typeMapper
+
+      implicit val CertificateStatusTypeMapper = MappedColumnType.base[CertificateStatuses.Value, String](
         s => s.toString,
-        s => CertificateStatus.withName(s)
+        s => CertificateStatuses.withName(s)
       )
       def userId = column[Long]("USER_ID")
-      def status = column[CertificateStatus.Value]("STATE")
+      def status = column[CertificateStatuses.Value]("STATE")
       def statusAcquiredDate = column[DateTime]("STATE_ACQUIRED_DATE")
+
       def userJoinedDate = column[DateTime]("USER_JOINED_DATE") //Possibly not needed, was used in CertificateToUser repository
       def certificateId = column[Long]("CERTIFICATE_ID")
 

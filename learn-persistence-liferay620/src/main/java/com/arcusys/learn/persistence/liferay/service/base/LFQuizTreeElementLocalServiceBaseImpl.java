@@ -2,54 +2,7 @@ package com.arcusys.learn.persistence.liferay.service.base;
 
 import com.arcusys.learn.persistence.liferay.model.LFQuizTreeElement;
 import com.arcusys.learn.persistence.liferay.service.LFQuizTreeElementLocalService;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFActivityDataMapPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFActivityPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFActivityStateNodePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFActivityStatePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFActivityStateTreePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFAnswerPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFAttemptDataPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFAttemptPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFBigDecimalPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFChildrenSelectionPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFConditionRulePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFConfigPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFCoursePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFGlblObjectiveStatePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFLRSToActivitySettingPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFLessonLimitPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFObjectiveMapPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFObjectivePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFObjectiveStatePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFPackageGradeStoragePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFPackagePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFPackageScopeRulePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFPlayerScopeRulePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuestionCategoryPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuestionPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuizAnswerScorePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuizPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuizQuestCatPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuizQuestionPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFQuizTreeElementPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFResourcePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFRollupContributionPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFRollupRulePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFRuleConditionPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSeqPermissionsPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSequencingPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSequencingTrackingPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSiteDependentConfigPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSlideEntityPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSlidePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFSlideSetPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFTCClntApiStoragePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFTincanLrsEndpointPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFTincanManifestActPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFTincanPackagePersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFTincanURIPersistence;
-import com.arcusys.learn.persistence.liferay.service.persistence.LFUserPersistence;
-
+import com.arcusys.learn.persistence.liferay.service.persistence.*;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.IdentifiableBean;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
@@ -67,11 +20,9 @@ import com.liferay.portal.service.BaseLocalServiceImpl;
 import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.portal.service.persistence.UserPersistence;
 
-import java.io.Serializable;
-
-import java.util.List;
-
 import javax.sql.DataSource;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Provides the base implementation for the l f quiz tree element local service.
@@ -132,10 +83,6 @@ public abstract class LFQuizTreeElementLocalServiceBaseImpl
     protected com.arcusys.learn.persistence.liferay.service.LFConditionRuleLocalService lfConditionRuleLocalService;
     @BeanReference(type = LFConditionRulePersistence.class)
     protected LFConditionRulePersistence lfConditionRulePersistence;
-    @BeanReference(type = com.arcusys.learn.persistence.liferay.service.LFConfigLocalService.class)
-    protected com.arcusys.learn.persistence.liferay.service.LFConfigLocalService lfConfigLocalService;
-    @BeanReference(type = LFConfigPersistence.class)
-    protected LFConfigPersistence lfConfigPersistence;
     @BeanReference(type = com.arcusys.learn.persistence.liferay.service.LFCourseLocalService.class)
     protected com.arcusys.learn.persistence.liferay.service.LFCourseLocalService lfCourseLocalService;
     @BeanReference(type = LFCoursePersistence.class)
@@ -240,18 +187,6 @@ public abstract class LFQuizTreeElementLocalServiceBaseImpl
     protected com.arcusys.learn.persistence.liferay.service.LFSiteDependentConfigLocalService lfSiteDependentConfigLocalService;
     @BeanReference(type = LFSiteDependentConfigPersistence.class)
     protected LFSiteDependentConfigPersistence lfSiteDependentConfigPersistence;
-    @BeanReference(type = com.arcusys.learn.persistence.liferay.service.LFSlideLocalService.class)
-    protected com.arcusys.learn.persistence.liferay.service.LFSlideLocalService lfSlideLocalService;
-    @BeanReference(type = LFSlidePersistence.class)
-    protected LFSlidePersistence lfSlidePersistence;
-    @BeanReference(type = com.arcusys.learn.persistence.liferay.service.LFSlideEntityLocalService.class)
-    protected com.arcusys.learn.persistence.liferay.service.LFSlideEntityLocalService lfSlideEntityLocalService;
-    @BeanReference(type = LFSlideEntityPersistence.class)
-    protected LFSlideEntityPersistence lfSlideEntityPersistence;
-    @BeanReference(type = com.arcusys.learn.persistence.liferay.service.LFSlideSetLocalService.class)
-    protected com.arcusys.learn.persistence.liferay.service.LFSlideSetLocalService lfSlideSetLocalService;
-    @BeanReference(type = LFSlideSetPersistence.class)
-    protected LFSlideSetPersistence lfSlideSetPersistence;
     @BeanReference(type = com.arcusys.learn.persistence.liferay.service.LFTCClntApiStorageLocalService.class)
     protected com.arcusys.learn.persistence.liferay.service.LFTCClntApiStorageLocalService lftcClntApiStorageLocalService;
     @BeanReference(type = LFTCClntApiStoragePersistence.class)
@@ -929,43 +864,6 @@ public abstract class LFQuizTreeElementLocalServiceBaseImpl
     public void setLFConditionRulePersistence(
         LFConditionRulePersistence lfConditionRulePersistence) {
         this.lfConditionRulePersistence = lfConditionRulePersistence;
-    }
-
-    /**
-     * Returns the l f config local service.
-     *
-     * @return the l f config local service
-     */
-    public com.arcusys.learn.persistence.liferay.service.LFConfigLocalService getLFConfigLocalService() {
-        return lfConfigLocalService;
-    }
-
-    /**
-     * Sets the l f config local service.
-     *
-     * @param lfConfigLocalService the l f config local service
-     */
-    public void setLFConfigLocalService(
-        com.arcusys.learn.persistence.liferay.service.LFConfigLocalService lfConfigLocalService) {
-        this.lfConfigLocalService = lfConfigLocalService;
-    }
-
-    /**
-     * Returns the l f config persistence.
-     *
-     * @return the l f config persistence
-     */
-    public LFConfigPersistence getLFConfigPersistence() {
-        return lfConfigPersistence;
-    }
-
-    /**
-     * Sets the l f config persistence.
-     *
-     * @param lfConfigPersistence the l f config persistence
-     */
-    public void setLFConfigPersistence(LFConfigPersistence lfConfigPersistence) {
-        this.lfConfigPersistence = lfConfigPersistence;
     }
 
     /**
@@ -1952,119 +1850,6 @@ public abstract class LFQuizTreeElementLocalServiceBaseImpl
     public void setLFSiteDependentConfigPersistence(
         LFSiteDependentConfigPersistence lfSiteDependentConfigPersistence) {
         this.lfSiteDependentConfigPersistence = lfSiteDependentConfigPersistence;
-    }
-
-    /**
-     * Returns the l f slide local service.
-     *
-     * @return the l f slide local service
-     */
-    public com.arcusys.learn.persistence.liferay.service.LFSlideLocalService getLFSlideLocalService() {
-        return lfSlideLocalService;
-    }
-
-    /**
-     * Sets the l f slide local service.
-     *
-     * @param lfSlideLocalService the l f slide local service
-     */
-    public void setLFSlideLocalService(
-        com.arcusys.learn.persistence.liferay.service.LFSlideLocalService lfSlideLocalService) {
-        this.lfSlideLocalService = lfSlideLocalService;
-    }
-
-    /**
-     * Returns the l f slide persistence.
-     *
-     * @return the l f slide persistence
-     */
-    public LFSlidePersistence getLFSlidePersistence() {
-        return lfSlidePersistence;
-    }
-
-    /**
-     * Sets the l f slide persistence.
-     *
-     * @param lfSlidePersistence the l f slide persistence
-     */
-    public void setLFSlidePersistence(LFSlidePersistence lfSlidePersistence) {
-        this.lfSlidePersistence = lfSlidePersistence;
-    }
-
-    /**
-     * Returns the l f slide entity local service.
-     *
-     * @return the l f slide entity local service
-     */
-    public com.arcusys.learn.persistence.liferay.service.LFSlideEntityLocalService getLFSlideEntityLocalService() {
-        return lfSlideEntityLocalService;
-    }
-
-    /**
-     * Sets the l f slide entity local service.
-     *
-     * @param lfSlideEntityLocalService the l f slide entity local service
-     */
-    public void setLFSlideEntityLocalService(
-        com.arcusys.learn.persistence.liferay.service.LFSlideEntityLocalService lfSlideEntityLocalService) {
-        this.lfSlideEntityLocalService = lfSlideEntityLocalService;
-    }
-
-    /**
-     * Returns the l f slide entity persistence.
-     *
-     * @return the l f slide entity persistence
-     */
-    public LFSlideEntityPersistence getLFSlideEntityPersistence() {
-        return lfSlideEntityPersistence;
-    }
-
-    /**
-     * Sets the l f slide entity persistence.
-     *
-     * @param lfSlideEntityPersistence the l f slide entity persistence
-     */
-    public void setLFSlideEntityPersistence(
-        LFSlideEntityPersistence lfSlideEntityPersistence) {
-        this.lfSlideEntityPersistence = lfSlideEntityPersistence;
-    }
-
-    /**
-     * Returns the l f slide set local service.
-     *
-     * @return the l f slide set local service
-     */
-    public com.arcusys.learn.persistence.liferay.service.LFSlideSetLocalService getLFSlideSetLocalService() {
-        return lfSlideSetLocalService;
-    }
-
-    /**
-     * Sets the l f slide set local service.
-     *
-     * @param lfSlideSetLocalService the l f slide set local service
-     */
-    public void setLFSlideSetLocalService(
-        com.arcusys.learn.persistence.liferay.service.LFSlideSetLocalService lfSlideSetLocalService) {
-        this.lfSlideSetLocalService = lfSlideSetLocalService;
-    }
-
-    /**
-     * Returns the l f slide set persistence.
-     *
-     * @return the l f slide set persistence
-     */
-    public LFSlideSetPersistence getLFSlideSetPersistence() {
-        return lfSlideSetPersistence;
-    }
-
-    /**
-     * Sets the l f slide set persistence.
-     *
-     * @param lfSlideSetPersistence the l f slide set persistence
-     */
-    public void setLFSlideSetPersistence(
-        LFSlideSetPersistence lfSlideSetPersistence) {
-        this.lfSlideSetPersistence = lfSlideSetPersistence;
     }
 
     /**

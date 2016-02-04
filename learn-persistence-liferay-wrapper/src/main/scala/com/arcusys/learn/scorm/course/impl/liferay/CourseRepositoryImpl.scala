@@ -2,29 +2,25 @@ package com.arcusys.learn.scorm.course.impl.liferay
 
 import com.arcusys.learn.persistence.liferay.model.LFCourse
 import com.arcusys.learn.persistence.liferay.service.LFCourseLocalServiceUtil
-import com.arcusys.valamis.gradebook.model.CourseGrade
-import com.arcusys.valamis.gradebook.storage.CourseGradeStorage
+import com.arcusys.valamis.grade.model.CourseGrade
+import com.arcusys.valamis.grade.storage.CourseGradeStorage
 import org.joda.time.DateTime
 
-/**
- * Created by mminin on 15.10.14.
- */
+import scala.util.Try
+
+// TODO convert grade column type to float
 class CourseRepositoryImpl extends CourseGradeStorage {
-
-  override def renew(): Unit = {
-    LFCourseLocalServiceUtil.removeAll()
-  }
-
-  override def get(courseId: Int, userID: Int): Option[CourseGrade] = {
-    extract(LFCourseLocalServiceUtil.fetchByCourseIdAndUserId(courseId, userID))
+  
+  override def get(courseId: Long, userId: Long): Option[CourseGrade] = {
+    Option(LFCourseLocalServiceUtil.fetchByCourseIdAndUserId(courseId.toInt, userId.toInt)) map extract
   }
 
   override def create(course: CourseGrade): Unit = {
     val lfEntity = LFCourseLocalServiceUtil.createLFCourse()
 
-    lfEntity.setCourseID(course.courseID)
-    lfEntity.setUserID(course.userID)
-    lfEntity.setGrade(course.grade)
+    lfEntity.setCourseID(course.courseId.toInt)
+    lfEntity.setUserID(course.userId.toInt)
+    lfEntity.setGrade(course.grade.map(_.toString).getOrElse(""))
     lfEntity.setComment(course.comment)
     lfEntity.setDate(DateTime.now().toDate)
 
@@ -32,21 +28,23 @@ class CourseRepositoryImpl extends CourseGradeStorage {
   }
 
   override def modify(course: CourseGrade): Unit = {
-    val lfEntity = LFCourseLocalServiceUtil.findByCourseIdAndUserId(course.courseID, course.userID)
+    val lfEntity = LFCourseLocalServiceUtil
+      .findByCourseIdAndUserId(course.courseId.toInt, course.userId.toInt)
 
-    lfEntity.setCourseID(course.courseID)
-    lfEntity.setUserID(course.userID)
-    lfEntity.setGrade(course.grade)
+    lfEntity.setCourseID(course.courseId.toInt)
+    lfEntity.setUserID(course.userId.toInt)
+    lfEntity.setGrade(course.grade.map(_.toString).getOrElse(""))
     lfEntity.setComment(course.comment)
     lfEntity.setDate(DateTime.now().toDate)
 
     LFCourseLocalServiceUtil.updateLFCourse(lfEntity)
   }
 
-  private def extract(lfEntity: LFCourse): Option[CourseGrade] =
-    Option(lfEntity).map(lfEntity => CourseGrade(lfEntity.getCourseID,
-      lfEntity.getUserID,
-      lfEntity.getGrade,
-      lfEntity.getComment,
-      (if (lfEntity.getDate != null) Option(new DateTime(lfEntity.getDate)) else None)))
+  private def extract(lfEntity: LFCourse) = CourseGrade(
+    lfEntity.getCourseID.toLong,
+    lfEntity.getUserID.toLong,
+    Try(lfEntity.getGrade.toFloat).toOption,
+    lfEntity.getComment,
+    Option(lfEntity.getDate).map(d => new DateTime(d))
+  )
 }

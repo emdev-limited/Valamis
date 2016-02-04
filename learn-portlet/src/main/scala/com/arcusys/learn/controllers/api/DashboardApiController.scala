@@ -1,25 +1,19 @@
 package com.arcusys.learn.controllers.api
 
+import com.arcusys.learn.controllers.api.base.BaseApiController
 import com.arcusys.learn.facades.{CertificateFacadeContract, GradebookFacadeContract}
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission.PermissionUtil
-import com.arcusys.learn.models.request.DashboardRequest
+import com.arcusys.learn.liferay.permission.{PermissionUtil, PortletName, ViewPermission}
 import com.arcusys.learn.models.response.UserSummaryResponse
-import com.arcusys.valamis.certificate.model.CertificateStatus
-import com.arcusys.valamis.certificate.model.goal.GoalStatuses
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.certificate.model.CertificateStatuses
 import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.settings.service.SettingService
-import com.escalatesoft.subcut.inject.BindingModule
 
-class DashboardApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  def this() = this(Configuration)
+class DashboardApiController extends BaseApiController {
 
   lazy val endpointService = inject[LrsEndpointService]
   lazy val settingsManager = inject[SettingService]
-  val lrsClientManager = inject[LrsClientManager]
-  val certificateFacade = inject[CertificateFacadeContract]
-  val gradebookFacade = inject[GradebookFacadeContract]
+  lazy val certificateFacade = inject[CertificateFacadeContract]
+  lazy val gradebookFacade = inject[GradebookFacadeContract]
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)
@@ -27,49 +21,27 @@ class DashboardApiController(configuration: BindingModule) extends BaseApiContro
 
   get("/dashboard/summary(/)") {
     jsonAction {
-      val dashboardRequest = DashboardRequest(this)
+      PermissionUtil.requirePermissionApi(ViewPermission, PortletName.ValamisStudySummary)
       val userId = PermissionUtil.getUserId
+      val companyId = PermissionUtil.getCompanyId
 
-      val certificatesReceived = certificateFacade.getStatesBy(
-        userId,
-        Set(CertificateStatus.Success)
-      ).size
+      val (pieData, lessonsCompleted) = gradebookFacade.getPieDataWithCompletedPackages(userId)
 
-      val certificatesInProgress = certificateFacade.getStatesBy(
-        userId,
-        Set(CertificateStatus.InProgress)
-      ).size
+      val certificates = certificateFacade.getStatesBy(userId, companyId, Set(CertificateStatuses.InProgress, CertificateStatuses.Success))
 
-      val lessonsCompleted = lrsClientManager.statementApi(statementApi =>
-        gradebookFacade.getCompletedPackagesCount(statementApi, userId), dashboardRequest.lrsAuth)
+      val certificatesReceived = certificates.count(_.status == CertificateStatuses.Success)
 
-      val pieData = lrsClientManager.statementApi(statementApi =>
-        gradebookFacade.getCompletedPackages(statementApi, userId), dashboardRequest.lrsAuth)
+      val certificatesInProgress = certificates.count(_.status == CertificateStatuses.InProgress)
 
-      val certificates = certificateFacade.getStatesBy(userId, Set(CertificateStatus.InProgress, CertificateStatus.Success))
-
-      val goals = lrsClientManager.statementApi(statementApi =>
-        for (
-          certificate <- certificates;
-          certificateId = certificate.id;
-          goalStatus = certificateFacade.getGoalsStatuses(statementApi, certificateId, userId.toInt)
-        ) yield goalStatus,
-        dashboardRequest.lrsAuth
-      )
-
-      val learningGoalsAchived = goals.map(c => {
-        val sp = c.packages.count(_.status == GoalStatuses.Success.toString)
-        val sa = c.activities.count(_.status == GoalStatuses.Success.toString)
-        val sc = c.courses.count(_.status == GoalStatuses.Success.toString)
-        val ss = c.statements.count(_.status == GoalStatuses.Success.toString)
-        sp + sa + sc + ss
-      }).sum
+      val learningGoalsAchieved = certificates.map(c =>
+        certificateFacade.getCountGoals(c.id, userId)
+      ).sum
 
 
       UserSummaryResponse(
         certificatesReceived = certificatesReceived,
         lessonsCompleted = lessonsCompleted,
-        learningGoalsAchived = learningGoalsAchived,
+        learningGoalsAchived = learningGoalsAchieved,
         certificatesInProgress = certificatesInProgress,
         piedata = pieData
       )

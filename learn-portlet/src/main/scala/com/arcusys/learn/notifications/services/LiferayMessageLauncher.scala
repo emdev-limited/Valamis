@@ -1,8 +1,8 @@
 package com.arcusys.learn.notifications.services
 
-import javax.servlet.{ ServletContextEvent, ServletContextListener }
+import javax.servlet.{ServletContextEvent, ServletContextListener}
 
-import com.liferay.portal.kernel.log.{ Log, LogFactoryUtil }
+import com.liferay.portal.kernel.log.{Log, LogFactoryUtil}
 
 class LiferayMessageLauncher extends ServletContextListener {
   private val log: Log = LogFactoryUtil.getLog(classOf[LiferayMessageLauncher])

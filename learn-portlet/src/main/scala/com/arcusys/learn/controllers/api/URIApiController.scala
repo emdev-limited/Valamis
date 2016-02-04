@@ -1,22 +1,20 @@
 package com.arcusys.learn.controllers.api
 
+import com.arcusys.learn.controllers.api.base.BaseApiController
 import com.arcusys.learn.exceptions.BadRequestException
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.models.request.{URIActionType, URIRequest}
 import com.arcusys.valamis.exception.EntityNotFoundException
 import com.arcusys.valamis.slide.service.SlideServiceContract
 import com.arcusys.valamis.uri.model.ValamisURIType
 import com.arcusys.valamis.uri.service.URIServiceContract
-import com.escalatesoft.subcut.inject.BindingModule
 
 /**
  * Create and provide URI for TinCan Objects
  */
-class URIApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  def this() = this(Configuration)
+class URIApiController extends BaseApiController {
 
-  val uriService = inject[URIServiceContract]
-  val slideService = inject[SlideServiceContract]
+  lazy val uriService = inject[URIServiceContract]
+  lazy val slideService = inject[SlideServiceContract]
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)
@@ -25,7 +23,7 @@ class URIApiController(configuration: BindingModule) extends BaseApiController(c
   get("/uri(/)")(jsonAction {
     val uriRequest = URIRequest(this)
     uriRequest.action match {
-      case None => {
+      case None =>
         val result = uriService.getOrCreate(
           uriRequest.prefix,
           uriRequest.id,
@@ -33,19 +31,17 @@ class URIApiController(configuration: BindingModule) extends BaseApiController(c
           uriRequest.content)
 
         result
-      }
-      case Some(URIActionType.GetAll) => {
+      case Some(URIActionType.GetAll) =>
         uriService.getById(
           uriRequest.start.getOrElse(-1),
           uriRequest.end.getOrElse(-1),
           uriRequest.filter)
-      }
       case _ => throw new BadRequestException
     }
   })
 
   get("/uri/verbs(/)")(jsonAction {
-    slideService.getTinCanVerbs
+    slideService.getTinCanVerbs()
   })
 
   get("/uri/:objType/:objName")(action {

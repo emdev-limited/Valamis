@@ -1,58 +1,61 @@
-<section data-state="matching_{{id}}">
-<div class="SCORMPlayerContentDisplay content{{id}}">
+<section data-state="matching_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
+<div class="SCORMPlayerContentDisplay content{{id}}_{{questionNumber}}">
     <div class="playerHeader">
         <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
     </div>
     <div class="playerMainArea">
 
-        <div class="playerMatchingAnswers" id="scormQuestionData{{id}}">
+        <div class="playerMatchingAnswers" id="scormQuestionData{{id}}_{{questionNumber}}">
                <div class =maschingQuestionBlock>
-                <div class="matchingAnswerBox matchingAnswerBoxs{{id}}">
+                <div class="matchingAnswerBox matchingAnswerBoxs{{id}}_{{questionNumber}}">
                         <div class="matchingQuestionVariant">
                             <!--{{{answerText}}}-->
                         </div>
 
-                        <ul class="answerContainer container{{id}} ui-droppable" id="containerTemp">
+                        <ul class="answerContainer container{{id}}_{{questionNumber}} ui-droppable" id="containerTemp">
                             {{#answersMatching}}
-                            <li class="ui-state-default acceptable categorization{{id}} matchingQuestion val-icon-drag">{{{matchingText}}}</li>
+                            <li class="ui-state-default acceptable categorization{{id}}_{{questionNumber}} matchingQuestion val-icon-drag" id="matchingAnswer{{answerId}}">
+                                {{{matchingText}}}
+                            </li>
                             {{/answersMatching}}
                         </ul>
                 </div>
                 </div>
                 <div class =maschingAnswerBlock>
-                    {{#answers}}
-            <ul class="matchingAnswerBox matchingAnswerBoxs{{id}}">
-                <li>
-                    <div class="matchingQuestionVariant">
-                        {{{answerText}}}
-                    </div>
-                        <ul class="answerContainer container{{id}} ui-droppable"></ul>
-
-                </li>
-            </ul>
-
-            {{/answers}}
+                {{#answers}}
+                    <ul class="matchingAnswerBox matchingAnswerBoxs{{id}}_{{questionNumber}}">
+                        <li>
+                            <div class="matchingQuestionVariant">
+                                {{{answerText}}}
+                            </div>
+                            <ul class="answerContainer container{{id}}_{{questionNumber}} ui-droppable"></ul>
+                        </li>
+                    </ul>
+                {{/answers}}
                 </div>
         </div>
     </div>
     <!--{{#autoShowAnswer}} -->
-    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton" onclick="TinCanCourseHelpers['matchingShowAnswers_{{id}}']()">Check</button>
+    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+            onclick="TinCanCourseHelpers['matchingShowAnswers_{{id}}_{{questionNumber}}']()">
+        Check
+    </button>
     <!--{{/autoShowAnswer}} -->
 </div>
 <!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}" style="display: none;">
-    <h2><span id="answerCorrectness{{id}}" style="vertical-align: baseline !important;"></span></h2>
+<div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
+    <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
 
-    <div id="answerComparison{{id}}" style="display: none;">
+    <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
         <div style="display: none;" class="verticalSeparator">
-            <div><strong>Your answers:</strong></div>
+            <p><strong>Your answers:</strong></p>
 
-            <div id="usersAnswers{{id}}"></div>
+            <div id="usersAnswers{{id}}_{{questionNumber}}"></div>
         </div>
         <div style="display: inline-block;">
-            <div><strong>Correct answers:</strong></div>
+            <p><strong>Correct answers:</strong></p>
 
-            <div id="correctAnswers{{id}}"></div>
+            <div id="correctAnswers{{id}}_{{questionNumber}}"></div>
         </div>
         <br>
     </div>
@@ -66,9 +69,9 @@
 </section>
 <script type="text/javascript">
     jQuery(document).ready(function () {
-        PrepareMatchingAnswersView('{{id}}');
+        PrepareMatchingAnswersView('{{id}}_{{questionNumber}}');
         /*{{#autoShowAnswer}}*/
-        TinCanCourseHelpers['matchingShowAnswers_{{id}}'] = function () {
+        TinCanCourseHelpers['matchingShowAnswers_{{id}}_{{questionNumber}}'] = function () {
             function addMatchedLine(target, line) {
                var matchedLeft = jQuery("<span>").addClass("matchedLeft").html(line[0]);
               var matchedMiddle = jQuery("<span>").addClass("matchedMiddle").html(" -> ");
@@ -76,16 +79,20 @@
                 target.append(jQuery("<div>").addClass("matchedLine").append(matchedLeft).append(matchedMiddle).append(matchedRight));
             }
 
-            jQuery('.answers{{id}}').show();
-            jQuery('.content{{id}}').hide();
+            jQuery('.answers{{id}}_{{questionNumber}}').show();
+            jQuery('.content{{id}}_{{questionNumber}}').hide();
 
-            var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
+            var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
+            parent_el.prevAll('.rj-element').hide();
+            parent_el.nextAll('.rj-element').hide();
+
+            var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
             var correct = answers.isPassed;
             var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
             if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
-            jQuery("#answerCorrectness{{id}}").html(correctness);
+            jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
             if (!correct) {
-                jQuery("#answerComparison{{id}}").show();
+                jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
                 var learnerResponse = answers.learnerResponse;
                 var correctPattern = answers.correctResponse;
@@ -93,32 +100,37 @@
                 var learnerResponseLines = learnerResponse.split("[,]");
                 for (var i = 0; i < learnerResponseLines.length; i++) {
                     var learnerResponseAnswer = learnerResponseLines[i].split("[.]");
-                    addMatchedLine(jQuery("#usersAnswers{{id}}"), learnerResponseAnswer);
+                    addMatchedLine(jQuery("#usersAnswers{{id}}_{{questionNumber}}"), learnerResponseAnswer);
                 }
 
                 var correctPatternLines = correctPattern.split("[,]");
                 for (var i = 0; i < correctPatternLines.length; i++) {
                     var correctPatterAnswer = correctPatternLines[i].split("[.]");
-                    addMatchedLine(jQuery("#correctAnswers{{id}}"), correctPatterAnswer);
+                    addMatchedLine(jQuery("#correctAnswers{{id}}_{{questionNumber}}"), correctPatterAnswer);
                 }
             }
             doScale();
         };
         /*{{/autoShowAnswer}}*/
 
-        TinCanCourseHelpers['collectAnswers_{{id}}'] = function () {
-            var dataToCompare = JSON.parse('{{{answerData}}}');
+        TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function () {
+            //Replace all tags with /> to >, as we get not closed tags in answer
+            var dataToCompare = JSON.parse(unescapeElement('{{answerData}}').replace(/[\s]+\/>/gi, '>'));
 
             var userAnswers = [],
                     score = 0,
                     hasScore = false,
                     correctResponse = [],
-                    learnerResponse = [];
+                    learnerResponse = [],
+                    rawLearnerResponse = [];
 
-            jQuery(".matchingAnswerBoxs{{id}}").each(function (index, element) {
+            jQuery(".matchingAnswerBoxs{{id}}_{{questionNumber}}").each(function (index, element) {
                 var question = jQuery.trim(jQuery(".matchingQuestionVariant  ", jQuery(element)).html().toString());
                 var answers = jQuery(".answerContainer > li", jQuery(element));
                 answers.each(function (answerIndex, answerElement) {
+                    var answerId = jQuery(answerElement).attr('id').replace('matchingAnswer', '');
+                    rawLearnerResponse.push([index, answerId].join("[.]"));
+
                     var answer = jQuery.trim(jQuery(answerElement).html().toString());
                     learnerResponse.push([question, answer].join("[.]"));
                     var answerObject = {text: question, matchingText: answer};
@@ -129,35 +141,52 @@
             for (var i = 0; i < dataToCompare.length; i++) {
                 correctResponse.push([dataToCompare[i].answerText, dataToCompare[i].matchingText].join('[.]'));
                 for (var j = 0; j < userAnswers.length; j++) {
-                    if (dataToCompare[i].answerText == userAnswers[j].answerText
+                    if (dataToCompare[i].answerText == userAnswers[j].text
                             && dataToCompare[i].matchingText == userAnswers[j].matchingText) {
                         if (dataToCompare[i].score) hasScore = true;
                         score += dataToCompare[i].score;
                     }
                 }
             }
-            var isPassed = learnerResponse.join('[,]').toLowerCase() == correctResponse.join('[,]').toLowerCase();
+            var isPassed = decodeURIComponent(learnerResponse.join('[,]')).toLowerCase() == decodeURIComponent(correctResponse.join('[,]')).toLowerCase();
 
             return {
                 learnerResponse: learnerResponse.join('[,]'),
                 correctResponse: correctResponse.join('[,]'),
+                rawLearnerResponse: rawLearnerResponse.join("[,]"),
                 isPassed: isPassed,
                 score: (hasScore) ? score : null
             }
         };
 
-        TinCanCourseModules['matching_{{id}}'] = function (tincan) {
-            var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
+        TinCanCourseModules['matching_{{id}}_{{questionNumber}}'] = function (tincan) {
+            var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
 
-            var taskID = 'task{{id}}';
+            var taskID = 'task{{id}}_{{questionNumber}}';
 
             if (answers.isPassed) {
-                tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'matching', answers.learnerResponse, answers.correctResponse, true, 100, answers.score));
+                tincan.sendStatement(GetQuestionAnswerStatement(taskID, unescapeElement('{{text}}'), '{{title}}', 'matching', answers.learnerResponse, answers.correctResponse, true, 100, answers.score));
                 return 1;
             } else {
-                tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'matching', answers.learnerResponse, answers.correctResponse, false, 0, answers.score));
+                tincan.sendStatement(GetQuestionAnswerStatement(taskID, unescapeElement('{{text}}}'), '{{title}}', 'matching', answers.learnerResponse, answers.correctResponse, false, 0, answers.score));
                 return 0;
             }
         }
     });
+
+    TinCanCourseSetAnswers['matching_{{id}}_{{questionNumber}}'] = function(userAnswer) {
+        userAnswer.split("[,]").forEach(function(item) {
+            var boxIndex = item.split("[.]")[0];
+            var answerId = item.split("[.]")[1];
+
+            var box = jQuery(".answerContainer", jQuery(".matchingAnswerBoxs{{id}}_{{questionNumber}}")[boxIndex]);
+            var answerElem = jQuery("#matchingAnswer" + answerId + ".categorization{{id}}_{{questionNumber}}");
+
+            jQuery(answerElem).appendTo(box);
+        });
+    };
+
+    TinCanCourseQuestionsAll['matching_{{id}}_{{questionNumber}}'] = unescapeElement('{{title}}');
+    TinCanCourseQuestionsContent['matching_{{id}}_{{questionNumber}}'] = unescapeElement('{{text}}');
+
 </script>

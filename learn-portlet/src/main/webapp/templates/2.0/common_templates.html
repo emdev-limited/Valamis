@@ -1,4 +1,3 @@
-
 <script type="text/template" id="valamisAppLayoutTemplate">
     <div id="valamisAppModalRegion" class="portlet-body"></div>
 </script>
@@ -31,6 +30,17 @@
     </div>
 </script>
 
+<!--save confirmation template-->
+
+<script type="text/template" id="valamisSaveConfirmationTemplate">
+    <div class="confirmation-question">{{message}}</div>
+    <div>
+        <button class="js-confirmation confirmation btn-primary">{{saveLabel}}</button>
+        <button class="js-decline decline btn-primary">{{dontSaveLabel}}</button>
+        <button>{{cancelLabel}}</button>
+    </div>
+</script>
+
 <!-- image gallery templates -->
 
 <script type="text/html" id="liferayGalleryElementView">
@@ -45,8 +55,9 @@
 <script type="text/html" id="liferayImageGalleryDialogView">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" placeholder="{{searchPlaceholderLabel}}" id="gallerySearch"/>
+            <div class="val-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}" id="gallerySearch" class="js-search"/>
+            </div>
         </div>
         <div class="filter-element paging-showing-label shift-left" id="galeryPagingShowing"></div>
 
@@ -79,8 +90,9 @@
 <script type="text/html" id="liferaySiteDialogToolbar">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" id="siteSearch" class="js-site-search" placeholder="{{searchPlaceholderLabel}}" />
+            <div class="val-search">
+                <input type="text" id="siteSearch" class="js-site-search js-search" placeholder="{{searchPlaceholderLabel}}" />
+            </div>
         </div>
         <div class="filter-element paging-showing-label shift-left" id="siteListPagingShowing"></div>
         <div id="sortSite" class="js-site-sort dropdown filter-element shift-right" data-value="true">

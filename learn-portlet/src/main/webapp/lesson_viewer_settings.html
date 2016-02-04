@@ -64,9 +64,7 @@
 
             Backbone.emulateJSON = true;
             Backbone.ajax = window.LearnAjax.ajax;
-            var defaultURL = Utils.getContextPath() + '/i18n/lessonViewer_en.properties';
-            var localizedURL = Utils.getContextPath() + '/i18n/lessonViewer_{{language}}.properties';
-            Utils.i18nLoader(localizedURL, defaultURL, onPlayerSettingsLanguageLoad, onPlayerSettingsLanguageError);
+            Utils.loadLanguage('lessonViewer', onPlayerSettingsLanguageLoad);
 
             jQuerySettings('#PackageAddFromPersonalSiteButton').on('click', function () {
                 var personal = new PersonalModal();
@@ -80,11 +78,6 @@
             scormPlayerSettingsLanguageData = properties;
             initPlayerSettings();
         }
-
-        function onPlayerSettingsLanguageError() {
-            alert('Translation resource loading failed!');
-        }
-
 
         function initPlayerSettings() {
             var selected = jQuerySettings("#selectedScope").val();

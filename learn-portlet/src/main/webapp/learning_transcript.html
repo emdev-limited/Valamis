@@ -32,9 +32,7 @@
     jQuery1816User(function () {
         Backbone.emulateJSON = true;
         Backbone.ajax = window.LearnAjax.ajax;
-        var defaultURL = Utils.getContextPath() + '/i18n/curriculum_en.properties';
-        var localizedURL = Utils.getContextPath() + '/i18n/curriculum_{{language}}.properties';
-        Utils.i18nLoader(localizedURL, defaultURL, onUserLanguageLoad, onUserLanguageError);
+        Utils.loadLanguage('curriculum', onUserLanguageLoad);
     });
 
     var EditCertificateLayout = Backbone.Marionette.Layout.extend({
@@ -58,7 +56,7 @@
         cancelEl: '.modal-close',
         className: 'val-modal',
         onRender: function () {
-            var dialog = new LiferayUserSelectDialog({getAllUsers: true, singleSelect: true, language: scormLanguageDataUser});
+            var dialog = new LiferayUserSelectDialog({singleSelect: true, language: scormLanguageDataUser});
             dialog.on('closeModal', function () {
                 editCertificateLayout.modals.close();
             });
@@ -104,10 +102,6 @@
         createModalLayout();
         initUserDetails();
         initUserView();
-    }
-
-    function onUserLanguageError() {
-        alert('Translation resource loading failed!');
     }
 
     function createModalLayout () {

@@ -4,14 +4,11 @@ achievedCertificates.module('Entities', function(Entities, achievedCertificates,
     url: path.root,
     sync: {
       'read': {
-        'path': function (model, options) {
-          return path.api.certificates;
-        },
+        'path': path.api.certificateStates,
         'data': function (collection) {
           var params = {
             courseId: Utils.getCourseId(),
-            action: 'GETCERTIFICATESTATES',
-            statuses: 'success'
+            statuses: 'Success'
           };
           return params;
         },
@@ -21,7 +18,13 @@ achievedCertificates.module('Entities', function(Entities, achievedCertificates,
   });
 
   Entities.CertificateCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({})
+    model: Backbone.Model.extend({}),
+    parse: function(response) {
+      return _.map(response, function(model) {
+        model['url'] = Utils.getCertificateUrl(model.id);
+        return model;
+      })
+    }
   }).extend(CertificateCollectionService);
 
 });

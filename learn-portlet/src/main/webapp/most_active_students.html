@@ -9,9 +9,7 @@
 </div>
 <script type="text/javascript">
     // upload translations
-    var defaultURL = Utils.getContextPath() + 'i18n/statementReport_en.properties';
-    var localizedURL = Utils.getContextPath() + 'i18n/statementReport_{{language}}.properties';
-    Utils.i18nLoader(localizedURL, defaultURL, onReportLanguageLoad, onReportLanguageError);
+    Utils.loadLanguage('statementReport', onReportLanguageLoad);
 
     Backbone.Marionette.TemplateCache.prototype.compileTemplate = function (template) {
         Mustache.parse(template);
@@ -54,10 +52,6 @@
     function onReportLanguageLoad(properties) {
         language = properties;
         initView();
-    }
-
-    function onReportLanguageError() {
-        alert('Translation resource loading failed!');
     }
 
 </script>

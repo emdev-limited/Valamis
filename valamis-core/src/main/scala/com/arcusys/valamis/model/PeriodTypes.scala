@@ -32,7 +32,7 @@ object PeriodTypes extends Enumeration {
   def getEndDate(periodType: PeriodType, value: Int, startDate: DateTime): DateTime = periodType match {
     case PeriodTypes.DAYS      => startDate.plusDays(value)
     case PeriodTypes.WEEKS     => startDate.plusWeeks(value)
-    case PeriodTypes.MONTH     => startDate.plusWeeks(value)
+    case PeriodTypes.MONTH     => startDate.plusMonths(value)
     case PeriodTypes.YEAR      => startDate.plusYears(value)
     case PeriodTypes.UNLIMITED => startDate.plusYears(99999)
   }

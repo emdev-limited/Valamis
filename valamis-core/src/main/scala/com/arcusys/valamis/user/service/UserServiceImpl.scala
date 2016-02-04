@@ -3,130 +3,148 @@ package com.arcusys.valamis.user.service
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.constants.QueryUtilHelper
 import com.arcusys.learn.liferay.services.{OrganizationLocalServiceHelper, UserLocalServiceHelper}
-import com.arcusys.valamis.model.{RangeResult, SkipTake}
-import com.arcusys.valamis.user.model.User
+import com.arcusys.valamis.model.{SkipTake, Order}
+import com.arcusys.valamis.user.model._
 import com.arcusys.valamis.user.storage.UserStorage
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.liferay.portal.kernel.dao.orm._
+import com.liferay.portal.kernel.workflow.WorkflowConstants
 import com.liferay.portal.model.Organization
+
 import scala.collection.JavaConversions._
-
 import scala.collection.JavaConverters._
-
 // TODO: refactor (get by id)
-class UserServiceImpl(
-    implicit val bindingModule: BindingModule)
+class UserServiceImpl(implicit val bindingModule: BindingModule)
   extends UserService
   with UserConverter
   with Injectable {
 
-  val userStorage = inject[UserStorage]
+  private lazy val userStorage = inject[UserStorage]
+  private lazy val userCertificateRepository = inject[UserCertificateRepository]
+  private lazy val userLocalService = UserLocalServiceHelper()
 
-  def all(courseId: Long, skip: Int, take: Int, filter: String, sortAZ: Boolean): Seq[LUser] = {
-    var users = UserLocalServiceHelper()
-      .getGroupUsers(courseId)
-      .asScala
-      .filter(u => u.isActive && u.getFullName != "")
-      .sortBy(x => x.getFullName)
+  def all(courseId: Long, namePart: String, sortAZ: Boolean): Seq[LUser] =
+    getBy(UserFilter(
+      namePart = namePart,
+      groupId = Some(courseId),
+      sortBy = Some(UserSort(UserSortBy.Name, Order.apply(sortAZ)))
+    ))
 
-    users = users.filter(x => if (filter != "") x.getFullName.toLowerCase.contains(filter.toLowerCase) else true)
+  def getBy(filter: UserFilter, skipTake: Option[SkipTake]) = {
+    val query = getQuery(filter)
 
-    if (!sortAZ) users = users.reverse
-
-    if (skip < 0)
-      users
-    else
-      users.drop(skip).take(take)
-  }
-
-  def all(companyId: Long,
-          orgId: Option[Long],
-          skipTake: Option[SkipTake],
-          filter: String,
-          sortAZ: Boolean): RangeResult[LUser] = {
-
-    var users = UserLocalServiceHelper()
-      .getCompanyUsers(companyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
-      .asScala
-      .filter(u => u.isActive && u.getFullName != "")
-      .sortBy(x => x.getFullName)
-
-    users = users.filter(x => x.getFullName.toLowerCase.contains(filter.toLowerCase))
-
-    for (id <- orgId)
-      users = users.filter(u =>
-        u.getOrganizations.asScala.map(_.getOrganizationId).contains(id)
-      )
-
-    if (!sortAZ)
-      users = users.reverse
-
-    val count = users.length
-
-    for (
-      SkipTake(skip, take) <- skipTake
-      if skip >= 0
-    ) {
-      users = users.drop(skip).take(take)
+    filter.sortBy match {
+      case Some(UserSort(_, Order.Asc)) =>
+        query.addOrder(OrderFactoryUtil.asc("lastName"))
+          .addOrder(OrderFactoryUtil.asc("firstName"))
+      case _ =>
+        query.addOrder(OrderFactoryUtil.desc("lastName"))
+          .addOrder(OrderFactoryUtil.desc("firstName"))
     }
 
-    RangeResult(count, users)
+    val result = skipTake match {
+      case Some(SkipTake(skip, take)) if take > 0 =>
+        userLocalService.dynamicQuery(query, skip, skip + take)
+      case _ =>
+        userLocalService.dynamicQuery(query)
+    }
+
+    result.asScala.map(_.asInstanceOf[LUser])
   }
 
-  def byId(id: Long): LUser = UserLocalServiceHelper().getUser(id)
+  def getCountBy(filter: UserFilter) = {
+    val query = getQuery(filter).setProjection(ProjectionFactoryUtil.rowCount())
+    userLocalService.dynamicQueryCount(query)
+  }
 
-  def byIds(companyId: Long, ids: Set[Long]): Set[LUser] =
-    UserLocalServiceHelper()
-      .getCompanyUsers(companyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
-      .filter(user => ids.contains(user.getUserId))
-      .toSet
+  private def getQuery(filter: UserFilter): DynamicQuery = {
+    val query = userLocalService.dynamicQuery
+      .add(RestrictionsFactoryUtil.eq("status", WorkflowConstants.STATUS_APPROVED)) // isActive
+      .add(
+        RestrictionsFactoryUtil.or(
+          RestrictionsFactoryUtil.ne("firstName", ""),
+          RestrictionsFactoryUtil.ne("lastName", "")
+        )
+      )
+    
+    for(companyId <- filter.companyId)
+      query.add(RestrictionsFactoryUtil.eq("companyId", companyId))
+    
+    if(filter.namePart.nonEmpty) {
+      query.add(RestrictionsFactoryUtil.or(
+        RestrictionsFactoryUtil.ilike("firstName", "%" + filter.namePart + "%"),
+        RestrictionsFactoryUtil.ilike("lastName", "%" + filter.namePart + "%")
+      ))
+    }
 
-  def getByName(name: String, companyId: Long) =
-    all(companyId.toInt)
+    for (certificateId <- filter.certificateId) {
+      addFilterByIds(query, userCertificateRepository.getUsersBy(certificateId), filter.isUserJoined)
+    }
+
+    if (filter.groupId.isDefined || filter.organizationId.isDefined) {
+      val organizations =if(filter.groupId.isDefined)
+        //Find organizations that is member of that site
+         OrganizationLocalServiceHelper.getGroupOrganizations(filter.groupId.get).map(_.getOrganizationId)
+      else
+         Seq()
+
+      val userIds = filter.groupId
+        .map(userLocalService.getGroupUserIds).getOrElse(Seq()) ++
+              filter.organizationId.map(userLocalService.getOrganizationUserIds).getOrElse(Seq()) ++
+              organizations.flatMap(userLocalService.getOrganizationUserIds)
+        .distinct
+
+      addFilterByIds(query, userIds.distinct)
+    }
+
+    query
+  }
+
+  private def addFilterByIds(query: DynamicQuery, userIds: Seq[Long], contains: Boolean = true): Unit = {
+    (contains, userIds) match {
+      case (true, Seq()) => query.add(RestrictionsFactoryUtil.eq("userId", null)) // abort query
+      case (false, Seq()) =>
+      case (true, ids:Seq[Long]) => query.add(RestrictionsFactoryUtil.in("userId", userIds))
+      case (false, ids:Seq[Long]) => query.add(RestrictionsFactoryUtil.not(RestrictionsFactoryUtil.in("userId", userIds)))
+    }
+  }
+
+  def getById(id: Long): LUser = userLocalService.getUser(id)
+
+  def getByName(name: String, companyId: Long, count: Option[Int] = None) = {
+    val users = all(companyId.toInt)
       .filter(_.getFullName.toLowerCase.contains(name.toLowerCase))
       .map(toModel)
 
-  def getByIds(companyId: Long, ids: Set[Long]): Seq[User] =
-    UserLocalServiceHelper()
+    count match {
+      case Some(value) => users.take(value)
+      case None => users
+    }
+  }
+
+  def getByIds(companyId: Long, ids: Set[Long]): Seq[LUser] =
+    userLocalService
       .getCompanyUsers(companyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
       .filter(user => ids.contains(user.getUserId))
-      .map(toModel)
 
-  def orgs(): Seq[Organization] = {
+  def getOrganizations: Seq[Organization] = {
     OrganizationLocalServiceHelper
       .getOrganizations(QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
       .asScala
   }
 
-  override def all(companyId: Int): Seq[LUser] = UserLocalServiceHelper()
-    .getCompanyUsers(companyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
-    .asScala
-    .filter(u => u.isActive && u.getFullName != "")
+  override def all(companyId: Long): Seq[LUser] = getBy(UserFilter(Some(companyId)))
 
-  def getUserOption(userId: Int): Option[User] = {
+  def getUserOption(userId: Int): Option[ScormUser] = {
     userStorage.getByID(userId)
   }
 
   // TODO rename
   def createAndGetId(userId: Int, name: String): Unit = {
-    userStorage.createAndGetID(new User(userId, name))
-  }
-
-  override def getUsersWithAttemptsByCourseID(courseID: Long) = {
-    def getAllRawUsers = {
-      val users = UserLocalServiceHelper().getGroupUsers(courseID)
-      for (i <- 0 to users.size - 1) yield users.get(i)
-    }
-
-    def getUsersByRole: IndexedSeq[User] = {
-      val scormUsers = userStorage.getUsersWithAttempts.filter(_ != null)
-      for {
-        user: LUser <- getAllRawUsers
-        if scormUsers.count(scUser => scUser.id == user.getUserId) > 0
-      } yield scormUsers.filter(scUser => scUser.id == user.getUserId).head
-    }
+    userStorage.createAndGetID(new ScormUser(userId, name))
   }
 }
 
 trait UserConverter {
-  def toModel(lUser: LUser) = User(lUser.getUserId.toInt, lUser.getFullName)
+  def toModel(lUser: LUser) = User(lUser.getUserId, lUser.getFullName)
 }

@@ -1,17 +1,21 @@
 package com.arcusys.learn.liferay.services
 
-import com.liferay.portal.kernel.dao.orm.{ ProjectionFactoryUtil, RestrictionsFactoryUtil, PropertyFactoryUtil }
-import com.liferay.portal.model.Group
-import com.liferay.portal.service.{ ServiceContext, GroupLocalServiceUtil }
 import java.util
+
+import com.arcusys.learn.liferay.constants.QueryUtilHelper
+import com.liferay.portal.kernel.dao.orm.{ProjectionFactoryUtil, RestrictionsFactoryUtil}
+import com.liferay.portal.model.Group
+import com.liferay.portal.service.{GroupLocalServiceUtil, ServiceContext}
+import com.liferay.portal.util.comparator.GroupNameComparator
 import com.liferay.portlet.asset.model.AssetVocabulary
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil
 
 import scala.collection.JavaConverters._
-import com.arcusys.learn.liferay.constants.QueryUtilHelper
 
 object GroupLocalServiceHelper {
   def getGroup(groupId: Long): Group = GroupLocalServiceUtil.getGroup(groupId)
+
+  def fetchGroup(groupId: Long): Group = GroupLocalServiceUtil.fetchGroup(groupId)
 
   def updateGroup(group: Group): Group = GroupLocalServiceUtil.updateGroup(group)
 
@@ -48,6 +52,12 @@ object GroupLocalServiceHelper {
   def getGroups: java.util.List[Group] = GroupLocalServiceUtil.getGroups(QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
 
   def getGroupsByUserId(userId: Long): java.util.List[Group] = GroupLocalServiceUtil.getUserGroups(userId)
+
+  def getGroupsByUserId(userId: Long, skip: Int, take: Int, sortAsc: Boolean = true): java.util.List[Group] =
+    GroupLocalServiceUtil.getUserGroups(userId, skip, take, new GroupNameComparator(sortAsc))
+
+  def getGroupsCountByUserId(userId: Long): Long =
+    GroupLocalServiceUtil.getUserGroupsCount(userId)
 
   def getGroupVocabulary(globalGroupId: Long, vocabularyName: String): AssetVocabulary =
     AssetVocabularyLocalServiceUtil.getGroupVocabulary(globalGroupId, vocabularyName)

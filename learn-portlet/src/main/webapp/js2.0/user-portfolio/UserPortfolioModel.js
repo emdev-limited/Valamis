@@ -6,8 +6,6 @@ var UserAccountService = new Backbone.Service({ url: path.root,
             },
             'data': function () {
                 return {
-                    withOpenBadges: 'true',
-                    resultAs: 'none',
                     courseId: Utils.getCourseId()
                 }
             },
@@ -23,3 +21,29 @@ var UserAccountModel = Backbone.Model.extend({
         name:""
     }
 }).extend(UserAccountService);
+
+var CertificateCollectionService = new Backbone.Service({
+    url: path.root,
+    sync: {
+        'read': {
+            'path': function (e, options) {
+               return path.api.users + options.userId + '/certificates'
+            },
+            'data': function () {
+                var params = {
+                    withOpenBadges: true,
+                    courseId: Utils.getCourseId()
+                };
+                return params;
+            },
+            'method': 'get'
+          }
+    }
+});
+
+var CertificateCollection = Backbone.Collection.extend({
+    model: Backbone.Model.extend({}),
+    parse: function (response) {
+        return response.records;
+    }
+}).extend(CertificateCollectionService);

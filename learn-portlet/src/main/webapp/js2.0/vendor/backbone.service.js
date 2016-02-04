@@ -96,7 +96,8 @@
         'POST': 'create',
         'PUT': 'update',
         'DELETE': 'delete',
-        'GET': 'read'
+        'GET': 'read',
+        'PATCH': 'patch'
     };
 
     function parseTargets(targets) {

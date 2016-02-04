@@ -75,4 +75,12 @@ class SettingServiceImpl(implicit val bindingModule: BindingModule) extends Sett
   override def setDBVersion(value: String): Unit = {
     settingStorage.modify(SettingType.DBVersion, value)
   }
+
+  override def setLicense(value: String): Unit = {
+    settingStorage.modify(SettingType.License, value)
+  }
+
+  override def getLicense: String= {
+    settingStorage.getByKey(SettingType.License).map(_.value).getOrElse("")
+  }
 }

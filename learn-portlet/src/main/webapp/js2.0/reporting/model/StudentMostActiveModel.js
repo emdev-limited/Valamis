@@ -2,7 +2,7 @@ var StudentMostActiveModel = Backbone.Model.extend({
     defaults: {}
 });
 
-StudentMostActiveModelCollectionService = new Backbone.Service({ url: '/',
+StudentMostActiveModelCollectionService = new Backbone.Service({ url: path.root,
     sync: {
         'read': {
             path: path.api.report,

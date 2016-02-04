@@ -39,12 +39,16 @@ lessonManager.commands.setHandler('package:save', function(model){
     var scope = lessonManager.filter.get('scope');
     var options = {scope: scope, silent: true};
     model.save({}, options);
-    model.trigger('package:saved');
 });
 
 lessonManager.commands.setHandler('package:remove', function(model){
-    model.destroy().then(function(){
-        lessonManager.execute('packages:reload');
+    model.destroy({
+        success: function(){
+            lessonManager.execute('packages:reload');
+        },
+        error: function(model, err) {
+            console.log("error " + err);
+        }
     });
 });
 

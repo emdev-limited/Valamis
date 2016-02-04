@@ -2,6 +2,7 @@ package com.arcusys.learn.models.response.users
 
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+
 import scala.util.Try
 
 /**

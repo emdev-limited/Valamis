@@ -116,15 +116,37 @@ TINCAN.Viewer.prototype.TinCanSearchHelper = function () {
         var agent = null,
             agentCfg = {},
             agentProperty = this.getSearchVar("agentProperty"),
-            agentValue = this.getSearchVar("agentValue");
+            agentValue = this.getSearchVar("agentValue"),
+            deferred = jQueryValamis.Deferred();
 
         if (agentProperty !== null && agentValue !== null) {
-            agentCfg[agentProperty] = agentValue;
+            if (agentProperty === "mbox") {
+                agentCfg[agentProperty] = agentValue;
+                deferred.resolve(new TinCan.Agent(agentCfg));
+            }
+            else if (agentProperty === "account") {
+                Liferay.Service(
+                  '/user/get-user-by-email-address',
+                  {
+                      p_auth: Liferay.authToken,
+                      companyId: Liferay.ThemeDisplay.getCompanyId(),
+                      emailAddress: agentValue
+                  },
+                  function(user) {
+                      agentCfg[agentProperty] = {
+                          'homePage': tincanAccountHomePage,
+                          'name': user.uuid
+                      };
 
-            agent = new TinCan.Agent(agentCfg);
-        }
+                      deferred.resolve(new TinCan.Agent(agentCfg));
+                  }
+                );
+            }
+            else deferred.resolve(agent);
 
-        return agent;
+        } else deferred.resolve(agent);
+
+        return deferred.promise();
     };
 
     this.getActor = function () {
@@ -358,57 +380,94 @@ TINCAN.Viewer.prototype.pre1QueryObj = function (helper) {
 
 TINCAN.Viewer.prototype.v1QueryObj = function (helper) {
     var queryObj = this.commonQueryObj(helper),
-        agent = helper.getAgent(),
         activity = helper.getActivity(),
         format = helper.getFormat(),
         relatedAgents = helper.getRelatedAgents(),
         relatedActivities = helper.getRelatedActivities(),
-        attachments = helper.getAttachments();
+        attachments = helper.getAttachments(),
+        deferred = jQueryValamis.Deferred();
 
-    if (agent !== null) {
-        queryObj.agent = agent;
-    }
-    if (activity !== null) {
-        queryObj.activity = activity;
-    }
-    if (format !== null) {
-        queryObj.format = format;
-    }
-    if (relatedAgents !== null) {
-        queryObj.related_agents = relatedAgents;
-    }
-    if (relatedActivities !== null) {
-        queryObj.related_activities = relatedActivities;
-    }
-    // TODO: TinCanJS doesn't yet parse multipart
-    //if (attachments !== null) {
-    //queryObj.attachments = attachments;
-    //}
+    var getAgent = helper.getAgent();
 
-    return queryObj;
+    jQueryValamis.when(getAgent).then(function(agent) {
+
+        if (agent !== null) {
+            if (agent.mbox)
+                queryObj.agent = JSON.stringify({mbox:agent.mbox});
+            else
+                queryObj.agent = JSON.stringify({account:agent.account});
+        }
+        if (activity !== null) {
+            queryObj.activity = activity;
+        }
+        if (format !== null) {
+            queryObj.format = format;
+        }
+        if (relatedAgents !== null) {
+            queryObj.related_agents = relatedAgents;
+        }
+        if (relatedActivities !== null) {
+            queryObj.related_activities = relatedActivities;
+        }
+        // TODO: TinCanJS doesn't yet parse multipart
+        //if (attachments !== null) {
+        //queryObj.attachments = attachments;
+        //}
+
+        deferred.resolve(queryObj);
+    });
+
+    return deferred.promise();
 };
 
 TINCAN.Viewer.prototype.searchStatements = function () {
     var selectVersion,
-        versionsToUse,
         helper = new this.TinCanSearchHelper(),
-        queryObj,
-        requestResult,
-        prop,
-        url,
-        urlPairs = [];
+        queryObj;
 
     selectVersion = helper.getVersion();
 
     if (selectVersion === "0.9" || selectVersion === "0.95" || selectVersion === "0.95 + 0.9") {
         queryObj = this.pre1QueryObj(helper);
+        this.loadStatements(queryObj, selectVersion);
     }
     else {
-        queryObj = this.v1QueryObj(helper);
+        var that = this;
+        jQueryValamis.when(this.v1QueryObj(helper)).then(function(queryObj) {
+            that.loadStatements(queryObj, selectVersion);
+        });
     }
+};
+
+
+TINCAN.Viewer.prototype.loadStatements = function (queryObj, selectVersion) {
+    var versionsToUse,
+      requestResult,
+      prop,
+      url,
+      urlPairs = [];
 
     queryObj.limit = 25;
 
+    if (this.multiVersionStream != null) {
+        var moreUrl = _.map(this.multiVersionStream.state, function (st) {
+            return st.moreUrl
+        }).toString();
+
+
+        var parse = moreUrl.split("&");
+
+        var offset = 0;
+        parse.forEach(function (params) {
+            if (params.indexOf("offset") != -1) {
+                offset = params.split("=")[1]
+            }
+        });
+
+        queryObj.offset = offset;
+    }
+
+    // queryObj.offset = 25;
     // Figure out the versions to use
     if (selectVersion === "latest") {
         versionsToUse = [ this.allVersions[0] ];
@@ -421,12 +480,12 @@ TINCAN.Viewer.prototype.searchStatements = function () {
     this.multiVersionStream = this.getMultiVersionStream(versionsToUse);
     requestResult = this.multiVersionStream.loadStatements(queryObj, this.getCallback(this.statementsFetched));
 
-    if (requestResult.config && requestResult.config.params) {
+    if (requestResult && requestResult.params) {
         // Set the TCAPI query text
-        for (prop in requestResult.config.params) {
-            urlPairs.push(prop + "=" + encodeURIComponent(requestResult.config.params[prop]));
+        for (prop in requestResult.params) {
+            urlPairs.push(prop + "=" + encodeURIComponent(requestResult.params[prop]));
         }
-        url = this.lrses[versionsToUse[0]].endpoint + requestResult.config.url + "?" + urlPairs.join("&");
+        url = this.lrses[versionsToUse[0]].endpoint + requestResult.url + "?" + urlPairs.join("&");
     }
     else {
         url = "Invalid URL: " + requestResult.err;
@@ -696,6 +755,7 @@ TINCAN.Viewer.prototype.pageInitialize = function () {
             jQueryValamis("#showAllStatements").hide();
             jQueryValamis("#noStatementsMessage").hide();
             jQueryValamis("#theStatements").empty();
+            tcViewer.multiVersionStream = null;
             tcViewer.searchStatements();
         };
 
@@ -719,7 +779,8 @@ TINCAN.Viewer.prototype.pageInitialize = function () {
     jQueryValamis("#showAllStatements").click(
         function () {
             jQueryValamis("#statementsLoading").show();
-            tcViewer.getMoreStatements();
+            tcViewer.searchStatements();
+           // tcViewer.getMoreStatements();
         }
     );
 

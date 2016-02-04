@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 
 trait LFTincanURIStorageImpl extends EntityStorage[ValamisURI] {
 
-  def mapper(entity: LFTincanURI): ValamisURI = ValamisURI(
+  private def extract(entity: LFTincanURI): ValamisURI = ValamisURI(
     entity.getUri(),
     entity.getObjID(),
     ValamisURIType.withName(entity.getObjType()),
@@ -23,8 +23,7 @@ trait LFTincanURIStorageImpl extends EntityStorage[ValamisURI] {
   def getOne(parameters: (String, Any)*): Option[ValamisURI] = parameters match {
     case Seq(("uri", uri: String)) =>
       try {
-        val storage = LFTincanURILocalServiceUtil.fetchLFTincanURI(uri)
-        Option(mapper(storage))
+        Option(LFTincanURILocalServiceUtil.fetchLFTincanURI(uri)) map extract
       } catch {
         case e: NoSuchModelException => {
           None
@@ -33,15 +32,13 @@ trait LFTincanURIStorageImpl extends EntityStorage[ValamisURI] {
 
     case Seq(("id", objId: String), ("type", objType: String)) => {
       try {
-        val storage = LFTincanURILocalServiceUtil.findURI(objId, objType)
-        Option(mapper(storage))
+        Option(LFTincanURILocalServiceUtil.findURI(objId, objType)) map extract
       } catch {
         case e: NoSuchModelException => {
           None
         }
       }
     }
-
   }
 
   def create(parameters: (String, Any)*) = parameters match {
@@ -67,7 +64,7 @@ trait LFTincanURIStorageImpl extends EntityStorage[ValamisURI] {
       LFTincanURILocalServiceUtil
         .getLFTincanURIs(start, uriCount)
         .asScala
-        .map(x => uriList = uriList :+ mapper(x))
+        .map(x => uriList = uriList :+ extract(x))
 
       uriList.filter(x => x.uri.contains(filter))
     }

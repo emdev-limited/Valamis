@@ -3,9 +3,9 @@ package com.arcusys.valamis.certificate.service.export
 import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.certificate.model.goal.{ ActivityGoal, CourseGoal, PackageGoal, StatementGoal }
 import com.arcusys.valamis.certificate.storage.{ ActivityGoalStorage, CourseGoalStorage, PackageGoalStorage, StatementGoalStorage }
+import com.arcusys.valamis.course.CourseService
 import com.arcusys.valamis.export.ExportProcessor
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.gradebook.service.CourseGradeService
 import com.arcusys.valamis.util.ZipBuilder
 import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
 
@@ -15,7 +15,7 @@ class CertificateExportProcessor(
   with Injectable {
 
   private lazy val fileFacade = inject[FileService]
-  private lazy val courseFacade = inject[CourseGradeService]
+  private lazy val courseService = inject[CourseService]
   private lazy val courseGoalStorage = inject[CourseGoalStorage]
   private lazy val activityGoalStorage = inject[ActivityGoalStorage]
   private lazy val statementGoalStorage = inject[StatementGoalStorage]
@@ -65,10 +65,10 @@ class CertificateExportProcessor(
   }
 
   private def toExportModel(goal: CourseGoal): CourseGoalExport = {
-    val course = courseFacade.getCourse(goal.courseId)
+    val course = courseService.getById(goal.courseId)
     CourseGoalExport(
-      course.getDescriptiveName,
-      course.getFriendlyURL,
+      course.map(_.getDescriptiveName).getOrElse(""),
+      course.map(_.getFriendlyURL).getOrElse(""),
       goal.periodValue,
       goal.periodType.toString,
       goal.arrangementIndex)

@@ -7,4 +7,6 @@ object ScopeType extends Enumeration {
   val Site = Value("site")
   val Page = Value("page")
   val Player = Value("player")
+
+  def isValid(s: String) = values.exists(_.toString == s)
 }

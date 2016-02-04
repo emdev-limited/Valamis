@@ -14,14 +14,16 @@ case class ActivityPackageResponse(
   id: Long,
   title: String,
   logo: Option[String],
-  course: CourseResponse,
+  course: Option[CourseResponse],
   comment: Option[String],
-  tpe: Activities.Value = Activities.Lesson
+  tpe: Activities.Value = Activities.Lesson,
+  url: Option[String]
 ) extends ActivityObjectResponse
 
 case class ActivityCourseResponse(
   id: Long,
   title: String,
+  logoCourse: Option[String],
   tpe: Activities.Value = Activities.Course
 ) extends ActivityObjectResponse
 
@@ -29,7 +31,8 @@ case class ActivityCertificateResponse(
   id: Long,
   title: String,
   logo: Option[String],
-  tpe: Activities.Value = Activities.Certificate
+  tpe: Activities.Value = Activities.Certificate,
+  url: Option[String]
 ) extends ActivityObjectResponse
 
 case class ActivityUserStatusResponse(

@@ -2,7 +2,7 @@ package com.arcusys.learn.scorm.tracking.impl.liferay
 
 import com.arcusys.learn.persistence.liferay.model.LFUser
 import com.arcusys.learn.persistence.liferay.service.{ LFAttemptLocalServiceUtil, LFUserLocalServiceUtil }
-import com.arcusys.valamis.user.model.User
+import com.arcusys.valamis.user.model.{ScormUser, User}
 import com.arcusys.valamis.user.storage.UserStorage
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -14,17 +14,16 @@ class UserStorageImpl extends UserStorage {
 
   override def renew(): Unit = {
     LFUserLocalServiceUtil.removeAll()
-    createAndGetID(new User(-1, "Guest", 0, "en", 0, 0))
+    createAndGetID(new ScormUser(-1, "Guest", 0, "en", 0, 0))
   }
 
-  override def getAll: Seq[User] = {
+  override def getAll: Seq[ScormUser] = {
     LFUserLocalServiceUtil.getLFUsers(-1, -1).asScala.map(extract)
   }
 
-  override def modify(user: User): Unit = {
-    val lfEntity = LFUserLocalServiceUtil.findByUserId(user.id)
+  override def modify(user: ScormUser): Unit = {
+    val lfEntity = LFUserLocalServiceUtil.findByUserId(user.id.toInt)
 
-    lfEntity.setId(user.id)
     lfEntity.setName(user.name)
     lfEntity.setPreferredAudioLevel(user.preferredAudioLevel.toDouble)
     lfEntity.setPreferredLanguage(user.preferredLanguage)
@@ -34,31 +33,26 @@ class UserStorageImpl extends UserStorage {
     LFUserLocalServiceUtil.addLFUser(lfEntity)
   }
 
-  override def getUsersWithAttempts: Seq[User] = {
+  override def getUsersWithAttempts: Seq[ScormUser] = {
     val userIDs = LFAttemptLocalServiceUtil.getLFAttempts(-1, -1).asScala.map(_.getUserID).toArray
     if (userIDs.length == 0) Nil else
       LFUserLocalServiceUtil.findByUserIds(userIDs).asScala.map(extract)
   }
 
-  override def getByID(userID: Int): Option[User] = {
-    Try(LFUserLocalServiceUtil.findByUserId(userID)).toOption.map(extract)
+  override def getByID(userId: Int): Option[ScormUser] = {
+    Try(LFUserLocalServiceUtil.findByUserId(userId)).toOption.map(extract)
   }
 
-  override def getByName(name: String): Seq[User] = getAll.filter(_.name.toLowerCase.contains(name))
+  override def getByName(name: String): Seq[ScormUser] = getAll.filter(_.name.toLowerCase.contains(name))
 
-  override def getUsersWithAttemptsInPackage(packageId: Long): Seq[User] = {
-    val userIDs = LFAttemptLocalServiceUtil.findByPackageID(packageId.toInt).asScala.map(_.getUserID).toArray
-    LFUserLocalServiceUtil.findByUserIds(userIDs).asScala.map(extract)
+  override def delete(userId: Int): Unit = {
+    LFUserLocalServiceUtil.removeByUserId(userId)
   }
 
-  override def delete(userID: Int): Unit = {
-    LFUserLocalServiceUtil.removeByUserId(userID)
-  }
-
-  override def createAndGetID(user: User): Int = {
+  override def createAndGetID(user: ScormUser): Int = {
     val lfEntity = LFUserLocalServiceUtil.createLFUser()
 
-    lfEntity.setId(user.id)
+    lfEntity.setId(user.id.toInt)
     lfEntity.setName(user.name)
     lfEntity.setPreferredAudioLevel(user.preferredAudioLevel.toDouble)
     lfEntity.setPreferredLanguage(user.preferredLanguage)
@@ -71,5 +65,5 @@ class UserStorageImpl extends UserStorage {
 
   def extract(lfEntity: LFUser) =
     if (lfEntity == null) null
-    else User(lfEntity.getId, lfEntity.getName)
+    else ScormUser(lfEntity.getId.toLong, lfEntity.getName)
 }

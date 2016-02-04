@@ -25,6 +25,7 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
     private String _authType;
     private String _key;
     private String _secret;
+    private String _customHost;
     private BaseModel<?> _lfTincanLrsEndpointRemoteModel;
 
     public LFTincanLrsEndpointClp() {
@@ -69,6 +70,7 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
         attributes.put("authType", getAuthType());
         attributes.put("key", getKey());
         attributes.put("secret", getSecret());
+        attributes.put("customHost", getCustomHost());
 
         return attributes;
     }
@@ -103,6 +105,12 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
 
         if (secret != null) {
             setSecret(secret);
+        }
+
+        String customHost = (String) attributes.get("customHost");
+
+        if (customHost != null) {
+            setCustomHost(customHost);
         }
     }
 
@@ -216,6 +224,28 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
         }
     }
 
+    @Override
+    public String getCustomHost() {
+        return _customHost;
+    }
+
+    @Override
+    public void setCustomHost(String customHost) {
+        _customHost = customHost;
+
+        if (_lfTincanLrsEndpointRemoteModel != null) {
+            try {
+                Class<?> clazz = _lfTincanLrsEndpointRemoteModel.getClass();
+
+                Method method = clazz.getMethod("setCustomHost", String.class);
+
+                method.invoke(_lfTincanLrsEndpointRemoteModel, customHost);
+            } catch (Exception e) {
+                throw new UnsupportedOperationException(e);
+            }
+        }
+    }
+
     public BaseModel<?> getLFTincanLrsEndpointRemoteModel() {
         return _lfTincanLrsEndpointRemoteModel;
     }
@@ -290,6 +320,7 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
         clone.setAuthType(getAuthType());
         clone.setKey(getKey());
         clone.setSecret(getSecret());
+        clone.setCustomHost(getCustomHost());
 
         return clone;
     }
@@ -335,7 +366,7 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
 
     @Override
     public String toString() {
-        StringBundler sb = new StringBundler(11);
+        StringBundler sb = new StringBundler(13);
 
         sb.append("{id=");
         sb.append(getId());
@@ -347,6 +378,8 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
         sb.append(getKey());
         sb.append(", secret=");
         sb.append(getSecret());
+        sb.append(", customHost=");
+        sb.append(getCustomHost());
         sb.append("}");
 
         return sb.toString();
@@ -354,7 +387,7 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
 
     @Override
     public String toXmlString() {
-        StringBundler sb = new StringBundler(19);
+        StringBundler sb = new StringBundler(22);
 
         sb.append("<model><model-name>");
         sb.append(
@@ -380,6 +413,10 @@ public class LFTincanLrsEndpointClp extends BaseModelImpl<LFTincanLrsEndpoint>
         sb.append(
             "<column><column-name>secret</column-name><column-value><![CDATA[");
         sb.append(getSecret());
+        sb.append("]]></column-value></column>");
+        sb.append(
+            "<column><column-name>customHost</column-name><column-value><![CDATA[");
+        sb.append(getCustomHost());
         sb.append("]]></column-value></column>");
 
         sb.append("</model>");

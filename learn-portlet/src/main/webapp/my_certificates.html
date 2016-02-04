@@ -1,0 +1,27 @@
+
+<div id="myCertificatesAppRegion">
+</div>
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(document).ready(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var myCertificatesPermission = { };
+
+        var myCertificatesOptions = {
+            resourceName: 'dashboard',
+            permissions: myCertificatesPermission,
+            app: myCertificates,
+            appOptions: {}
+        };
+
+        valamisApp.execute('subapp:start', myCertificatesOptions);
+
+    });
+
+</script>

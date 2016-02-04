@@ -2,15 +2,15 @@
  * Created by igorborisov on 27.05.15.
  */
 
-contentManager.module("Views", function (Views, ContentManager, Backbone, Marionette, $, _) {
+contentManager.module("TreeViews", function (TreeViews, ContentManager, Backbone, Marionette, $, _) {
 
-    Views.CourseItemView = Marionette.CompositeView.extend({
+    TreeViews.CourseItemView = Marionette.CompositeView.extend({
         template: '#contentManagerContentRootNodeTemplate',
         childViewContainer: '.tree-items',
-        childView: Views.ContentsTree
+        childView: TreeViews.ContentsTree
     });
 
-    Views.BaseTreeView = Marionette.CompositeView.extend({
+    TreeViews.BaseTreeView = Marionette.CompositeView.extend({
         events: {
             'click .js-tree-item': 'selectNode',
             'click .js-tree-item-icon': 'toggleExpand'
@@ -22,13 +22,13 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         updateCollapsed: function () {
             if (!this.collection.hasChildNodes()) {
                 this.$el.removeClass('expanded').removeClass('collapsed');
-                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-down').removeClass('val-icon-arrow-right');
+                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-down-two').removeClass('val-icon-arrow-right-two');
             } else if (this.collapsed) {
                 this.$el.removeClass('expanded').addClass('collapsed');
-                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-down').addClass('val-icon-arrow-right');
+                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-down-two').addClass('val-icon-arrow-right-two');
             } else {
                 this.$el.removeClass('collapsed').addClass('expanded');
-                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-right').addClass('val-icon-arrow-down');
+                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-right-two').addClass('val-icon-arrow-down-two');
             }
         },
         loadChildren: function () {
@@ -49,11 +49,11 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         }
     });
 
-    Views.TreeView = Views.BaseTreeView.extend({
+    TreeViews.TreeView = TreeViews.BaseTreeView.extend({
         template: '#contentManagerContentNodeTemplate',
         tagName: 'li',
         className: 'category collapsed',
-        childView: Views.TreeView,
+        childView: TreeViews.TreeView,
         childViewContainer: '.tree-items',
         childEvents: {
             'select:node': function (childView, model) {
@@ -70,7 +70,12 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                 this.$('> .js-tree-item > .js-tree-item-title').text(this.model.get('title'));
             },
             'change childrenAmount': function (arg) {
-                this.$('> .js-tree-item > .js-tree-item-title').attr('data-count', this.model.get('childrenAmount'));
+                if( this.model.get('childrenAmount') > 0 ){
+                    this.$('> .js-tree-item > .js-tree-item-title').attr('data-count', this.model.get('childrenAmount'));
+                }
+                else {
+                    this.$('> .js-tree-item > .js-tree-item-title').removeAttr('data-count');
+                }
             }
         },
         onRender: function () {
@@ -80,6 +85,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                 }
             }
             this.$el.attr('data-id', this.model ? this.model.get('id') : '');
+            TreeViews.droppableInit(this.$el.children('.js-tree-item'));
         },
         templateHelpers: function () {
             return {
@@ -87,21 +93,39 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             }
         },
         selectNode: function (e) {
-            e.stopPropagation();
+            if( e ) e.stopPropagation();
             this.triggerMethod('contents:clean:active');
             this.triggerMethod('contents:activate:category', this.model);
 
+            jQueryValamis('.tree-active-branch').removeClass('tree-active-branch');
             this.$el.addClass('selected-entity');
+            this.selectParent(this.$el);
 
             if (!this.childrenFetched) {
                 this.loadChildren();
             }
+            ContentManager.options.currentCategory = this.model.get('id');
+            localStorage.setItem('ValamisCMCategory',ContentManager.options.currentCategory);
+            this.model.nodes.sort()
+        },
+        selectParent: function ($el) {
+            if($el.hasClass('js-root'))
+                return;
+
+            $el = $el.parent().prev(); //Select previous span
+            $el.addClass('tree-active-branch');
+            this.selectParent($el.parent());
+        },
+        findByModelId: function(model_id){
+            return _.find(this.children._views,function(view){
+                return model_id === view.model.get('id');
+            });
         }
     });
 
-    Views.ContentsTree = Marionette.CompositeView.extend({
+    TreeViews.ContentsTree = Marionette.CompositeView.extend({
         template: '#contentManagerContentRootNodeTemplate',
-        childView: Views.TreeView,
+        childView: TreeViews.TreeView,
         childViewContainer: ".tree-items",
         events: {
             'click .js-root': 'selectThis',
@@ -119,13 +143,13 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         updateCollapsed: function () {
             if (!this.collection.hasChildNodes()) {
                 this.$el.removeClass('expanded').removeClass('collapsed');
-                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-down').removeClass('val-icon-arrow-right');
+                this.$('> .js-tree-item > .js-tree-item-icon').removeClass('val-icon-arrow-down-two').removeClass('val-icon-arrow-right-two');
             } else if (this.collapsed) {
                 this.$('> ul > li').removeClass('expanded').addClass('collapsed');
-                this.$('> ul > li > .js-tree-item > .js-tree-item-icon').first().removeClass('val-icon-arrow-down').addClass('val-icon-arrow-right');
+                this.$('> ul > li > .js-tree-item > .js-tree-item-icon').first().removeClass('val-icon-arrow-down-two').addClass('val-icon-arrow-right-two');
             } else {
                 this.$('> ul > li').removeClass('collapsed').addClass('expanded');
-                this.$('> ul > li > .js-tree-item > .js-tree-item-icon').first().removeClass('val-icon-arrow-right').addClass('val-icon-arrow-down');
+                this.$('> ul > li > .js-tree-item > .js-tree-item-icon').first().removeClass('val-icon-arrow-right-two').addClass('val-icon-arrow-down-two');
             }
         },
         childEvents: {
@@ -148,8 +172,9 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             this.collection = this.model.nodes;
         },
         onRender: function () {
-            this.sortable();
+            //this.sortable();
             this.updateCollapsed();
+            TreeViews.droppableInit(this.$('span.js-tree-root-item'));
         },
         selectThis: function () {
             this.triggerMethod('contents:clean:active');
@@ -158,7 +183,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         selectNode: function (model) {
             var that = this;
-
+            model = model || that.model;
             if (that.childrenFetched) {
                 that.triggerMethod('contents:activate:category', model);
             } else {
@@ -173,6 +198,9 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                     that.triggerMethod('contents:activate:category', model);
                 });
             }
+            ContentManager.options.currentCategory = '';
+            localStorage.setItem('ValamisCMCategory','');
+            that.model.nodes.sort()
         },
         updateSorting: function (movedModel, index, parentId) {
             contentManager.execute('move:content:item', movedModel, index, parentId, 'category');
@@ -186,9 +214,13 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                 that.render();
             });
         },
+
+        //TODO content sortable
         sortable: function () {
             var that = this;
+
             this.$('ul.tree-items').nestedSortable({
+                disabled: true,
                 handle: '.js-tree-item',
                 items: 'li',
                 toleranceElement: '> span',
@@ -220,13 +252,18 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                 }
             }).disableSelection();
 
+        },
+        findByModelId: function(model_id){
+            return _.find(this.children._views,function(view){
+                return model_id === view.model.get('id');
+            });
         }
     });
 
-    Views.CoursesView = Marionette.CollectionView.extend({
+    TreeViews.CoursesView = Marionette.CollectionView.extend({
         template: '#contentManagerContentRootNodeTemplate',
         childViewContainer: '.tree-items',
-        childView: Views.ContentsTree,
+        childView: TreeViews.ContentsTree,
         addChild: function (child, ChildView, index) {
 
             var courseId = child.get('id');
@@ -243,5 +280,46 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             Marionette.CollectionView.prototype.addChild.apply(this, arguments);
         }
     });
+
+    TreeViews.getTreeIds = function( parent_id ){
+        var ids = [ parent_id ];
+        var contentsTreeRegion = contentManager.mainRegion.currentView.regionManager.get('contents');
+        var treeCategoryEl = contentsTreeRegion.currentView.$('.category[data-id="' + parent_id + '"]');
+        treeCategoryEl.parents('.category').each(function(){
+            ids.push( jQueryValamis(this).data('id') );
+        });
+        return ids;
+    };
+
+    TreeViews.droppableInit = function(elements){
+        elements
+            .droppable({
+                greedy: true,
+                accept: '.lesson-item-li',
+                hoverClass: 'ui-state-selected',
+                tolerance: 'pointer',
+                drop: function(e, ui){
+                    ui.draggable.data('dropped',true);
+                    var id = ui.draggable.data('id'),
+                        target = $(e.target).parent('li'),
+                        parentId = target.data('id');
+
+                    var contentRegion = contentManager.mainRegion.currentView.regionManager.get('content'),
+                        contentListRegion = contentRegion.currentView.regionManager.get('content'),
+                        nodesCollection = contentListRegion.currentView.model.nodes;
+
+                    if( !nodesCollection ){
+                        return;
+                    }
+                    var contentType = contentManager.Views.getElementContentType( ui.draggable ),
+                        cid = contentManager.Views.getElementUniqueId( ui.draggable, contentType),
+                        movedModel = nodesCollection.findWhere({uniqueId: cid});
+
+                    if( movedModel ){
+                        contentManager.execute('move:content:item', movedModel, 1, parentId);
+                    }
+                }
+            });
+    };
 
 });

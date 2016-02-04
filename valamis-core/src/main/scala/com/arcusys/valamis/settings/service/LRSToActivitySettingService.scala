@@ -1,11 +1,10 @@
 package com.arcusys.valamis.settings.service
 
-import com.arcusys.valamis.settings.model.LRSToActivitySetting
+import com.arcusys.valamis.settings.model.StatementToActivity
 
 trait LRSToActivitySettingService {
-  def getAll: Seq[LRSToActivitySetting]
-  def getByCourseId(courseId: Int): Seq[LRSToActivitySetting]
-  def create(courseId: Int, title: String, mappedActivity: Option[String], mappedVerb: Option[String]): LRSToActivitySetting
-  def modify(id: Int, courseID: Int, title: String, mappedActivity: Option[String], mappedVerb: Option[String]): LRSToActivitySetting
+  def getByCourseId(courseId: Int): Seq[StatementToActivity]
+  def create(courseId: Int, title: String, mappedActivity: Option[String], mappedVerb: Option[String]): StatementToActivity
+  def modify(id: Int, courseID: Int, title: String, mappedActivity: Option[String], mappedVerb: Option[String]): StatementToActivity
   def delete(id: Int)
 }

@@ -1,15 +1,14 @@
 package com.arcusys.valamis.user.storage
 
-import com.arcusys.valamis.user.model.User
+import com.arcusys.valamis.user.model.{ScormUser, User}
 
 trait UserStorage {
-  def getAll: Seq[User]
-  def getByID(userID: Int): Option[User]
-  def getByName(name: String): Seq[User]
-  def createAndGetID(user: User): Int
-  def modify(user: User)
-  def delete(userID: Int)
-  def getUsersWithAttempts: Seq[User]
-  def getUsersWithAttemptsInPackage(packageId: Long): Seq[User]
+  def getAll: Seq[ScormUser]
+  def getByID(userId: Int): Option[ScormUser]
+  def getByName(name: String): Seq[ScormUser]
+  def createAndGetID(user: ScormUser): Int
+  def modify(user: ScormUser)
+  def delete(userId: Int)
+  def getUsersWithAttempts: Seq[ScormUser]
   def renew()
 }

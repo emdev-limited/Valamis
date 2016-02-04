@@ -1,18 +1,14 @@
 package com.arcusys.learn.scorm.manifest.service
 
-import com.arcusys.learn.controllers.api.BaseApiController
-import com.arcusys.learn.liferay.permission.PermissionUtil
-import com.arcusys.valamis.lesson.scorm.model.manifest.{ LeafActivity, Activity }
+import com.arcusys.learn.controllers.api.base.BaseApiController
+import com.arcusys.learn.liferay.permission.PermissionUtil._
+import com.arcusys.learn.web.ServletBase
+import com.arcusys.valamis.lesson.scorm.model.manifest.{Activity, LeafActivity}
 import com.arcusys.valamis.lesson.scorm.model.tracking.ActivityStateNode
 import com.arcusys.valamis.lesson.service.ActivityServiceContract
 import com.arcusys.valamis.util.TreeNode
-import com.escalatesoft.subcut.inject.BindingModule
-import com.arcusys.learn.web.ServletBase
-import com.arcusys.learn.ioc.Configuration
-import PermissionUtil._
 
-class ActivitiesService(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase {
-  def this() = this(Configuration)
+class ActivitiesService extends BaseApiController with ServletBase {
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)

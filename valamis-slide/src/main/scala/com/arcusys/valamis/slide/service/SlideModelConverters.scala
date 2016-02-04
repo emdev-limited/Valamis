@@ -3,38 +3,43 @@ package com.arcusys.valamis.slide.service
 import com.arcusys.valamis.slide.model._
 
 object SlideModelConverters {
-  implicit def slideSetModelConversion(entity: SlideSetEntity, slides: List[SlideModel]) =
-    SlideSetModel(Some(entity.id), entity.title, entity.description, entity.courseId, entity.logo, slides)
 
-  def slideModelConversion(entity: SlideEntity, slideElements: List[SlideElementModel]) =
-    SlideModel(
-      Some(entity.id),
+  implicit def slideSetModelConversion(entity: SlideSetEntity, slides: List[SlideModel], slidesCount: Option[Long] = None) =
+    SlideSetModel(
+      entity.id,
       entity.title,
-      entity.bgColor,
-      entity.bgImage,
-      entity.leftSlideId,
-      entity.topSlideId,
-      slideElements,
-      entity.slideSetId,
-      entity.statementVerb,
-      entity.statementObject,
-      entity.statementCategoryId
-    )
+      entity.description,
+      entity.courseId,
+      entity.logo,
+      slides,
+      entity.isTemplate,
+      entity.isSelectedContinuity,
+      entity.themeId,
+      entity.duration,
+      entity.scoreLimit,
+      entity.playerTitle,
+      slidesCount)
 
-  implicit def slideElementModelConversion(entity: SlideElementEntity) =
-    SlideElementModel(
-      Some(entity.id),
-      entity.top,
-      entity.left,
-      entity.width,
-      entity.height,
-      entity.zIndex,
-      entity.content,
-      entity.slideEntityType,
-      entity.slideId,
-      entity.correctLinkedSlideId,
-      entity.incorrectLinkedSlideId,
-      entity.notifyCorrectAnswer)
-  implicit def slideElementListModelConversion(list: List[SlideElementEntity]) = list.map(slideElementModelConversion)
-  implicit def slideElementOptionModelConversion(list: Option[SlideElementEntity]) = list.map(slideElementModelConversion)
+  implicit def slideElementPropertyConversion(entity: SlideElementPropertyEntity):SlideElementProperty =
+    SlideElementProperty(
+      entity.key,
+      entity.value)
+
+  implicit def slideElementPropertyListConversion(list: Seq[SlideElementPropertyEntity]): Seq[SlideElementProperty] =
+    list.map(slideElementPropertyConversion)
+
+  implicit def slidePropertyConversion(entity: SlidePropertyEntity):SlideProperty =
+    SlideProperty(
+      entity.key,
+      entity.value)
+
+  implicit def slidePropertyListConversion(list: Seq[SlidePropertyEntity]): Seq[SlideProperty] =
+    list.map(slidePropertyConversion)
+
+
+  implicit def deviceConversion(entity: DeviceEntity): Device =
+    Device(entity.id, entity.name, entity.minWidth, entity.maxWidth, entity.minHeight, entity.margin)
+
+  implicit def deviceListConversion(list: List[DeviceEntity]): List[Device]=
+    list.map(deviceConversion)
 }

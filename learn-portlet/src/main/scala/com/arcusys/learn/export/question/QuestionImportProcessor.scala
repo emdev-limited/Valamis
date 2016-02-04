@@ -1,43 +1,132 @@
 package com.arcusys.learn.export.question
 
 import java.io.File
-import com.arcusys.learn.facades._
+
+import com.arcusys.valamis.content.model.QuestionType.QuestionType
+import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.export.ImportProcessor
-import com.arcusys.valamis.questionbank.service.QuestionService
-import com.arcusys.valamis.util.JsonSupport
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
-import org.json4s.{ DefaultFormats, Formats }
+import com.arcusys.valamis.content.service.{PlainTextService, CategoryService, QuestionService}
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class QuestionImportProcessor(implicit configuration: BindingModule) extends ImportProcessor[QuestionCategoryExport] with Injectable with JsonSupport {
+class QuestionImportProcessor(implicit val bindingModule: BindingModule)
+  extends ImportProcessor[QuestionCategoryExport]
+  with Injectable {
 
-  override implicit def bindingModule: BindingModule = configuration
 
-  private lazy val questionFacade = inject[QuestionFacadeContract]
   private lazy val questionService = inject[QuestionService]
+  private lazy val plainTextService = inject[PlainTextService]
+  private lazy val catService = inject[CategoryService]
 
-  def importItems(items: List[QuestionCategoryExport], courseId: Long, tempDirectory: File, userId: Long): Unit = {
+  override def importItems(items: List[QuestionCategoryExport], courseId: Long, tempDirectory: File, userId: Long): Unit = {
     items.foreach(qc => {
-      val categoryId = if (qc.title == "root") {
-        None
-      } else {
-        Option(questionService.createCategory(qc.title, qc.description, None, Option(courseId.toInt)).id)
-      }
-      qc.children.map(q =>
-        questionFacade.createQuestion(
-          categoryId,
-          q.questionType,
-          q.title,
-          q.text,
-          q.explanationText,
-          q.rightAnswerText.getOrElse(""),
-          q.wrongAnswerText.getOrElse(""),
-          q.forceCorrectCount,
-          q.isCaseSensitive,
-          Option(courseId.toInt),
-          q.answers.map(_.toAnswerResponse()
-        ).toList)
-      )
+      val catId = importCategory(qc,None,courseId)
+      qc.childrenCats.foreach(importCategory(_,catId,courseId))
     })
+  }
+
+  def importCategory(qc: QuestionCategoryExport, parentId:Option[Long],courseId: Long): Option[Long] = {
+    val categoryId = if (qc.title == "root") {
+      None
+    } else {
+      catService.create(Category(None, qc.title, qc.description, parentId, courseId)).id
+    }
+    qc.children.foreach {
+      case q: QuestionExport if q.questionType != 8 =>
+        val (question, answers) = fromExportFormat(categoryId, courseId, q)
+        questionService.create(question, answers)
+      case p: QuestionExport if p.questionType == 8 =>
+        plainTextService.create(PlainText(None, categoryId, p.title, p.text, courseId))
+    }
+
+    categoryId
+  }
+
+  private def fromExportFormat(questionType: QuestionType, courseId: Long, input: AnswerExport): Answer = questionType match {
+    case QuestionType.Choice | QuestionType.Text | QuestionType.Positioning =>
+      new AnswerText(None, None, courseId, input.answerText, input.isCorrect,0,input.score)
+    case QuestionType.Numeric =>
+      new AnswerRange(None, None, courseId, input.rangeFrom.toDouble, input.rangeTo.toDouble, input.score)
+    case QuestionType.Matching | QuestionType.Categorization =>
+      new AnswerKeyValue(None, None, courseId, input.answerText, Some(input.matchingText), input.score)
+  }
+
+  private def fromExportFormat(categoryID: Option[Long], courseId: Long, input: QuestionExport): (Question, Seq[Answer]) = {
+    val qType = Question.getTypeByCode(input.questionType)
+    qType match {
+      case QuestionType.Choice => (new ChoiceQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        input.rightAnswerText.getOrElse(""),
+        input.wrongAnswerText.getOrElse(""),
+        input.forceCorrectCount,
+        courseId
+      ), input.answers.map(fromExportFormat(qType, courseId, _)))
+      case QuestionType.Text => (new TextQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        input.rightAnswerText.getOrElse(""),
+        input.wrongAnswerText.getOrElse(""),
+        input.isCaseSensitive,
+        courseId
+      ), input.answers.map(fromExportFormat(qType, courseId, _)))
+      case QuestionType.Numeric => (new NumericQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        input.rightAnswerText.getOrElse(""),
+        input.wrongAnswerText.getOrElse(""),
+        courseId
+      ), input.answers.map(fromExportFormat(qType, courseId, _)))
+      case QuestionType.Positioning => (new PositioningQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        input.rightAnswerText.getOrElse(""),
+        input.wrongAnswerText.getOrElse(""),
+        input.forceCorrectCount,
+        courseId
+      ), input.answers.map(fromExportFormat(qType, courseId, _)))
+      case QuestionType.Matching => (new MatchingQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        input.rightAnswerText.getOrElse(""),
+        input.wrongAnswerText.getOrElse(""),
+        courseId
+      ), input.answers.map(fromExportFormat(qType, courseId, _)))
+      case QuestionType.Essay => (new EssayQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        courseId
+      ), Seq())
+      case QuestionType.Categorization => (new CategorizationQuestion(
+        None,
+        categoryID,
+        input.title,
+        input.text,
+        input.explanationText,
+        input.rightAnswerText.getOrElse(""),
+        input.wrongAnswerText.getOrElse(""),
+        courseId
+      ), input.answers.map(fromExportFormat(qType, courseId, _)))
+    }
+
+
   }
 }
 

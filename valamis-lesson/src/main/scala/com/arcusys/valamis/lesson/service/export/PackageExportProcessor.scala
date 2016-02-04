@@ -31,11 +31,11 @@ class PackageExportProcessor(implicit val bindingModule: BindingModule) extends 
   }
 
   private def composePackage(packageId: Long): File = {
-    val zipFile = FileSystemUtil.getTempFile(s"package_${packageId}", "zip")
+    val zipFile = FileSystemUtil.getTempFile(s"package_$packageId", "zip")
     val zip = new ZipBuilder(zipFile)
-    fileStorage.getFiles(s"data/${packageId}/").foreach(f => {
+    fileStorage.getFiles(s"data/$packageId/").foreach(f => {
       if (!f.filename.endsWith("/"))
-        zip.addFile(f.filename.replace(s"data/${packageId}/", ""), f.content.getOrElse(null))
+        zip.addFile(f.filename.replace(s"data/$packageId/", ""), f.content.orNull)
     })
     zip.close()
     zipFile

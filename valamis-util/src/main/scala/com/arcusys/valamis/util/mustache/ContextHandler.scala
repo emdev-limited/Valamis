@@ -87,12 +87,12 @@ trait ContextHandler {
    }
 
    private def fields(w: AnyRef) = Map(
-     w.getClass().getFields.map(x => { x.getName -> x }): _*
+     w.getClass.getFields.map(x => { x.getName -> x }): _*
    )
 
    private def methods(w: AnyRef) = Map(
-     w.getClass().getMethods
-       .filter(x => { x.getParameterTypes.length == 0 })
+     w.getClass.getMethods
+       .filter(x => { x.getParameterTypes.isEmpty })
        .map(x => { x.getName -> x }): _*
    )
 

@@ -60,15 +60,15 @@
             submitEl: '.bbm-button',
             cancelEl: '.modal-close',
             onRender: function () {
-                var me = this;
+                var that = this;
                 var uploader = new FileUploader({
                     endpoint: path.root + path.api.files + '?action=ADD&contentType=import-package&courseId=' + Utils.getCourseId(),
                     message: '{{importMessage}}'
                 });
 
                 uploader.on('fileuploaddone', function (data) {
-                    me.trigger('modal:close');
-                    me.close();
+                    that.trigger('modal:close');
+                    that.close();
                 });
 
                 this.$('.lm-modal-content').append(uploader.render().$el);

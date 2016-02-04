@@ -2,18 +2,22 @@ package com.arcusys.valamis.lesson.service
 
 import java.io.File
 
-import com.arcusys.learn.liferay.services.{SocialActivityLocalServiceHelper, GroupLocalServiceHelper}
+import com.arcusys.learn.liferay.services.{GroupLocalServiceHelper, SocialActivityLocalServiceHelper}
+import com.arcusys.valamis.course.UserCourseResultService
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lesson.model.{LessonType, PackageActivityType}
 import com.arcusys.valamis.lesson.scorm.model.ScormPackage
-import com.arcusys.valamis.lesson.{scorm, tincan}
 import com.arcusys.valamis.lesson.tincan.model.TincanPackage
 import com.arcusys.valamis.lesson.tincan.service
+import com.arcusys.valamis.lesson.{scorm, tincan}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 class PackageUploadManager(implicit val bindingModule: BindingModule) extends Injectable {
-  private val packageService = inject[ValamisPackageService]
+  private lazy val packageService = inject[ValamisPackageService]
+  private lazy val courseResults = inject[UserCourseResultService]
   private lazy val fileService = inject[FileService]
+  private lazy val assetHelper = new PackageAssetHelper()
+
 
   def uploadPackage(title: String, summary: String, courseId: Long, userId: Long, packageFile: File): (Long, LessonType.LessonType) = {
 
@@ -39,8 +43,10 @@ class PackageUploadManager(implicit val bindingModule: BindingModule) extends In
     val (packageId, packageType) = uploadPackage(title, summary, courseId, userId, packageFile)
 
     for ((sourceDirectory, fileName) <- logoOpt) {
-      fileService.copyFile(sourceDirectory, fileName, s"package_logo_$packageId", fileName, deleteFolder = false)
-      packageService.updatePackageLogo(packageId, packageType, Some(fileName))
+      if(!fileName.isEmpty) {
+        fileService.copyFile(sourceDirectory, fileName, s"package_logo_$packageId", fileName, deleteFolder = false)
+        packageService.updatePackageLogo(packageType, packageId, Some(fileName))
+      }
     }
 
     (packageId, packageType)
@@ -49,8 +55,9 @@ class PackageUploadManager(implicit val bindingModule: BindingModule) extends In
   def uploadTincanPackage(title: String, summary: String, packageFile: File, courseId: Long, userId: Long): Long = {
     val uploader = new tincan.service.PackageProcessor()
     val packageId = uploader.processPackageAndGetId(title, summary, packageFile, Some(courseId.toInt))
+    val pkg = packageService.getPackage(LessonType.Tincan, packageId)
 
-    new AssetHelper().addTincanPackageAssetEntry(userId, courseId, packageId, title, Option(summary))
+    assetHelper.updatePackageAssetEntry(userId, courseId, pkg)
     SocialActivityLocalServiceHelper.addWithSet(
       GroupLocalServiceHelper.getGroup(courseId).getCompanyId,
       userId,
@@ -59,14 +66,17 @@ class PackageUploadManager(implicit val bindingModule: BindingModule) extends In
       `type` = Some(PackageActivityType.Published.id),
       classPK = Some(packageId))
 
+    courseResults.setCourseNotCompleted(courseId)
+
     packageId
   }
 
   def uploadScormPackage(title: String, summary: String, packageFile: File, courseId: Long, userId: Long): Long = {
     val uploader = new scorm.service.PackageProcessor()
     val packageId = uploader.processPackageAndGetId(title, summary, packageFile, Some(courseId.toInt))
+    val pkg = packageService.getPackage(LessonType.Scorm, packageId)
 
-    new AssetHelper().addScormPackageAssetEntry(userId, courseId, packageId, title, Option(summary))
+    assetHelper.updatePackageAssetEntry(userId, courseId, pkg)
     SocialActivityLocalServiceHelper.addWithSet(
       GroupLocalServiceHelper.getGroup(courseId).getCompanyId,
       userId,
@@ -74,6 +84,8 @@ class PackageUploadManager(implicit val bindingModule: BindingModule) extends In
       courseId = Some(courseId),
       `type` = Some(PackageActivityType.Published.id),
       classPK = Some(packageId))
+
+    courseResults.setCourseNotCompleted(courseId)
 
     packageId
   }

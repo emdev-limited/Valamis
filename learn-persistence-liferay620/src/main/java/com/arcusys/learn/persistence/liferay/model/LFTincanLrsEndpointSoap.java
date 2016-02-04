@@ -17,6 +17,7 @@ public class LFTincanLrsEndpointSoap implements Serializable {
     private String _authType;
     private String _key;
     private String _secret;
+    private String _customHost;
 
     public LFTincanLrsEndpointSoap() {
     }
@@ -29,6 +30,7 @@ public class LFTincanLrsEndpointSoap implements Serializable {
         soapModel.setAuthType(model.getAuthType());
         soapModel.setKey(model.getKey());
         soapModel.setSecret(model.getSecret());
+        soapModel.setCustomHost(model.getCustomHost());
 
         return soapModel;
     }
@@ -118,5 +120,13 @@ public class LFTincanLrsEndpointSoap implements Serializable {
 
     public void setSecret(String secret) {
         _secret = secret;
+    }
+
+    public String getCustomHost() {
+        return _customHost;
+    }
+
+    public void setCustomHost(String customHost) {
+        _customHost = customHost;
     }
 }

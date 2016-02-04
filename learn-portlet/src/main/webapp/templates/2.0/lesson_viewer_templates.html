@@ -3,8 +3,9 @@
 <script type="text/html" id="packageListTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" id="playerPackageFilter" placeholder="{{searchLabel}}">
+            <div class="val-search">
+                <input class="js-search" type="text" id="playerPackageFilter" placeholder="{{searchLabel}}">
+            </div>
         </div>
         <div id="playerPackageTags" class="dropdown filter-element shift-left js-filter-dropdown" data-value="">
             <button class="button medium simple">
@@ -19,12 +20,13 @@
     <div class="val-row filters-row">
        <div class="shift-left filter-element paging-showing-label" id="lessonViewerPagingShowing"> </div>
 
-        <div id="playerPackageOrder" class="dropdown filter-element shift-right js-filter-dropdown" data-value="date:false">
+        <div id="playerPackageOrder" class="dropdown filter-element shift-right js-filter-dropdown" data-value="default:true">
             <button class="button medium simple">
-                <span class="dropdown-text"> {{newestLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+                <span class="dropdown-text"> {{defaultLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
             </button>
             <ul class="dropdown-menu">
-                <li class="selected" data-value="date:false"> {{newestLabel}} </li>
+                <li class="selected" data-value="default:true"> {{defaultLabel}} </li>
+                <li data-value="date:false"> {{newestLabel}} </li>
                 <li data-value="date:true"> {{oldestLabel}} </li>
                 <li data-value="name:true"> {{byNameAscLabel}} </li>
                 <li data-value="name:false"> {{byNameDescLabel}} </li>
@@ -38,10 +40,13 @@
             <span class="val-icon-list-view">List View</span>
         </button>
     </div>
-
     <div class="js-package-items val-row list">
     </div>
     <div class="val-paginator text-center" id="packageListPaginator"></div>
+</script>
+
+<script type="text/html" id="packageSortableListTemplate">
+    <div {{#sortableId}} id="{{sortableId}}" {{/sortableId}} class="js-package-items-sortable"></div>
 </script>
 
 <script type="text/html" id="SCORMPlayerContent">
@@ -57,24 +62,16 @@
         <div class="content-wrapper">
             <div class="content-header clearfix">
                 <div class="content-controls shift-left">
-                    <div class="val-icon-menu js-toggle-sidebar val-icon-with-label">
-                        <span>{{contentsLabel}}</span>
-                    </div>
-                    <div id="SlideMap" class="val-icon-grid-view val-icon-with-label" ><span>{{slideMapLabel}}</span></div>
+                    <div class="val-icon-menu js-toggle-sidebar val-icon-with-label"></div>
                 </div>
                 <div class="content-controls shift-right">
-                    <div id="PlayerLaunchFullScreen" class="val-icon-fullscreen val-icon-with-label">
-                        <span>{{navigationButtonFullScreenLabel}}</span>
-                    </div>
+                    <div id="PlayerLaunchFullScreen" class="val-icon-fullscreen val-icon-with-label"></div>
                     <div id="PlayerExitFullScreen" class="val-icon-fullscreen-exit val-icon-with-label" style="display:none;">
-                        <span>{{navigationButtonExitFullScreenLabel}}</span>
                     </div>
-                    <div id="SCORMNavigationSuspend" class="val-icon-pause val-icon-with-label">
-                        <span>{{pauseLabel}}</span>
-                    </div>
+                    <div id="SCORMNavigationSuspend" class="val-icon-pause val-icon-with-label hidden"></div>
                     <div id="SCORMNavigationExit" class="val-icon-exit"></div>
                 </div>
-                <h2 id="currentPackageName" class="content-title"></h2>
+                <h2 id="currentPackageName" class="content-title package-name"></h2>
             </div>
             <div class="content-container">
                 <iframe id="SCORMDataOutput" src=""></iframe>
@@ -106,11 +103,17 @@
 
 <script type="text/html" id="playerTileItemView">
         <div class="tile-content">
-            <div class="image js-start-package"
-                {{#logo}}
-                style="background-image: url('/delegate/files/images?folderId=package_logo_{{id}}&file={{{logo}}}')"
-                {{/logo}}>
-                <a href={{link}}></a>
+            <div class="tile-with-rating">
+                <div class="image js-start-package"
+                    {{#logo}}
+                    style="background-image: url('/delegate/packages/{{id}}/logo?courseId={{courseId}}')"
+                    {{/logo}}
+                    {{^logo}}
+                    style="background-image: url('/learn-portlet/img/imgo.jpg')"
+                    {{/logo}}>
+                    <a href={{link}}></a>
+                </div>
+                <div class="valamis-rating js-valamis-rating"></div>
             </div>
             <ul>
                 <li class="title js-start-package"><a href={{link}}>{{title}}</a></li>
@@ -118,7 +121,7 @@
                 <li class="categories">{{categories}}</li>
                 <li class="status">
                     {{#LV_SHARE}}
-                    <span class="val-icon-link cursor-pointer js-share-package"></span>
+                    <span class="val-icon-share cursor-pointer js-share-package"></span>
                     {{/LV_SHARE}}
                     <span class="val-label">
                         {{packageStatusLabel}}
@@ -132,7 +135,7 @@
 <script type="text/html" id="navigation-question-item">
     <span class="lesson-item-title">{{title}}</span>
     {{#elementType}}<span class="lesson-item-type">{{elementType}}</span>{{/elementType}}
-    <!--<span class="lesson-item-duration"> Time container </span>-->
+    {{#duration}}<span class="lesson-item-duration"> {{duration}} </span>{{/duration}}
     <span class="lesson-item-status"></span>
 </script>
 
@@ -158,5 +161,14 @@
         <button class="button big primary js-post-share-package">
             {{shareLabel}}
         </button>
+    </div>
+</script>
+<script type="text/html" id="startConfirmationView">
+    <div id="start-package-confirmation">
+        <div class="confirmation-question">{{startConfirmationViewLabel}}</div>
+        <div id="button-toolbar">
+            <button class="js-confirmation btn-confirmation">{{yesLabel}}</button>
+            <button class="js-decline btn-decline">{{noLabel}}</button>
+        </div>
     </div>
 </script>

@@ -158,7 +158,7 @@ public class LFTincanLrsEndpointLocalServiceClp
 
         _methodParameterTypes21 = new String[] {
                 "java.lang.String", "java.lang.String", "java.lang.String",
-                "java.lang.String"
+                "java.lang.String", "java.lang.String"
             };
     }
 
@@ -731,7 +731,8 @@ public class LFTincanLrsEndpointLocalServiceClp
 
     @Override
     public void setEndpoint(java.lang.String endpoint,
-        java.lang.String authType, java.lang.String key, java.lang.String secret)
+        java.lang.String authType, java.lang.String key,
+        java.lang.String secret, java.lang.String host)
         throws com.liferay.portal.kernel.exception.SystemException {
         try {
             _invokableLocalService.invokeMethod(_methodName21,
@@ -743,7 +744,9 @@ public class LFTincanLrsEndpointLocalServiceClp
                     
                 ClpSerializer.translateInput(key),
                     
-                ClpSerializer.translateInput(secret)
+                ClpSerializer.translateInput(secret),
+                    
+                ClpSerializer.translateInput(host)
                 });
         } catch (Throwable t) {
             t = ClpSerializer.translateThrowable(t);

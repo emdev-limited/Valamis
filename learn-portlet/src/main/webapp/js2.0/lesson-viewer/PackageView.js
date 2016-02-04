@@ -12,7 +12,34 @@ PlayerPackageView = Backbone.View.extend({
     render: function () {
         this.showDefault();
         this.$el.attr('id', this.model.id);
+
+        var packageRating = this.model.get('rating');
+        var that = this;
+        this.$('.js-valamis-rating')
+          .valamisRating({
+            score: packageRating.score,
+            average: packageRating.average
+          })
+          .on('valamisRating:changed', function(e, score) {
+            that.setPackageRating(score)
+          })
+          .on('valamisRating:deleted', function(e) {
+            that.deletePackageRating()
+          });
         return this;
+    },
+
+    setPackageRating: function(score) {
+        this.model.ratePackage({}, {ratingScore: score});
+    },
+
+    deletePackageRating: function() {
+      var that = this;
+      this.model.deletePackageRating({}, {
+        success: function(response) {
+          that.$('.js-valamis-rating').valamisRating('average', response.average);
+        }
+      });
     },
 
     showDefault: function () {
@@ -49,8 +76,9 @@ PlayerPackageView = Backbone.View.extend({
             remain: remain,
             link: link,
             categories: categories,
-            packageStatusLabel: this.language[statusLabel]
-          }, this.model.toJSON(), this.language, this.permissions));
+            packageStatusLabel: this.language[statusLabel],
+            courseId: Utils.getCourseId()
+        }, this.model.toJSON(), this.language, this.permissions));
         this.$el.html(template);
     },
     sharePackage: function() {
@@ -73,42 +101,62 @@ var PlayerPackageListView = Backbone.View.extend({
 
     initialize: function (options) {
         if (playerSettings.get('layout') === PLAYER_LIST_VIEW_MODE.TILE) {
-          this.viewMode = PLAYER_LIST_VIEW_MODE.TILE;
+            this.viewMode = PLAYER_LIST_VIEW_MODE.TILE;
         } else {
-          this.viewMode = PLAYER_LIST_VIEW_MODE.LIST;
+            this.viewMode = PLAYER_LIST_VIEW_MODE.LIST;
         }
 
+        var that = this;
         this.permissions = options.permissions;
         this.language = options.language;
         this.activePackageView = null;
         this.sortableAscOrder = [];
         this.childViews = [];
-        this.paginatorModel = new PageModel();
-        this.collection.on('reset', this.addPackagesFromCollection, this);
+        this.paginatorModel = new PageModel({'allowShowAll': permissionActionsLessonViewer.LV_ORDER});
+        this.collection.on('reset', function () {
+            that.addPackagesFromCollection();
+            var orderCollection = that.collection.toJSON();
+            _.each(orderCollection, function(val) {
+                jQueryValamis('#' + val.id).attr('data-orderIndex', val.id);
+            });
+            that.loadingToggle(true);
+        }, this);
+        this.collection.on('request', function () {
+            that.loadingToggle(false);
+        });
         this.render();
-        var that = this;
 
         this.setDisplayModeActiveState(this.viewMode);
         this.tags = new Valamis.TagCollection();
-        this.tags.fetch({
-          success: function() {
-            that.addTags();
-          }
-        });
+        var tagsOptions = {
+            courseId: Utils.getCourseId(),
+            pageId: jQueryValamis('#pageID').val(),
+            playerId: jQueryValamis('#playerID').val()
+        };
+        this.tags.getPackagesTags({}, tagsOptions).then(function(collection) {
+                that.tags.add(collection);
+                that.addTags();
+            }
+        );
 
         if (playerSettings.get('sort')) {
-          var elem = this.$el.find('#playerPackageOrder');
-          var sort = playerSettings.get('sort');
-          elem.data('value', sort);
-          var selected = this.$el.find('li[data-value="'+sort+'"]');
-          elem.find('li').removeClass('selected');
-          selected.addClass('selected');
-          elem.find('.dropdown-text').html(selected.html());
+            var elem = this.$el.find('#playerPackageOrder');
+            var sort = playerSettings.get('sort');
+            elem.data('value', sort);
+            var selected = this.$el.find('li[data-value="'+sort+'"]');
+            elem.find('li').removeClass('selected');
+            selected.addClass('selected');
+            elem.find('.dropdown-text').html(selected.html());
         }
 
         this.collection.on('packageCollection:updated', function (details) {
             that.updatePagination(details, that);
         });
+    },
+
+    loadingToggle: function(hidden){
+        this.$el.closest('.val-portlet').find('.loading-container')
+            .toggleClass('hidden', hidden);
     },
 
     addTags: function() {
@@ -120,8 +168,15 @@ var PlayerPackageListView = Backbone.View.extend({
 
     render: function () {
         var that = this;
-        var template = Mustache.to_html(jQueryValamis('#packageListTemplate').html(), _.extend(that.language));
+        var template = Mustache.to_html(jQueryValamis('#packageListTemplate').html(), _.extend({}, that.language, {courseId: Utils.getCourseId}, that.permissions));
         this.$el.html(template);
+        this.$('.js-search')
+            .on('focus', function() {
+                jQueryValamis(this).parent('.val-search').addClass('focus');
+            })
+            .on('blur', function() {
+                jQueryValamis(this).parent('.val-search').removeClass('focus');
+            });
 
         that.paginator = new ValamisPaginator({
             el: that.$el.find("#packageListPaginator"),
@@ -129,13 +184,21 @@ var PlayerPackageListView = Backbone.View.extend({
             model: that.paginatorModel
         });
         that.paginator.on('pageChanged', function () {
-            that.reload();
+            that.reload(false);
         });
 
         that.paginatorShowing = new ValamisPaginatorShowing({
             el: that.$el.find("#lessonViewerPagingShowing"),
             language: that.language,
             model: that.paginator.model
+        });
+
+        that.paginator.model.on('pageChanged', function () {
+            that.reload(false);
+        });
+
+        that.paginator.model.on('showAll', function () {
+            that.reload(true);
         });
     },
     reloadFirstPage: function () {
@@ -145,12 +208,22 @@ var PlayerPackageListView = Backbone.View.extend({
             itemsOnPage: this.paginatorModel.get('itemsOnPage'),
             portletID: this.portletID});
     },
-    reload: function () {
-        this.collection.fetch({
+    reload: function (showAll) {
+        this.$('.js-package-items').empty();
+        var params = {
             reset: true,
-            currentPage: this.paginatorModel.get('currentPage'),
-            itemsOnPage: this.paginatorModel.get('itemsOnPage'),
-            portletID: this.portletID});
+            portletID: this.portletID
+        };
+
+        if (!showAll)
+            _.extend(params, {
+                currentPage: this.paginatorModel.get('currentPage'),
+                itemsOnPage: this.paginatorModel.get('itemsOnPage')
+            });
+        else
+            this.paginatorModel.set({'currentPage': 1});
+
+        this.collection.fetch(params);
     },
 
     updatePagination: function (details, context) {
@@ -207,7 +280,7 @@ var PlayerPackageListView = Backbone.View.extend({
     applyFilter: function () {
       clearTimeout(this.inputTimeout);
       this.updateSettings();
-      this.reloadPackageList();
+      this.reload(false);
     },
 
     updateSettings: function() {
@@ -226,17 +299,48 @@ var PlayerPackageListView = Backbone.View.extend({
         view.on('showSharePackageModal', function(model) {
           this.trigger('showSharePackageModal', model);
         }, this);
-
         this.childViews.push(view);
-        this.$el.find('.js-package-items').append(view.render().$el);
+        this.$el.find('.js-package-items-sortable').append(view.render().$el);
     },
 
     addPackagesFromCollection: function () {
-        _.forEach(this.childViews, function(e) {
+        _.forEach(this.childViews, function (e) {
             this.stopListening(e);
             e.remove();
         }, this);
-        this.$('.js-package-items').empty();
+        var enabledSort = (!jQueryValamis('#playerPackageFilter').val() && !jQueryValamis('#playerPackageTags').data('value')) && this.permissions.LV_ORDER;
+        var sortableId = enabledSort ? 'sortable' : '';
+
+        var template = Mustache.to_html(jQueryValamis('#packageSortableListTemplate').html(), {sortableId: sortableId});
+        this.$('.js-package-items').html(template);
+        var collection = this.collection;
+
+        if (enabledSort) {
+            Sortable.create(sortable, {
+                dataIdAttr: "data-orderIndex",
+                animation: 200,
+                store: {
+                    get: function (sortable) {
+                        var order = localStorage.getItem(sortable.options.group);
+                        return order ? order.split('|') : [];
+                    },
+                    set: function (sortable) {
+                        this.order = sortable.toArray();
+                        saveOrder(this.order);
+                    }
+                }
+            });
+        }
+
+        function saveOrder(order) {
+            if (order && order.length > 0) {
+                var options = {
+                    playerId: jQueryValamis('#playerID').val(),
+                    index: order
+                };
+                collection.updateIndex({}, options);
+            }
+        }
         this.collection.each(this.addPackage, this);
         jQueryValamis(window).trigger('portlet-ready');
     }

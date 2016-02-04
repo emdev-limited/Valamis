@@ -10,9 +10,11 @@
         <permissions>
             <supports>
                 <action-key>SHARE_ACTION</action-key>
+                <action-key>ORDER_ACTION</action-key>
             </supports>
             <site-member-defaults>
                 <action-key>VIEW</action-key>
+                <action-key>SHARE_ACTION</action-key>
             </site-member-defaults>
             <guest-defaults>
             </guest-defaults>
@@ -22,27 +24,6 @@
             </guest-unsupported>
         </permissions>
     </portlet-resource>
-
-    <portlet-resource>
-        <portlet-name>SCORMQuizes</portlet-name>
-        <permissions>
-            <supports>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>PUBLISH</action-key>
-            </supports>
-            <site-member-defaults>
-            </site-member-defaults>
-            <guest-defaults>
-            </guest-defaults>
-            <guest-unsupported>
-                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
-                <action-key>CONFIGURATION</action-key>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>PUBLISH</action-key>
-            </guest-unsupported>
-        </permissions>
-    </portlet-resource>
-
 
     <portlet-resource>
         <portlet-name>Curriculum</portlet-name>
@@ -383,17 +364,60 @@
         </permissions>
     </portlet-resource>
 
-    <!--ValamisSlidesEditorView-->
+    <!--LessonStudioView-->
     <portlet-resource>
         <portlet-name>ValamisSlidesEditor</portlet-name>
         <permissions>
             <supports>
+                <action-key>EDIT_THEME</action-key>
             </supports>
             <site-member-defaults>
             </site-member-defaults>
             <guest-defaults>
             </guest-defaults>
             <guest-unsupported>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--CompetencesAdmin-->
+    <portlet-resource>
+        <portlet-name>CompetencesAdmin</portlet-name>
+        <permissions>
+            <supports>
+                <action-key>MODIFY_ACTION</action-key>
+                <action-key>MODIFY_ALL_ACTION</action-key>
+            </supports>
+            <site-member-defaults>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>MODIFY_ACTION</action-key>
+                <action-key>MODIFY_ALL_ACTION</action-key>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--CompetencesUser-->
+    <portlet-resource>
+        <portlet-name>CompetencesUser</portlet-name>
+        <permissions>
+            <supports>
+                <action-key>MODIFY_ACTION</action-key>
+            </supports>
+            <site-member-defaults>
+                <action-key>VIEW</action-key>
+                <action-key>MODIFY_ACTION</action-key>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>MODIFY_ACTION</action-key>
                 <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
                 <action-key>CONFIGURATION</action-key>
             </guest-unsupported>
@@ -459,13 +483,27 @@
         <portlet-name>ValamisActivities</portlet-name>
         <permissions>
             <supports>
+                <action-key>WRITE_STATUS</action-key>
+                <action-key>SHARE_ACTION</action-key>
+                <action-key>COMMENT</action-key>
+                <action-key>LIKE</action-key>
+                <action-key>SHOW_ALL</action-key>
             </supports>
             <site-member-defaults>
                 <action-key>VIEW</action-key>
+                <action-key>WRITE_STATUS</action-key>
+                <action-key>SHARE_ACTION</action-key>
+                <action-key>COMMENT</action-key>
+                <action-key>LIKE</action-key>
             </site-member-defaults>
             <guest-defaults>
             </guest-defaults>
             <guest-unsupported>
+                <action-key>WRITE_STATUS</action-key>
+                <action-key>SHARE_ACTION</action-key>
+                <action-key>COMMENT</action-key>
+                <action-key>LIKE</action-key>
+                <action-key>SHOW_ALL</action-key>
                 <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
                 <action-key>CONFIGURATION</action-key>
             </guest-unsupported>
@@ -515,9 +553,86 @@
         <portlet-name>ValamisStudySummary</portlet-name>
         <permissions>
             <supports>
+                <action-key>HIDE_STATISTIC</action-key>
             </supports>
             <site-member-defaults>
                 <action-key>VIEW</action-key>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--PhenomenizerStudio-->
+    <portlet-resource>
+        <portlet-name>PhenomenizerStudio</portlet-name>
+        <permissions>
+            <supports>
+                <action-key>MODIFY_ACTION</action-key>
+                <action-key>PUBLISH</action-key>
+            </supports>
+            <site-member-defaults>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+                <action-key>MODIFY_ACTION</action-key>
+                <action-key>PUBLISH</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--PhenomenizerReport-->
+    <portlet-resource>
+        <portlet-name>PhenomenizerReport</portlet-name>
+        <permissions>
+            <supports>
+                <action-key>VIEW_ALL</action-key>
+            </supports>
+            <site-member-defaults>
+                <action-key>VIEW</action-key>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+                <action-key>VIEW_ALL</action-key>
+                <action-key>EDIT</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--MyCertificates-->
+    <portlet-resource>
+        <portlet-name>MyCertificates</portlet-name>
+        <permissions>
+            <supports>
+            </supports>
+            <site-member-defaults>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--MyCourses-->
+    <portlet-resource>
+        <portlet-name>MyCourses</portlet-name>
+        <permissions>
+            <supports>
+            </supports>
+            <site-member-defaults>
             </site-member-defaults>
             <guest-defaults>
             </guest-defaults>

@@ -1,0 +1,18 @@
+package com.arcusys.learn.models.request
+
+import com.arcusys.learn.service.util.Parameter
+import org.scalatra.ScalatraBase
+
+object NotificationRequest extends BaseRequest{
+  val TargetId = "targetId"
+  val PackageTitle = "packageTitle"
+
+  def apply(scalatra: ScalatraBase) = new Model(scalatra)
+
+  class Model(val scalatra: ScalatraBase) extends BaseCollectionFilteredRequestModel(scalatra) {
+
+    def targetId = Parameter(TargetId).longRequired
+    def packageTitle = Parameter(PackageTitle).required
+    def courseId = Parameter(CourseId).longRequired
+  }
+}

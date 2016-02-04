@@ -5,22 +5,19 @@ object Settings {
 
   val common = Seq(
     organization := "com.arcusys.valamis",
-    version := "2.4",
+    version := "2.6.1",
     scalaVersion := Version.scala,
     resolvers ++= Seq(
-      Resolver.mavenLocal,
       ArcusysResolvers.public,
       Resolver.sonatypeRepo("releases"),
       Resolver.typesafeIvyRepo("releases"),
       DefaultMavenRepository
     ),
     libraryDependencies ++= Dependencies.common,
-    publishMavenStyle             := true,
     publishArtifact in packageDoc := false,
     publishArtifact in packageSrc := false,
     publishMavenStyle             := true,
-    javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
-    scalacOptions        += "-target:jvm-1.6"
+    javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
   )
 
   val liferay = Liferay620

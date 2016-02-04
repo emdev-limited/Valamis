@@ -2,29 +2,27 @@ package com.arcusys.learn.facades
 
 import com.arcusys.learn.liferay.LiferayClasses.LUser
 import com.arcusys.learn.models.OrgResponse
-import com.arcusys.learn.models.response.users.UserShortResponse
-import com.arcusys.valamis.lrs.api.StatementApi
-import com.arcusys.valamis.model.{RangeResult, SkipTake}
+import com.arcusys.learn.models.response.CollectionResponse
+import com.arcusys.learn.models.response.users.{UserResponse, UserResponseBase}
+import com.arcusys.valamis.model.SkipTake
+import com.arcusys.valamis.user.model.UserFilter
 
 trait UserFacadeContract {
 
-  def all(courseId: Long, skip: Int, take: Int, filter: String, sortAZ: Boolean): Seq[LUser]
+  def getBy(filter: UserFilter,
+            page: Option[Int],
+            skipTake: Option[SkipTake] = None,
+            withStat: Boolean = false
+             ): CollectionResponse[UserResponseBase]
 
-  def byId(id: Long): LUser
-
-  def all(companyId: Long, orgId: Option[Long], skipTake: Option[SkipTake], filter: String, sortAZ: Boolean): RangeResult[UserShortResponse]
-
-  def byId(statementApi: StatementApi, id: Long, isShortResult: Boolean, withOpenBadges: Boolean): AnyRef
+  def getById(id: Long): UserResponse
 
   // def byPermission(permissionType: PermissionType): Seq[UserShortResponse]
-  def allCanView(viewAll: Boolean): Seq[UserShortResponse]
+  def allCanView(courseId: Long, viewAll: Boolean): Seq[UserResponse]
 
-  def canView(user: LUser, viewAll: Boolean): Boolean
+  def canView(courseId: Long, user: LUser, viewAll: Boolean): Boolean
 
-  def canView(userId: Long, viewAll: Boolean): Boolean
+  def canView(courseId: Long, userId: Long, viewAll: Boolean): Boolean
 
-  def orgs(): Seq[OrgResponse]
-
-  def getUserShortInfo(id:Long): UserShortResponse
-
+  def getOrganizations: Seq[OrgResponse]
 }

@@ -2,10 +2,9 @@ package com.arcusys.valamis.lesson.generator.tincan.file.html
 
 import com.arcusys.valamis.lesson.generator.tincan.TinCanPackageGeneratorProperties
 import com.arcusys.valamis.lesson.generator.util.ResourceHelpers
-import com.arcusys.valamis.questionbank.model._
-import com.arcusys.valamis.quiz.model.PPTXQuizQuestion
+import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.util.mustache.Mustache
-import com.arcusys.valamis.util.JsonSupport._
+import com.arcusys.valamis.util.serialization.JsonHelper._
 import scala.util.Random
 
 
@@ -31,14 +30,6 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
     generateHTMLByQuestionType("pdf", Map("id" -> id, "title" -> title, "filename" -> filename))
   }
 
-  def getHTMLForPPTXPage(pptx: PPTXQuizQuestion) = {
-    generateHTMLByQuestionType("pptx", Map("id" -> pptx.id, "title" -> pptx.title.get.takeWhile(_ != '.')))
-  }
-
-  def getHTMLForPPTXForegroundPage(pptx: PPTXQuizQuestion) = {
-    generateHTMLByQuestionType("pptx-foreground-iframe", Map("quizID" -> pptx.quizID, "file" -> pptx.file))
-  }
-
   def getHTMLForIframePage(id: Int, title: String, src: String) = {
     val newsrc = src match {
       case s if s contains "youtube.com/embed" => s match {
@@ -54,16 +45,22 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
     generateHTMLByQuestionType("iframe", Map("id" -> id, "title" -> title, "src" -> newsrc))
   }
 
-  def getViewModelFromQuestion(question: Question[Answer], autoShowAnswer: Boolean = false, contextPath: String = "") = question match {
+  def getViewModelFromQuestion(question: Question,
+                               qAnswers:Seq[Answer],
+                               autoShowAnswer: Boolean = false,
+                               questionNumber: Long) = question match {
     case choiceQuestion: ChoiceQuestion =>
-      val answers = choiceQuestion.answers.map(answer =>
-        Map("text" -> prepareString(answer.text),
-          "id" -> answer.id,
-          "score" -> answer.score))
-      val correctAnswers = json(choiceQuestion.answers.filter(_.isCorrect).map(x => x.id)).get
-      val multipleChoice = !choiceQuestion.forceCorrectCount || (choiceQuestion.answers.count(_.isCorrect) > 1)
+      val answers = qAnswers.map { answer =>
+          Map("text" -> prepareString(answer.asInstanceOf[AnswerText].body),
+            "id" -> answer.id,
+            "questionNumber" -> questionNumber,
+            "score" -> answer.score)
+      }
+      val correctAnswers = toJson(qAnswers.filter(_.asInstanceOf[AnswerText].isCorrect).map(x => x.id))
+      val multipleChoice = !choiceQuestion.forceCorrectCount || (qAnswers.count(_.asInstanceOf[AnswerText].isCorrect) > 1)
       val viewModel = Map(
-        "id" -> choiceQuestion.id,
+        "id" -> choiceQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(choiceQuestion.title),
         "text" -> prepareStringKeepNewlines(choiceQuestion.text),
         "answer" -> correctAnswers,
@@ -73,30 +70,36 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "hasExplanation" -> choiceQuestion.explanationText.nonEmpty,
         "rightAnswerText" -> choiceQuestion.rightAnswerText,
         "wrongAnswerText" -> choiceQuestion.wrongAnswerText,
-        "explanation" -> choiceQuestion.explanationText,
-        "contextPath" -> contextPath)
+        "explanation" -> choiceQuestion.explanationText
+        )
       viewModel
     case textQuestion: TextQuestion =>
-      val possibleAnswers = json(textQuestion.answers.map(answer => Map("text" -> answer.text, "score" -> answer.score)))
+      val possibleAnswers = toJson(qAnswers.map(answer => Map("text" -> answer.asInstanceOf[AnswerText].body, "score" -> answer.score)))
       val isCaseSensitive = textQuestion.isCaseSensitive
       val viewModel = Map(
-        "id" -> textQuestion.id,
+        "id" -> textQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(textQuestion.title),
-        "answers" -> possibleAnswers.get,
+        "answers" -> possibleAnswers,
         "isCaseSensitive" -> isCaseSensitive,
         "text" -> prepareStringKeepNewlines(textQuestion.text),
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> textQuestion.explanationText.nonEmpty,
         "explanation" -> textQuestion.explanationText,
         "rightAnswerText" -> textQuestion.rightAnswerText,
-        "wrongAnswerText" -> textQuestion.wrongAnswerText,
-        "contextPath" -> contextPath)
+        "wrongAnswerText" -> textQuestion.wrongAnswerText
+        )
       viewModel
     case numericQuestion: NumericQuestion =>
-      val answers = json(numericQuestion.answers.map(answer =>
-        Map("from" -> answer.notLessThan, "to" -> answer.notGreaterThan, "score" -> answer.score))).get
+      val answers = toJson(qAnswers.map { answer =>
+        Map("questionNumber" -> questionNumber,
+          "from" -> answer.asInstanceOf[AnswerRange].rangeFrom,
+          "to" -> answer.asInstanceOf[AnswerRange].rangeTo,
+          "score" -> answer.score)
+      })
       val viewModel = Map(
-        "id" -> numericQuestion.id,
+        "id" -> numericQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(numericQuestion.title),
         "text" -> prepareStringKeepNewlines(numericQuestion.text),
         "answers" -> answers,
@@ -104,124 +107,149 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "hasExplanation" -> numericQuestion.explanationText.nonEmpty,
         "explanation" -> numericQuestion.explanationText,
         "rightAnswerText" -> numericQuestion.rightAnswerText,
-        "wrongAnswerText" -> numericQuestion.wrongAnswerText,
-        "contextPath" -> contextPath)
+        "wrongAnswerText" -> numericQuestion.wrongAnswerText
+        )
       viewModel
     case positioningQuestion: PositioningQuestion =>
-      val answers = json(positioningQuestion.answers.map(answer => Map("id" -> answer.id, "text" -> prepareString(answer.text)))).get
+      val answers = toJson(qAnswers.map { answer =>
+        Map("id" -> answer.id,
+          "questionNumber" -> questionNumber,
+          "text" -> prepareString(answer.asInstanceOf[AnswerText].body))
+      })
       val viewModel = Map(
-        "id" -> positioningQuestion.id,
+        "id" -> positioningQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(positioningQuestion.title),
         "text" -> prepareStringKeepNewlines(positioningQuestion.text),
         "answers" -> answers,
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> positioningQuestion.explanationText.nonEmpty,
-        "score" -> positioningQuestion.answers.headOption.map(_.score),
+        "score" -> qAnswers.headOption.map(_.score),
         "explanation" -> positioningQuestion.explanationText,
         "rightAnswerText" -> positioningQuestion.rightAnswerText,
-        "wrongAnswerText" -> positioningQuestion.wrongAnswerText,
-        "contextPath" -> contextPath)
+        "wrongAnswerText" -> positioningQuestion.wrongAnswerText
+        )
       viewModel
     case matchingQuestion: MatchingQuestion =>
-      val answers = matchingQuestion.answers.map(answer =>
-        Map("answerText" -> removeLineBreak(answer.text),
-          "matchingText" -> removeLineBreak(answer.keyText.getOrElse(null)),
-          "score" -> answer.score))
+      val answers = qAnswers.map { answer =>
+        Map("answerId" -> answer.id,
+          "questionNumber" -> questionNumber,
+          "answerText" -> removeLineBreak(answer.asInstanceOf[AnswerKeyValue].key),
+          "matchingText" -> removeLineBreak(answer.asInstanceOf[AnswerKeyValue].value.orNull),
+          "score" -> answer.score)
+      }
       val viewModel = Map(
-        "id" -> matchingQuestion.id,
+        "id" -> matchingQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(matchingQuestion.title),
         "text" -> prepareStringKeepNewlines(matchingQuestion.text),
         "answers" -> answers,
         "answersMatching" -> Random.shuffle(answers),
-        "answerData" -> json(answers).get,
+        "answerData" -> toJson(answers),
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> matchingQuestion.explanationText.nonEmpty,
         "explanation" -> matchingQuestion.explanationText,
         "rightAnswerText" -> matchingQuestion.rightAnswerText,
-        "wrongAnswerText" -> matchingQuestion.wrongAnswerText,
-        "contextPath" -> contextPath)
+        "wrongAnswerText" -> matchingQuestion.wrongAnswerText
+        )
       viewModel
     case categorizationQuestion: CategorizationQuestion =>
-      val answerJSON = json(categorizationQuestion.answers.map(answer =>
-        Map("text" -> prepareString(answer.text),
-          "matchingText" -> answer.answerCategoryText.map(prepareString),
-          "score" -> answer.score))).get
-      val answerText = categorizationQuestion.answers.map(answer => prepareString(answer.text)).distinct
-      val matchingText = categorizationQuestion.answers.filter(a => a.answerCategoryText != None && !a.answerCategoryText.get.isEmpty).
-        sortBy(_.answerCategoryText).
-        map(answer => prepareString(answer.answerCategoryText.getOrElse("")))
+      val answerJSON = toJson(qAnswers.map { answer =>
+        Map("questionNumber" -> questionNumber,
+          "text" -> prepareString(answer.asInstanceOf[AnswerKeyValue].key),
+          "matchingText" -> answer.asInstanceOf[AnswerKeyValue].value.map(prepareString),
+          "score" -> answer.score)
+      })
+      val answerText = qAnswers.map(answer => prepareString(answer.asInstanceOf[AnswerKeyValue].key)).distinct
+      val matchingText = qAnswers.filter(a => a.asInstanceOf[AnswerKeyValue].value.isDefined && !a.asInstanceOf[AnswerKeyValue].value.get.isEmpty).
+        sortBy(_.asInstanceOf[AnswerKeyValue].value).
+        map(answer => Map(
+        "answerId" -> answer.id,
+        "matchingText" -> prepareString(answer.asInstanceOf[AnswerKeyValue].value.getOrElse(""))
+      ))
       val randomAnswers = Random.shuffle(matchingText)
       val randomAnswersSize = if (randomAnswers.length % answerText.length == 0) randomAnswers.length / answerText.length else randomAnswers.length / answerText.length + 1
       val viewModel = Map(
-        "id" -> categorizationQuestion.id,
+        "id" -> categorizationQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(categorizationQuestion.title),
         "text" -> prepareStringKeepNewlines(categorizationQuestion.text),
         "answerText" -> answerText,
         "matchingText" -> matchingText,
         "randomAnswers" -> (1 to randomAnswersSize).zipWithIndex.map {
-          case (model, index) => {
+          case (model, index) =>
             val skip = index * answerText.length
             val take = if (randomAnswers.length - skip < answerText.length) randomAnswers.length % answerText.length else answerText.length
-            randomAnswers.drop(skip).take(take)
-          }
+            randomAnswers.slice(skip, skip + take)
         },
         "answers" -> answerJSON,
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> categorizationQuestion.explanationText.nonEmpty,
         "explanation" -> categorizationQuestion.explanationText,
         "rightAnswerText" -> categorizationQuestion.rightAnswerText,
-        "wrongAnswerText" -> categorizationQuestion.wrongAnswerText,
-        "contextPath" -> contextPath)
+        "wrongAnswerText" -> categorizationQuestion.wrongAnswerText
+        )
       viewModel
     case essayQuestion: EssayQuestion =>
       val viewModel = Map(
-        "id" -> essayQuestion.id,
+        "id" -> essayQuestion.id.get,
+        "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(essayQuestion.title),
         "text" -> essayQuestion.text,
         "autoShowAnswer" -> autoShowAnswer,
-        "explanation" -> essayQuestion.explanationText,
-        "contextPath" -> contextPath)
+        "explanation" -> essayQuestion.explanationText
+        )
       viewModel
-    case embeddedAnswerQuestion: EmbeddedAnswerQuestion =>
-      val viewModel = Map(
-        "id" -> embeddedAnswerQuestion.id,
-        "title" -> removeLineBreak(embeddedAnswerQuestion.title),
-        "text" -> embeddedAnswerQuestion.text,
-        "autoShowAnswer" -> autoShowAnswer,
-        "explanation" -> embeddedAnswerQuestion.explanationText,
-        "rightAnswerText" -> embeddedAnswerQuestion.rightAnswerText,
-        "wrongAnswerText" -> embeddedAnswerQuestion.wrongAnswerText,
-        "contextPath" -> contextPath)
-      viewModel
-    case plainText: PlainText =>
-      val viewModel = Map(
-        "id" -> plainText.id,
-        "title" -> removeLineBreak(plainText.title),
-        "text" -> prepareStringKeepNewlines(plainText.text),
-        "autoShowAnswer" -> autoShowAnswer,
-        "explanation" -> plainText.explanationText,
-        "contextPath" -> contextPath)
-      viewModel
-    case videoDLQuestion: DLVideo =>
-      val viewModel = Map(
-        "id" -> videoDLQuestion.id,
-        "title" -> removeLineBreak(videoDLQuestion.title),
-        "uuid" -> prepareString(videoDLQuestion.uuid),
-        "autoShowAnswer" -> autoShowAnswer,
-        "groupId" -> videoDLQuestion.groupId,
-        "hasExplanation" -> videoDLQuestion.explanationText.nonEmpty,
-        "explanation" -> removeLineBreak(videoDLQuestion.explanationText),
-        "contextPath" -> contextPath)
-      viewModel
-    case purePlainText: PurePlainText =>
-      val viewModel = Map("data" -> purePlainText.text,
-        "contextPath" -> contextPath)
-      viewModel
+//    case embeddedAnswerQuestion: EmbeddedAnswerQuestion =>
+//      val viewModel = Map(
+//        "id" -> embeddedAnswerQuestion.id,
+//        "questionNumber" -> questionNumber,
+//        "title" -> removeLineBreak(embeddedAnswerQuestion.title),
+//        "text" -> embeddedAnswerQuestion.text,
+//        "autoShowAnswer" -> autoShowAnswer,
+//        "explanation" -> embeddedAnswerQuestion.explanationText,
+//        "rightAnswerText" -> embeddedAnswerQuestion.rightAnswerText,
+//        "wrongAnswerText" -> embeddedAnswerQuestion.wrongAnswerText
+//        )
+//      viewModel
+//    case videoDLQuestion: DLVideo =>
+//      val viewModel = Map(
+//        "id" -> videoDLQuestion.id,
+//        "questionNumber" -> questionNumber,
+//        "title" -> removeLineBreak(videoDLQuestion.title),
+//        "uuid" -> prepareString(videoDLQuestion.uuid),
+//        "autoShowAnswer" -> autoShowAnswer,
+//        "groupId" -> videoDLQuestion.groupId,
+//        "hasExplanation" -> videoDLQuestion.explanationText.nonEmpty,
+//        "explanation" -> removeLineBreak(videoDLQuestion.explanationText)
+//        )
+//      viewModel
+//    case purePlainText: PurePlainText =>
+//      val viewModel = Map("data" -> purePlainText.text
+//        )
+//      viewModel
     case _ => throw new Exception("Service: Oops! Can't recognize question type")
   }
 
-  def getHTMLByQuestionId(question: Question[Answer], autoShowAnswer: Boolean, contextPath: String = "") = {
-    val viewModel = getViewModelFromQuestion(question, autoShowAnswer, contextPath)
+  def getViewModelFromPlainText(plainText: PlainText,
+                               questionNumber: Long) = {
+      val viewModel = Map(
+        "id" -> plainText.id,
+        "questionNumber" -> questionNumber,
+        "title" -> removeLineBreak(plainText.title),
+        "text" -> prepareStringKeepNewlines(plainText.text),
+        "autoShowAnswer" -> false,
+        "explanation" -> ""
+      )
+      viewModel
+  }
+
+  def getHTMLForPlainText(viewModel:Map[String,Any]) = {
+    generateHTMLByQuestionType("PlainText", viewModel)
+  }
+
+  def getHTMLByQuestionId(question: Question,answers:Seq[Answer], autoShowAnswer: Boolean, questionNumber: Long) = {
+    val viewModel = getViewModelFromQuestion(question,answers,autoShowAnswer, questionNumber)
     question match {
       case choiceQuestion: ChoiceQuestion => generateHTMLByQuestionType("ChoiceQuestion", viewModel)
       case textQuestion: TextQuestion => generateHTMLByQuestionType("ShortAnswerQuestion", viewModel)
@@ -230,21 +258,21 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
       case matchingQuestion: MatchingQuestion => generateHTMLByQuestionType("MatchingQuestion", viewModel)
       case categorizationQuestion: CategorizationQuestion => generateHTMLByQuestionType("CategorizationQuestion", viewModel)
       case essayQuestion: EssayQuestion => generateHTMLByQuestionType("EssayQuestion", viewModel)
-      case embeddedAnswerQuestion: EmbeddedAnswerQuestion => generateHTMLByQuestionType("EmbeddedAnswerQuestion", viewModel)
-      case plainText: PlainText => generateHTMLByQuestionType("PlainText", viewModel)
-      case videoDLQuestion: DLVideo => generateHTMLByQuestionType("DLVideo", viewModel)
-      case purePlainText: PurePlainText => generateHTMLByQuestionType("PurePlainText", viewModel)
+//      case embeddedAnswerQuestion: EmbeddedAnswerQuestion => generateHTMLByQuestionType("EmbeddedAnswerQuestion", viewModel)
+      //case videoDLQuestion: DLVideo => generateHTMLByQuestionType("DLVideo", viewModel)
+      //case purePlainText: PurePlainText => generateHTMLByQuestionType("PurePlainText", viewModel)
       case _ => throw new Exception("Service: Oops! Can't recognize question type")
     }
   }
 
-  def generateRevealJSQuiz(id: Int, rootActivityId: String, title: String, description: String, serializedQuestionData: String, sections: String, maxDuration: Option[Int], properties: TinCanPackageGeneratorProperties) = {
-    val mustachedTimer = {
-      val timerModel = Map("maxDuration" -> maxDuration.map(_ * 60).getOrElse(0))
-      val is = getResourceStream("common/timer.js")
-
-      new Mustache(scala.io.Source.fromInputStream(is).mkString).render(timerModel)
-    }
+  def generateRevealJSQuiz(id: Int,
+                           rootActivityId: String,
+                           title: String,
+                           description: String,
+                           serializedQuestionData: String,
+                           sections: String,
+                           maxDuration: Option[Int],
+                           properties: TinCanPackageGeneratorProperties) = {
     val viewModel = Map(
       "id" -> id,
       "rootActivityId" -> rootActivityId,
@@ -253,11 +281,12 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
       "serializedQuestionData" -> serializedQuestionData,
       "sections" -> sections,
       "isPreview" -> isPreview,
-      "initProperties" -> json(Map("randomOrdering" -> properties.randomOrdering, "questionsCount" -> properties.questionsPerUser)).get,
+      "initProperties" -> toJson(Map("randomOrdering" -> properties.randomOrdering, "questionsCount" -> properties.questionsPerUser)),
       "isRandomized" -> properties.randomOrdering,
       "theme" -> properties.theme,
-      "timerSource" -> mustachedTimer,
-      "scoreLimit" -> properties.scoreLimit
+      "duration" -> maxDuration.getOrElse(0),
+      "scoreLimit" -> properties.scoreLimit,
+      "canPause" -> false
     )
     new Mustache(scala.io.Source.fromInputStream(getResourceStream("tincan/revealjs.html")).mkString).render(viewModel)
   }

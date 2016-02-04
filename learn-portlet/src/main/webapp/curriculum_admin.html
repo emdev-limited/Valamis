@@ -56,23 +56,15 @@ jQuery1816Curriculum(function () {
         document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
     }
     /** Mobile IE10 hack */
-
     Backbone.emulateJSON = true;
     Backbone.ajax = window.LearnAjax.ajax;
-    var defaultURL = Utils.getContextPath() + '/i18n/curriculum_en.properties';
-    var localizedURL = Utils.getContextPath() + '/i18n/curriculum_{{language}}.properties';
-    Utils.i18nLoader(localizedURL, defaultURL, onCurriculumLanguageLoad, onCurriculumLanguageError);
-
+    Utils.loadLanguage('curriculum',onCurriculumLanguageLoad);
 });
 
 function onCurriculumLanguageLoad(properties) {
     scormLanguageDataCurriculum = properties;
     initCurriculumView();
 }
-function onCurriculumLanguageError() {
-    alert('Translation resource loading failed!');
-}
-
 
 var EditCertificateLayout = Backbone.Marionette.Layout.extend({
     template: _.template(Mustache.to_html(jQuery('#certificate-modals-template').html(), scormLanguageDataCurriculum)),
@@ -116,17 +108,20 @@ var EditCertificateModal = Backbone.Modal.extend({
         this.editView.on('certificateAdded', this.showHiddenTabs, this);
         this.$('.js-certificate-editDetails-dialog').html(this.editView.render().$el);
     },
+    onShow: function () {
+        this.$('#certificateTitle').focus();
+    },
 
     init: function (certificateID, view) {
         jQuery1816Curriculum('#selectedCertificateID').val(certificateID);
 
-        jQuery('#editCertificateTabs a[href="#details"]').on('show.bs.tab', jQuery.proxy(function () {
+        jQuery('#editCertificateTabs').find('a[href="#details"]').on('show.bs.tab', jQuery.proxy(function () {
             this.editView.setCertificateID(certificateID);
         }, this));
-        jQuery('#editCertificateTabs a[href="#goals"]').on('show.bs.tab', function (e) {
+        jQuery('#editCertificateTabs').find('a[href="#goals"]').on('show.bs.tab', function (e) {
             window.goalsView.setCertificateID(certificateID);
         });
-        jQuery('#editCertificateTabs a[href="#members"]').on('show.bs.tab', function (e) {
+        jQuery('#editCertificateTabs').find('a[href="#members"]').on('show.bs.tab', function (e) {
             window.membersView.reload();
         });
 
@@ -152,19 +147,19 @@ var EditCertificateModal = Backbone.Modal.extend({
             jQuery('#goals').toggleClass('hidden');
         if(jQuery('#members').hasClass('hidden'))
             jQuery('#members').toggleClass('hidden');
-        if(jQuery('#editCertificateTabs a[href="#goals"]').parent().hasClass('hidden'))
-            jQuery('#editCertificateTabs a[href="#goals"]').parent().toggleClass('hidden');
-        if(jQuery('#editCertificateTabs a[href="#members"]').parent().hasClass('hidden'))
-            jQuery('#editCertificateTabs a[href="#members"]').parent().toggleClass('hidden');
+        if(jQuery('#editCertificateTabs').find('a[href="#goals"]').parent().hasClass('hidden'))
+            jQuery('#editCertificateTabs').find('a[href="#goals"]').parent().toggleClass('hidden');
+        if(jQuery('#editCertificateTabs').find('a[href="#members"]').parent().hasClass('hidden'))
+            jQuery('#editCertificateTabs').find('a[href="#members"]').parent().toggleClass('hidden');
     },
     openDetails: function () {
-        jQuery('#editCertificateTabs a[href="#details"]').tab('show');
+        jQuery('#editCertificateTabs').find('a[href="#details"]').tab('show');
     },
     openGoals: function () {
-        jQuery('#editCertificateTabs a[href="#goals"]').tab('show');
+        jQuery('#editCertificateTabs').find('a[href="#goals"]').tab('show');
     },
     openMembers: function () {
-        jQuery('#editCertificateTabs a[href="#members"]').tab('show');
+        jQuery('#editCertificateTabs').find('a[href="#members"]').tab('show');
     },
     openMembersAndRefresh: function () {
         this.showHiddenTabs();
@@ -218,7 +213,11 @@ var AddMembersModal = Backbone.Modal.extend({
     className: 'val-modal',
     cancelEl: '.modal-close',
     onRender: function () {
-        var dialog = new LiferayUserSelectDialog({getAllUsers: false, language: scormLanguageDataCurriculum});
+        var dialog = new LiferayUserSelectDialog({
+            singleSelect: false,
+            certificateId: jQuery('#selectedCertificateID').val(),
+            language: scormLanguageDataCurriculum
+        });
         dialog.on('closeModal', function () {
             editCertificateLayout.modals.close();
             window.membersView.render();
@@ -244,10 +243,15 @@ var CourseModal = Backbone.Modal.extend({
         }).map(function (item) {
             return item.get('id');
         });
-        var courses = jQuery.param({'courseGoalIds': selectedSites}, true);
+        var courses = {'courseGoalIds': selectedSites};
 
-        window.LearnAjax.post(path.root + path.api.certificates + jQuery1816Curriculum('#selectedCertificateID').val() +
-                '?action=ADDCOURSES&courseId=' + Utils.getCourseId() + '&' + courses).
+        window.LearnAjax.ajax({
+            url: path.root + path.api.certificates
+                + jQuery1816Curriculum('#selectedCertificateID').val()
+                + '/courses?courseId=' + Utils.getCourseId(),
+
+            data: courses,
+            type: 'POST'}).
                 done(function () {
                     window.goalsView.fetchModel();
                     editCertificateLayout.modals.close();
@@ -304,7 +308,7 @@ var GalleryModal = Backbone.Modal.extend({
                 saveCertificateLogo(certId,  data.get('title'));
             }
             var src = "/documents/" + Utils.getCourseId() + "/" + data.get('folderId') + "/" + data.get('title') + "/?version=" + data.get('version') + "&imageThumbnail=1";
-            jQuery("#certificateIcon_" + certId).attr('src', src);
+            jQuery('.js-certificate-icon').attr('src', src);
             editCertificateLayout.modals.close();
         }, this), this);
         dialog.on('closeModal', jQuery.proxy(function () {
@@ -353,6 +357,9 @@ var StatementModal = Backbone.Modal.extend({
     openSelectStatementModal: function (e) {
         e.preventDefault();
         editCertificateLayout.modals.show(new SelectStatementModal({parentWindow: this.dialog}));
+    },
+    onShow: function () {
+        this.$('#objectSelection').focus();
     }
 });
 
@@ -428,12 +435,7 @@ var CertificateLogoLayout = Backbone.Modal.extend({
     submitEl: '.bbm-button',
     cancelEl: '.modal-close',
     onRender: function () {
-        var certId = jQuery1816Curriculum('#selectedCertificateID').val();
-        var fileUploaderUrl = '';
-        if (!curriculumLogoData.supports()) {
-            fileUploaderUrl = path.root + path.api.files + '?action=ADD&contentType=icon&folderId=' + certId;
-        }
-        var uploader = new FileUploader({ endpoint: fileUploaderUrl, message: scormLanguageDataCurriculum['uploadLogoMessage']});
+        var uploader = new FileUploader({ endpoint: '', message: scormLanguageDataCurriculum['uploadLogoMessage']});
         if (curriculumLogoData.supports()) {
             uploader.on('fileuploadadd', function (data) {
                 curriculumLogoData.setSetting(IMAGE_PARAM_TYPE.CONTENT_TYPE, 'icon');
@@ -441,19 +443,14 @@ var CertificateLogoLayout = Backbone.Modal.extend({
                 curriculumLogoData.setSetting(IMAGE_PARAM_TYPE.FILE_NAME, data.name);
 
                 curriculumLogoData.readAsDataURL(data, function (img) {
-                    jQuery("#certificateIcon_" + certId).attr('src', img);
+                    jQuery('.js-certificate-icon').attr('src', img);
                 });
                 editCertificateLayout.modals.close();
             });
         }
         else {
             uploader.on('fileuploaddone', function (data) {
-                saveCertificateLogo(certId, data.name);
-                var src = path.root + path.api.files +
-                        "images?folderId=" + certId +
-                        "&file=" + data.name + "&date=" + Date.now();
-                jQuery("#certificateIcon_" + certId).attr('src', src);
-                editCertificateLayout.modals.close();
+                editCertificateLayout.modals.close(); //The image will automatically appear
             });
         }
         this.$('.certificate-modal-content').append(uploader.render().$el);
@@ -486,7 +483,7 @@ function initCurriculumView() {
 
             var data = e.data.split(';');
             var src = e.data.slice(0, -(data[data.length - 1].length + 1));
-            jQuery('#certificateIcon_' + id).attr('src', src);
+            jQuery('.js-certificate-icon').attr('src', src);
         }
     };
 

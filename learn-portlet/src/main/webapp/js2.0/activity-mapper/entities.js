@@ -6,7 +6,7 @@ ActivityMapperApp.module("Entities", function(Entities, ActivityMapperApp, Backb
     },
     persist: function(siteID) {
       var url = path.root + path.api.settingsApi;
-      $.post(url, {
+      window.LearnAjax.post(url, {
         courseId: siteID,
         keyID: this.get('activityID'),
         value: this.get('mappedVerb')

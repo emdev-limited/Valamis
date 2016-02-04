@@ -1,149 +1,114 @@
 package com.arcusys.learn.controllers.api
 
-import com.arcusys.learn.facades.{ CertificateFacadeContract, CourseFacadeContract, UserFacadeContract }
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission.{ PortletName, ModifyPermission, ViewPermission, PermissionUtil }
+import com.arcusys.learn.controllers.api.base.BaseJsonApiController
+import com.arcusys.learn.facades.{CertificateFacadeContract, UserFacadeContract}
+import com.arcusys.learn.liferay.permission.PermissionUtil._
+import com.arcusys.learn.liferay.permission._
+import com.arcusys.learn.models.CourseConverter
 import com.arcusys.learn.models.request.UserRequest
 import com.arcusys.learn.models.response.CollectionResponse
-import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.escalatesoft.subcut.inject.BindingModule
-import PermissionUtil._
+import com.arcusys.learn.policies.api.UserPolicy
+import com.arcusys.valamis.certificate.model.CertificateStatuses
+import com.arcusys.valamis.certificate.service.CertificateService
+import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.model.Order
+import com.arcusys.valamis.user.model.{UserFilter, UserSort}
+import org.json4s.ext.EnumNameSerializer
+import org.json4s.{DefaultFormats, Formats}
 
-// Documentation: https://confluence.intra.arcusys.fi/display/VAL/Web+API+Specification:+User
+class UserApiController
+  extends BaseJsonApiController
+  with UserPolicy
+  with CourseConverter {
 
-class UserApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  val certificateFacade = inject[CertificateFacadeContract]
-  val userFacade = inject[UserFacadeContract]
-  val courseFacade = inject[CourseFacadeContract]
-  val lrsReader = inject[LrsClientManager]
+  private lazy val certificateFacade = inject[CertificateFacadeContract]
+  private lazy val userFacade = inject[UserFacadeContract]
+  private lazy val courseService = inject[CourseService]
+  private lazy val req = UserRequest(this)
+  private lazy val certificateService = inject[CertificateService]
 
-  def this() = this(Configuration)
+  override implicit val jsonFormats: Formats = DefaultFormats + new EnumNameSerializer(CertificateStatuses)
 
-  before() {
-    scentry.authenticate(LIFERAY_STRATEGY_NAME)
+  get("/users(/)") {
+    val filter = UserFilter(
+      Some(getCompanyId),
+      req.filter,
+      req.certificateId,
+      req.groupId,
+      req.orgId,
+      req.isUserJoined,
+      Some(UserSort(req.sortBy, Order.apply(req.isSortDirectionAsc)))
+    )
+
+    userFacade.getBy(filter, req.pageOpt, req.skipTake, req.withStat)
   }
 
-  get("/users(/)(:userID)")(jsonAction {
-    val userRequest = UserRequest(this)
-    if (!PermissionUtil.hasPermissionApi(ModifyPermission, PortletName.CertificateManager)) {
-      PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LearningTranscript, PortletName.UserPortfolio, PortletName.ValamisActivities)
+  get("/users/:userID(/)") {
+    userFacade.getById(req.requestedUserId)
+  }
+
+  get("/users/:userID/certificates(/)"){
+
+    // only teachers and admins can see result of other people
+    if (req.requestedUserId != getUserId) {
+      PermissionUtil.requirePermissionApi(ViewPermission, PortletName.CertificateManager, PortletName.LearningTranscript)
     }
 
-    if (userRequest.isUserIdRequest) {
-      lrsReader.statementApi(
-        userFacade.byId(_,
-          userRequest.requestedUserId,
-          userRequest.isShortResult,
-          userRequest.withOpenBadges),
-        userRequest.lrsAuth)
+    if (req.available) {
+      val result = certificateFacade.getAvailableForUser(
+        getCompanyId.toInt,
+        req.skipTake,
+        req.textFilter,
+        req.isSortDirectionAsc,
+        req.requestedUserId,
+        req.isShortResult,
+        req.scope)
+
+      CollectionResponse(
+        req.page,
+        result.items,
+        result.total)
 
     } else {
-      val skipTake = userRequest.skipTake
-      val users = userFacade.all(
-        getCompanyId.toInt,
-        userRequest.orgId,
-        skipTake,
-        userRequest.filter,
-        userRequest.isSortDirectionAsc)
+      val result = if (req.withOpenBadges)
+        certificateFacade.getCertificatesByUserWithOpenBadges(
+          req.requestedUserId,
+          getCompanyId.toInt,
+          req.isSortDirectionAsc,
+          req.isShortResult,
+          req.skipTake,
+          req.textFilter)
+      else
+        certificateFacade.getForUserWithStatus(
+          req.requestedUserId,
+          getCompanyId.toInt,
+          req.isSortDirectionAsc,
+          req.skipTake,
+          req.textFilter,
+          req.isPublished)
 
-      val page = skipTake.map(x => userRequest.page).getOrElse(0)
-      CollectionResponse(page, users.items, users.total)
+      CollectionResponse(
+        req.page,
+        result.items,
+        result.total)
     }
-  })
+  }
 
-  get("/users/orgs")(jsonAction {
-    userFacade.orgs()
-  })
+  //TODO: Move to certificate controller
+  get("/users/:userID/certificates/:certificateId/goals(/)") {
+    val cetrificateId: Long = req.certificateId.getOrElse(0)
+    val userId = req.requestedUserId
+    if (certificateService.hasUser(cetrificateId, userId)) {
+      certificateFacade.getGoalsStatuses(cetrificateId, userId)
+    }
+  }
 
-  get("/users/:userID/certificates(/)")(jsonAction {
-
-    val userRequest = UserRequest(this)
-    // only teachers and admins can see result of other people
-    lrsReader.statementApi(statementApi =>{
-      if (userRequest.requestedUserId != getUserId) {
-        PermissionUtil.requirePermissionApi(ViewPermission, PortletName.CertificateManager, PortletName.LearningTranscript)
-      }
-
-      if (userRequest.available) {
-        val certificates = certificateFacade.getAvailableForUser(
-          getCompanyId.toInt,
-          userRequest.skip,
-          userRequest.count,
-          userRequest.filter,
-          userRequest.isSortDirectionAsc,
-          userRequest.requestedUserId,
-          userRequest.isShortResult,
-          userRequest.isOnlyPublished,
-          userRequest.scope)
-
-        val total = certificateFacade.availableForUserCount(
-          getCompanyId.toInt,
-          userRequest.requestedUserId,
-          userRequest.filter,
-          userRequest.isOnlyPublished,
-          userRequest.scope)
-
-        CollectionResponse(
-          userRequest.page,
-          certificates,
-          total)
-
-      } else {
-
-        val certificates = if (userRequest.withOpenBadges)
-          certificateFacade.getCertificatesByUserWithOpenBadges(
-            statementApi,
-            getCompanyId.toInt,
-            userRequest.skip,
-            userRequest.count,
-            userRequest.filter,
-            userRequest.isSortDirectionAsc,
-            userRequest.requestedUserId,
-            userRequest.isOnlyPublished)
-        else
-          certificateFacade.getForUserWithStatus(
-            statementApi,
-            getCompanyId.toInt,
-            userRequest.skip,
-            userRequest.count,
-            userRequest.filter,
-            userRequest.isSortDirectionAsc,
-            userRequest.requestedUserId,
-            userRequest.isShortResult,
-            userRequest.isOnlyPublished)
-
-        val total = if (userRequest.withOpenBadges)
-          lrsReader.statementApi(
-            certificateFacade.getCertificatesCountByUserWithOpenBadges(_,
-              getCompanyId.toInt,
-              userRequest.filter,
-              userRequest.requestedUserId,
-              userRequest.isOnlyPublished),
-          userRequest.lrsAuth)
-        else
-          certificateFacade.forUserCount(
-            getCompanyId.toInt,
-            userRequest.filter,
-            userRequest.requestedUserId,
-            userRequest.isOnlyPublished)
-
-        CollectionResponse(
-          userRequest.page,
-          certificates,
-          total)
-      }
-    }, userRequest.lrsAuth)
-  })
-
-  get("/users/:userID/certificates/:certificateId/goals(/)")(jsonAction {
-    val userRequest = UserRequest(this)
-    lrsReader.statementApi(
-      certificateFacade.getGoalsStatuses(_, userRequest.certificateId, userRequest.requestedUserId),
-      userRequest.lrsAuth)
-  })
-
-  get("/users/:userID/courses")(jsonAction {
-    val userRequest = UserRequest(this)
-    courseFacade.getByUserId(userRequest.requestedUserId)
-  })
+  get("/users/:userID/courses(/)"){
+    val result = courseService.getByUserId(req.requestedUserId, req.skipTake)
+    new CollectionResponse(
+      req.page,
+      result.items.map(toResponse),
+      result.total
+    )
+  }
 }

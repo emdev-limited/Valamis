@@ -4,7 +4,7 @@ import com.arcusys.valamis.lesson.generator.GenericPackageGenerator
 
 trait TinCanPackageGenerator extends GenericPackageGenerator {
   protected val commonResourceURLs = Seq("jquery-1.7.2.min.js", "jquery-ui-1.8.20.custom.min.js", "lodash.min.js", "jquery.ui.touch-punch.min.js",
-    "jquery-ui-1.8.20.custom.css", "base.js", "tincan-min.js", "player_tincan_content.css", "buttons.css")
+    "jquery-ui-1.8.20.custom.css", "base.js", "tincan-min.js", "toastr.min.js", "player_tincan_content.css", "buttons.css", "toastr.css")
 
   protected val commonRevealResourceURLs = Seq("reveal.min.js",
     "head.min.js",
@@ -24,6 +24,7 @@ trait TinCanPackageGenerator extends GenericPackageGenerator {
     "skins/polaris/polaris.css",
     "skins/polaris/polaris.png",
     "skins/polaris/polaris@2x.png",
+    "images/ui-bg_glass_100_f6f6f6_1x400.png",
     "lib/font/league-gothic/league-gothic.css",
     "lib/font/league-gothic/league-gothic.eot",
     "lib/font/league-gothic/league-gothic.woff",

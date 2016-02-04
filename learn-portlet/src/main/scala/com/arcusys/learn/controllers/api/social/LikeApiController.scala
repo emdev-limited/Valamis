@@ -1,30 +1,43 @@
 package com.arcusys.learn.controllers.api.social
 
-import com.arcusys.learn.controllers.api.BaseApiController
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.models.request.{LikeActionType, LikeRequest}
-import com.arcusys.valamis.social.service.LikeService
-import com.escalatesoft.subcut.inject.BindingModule
+import com.arcusys.learn.controllers.api.base.BaseJsonApiController
+import com.arcusys.learn.liferay.notifications.MessageType
+import com.arcusys.learn.liferay.notifications.website.activity.ActivityNotificationHelper
+import com.arcusys.learn.liferay.permission._
+import com.arcusys.learn.models.request.LikeRequest
+import com.arcusys.learn.policies.api.LikePolicy
+import com.arcusys.valamis.social.service.{ActivityService, LikeService}
 
-class LikeApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  def this() = this(Configuration)
+class LikeApiController extends BaseJsonApiController with LikePolicy  {
 
-  val likeService = inject[LikeService]
+  lazy val likeService = inject[LikeService]
+  lazy val activityService = inject[ActivityService]
 
   implicit val serializationFormats = LikeRequest.serializationFormats
 
-  get("/activity-like(/)")(jsonAction {
+  get("/activity-like(/)") {
+    val likeRequest = LikeRequest(this)
+    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.ValamisActivities)
+
+    likeService.getBy(likeRequest.likeFilter)
+  }
+
+  post("/activity-like(/)") {
     val likeRequest = LikeRequest(this)
 
-    likeService.getBy(likeRequest.likeRequest)
-  })
+    val activity = activityService.getById(likeRequest.activityId)
+    ActivityNotificationHelper.sendNotification(
+      MessageType.Like,
+      likeRequest.courseId,
+      likeRequest.userId,
+      request,
+      activity
+    )
+    likeService.create(likeRequest.like)
+  }
 
-  post("/activity-like(/)")(jsonAction {
+  delete ("/activity-like(/)") {
     val likeRequest = LikeRequest(this)
-
-    likeRequest.action match {
-      case LikeActionType.Create => likeService.create(likeRequest.like)
-      case LikeActionType.Delete => likeService.delete(likeRequest.userId, likeRequest.activityId)
-    }
-  })
+    likeService.delete(likeRequest.userId, likeRequest.activityId)
+  }
 }

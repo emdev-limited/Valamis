@@ -10,12 +10,16 @@
     <div class="tile-content">
         <div class="image certificate img-square"
         {{#logo}}
-        style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
+        style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
+        {{/logo}}
+
+        {{^logo}}
+        style="background-image: url('/learn-portlet/img/certificate-default.jpg')"
         {{/logo}}>
         </div>
         <ul>
-            <li class="title">{{title}}</li>
-            <li class="through-label">
+            <li class="title"><a href="{{url}}"> {{title}} </a></li>
+            <li class="time-label">
             {{#dateString}}
                 {{validThroughLabel}} {{dateString}}
             {{/dateString}}

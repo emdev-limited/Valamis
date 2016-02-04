@@ -1,7 +1,7 @@
 package com.arcusys.learn.service.util
 
-import org.scalatra.ScalatraBase
 import com.thoughtworks.paranamer.ParameterNamesNotFoundException
+import org.scalatra.ScalatraBase
 
 /**
  * Created by Iliya Tryapitsin on 24.02.14.

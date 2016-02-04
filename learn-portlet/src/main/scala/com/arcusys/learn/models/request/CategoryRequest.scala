@@ -1,8 +1,8 @@
 package com.arcusys.learn.models.request
 
 import com.arcusys.learn.liferay.permission.PermissionCredentials
+import com.arcusys.learn.service.util.{AntiSamyHelper, Parameter}
 import org.scalatra.ScalatraServlet
-import com.arcusys.learn.service.util.{ AntiSamyHelper, Parameter }
 
 import scala.util.Try
 
@@ -22,6 +22,8 @@ object CategoryRequest extends BaseRequest {
   val DndMode = "dndMode"
   val TargetId = "targetId"
   val ItemType = "itemType"
+  val CopyFromId = "copyFromId"
+
 
   def apply(controller: ScalatraServlet) = new Model(controller)
 
@@ -35,19 +37,29 @@ object CategoryRequest extends BaseRequest {
       }
     }
 
+    def copyFromId = Parameter(CopyFromId).intOption
+
     def permissionCredentials = PermissionCredentials(Parameter(CourseId).longRequired, Parameter(PortletId).required, Parameter(PrimaryKey).required)
 
     def itemType = Parameter(ItemType).required
 
     def categoryId = Parameter(CategoryId).intOption
 
-    def categoryIds = Parameter(CategoryIds).multiWithEmpty.map(x => Try(x.toInt).get)
+    def categoryIds = Parameter(CategoryIds).multiLong
 
-    def courseId = Parameter(CourseId).intOption
+    def courseId = Parameter(CourseId).longRequired
 
-    def newCourseId = Parameter(NewCourseId).intOption
+    @deprecated
+    def courseIdInt = Parameter(CourseId).intOption
 
-    def parentId = Parameter(ParentId).intOption
+    def newCourseId = Parameter(NewCourseId).longRequired
+
+    @deprecated
+    def newCourseIdInt = Parameter(NewCourseId).intOption
+
+    def parentId = Parameter(ParentId).longOption
+    @deprecated
+    def parentIdInt = Parameter(ParentId).intOption
 
     def id = Parameter(Id).intRequired
 
@@ -55,12 +67,9 @@ object CategoryRequest extends BaseRequest {
 
     def questionsIdSet = Parameter(Questions).multiRequired.map(x => x.toInt)
 
-    def title = AntiSamyHelper.sanitize(Parameter(Title).required)
+    def title = Parameter(Title).required
 
-    def description = Parameter(Description).option match {
-      case Some(value) => AntiSamyHelper.sanitize(value)
-      case None        => ""
-    }
+    def description = Parameter(Description).option.getOrElse("")
 
     def index = Parameter(Index).intRequired
 

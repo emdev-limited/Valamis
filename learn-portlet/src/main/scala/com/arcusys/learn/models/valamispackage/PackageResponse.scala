@@ -1,13 +1,10 @@
 package com.arcusys.learn.models.valamispackage
 
-import com.arcusys.valamis.lesson.model.ValamisTag
+import com.arcusys.valamis.lesson.model.{LessonType, PackageUploadModel, ValamisTag}
+import com.arcusys.valamis.ratings.model.Rating
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
-import org.json4s.{ CustomSerializer, DefaultFormats, Extraction }
-
-/**
- * Created by igorborisov on 07.10.14.
- */
+import org.json4s.{CustomSerializer, DefaultFormats, Extraction}
 
 case class PlayerPackageResponse(id: Long,
   title: String,
@@ -25,7 +22,8 @@ case class PlayerPackageResponse(id: Long,
   status: String,
   tags: Seq[ValamisTag],
   beginDate: String,
-  endDate: String)
+  endDate: String,
+  rating: Rating)
 
 case class PackageResponse(id: Long,
   title: String,
@@ -39,9 +37,8 @@ case class PackageResponse(id: Long,
   rerunIntervalType: String,
   tags: Seq[ValamisTag],
   beginDate: String,
-  endDate: String)
-
-case class PackageUploadModel(id: Int, title: String, description: String, packageType: String, logo: String)
+  endDate: String,
+  rating: Rating)
 
 class PackageSerializer extends CustomSerializer[PackageUploadModel](implicit format => ({
   case jValue: JValue =>
@@ -49,21 +46,13 @@ class PackageSerializer extends CustomSerializer[PackageUploadModel](implicit fo
       jValue.\("id").extract[Int],
       jValue.\("title").extract[String],
       jValue.\("description").extract[String],
-      jValue.\("packageType").extract[String],
+      jValue.\("packageType").extract[String] match {
+        case "scorm" => LessonType.Scorm
+        case "tincan" => LessonType.Tincan
+        case s => LessonType.withName(s)
+      },
       jValue.\("logo").extract[String]
     )
 }, {
   case pack: PackageUploadModel => render(Extraction.decompose(pack)(DefaultFormats))
-
 }))
-
-object PackageSortBy extends Enumeration {
-  type PackageSortBy = Value
-  val Name, Date = Value
-
-  def apply(v: String): PackageSortBy = v.toLowerCase() match {
-    case "name" => Name
-    case "date" => Date
-    case _      => throw new IllegalArgumentException()
-  }
-}

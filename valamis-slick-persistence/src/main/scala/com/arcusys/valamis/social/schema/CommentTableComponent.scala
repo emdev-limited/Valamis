@@ -1,8 +1,8 @@
 package com.arcusys.valamis.social.schema
 
 import com.arcusys.valamis.core.DbNameUtils._
+import com.arcusys.valamis.joda.JodaDateTimeMapper
 import com.arcusys.valamis.social.model.Comment
-import com.github.tototoshi.slick.GenericJodaSupport
 import org.joda.time.DateTime
 import scala.slick.driver.{JdbcDriver, JdbcProfile}
 
@@ -11,9 +11,7 @@ trait CommentTableComponent {
   import driver.simple._
 
   class CommentTable(tag: Tag) extends Table[Comment](tag, tblName("COMMENT")) {
-    val jodaMapper = new GenericJodaSupport(driver.asInstanceOf[JdbcDriver])
-    import jodaMapper._
-
+    implicit val jodaMapper = new JodaDateTimeMapper(driver.asInstanceOf[JdbcDriver]).typeMapper
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def companyId = column[Long]("COMPANY_ID")
     def userId = column[Long]("USER_ID")

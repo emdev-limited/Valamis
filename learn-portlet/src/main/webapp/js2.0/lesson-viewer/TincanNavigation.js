@@ -28,7 +28,6 @@ TincanNode1DCollection = NavigationNodeCollection.extend({
                 index1D += 1;
             }
         });
-        this.initialToggle();
     }
 });
 
@@ -65,7 +64,6 @@ TincanNode2DCollection = NavigationNodeCollection.extend({
             indexH += 1;
             indexV = 0;
         });
-        this.initialToggle();
     }
 });
 
@@ -116,11 +114,11 @@ navigationProxy = {
     getSlideTitle2D: function(event){
         if(this.tinCanPackageRendererInitialized()) return this.data[event.indexh].childElements[event.indexV];
     },
-    toggle2D: function(event){
-        this.navigationNodeCollection.toggle(event.indexh,event.indexv);
+    toggle2D: function(indexh, indexv){
+        this.navigationNodeCollection.toggle(indexh, indexv);
     },
-    toggle1D: function(event){
-        this.navigationNodeCollection.toggle(event.indexh);
+    toggle1D: function(indexh){
+        this.navigationNodeCollection.toggle(indexh);
     },
     playerDisplayContentIframe: function() {
         return jQueryValamis("#SCORMDataOutput")[0].contentWindow
@@ -132,6 +130,7 @@ navigationProxy = {
         var id = model.id;
         var elementType;
         var title = model.title;
+        var duration = model.duration;
 
         switch(model.jsonClass){
             case "TinCanQuizPackageGenerator$Category":
@@ -156,7 +155,7 @@ navigationProxy = {
                 break;
             case "RevealJSQuizQuestion":
             case "PlainRevealJSQuizQuestion":
-                elementType = "slide";
+                elementType = "page";
                 break;
             case "DLVideoQuizQuestion":
                 elementType = "video";
@@ -166,7 +165,8 @@ navigationProxy = {
         return {
             id: id,
             title: title,
-            elementType: elementType
+            elementType: elementType,
+            duration: duration
         }
     },
     parseModel1D: function(model){
@@ -184,6 +184,7 @@ navigationProxy = {
         result.push({
             title: first.title,
             elementType: 'directory',
+            duration: first.duration,
             childElements: [],
             prevModel: first
         });
@@ -197,6 +198,7 @@ navigationProxy = {
                 result.push({
                     title: nextHorizontal.title,
                     elementType: 'directory',
+                    duration: nextHorizontal.duration,
                     childElements: [],
                     prevModel: nextHorizontal
                 });
@@ -212,7 +214,8 @@ navigationProxy = {
             if(typeof nextVertical != 'undefined'){
                 var n = {
                     title: nextVertical.title,
-                    elementType: 'slide',
+                    elementType: 'page',
+                    duration: nextVertical.duration,
                     prevModel: nextVertical
                 };
                 directoryElement.childElements.push(n);
@@ -223,7 +226,8 @@ navigationProxy = {
         _.forEach(result, function(elem){
             elem.childElements.push({
                 title: elem.title,
-                elementType: 'slide',
+                elementType: 'page',
+                duration: elem.duration,
                 prevModel: elem.prevModel
             });
             composeVertical(elem, elem, data);

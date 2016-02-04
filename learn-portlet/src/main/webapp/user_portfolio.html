@@ -14,18 +14,14 @@
         jQuery1816User(function () {
             Backbone.emulateJSON = true;
             Backbone.ajax = window.LearnAjax.ajax;
-            var defaultURL = Utils.getContextPath() + '/i18n/curriculum_en.properties';
-            var localizedURL = Utils.getContextPath() + '/i18n/curriculum_{{language}}.properties';
-            Utils.i18nLoader(localizedURL, defaultURL, onUserLanguageLoad, onUserLanguageError);
+            Utils.loadLanguage('curriculum', onUserPortfolioLanguageLoad);
         });
 
-        function onUserLanguageLoad(properties) {
+        function onUserPortfolioLanguageLoad(properties) {
             scormLanguageDataUser = properties;
             initUserView();
         }
-        function onUserLanguageError() {
-            alert('Translation resource loading failed!');
-        }
+
         var ViewCertificateLayout = Backbone.Marionette.Layout.extend({
             template: _.template(jQuery('#certificate-modals-template').html()),
             regions: {

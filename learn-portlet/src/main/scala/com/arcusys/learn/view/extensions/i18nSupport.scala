@@ -1,12 +1,13 @@
 package com.arcusys.learn.view.extensions
 
-import scala.collection.JavaConversions._
-import javax.portlet.GenericPortlet
-import javax.portlet.PortletContext
-import javax.servlet.ServletContext
-import org.scalatra._
+import java.io.{FileInputStream, InputStreamReader}
 import java.util.Properties
-import java.io.{ FileInputStream, InputStreamReader }
+import javax.portlet.{GenericPortlet, PortletContext}
+import javax.servlet.ServletContext
+
+import org.scalatra.{ScalatraFilter, ScalatraServlet}
+
+import scala.collection.JavaConversions._
 
 trait i18nSupport {
   def getTranslation(path: String): Map[String, String] = {

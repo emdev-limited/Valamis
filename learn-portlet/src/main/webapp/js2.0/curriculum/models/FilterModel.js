@@ -8,7 +8,7 @@ LiferayOrganizationModel = Backbone.Model.extend({
 LiferayOrganizationCollectionService = new Backbone.Service({ url: path.root,
   sync: {
     'read': function () {
-      return  path.api.users + 'orgs';
+      return  path.api.organizations;
     }
   }
 });

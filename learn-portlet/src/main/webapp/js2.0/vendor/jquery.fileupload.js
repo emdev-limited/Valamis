@@ -421,7 +421,6 @@
                 multipart = options.multipart || !$.support.xhrFileUpload,
                 paramName = $.type(options.paramName) === 'array' ?
                     options.paramName[0] : options.paramName;
-            options.headers = $.extend({}, options.headers);
             if (options.contentRange) {
                 options.headers['Content-Range'] = options.contentRange;
             }

@@ -41,65 +41,6 @@
         </finder>
     </entity>
 
-    <entity name="LFQuiz" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/>
-        <column name="title" type="String" convert-null="true"/>
-        <column name="description" type="String" convert-null="true"/>
-        <column name="logo" type="String" convert-null="true"/>
-        <column name="welcomePageContent" type="String" convert-null="true"/>
-        <column name="finalPageContent" type="String" convert-null="true"/>
-        <column name="courseID" type="Integer" convert-null="false"/>
-        <column name="maxDuration" type="Integer" convert-null="false"/>
-
-        <finder name="CourseId" return-type="Collection">
-            <finder-column name="courseID" arrayable-operator="OR"/>
-        </finder>
-    </entity>
-    <entity name="LFQuizQuestion" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/>
-        <column name="quizId" type="Integer"/>
-        <column name="categoryId" type="Integer" convert-null="false"/>
-        <column name="questionId" type="Integer"/>
-        <column name="questionType" type="String" convert-null="true"/>
-        <column name="title" type="String"/>
-        <column name="url" type="String" convert-null="true"/>
-        <column name="plainText" type="String" convert-null="true"/>
-        <column name="arrangementIndex" type="Integer"/>
-        <column name="autoShowAnswer" type="Boolean"/>
-        <column name="groupId" type="Integer"/>
-
-        <finder name="QuizID" return-type="Collection">
-            <finder-column name="quizId"/>
-        </finder>
-        <finder name="QuizAndCategory" return-type="Collection">
-            <finder-column name="quizId"/>
-            <finder-column name="categoryId"/>
-        </finder>
-    </entity>
-
-    <entity name="LFQuizAnswerScore" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="answerId" type="long" primary="true"/>
-        <column name="score" type="Double"/>
-    </entity>
-
-    <!--LFQuizQuestionCategory-->
-    <entity name="LFQuizQuestCat" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/>
-        <column name="title" type="String" convert-null="true"/>
-        <column name="description" type="String" convert-null="true"/>
-        <column name="quizId" type="Integer"/>
-        <column name="parentId" type="Integer" convert-null="false"/>
-        <column name="arrangementIndex" type="Integer"/>
-
-        <finder name="QuizIdAndParentId" return-type="Collection">
-            <finder-column name="quizId"/>
-            <finder-column name="parentId"/>
-        </finder>
-
-        <finder name="QuizId" return-type="Collection">
-            <finder-column name="quizId"/>
-        </finder>
-    </entity>
     <entity name="LFAnswer" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
         <column name="id" type="long" primary="true"/>
         <column name="description" type="String" convert-null="true"/>
@@ -115,6 +56,7 @@
             <finder-column name="questionId"/>
         </finder>
     </entity>
+
     <entity name="LFQuestionCategory" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
         <column name="id" type="long" primary="true"/>
         <column name="title" type="String" convert-null="true"/>
@@ -132,6 +74,7 @@
             <finder-column name="parentId" arrayable-operator="OR"/>
         </finder>
     </entity>
+
     <entity name="LFQuestion" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
         <column name="id" type="long" primary="true"/>
         <column name="categoryId" type="Integer" convert-null="false"/>
@@ -151,6 +94,7 @@
             <finder-column name="categoryId" arrayable-operator="OR"/>
         </finder>
     </entity>
+
     <entity name="LFAttemptData" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
         <column name="id" type="long" primary="true"/>
         <column name="dataKey" type="String" convert-null="true"/>
@@ -590,6 +534,7 @@
         <column name="authType" type="String" />
         <column name="key" type="String" />
         <column name="secret" type="String" />
+        <column name="customHost" type="String" />
     </entity>
 
     <entity name="LFTincanPackage" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
@@ -713,39 +658,6 @@
         </finder>
     </entity>
 
-    <entity name="LFConfig" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/>
-        <column name="dataKey" type="String" convert-null="true"/>
-        <column name="dataValue" type="String" convert-null="true"/>
-
-        <finder name="DataKey" return-type="Collection">
-            <finder-column name="dataKey"/>
-        </finder>
-    </entity>
-
-    <entity name="LFQuizTreeElement" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/>
-        <column name="quizID" type="Integer"/>
-        <column name="elementID" type="String"/>
-        <column name="isCategory" type="Boolean"/>
-        <column name="parentID" type="String" convert-null="false"/>
-        <column name="arrangementIndex" type="Integer"/>
-
-        <finder name="QuizID" return-type="Collection">
-            <finder-column name="quizID"/>
-        </finder>
-
-        <finder name="QuizAndElementID" return-type="LFQuizTreeElement">
-            <finder-column name="quizID"/>
-            <finder-column name="elementID"/>
-        </finder>
-
-        <finder name="QuizAndParentID" return-type="Collection">
-            <finder-column name="quizID"/>
-            <finder-column name="parentID"/>
-        </finder>
-    </entity>
-
     <entity name="LFSiteDependentConfig" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
         <column name="id" type="long" primary="true"/>
         <column name="siteID" type="Integer"/>
@@ -808,44 +720,5 @@
             <finder-column name="objID"/>
             <finder-column name="objType"/>
         </finder>
-    </entity>
-
-    <entity name="LFSlideSet" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/> <!-- Primary key -->
-        <column name="title" type="String"/>
-        <column name="description" type="String"/>
-        <column name="logo" type="String"/>
-        <column name="courseId" type="Long"/>
-        <finder name="CourseId" return-type="Collection">
-            <finder-column name="courseId"/>
-        </finder>
-    </entity>
-
-    <entity name="LFSlide" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/> <!-- Primary key -->
-        <column name="bgcolor" type="String"/>
-        <column name="bgimage" type="String"/>
-        <column name="title" type="String"/>
-        <column name="slideSetId" type="Long"/>  <!-- Foreign key to SlideSet -->
-        <column name="topSlideId" type="Long"/>  <!-- Foreign key to Slide -->
-        <column name="leftSlideId" type="Long"/> <!-- Foreign key to Slide -->
-        <column name="statementVerb" type="String"/>
-        <column name="statementObject" type="String"/>
-        <column name="statementCategoryId" type="String"/> <!-- 36 char category id (uri) -->
-    </entity>
-
-    <entity name="LFSlideEntity" cache-enabled="false" local-service="true" remote-service="false" json-enabled="false">
-        <column name="id" type="long" primary="true"/>
-        <column name="top" type="String"/>
-        <column name="left" type="String"/>
-        <column name="width" type="String"/>
-        <column name="height" type="String"/>
-        <column name="zIndex" type="String"/>
-        <column name="content" type="String"/>
-        <column name="entityType" type="String"/>
-        <column name="slideId" type="Long"/> <!-- Foreign key to Slide -->
-        <column name="correctLinkedSlideId" type="Long"/>
-        <column name="incorrectLinkedSlideId" type="Long"/>
-        <column name="notifyCorrectAnswer" type="Boolean"/>
     </entity>
 </service-builder>

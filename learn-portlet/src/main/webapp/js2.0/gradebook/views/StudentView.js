@@ -16,7 +16,14 @@ StudentTableRowView = Backbone.View.extend({
 
     render: function () {
         var language = this.options.language;
-        var template = Mustache.to_html(jQueryValamis("#studentViewTablePackageRowTemplate").html(), _.extend(this.model.toJSON(), language));
+        var template = Mustache.to_html(
+            jQueryValamis("#studentViewTablePackageRowTemplate").html(),
+            _.extend({
+                    gradeAutoShowing: Math.floor(this.model.get('gradeAuto') || 0),
+                    gradeShowing: Math.floor(this.model.get('grade'))
+                    },
+                    this.model.toJSON(), language)
+        );
         this.$el.html(template);
 
         return this.$el;
@@ -54,7 +61,6 @@ StudentTableRowView = Backbone.View.extend({
     loadStatements: function() {
         var that = this;
         this.model.loadStatements({}).then(function(res){
-            that.model.set('gradeAuto', res.gradeAuto);
             that.model.set('statements', res.statements);
             var statementResult = JSON.parse(that.model.get('statements'));
             if (statementResult.statements.length > 0) {
@@ -62,7 +68,8 @@ StudentTableRowView = Backbone.View.extend({
                 that.tableView = new StudentPackageTableView({
                     language: that.options.language,
                     model: statementResult,
-                    activityIds:that.model.get('activityIds')
+                    activityId:that.model.get('activityId'),
+                    packageModel: that.options.model
                 });
                 that.$el.after(that.tableView.render());
             }
@@ -79,8 +86,11 @@ StudentView = Backbone.View.extend({
 
     initialize: function (options) {
         this.options = options;
-        var template = Mustache.to_html(jQueryValamis("#studentViewTemplate").html(), _.extend(this.model.toJSON(), language));
+
+        var template = Mustache.to_html(jQueryValamis("#studentViewLayoutTemplate").html(),
+            _.extend({}, this.model.toJSON(), language));
         this.$el.html(template);
+
         var windowHeight = jQueryValamis(window).height() - 200;
         this.$('.page-content-div').height(windowHeight);
 
@@ -118,6 +128,11 @@ StudentView = Backbone.View.extend({
             success: jQueryValamis.proxy(function (res) {
                 this.hideLoading();
                 this.model = new GradebookStudentModel(res);
+
+                var template = Mustache.to_html(jQueryValamis("#studentViewTemplate").html(),
+                    _.extend({}, this.model.toJSON(), language));
+                this.$('.js-student-view-table').html(template);
+
                 this.collection = new StudentGradesCollection(res.packageGrades);
                 this.addGradesFromCollection();
                 this.paginator.updateItems(res.packagesCount);
@@ -140,13 +155,13 @@ StudentView = Backbone.View.extend({
 
     render: function () {
         this.paginator.render();
-        var template = Mustache.to_html(jQueryValamis("#studentTotalGradeViewTemplate").html(), _.extend(this.model.toJSON(), language));
-        this.$('#studentTotalGrade').html(template);
+        this.paginatorShowing.render();
 
         return this.$el;
     },
 
     addGrade: function (grade) {
+        var minGrade = 70;
         grade.set('studentId', this.model.id);
         var view = new StudentTableRowView({
             model: grade,
@@ -157,7 +172,9 @@ StudentView = Backbone.View.extend({
         view.on('refreshTotalGrade', jQueryValamis.proxy(function () {
             var countCompleted = 0;
             this.collection.each(function (grade) {
-                if (grade.get('grade') != 0) countCompleted++;
+                var gradeval = grade.get('grade');
+                var gradeAuto = grade.get('gradeAuto');
+                if ( (gradeval && gradeval >= minGrade) || (gradeAuto && gradeAuto >= minGrade) ) countCompleted++;
             }, this);
             this.model.set('completedPackagesCount', countCompleted);
             this.trigger('refreshTotalGrade', this);

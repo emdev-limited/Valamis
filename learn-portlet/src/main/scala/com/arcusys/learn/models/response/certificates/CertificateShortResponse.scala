@@ -3,7 +3,7 @@ package com.arcusys.learn.models.response.certificates
 import com.arcusys.learn.models.CourseResponse
 
 case class CertificateShortResponse(
-  id: Int,
+  id: Long,
   title: String,
   shortDescription: String,
   description: String,

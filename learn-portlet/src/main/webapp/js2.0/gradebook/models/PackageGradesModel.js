@@ -43,7 +43,7 @@ var PackageGradesModel = Backbone.Model.extend({
         gradeAuto: 0,
         grade: 0,
         comment: '',
-        activityIds: [],
+        activityId: '',
         statements: []
     }
 }).extend(PackageGradesService);

@@ -1,6 +1,6 @@
 package com.arcusys.learn.models.request
 
-import com.arcusys.learn.service.util.{ AntiSamyHelper, Parameter }
+import com.arcusys.learn.service.util.{AntiSamyHelper, Parameter}
 import org.scalatra.ScalatraBase
 
 /**

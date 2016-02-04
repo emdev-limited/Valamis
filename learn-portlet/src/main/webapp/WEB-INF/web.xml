@@ -2,78 +2,6 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
-    <filter>
-        <filter-name>ContentManager</filter-name>
-        <filter-class>com.arcusys.learn.view.ContentManagerView</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>ContentManager</filter-name>
-        <url-pattern>/BankView/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>LessonViewerView</filter-name>
-        <filter-class>com.arcusys.learn.view.LessonViewerView</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>LessonViewerView</filter-name>
-        <url-pattern>/LessonViewerView/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>SCORMAdminView</filter-name>
-        <filter-class>com.arcusys.learn.view.AdminView</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>SCORMAdminView</filter-name>
-        <url-pattern>/ScormAdmin/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>LessonDesignerView</filter-name>
-        <filter-class>com.arcusys.learn.view.LessonDesignerView</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>LessonDesignerView</filter-name>
-        <url-pattern>/LessonDesignerView/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>GradebookView</filter-name>
-        <filter-class>com.arcusys.learn.view.GradebookView</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>GradebookView</filter-name>
-        <url-pattern>/GradebookView/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>CurriculumView</filter-name>
-        <filter-class>com.arcusys.learn.view.CurriculumAdmin</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>CurriculumView</filter-name>
-        <url-pattern>/CurriculumView/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>CurriculumUser</filter-name>
-        <filter-class>com.arcusys.learn.view.CurriculumUser</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>CurriculumUser</filter-name>
-        <url-pattern>/CurriculumUser/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>UserPortfolio</filter-name>
-        <filter-class>com.arcusys.learn.view.UserPortfolioView</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>UserPortfolio</filter-name>
-        <url-pattern>/UserPortfolio/*</url-pattern>
-    </filter-mapping>
-
     <!--Listeners-->
     <listener>
         <listener-class>com.liferay.portal.kernel.spring.context.PortletContextLoaderListener</listener-class>
@@ -81,6 +9,10 @@
     <listener>
         <listener-class>com.arcusys.learn.notifications.services.LiferayMessageLauncher</listener-class>
     </listener>
+    <listener>
+        <listener-class>com.arcusys.learn.service.CacheContextListener</listener-class>
+    </listener>
+
 
     <!--Api endpoints-->
     <!--NB: Api endpoint url start with '/delegate' prefix-->
@@ -141,6 +73,25 @@
         <url-pattern>/gradebooks/*</url-pattern>
     </servlet-mapping>
 
+    <!--Notification api endpoint -->
+    <servlet>
+        <servlet-name>notifications</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.learn.controllers.api.NotificationApiController</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>notifications</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>notifications</servlet-name>
+        <url-pattern>/notifications/*</url-pattern>
+    </servlet-mapping>
+
     <!--Courses api endpoint-->
     <servlet>
         <servlet-name>courses</servlet-name>
@@ -179,13 +130,32 @@
         <url-pattern>/users/*</url-pattern>
     </servlet-mapping>
 
+    <!--Org api endpoint-->
+    <servlet>
+        <servlet-name>organizations</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.learn.controllers.api.OrganizationApiController</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>organizations</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>organizations</servlet-name>
+        <url-pattern>/organizations/*</url-pattern>
+    </servlet-mapping>
+
     <!--Certificate api endpoint-->
     <servlet>
         <servlet-name>certificates</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
         <init-param>
             <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.learn.controllers.api.CertificateApiController</param-value>
+            <param-value>com.arcusys.learn.controllers.api.certificate.CertificateApiController</param-value>
         </init-param>
         <init-param>
             <param-name>sub-context</param-name>
@@ -198,6 +168,23 @@
         <url-pattern>/certificates/*</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>certificate-states</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.learn.controllers.api.certificate.CertificateStateController</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>certificate-states</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>certificate-states</servlet-name>
+        <url-pattern>/certificate-states/*</url-pattern>
+    </servlet-mapping>
 
     <!--SlideSet api endpoint-->
     <servlet>
@@ -256,6 +243,44 @@
         <url-pattern>/slideentities/*</url-pattern>
     </servlet-mapping>
 
+    <!--Slide theme api endpoint-->
+    <servlet>
+        <servlet-name>slidethemes</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.learn.controllers.api.slides.SlideThemeApiController</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>slidethemes</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>slidethemes</servlet-name>
+        <url-pattern>/slidethemes/*</url-pattern>
+    </servlet-mapping>
+
+    <!--Device api endpoint-->
+    <servlet>
+        <servlet-name>slidedevices</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.learn.controllers.api.slides.DeviceApiController</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>devices</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>slidedevices</servlet-name>
+        <url-pattern>/devices/*</url-pattern>
+    </servlet-mapping>
+
     <!--Printing api endpoint-->
     <servlet>
         <servlet-name>print</servlet-name>
@@ -294,13 +319,13 @@
         <url-pattern>/administering/*</url-pattern>
     </servlet-mapping>
 
-    <!--Category api endpoint-->
+    <!--content manager-->
     <servlet>
         <servlet-name>categories</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
         <init-param>
             <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.learn.controllers.api.CategoryApiController</param-value>
+            <param-value>com.arcusys.learn.controllers.api.content.CategoryController</param-value>
         </init-param>
         <init-param>
             <param-name>sub-context</param-name>
@@ -319,7 +344,7 @@
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
         <init-param>
             <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.learn.controllers.api.QuestionApiController</param-value>
+            <param-value>com.arcusys.learn.controllers.api.content.QuestionController</param-value>
         </init-param>
         <init-param>
             <param-name>sub-context</param-name>
@@ -331,6 +356,26 @@
         <servlet-name>questions</servlet-name>
         <url-pattern>/questions/*</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>plaintext</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.learn.controllers.api.content.PlainTextController</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>plaintext</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>plaintext</servlet-name>
+        <url-pattern>/plaintext/*</url-pattern>
+    </servlet-mapping>
+
+    <!--/ content manager-->
 
     <!-- Call liferay actions -->
     <servlet>
@@ -387,15 +432,6 @@
         <init-param>
             <param-name>portlet-class</param-name>
             <param-value>com.arcusys.learn.view.AdminView</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet>
-        <servlet-name>SCORMQuizes Servlet</servlet-name>
-        <servlet-class>com.liferay.portal.kernel.servlet.PortletServlet</servlet-class>
-        <init-param>
-            <param-name>portlet-class</param-name>
-            <param-value>com.arcusys.learn.view.SCORMQuizes</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -467,14 +503,7 @@
         <servlet-name>SCORMApplicationAdmin Servlet</servlet-name>
         <url-pattern>/SCORMApplicationAdmin/*</url-pattern>
     </servlet-mapping>
-    <!--<servlet-mapping>-->
-        <!--<servlet-name>SCORMQuestionBank Servlet</servlet-name>-->
-        <!--<url-pattern>/SCORMQuestionBank/*</url-pattern>-->
-    <!--</servlet-mapping>-->
-    <servlet-mapping>
-        <servlet-name>SCORMQuizes Servlet</servlet-name>
-        <url-pattern>/SCORMQuizes/*</url-pattern>
-    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>Gradebook Servlet</servlet-name>
         <url-pattern>/Gradebook/*</url-pattern>
@@ -490,15 +519,6 @@
     <servlet-mapping>
         <servlet-name>ValamisSocialDashboard Servlet</servlet-name>
         <url-pattern>/ValamisSocialDashboard/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>QuizPreviewResourceFilter</servlet-name>
-        <servlet-class>com.arcusys.learn.web.QuizPreviewResourceFilter</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>QuizPreviewResourceFilter</servlet-name>
-        <url-pattern>/resource/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -536,11 +556,6 @@
     <servlet>
         <servlet-name>LiferayJournalArticleService</servlet-name>
         <servlet-class>com.arcusys.learn.liferay.service.JournalArticleService</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>ActivityController</servlet-name>
-        <servlet-class>com.arcusys.learn.controllers.api.ActivityApiController</servlet-class>
     </servlet>
 
     <servlet>
@@ -589,29 +604,23 @@
         <url-pattern>/services/liferay/article/*</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>ActivityController</servlet-name>
-        <url-pattern>/services/activity/*</url-pattern>
-    </servlet-mapping>
-
     <servlet>
-        <servlet-name>quiz</servlet-name>
+        <servlet-name>statements-api-controller</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
         <init-param>
             <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.learn.controllers.api.QuizApiController</param-value>
+            <param-value>com.arcusys.learn.controllers.api.StatementApiController</param-value>
         </init-param>
         <init-param>
             <param-name>sub-context</param-name>
-            <param-value>quiz</param-value>
+            <param-value>statements</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>quiz</servlet-name>
-        <url-pattern>/quiz/*</url-pattern>
+        <servlet-name>statements-api-controller</servlet-name>
+        <url-pattern>/statements/*</url-pattern>
     </servlet-mapping>
-
 
     <servlet>
         <servlet-name>settings-api-controller</servlet-name>
@@ -722,7 +731,7 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>activity</servlet-name>
+        <servlet-name>activities</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
         <init-param>
             <param-name>servlet-class</param-name>
@@ -730,13 +739,13 @@
         </init-param>
         <init-param>
             <param-name>sub-context</param-name>
-            <param-value>activity</param-value>
+            <param-value>activities</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>activity</servlet-name>
-        <url-pattern>/activity/*</url-pattern>
+        <servlet-name>activities</servlet-name>
+        <url-pattern>/activities/*</url-pattern>
     </servlet-mapping>
 
     <!--Dashboard api endpoint-->

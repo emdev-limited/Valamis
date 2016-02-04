@@ -35,7 +35,9 @@ var PageModel = Backbone.Model.extend({
         lastPage: {page: 0, isActive: false},
         showPages: 5,
         isPrevVisible: true,
-        isNextVisible: false
+        isNextVisible: false,
+        allowShowAll: false,
+        isShowingAll: false
     },
     initialize: function () {
         this.on('change', this.countStartEndElements, this);
@@ -44,6 +46,7 @@ var PageModel = Backbone.Model.extend({
         var currentPage = this.get('currentPage');
         var itemsOnPage = this.get('itemsOnPage');
         var totalElements = this.get('totalElements');
+        var isShowingAll = this.get('isShowingAll');
 
         var totalPages = Math.floor(totalElements / itemsOnPage);
         if(totalElements % itemsOnPage !== 0 ) totalPages++;
@@ -66,7 +69,7 @@ var PageModel = Backbone.Model.extend({
             subStartPage = 1;
         }
 
-        if(subEndPage >= totalPages - 1) {
+        if(subEndPage > totalPages - 1) {
             subStartPage = totalPages - showPages + 1;
             if (subEndPage == totalPages - 1 && showPages < 5) subStartPage--;
 
@@ -84,10 +87,12 @@ var PageModel = Backbone.Model.extend({
             };
         }
 
+        var endElement = isShowingAll ? totalElements : Math.min(currentPage * itemsOnPage, totalElements);
+
         this.set(
             {
                 startElementNumber: Math.min((currentPage - 1) * itemsOnPage + 1, totalElements),
-                endElementNumber: Math.min(currentPage * itemsOnPage, totalElements),
+                endElementNumber: endElement,
                 firstPage: { page: 1, isActive: currentPage == 1},
                 lastPage: { page: totalPages, isActive: currentPage == totalPages},
                 navbuttons: navbuttons,
@@ -118,12 +123,14 @@ var ValamisPaginator = Backbone.View.extend({
         var templateContainer = jQuery('#paginatorTemplate');
         if (templateContainer.length == 0) throw new Error('Paginator template not found');
 
-        var template = Mustache.to_html(templateContainer.html(), _.extend(this.model.toJSON(), this.options.language));
+        var template = Mustache.to_html(templateContainer.html(), _.extend({}, this.model.toJSON(), this.options.language));
         this.$el.html(template);
 
-        if (this.model.get('totalElements') <= this.model.get('itemsOnPage')) {
-            this.$el.find(".pagination-group").hide();
-        }
+        this.model.on('showAll', function() {
+            this.$el.find(".pagination-group").addClass('hidden');
+        }, this);
+
+        this.$el.find(".pagination-group").toggleClass('hidden', this.model.get('totalElements') <= this.model.get('itemsOnPage'));
 
         return this;
     },
@@ -171,6 +178,18 @@ var ValamisPaginator = Backbone.View.extend({
 
 
 var ValamisPaginatorShowing = Backbone.View.extend({
+    events: {
+        'click .js-show-all-items': 'showAllItems',
+        'click .js-show-page-items': 'showPageItems'
+    },
+    showAllItems: function () {
+        this.model.set({'isShowingAll': true});
+        this.model.trigger('showAll', this);
+    },
+    showPageItems: function () {
+        this.model.set({'isShowingAll': false});
+        this.model.trigger('pageChanged', this);
+    },
     initialize: function (options) {
         var settings = options || {};
         this.options = {};
@@ -180,7 +199,7 @@ var ValamisPaginatorShowing = Backbone.View.extend({
     render: function(){
         var templateContainer = jQuery('#paginatorShowingTemplate');
         if (templateContainer.length == 0) throw new Error('PaginatorShowing template not found');
-        var template = Mustache.to_html(templateContainer.html(), _.extend(this.model.toJSON(), this.options.language));
+        var template = Mustache.to_html(templateContainer.html(), _.extend({}, this.model.toJSON(), this.options.language));
 
         this.$el.html(template);
         return this;

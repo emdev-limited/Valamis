@@ -3,7 +3,7 @@ package com.arcusys.valamis.lesson.generator.scorm.file.html
 import com.arcusys.valamis.lesson.generator.util.ResourceHelpers
 import com.arcusys.valamis.questionbank.model._
 import com.arcusys.valamis.util.mustache.Mustache
-import com.arcusys.valamis.util.JsonSupport._
+import com.arcusys.valamis.util.serialization.JsonHelper._
 
 class QuestionViewGenerator(isPreview: Boolean) {
   private lazy val genericJS = scala.io.Source.fromInputStream(getResourceStream("questionScript.html")).mkString
@@ -51,7 +51,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
           Map("text" -> prepareString(answer.text),
             "id" -> answer.id,
             "score" -> answer.score))
-        val correctAnswers = json(choiceQuestion.answers.filter(_.isCorrect).map(x => x.id)).get
+        val correctAnswers = toJson(choiceQuestion.answers.filter(_.isCorrect).map(x => x.id))
         val multipleChoice = !choiceQuestion.forceCorrectCount || (choiceQuestion.answers.count(_.isCorrect) > 1)
         val viewModel = Map("title" -> removeLineBreak(choiceQuestion.title),
           "text" -> prepareStringKeepNewlines(choiceQuestion.text),
@@ -67,10 +67,10 @@ class QuestionViewGenerator(isPreview: Boolean) {
         generateHTMLByQuestionType("ChoiceQuestion", viewModel)
 
       case textQuestion: TextQuestion =>
-        val possibleAnswers = json(textQuestion.answers.map(answer => Map("text" -> answer.text, "score" -> answer.score)))
+        val possibleAnswers = toJson(textQuestion.answers.map(answer => Map("text" -> answer.text, "score" -> answer.score)))
         val isCaseSensitive = textQuestion.isCaseSensitive
         val viewModel = Map("title" -> removeLineBreak(textQuestion.title),
-          "answers" -> possibleAnswers.get,
+          "answers" -> possibleAnswers,
           "isCaseSensitive" -> isCaseSensitive,
           "autoShowAnswer" -> autoShowAnswer,
           "text" -> prepareStringKeepNewlines(textQuestion.text),
@@ -82,8 +82,8 @@ class QuestionViewGenerator(isPreview: Boolean) {
         generateHTMLByQuestionType("ShortAnswerQuestion", viewModel)
 
       case numericQuestion: NumericQuestion =>
-        val answers = json(numericQuestion.answers.map(answer =>
-          Map("from" -> answer.notLessThan, "to" -> answer.notGreaterThan, "score" -> answer.score))).get
+        val answers = toJson(numericQuestion.answers.map(answer =>
+          Map("from" -> answer.notLessThan, "to" -> answer.notGreaterThan, "score" -> answer.score)))
         val viewModel = Map("title" -> removeLineBreak(numericQuestion.title),
           "text" -> prepareStringKeepNewlines(numericQuestion.text),
           "answers" -> answers,
@@ -96,7 +96,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
         generateHTMLByQuestionType("NumericQuestion", viewModel)
 
       case positioningQuestion: PositioningQuestion =>
-        val answers = json(positioningQuestion.answers.map(answer => Map("id" -> answer.id, "text" -> prepareString(answer.text)))).get
+        val answers = toJson(positioningQuestion.answers.map(answer => Map("id" -> answer.id, "text" -> prepareString(answer.text))))
         val viewModel = Map("title" -> removeLineBreak(positioningQuestion.title),
           "text" -> prepareStringKeepNewlines(positioningQuestion.text),
           "answers" -> answers,
@@ -112,12 +112,12 @@ class QuestionViewGenerator(isPreview: Boolean) {
       case matchingQuestion: MatchingQuestion =>
         val answers = matchingQuestion.answers.map(answer =>
           Map("answerText" -> removeLineBreak(answer.text),
-            "matchingText" -> removeLineBreak(answer.keyText.getOrElse(null)),
+            "matchingText" -> removeLineBreak(answer.keyText.orNull),
             "score" -> answer.score))
         val viewModel = Map("title" -> removeLineBreak(matchingQuestion.title),
           "text" -> prepareStringKeepNewlines(matchingQuestion.text),
           "answers" -> answers,
-          "answerData" -> json(answers).get,
+          "answerData" -> toJson(answers),
           "autoShowAnswer" -> autoShowAnswer,
           "hasExplanation" -> matchingQuestion.explanationText.nonEmpty,
           "explanation" -> matchingQuestion.explanationText,
@@ -127,10 +127,10 @@ class QuestionViewGenerator(isPreview: Boolean) {
         generateHTMLByQuestionType("MatchingQuestion", viewModel)
 
       case categorizationQuestion: CategorizationQuestion =>
-        val answerJSON = json(categorizationQuestion.answers.map(answer =>
+        val answerJSON = toJson(categorizationQuestion.answers.map(answer =>
           Map("text" -> prepareString(answer.text),
             "matchingText" -> answer.answerCategoryText.map(prepareString),
-            "score" -> answer.score))).get
+            "score" -> answer.score)))
         val answerText = categorizationQuestion.answers.map(answer => prepareString(answer.text)).distinct
         val matchingText = categorizationQuestion.answers.filter(a => a.answerCategoryText != None && !a.answerCategoryText.get.isEmpty).
           sortBy(_.answerCategoryText).
@@ -177,25 +177,25 @@ class QuestionViewGenerator(isPreview: Boolean) {
           "contextPath" -> contextPath)
         generateHTMLByQuestionType("PlainText", viewModel)
 
-      case purePlainText: PurePlainText =>
-        val viewModel = Map("title" -> removeLineBreak(purePlainText.title),
-          "text" -> prepareString(purePlainText.text),
-          "autoShowAnswer" -> autoShowAnswer,
-          "hasExplanation" -> purePlainText.explanationText.nonEmpty,
-          "explanation" -> removeLineBreak(purePlainText.explanationText),
-          "contextPath" -> contextPath)
-        generateHTMLByQuestionType("PlainText", viewModel)
+//      case purePlainText: PurePlainText =>
+//        val viewModel = Map("title" -> removeLineBreak(purePlainText.title),
+//          "text" -> prepareString(purePlainText.text),
+//          "autoShowAnswer" -> autoShowAnswer,
+//          "hasExplanation" -> purePlainText.explanationText.nonEmpty,
+//          "explanation" -> removeLineBreak(purePlainText.explanationText),
+//          "contextPath" -> contextPath)
+//        generateHTMLByQuestionType("PlainText", viewModel)
 
-      case videoDLQuestion: DLVideo =>
-        val viewModel = Map("title" -> removeLineBreak(videoDLQuestion.title),
-          "uuid" -> prepareString(videoDLQuestion.uuid),
-          "autoShowAnswer" -> autoShowAnswer,
-          "groupId" -> videoDLQuestion.groupId,
-          "hasExplanation" -> videoDLQuestion.explanationText.nonEmpty,
-          "explanation" -> removeLineBreak(videoDLQuestion.explanationText),
-          "contextPath" -> contextPath)
-
-        generateHTMLByQuestionType("DLVideo", viewModel)
+//      case videoDLQuestion: DLVideo =>
+//        val viewModel = Map("title" -> removeLineBreak(videoDLQuestion.title),
+//          "uuid" -> prepareString(videoDLQuestion.uuid),
+//          "autoShowAnswer" -> autoShowAnswer,
+//          "groupId" -> videoDLQuestion.groupId,
+//          "hasExplanation" -> videoDLQuestion.explanationText.nonEmpty,
+//          "explanation" -> removeLineBreak(videoDLQuestion.explanationText),
+//          "contextPath" -> contextPath)
+//
+//        generateHTMLByQuestionType("DLVideo", viewModel)
 
       case _ => throw new Exception("Service: Oops! Can't recognize question type")
     }

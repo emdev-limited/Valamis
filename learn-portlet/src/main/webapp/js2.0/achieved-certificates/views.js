@@ -9,6 +9,7 @@ achievedCertificates.module('Views', function (Views, achievedCertificates, Back
         dateString = new Date(endDate).toLocaleDateString();
       }
       return {
+        courseId: Utils.getCourseId,
         dateString: dateString
       }
     },

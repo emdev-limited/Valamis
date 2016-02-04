@@ -8,7 +8,7 @@ var RecentLessons = Marionette.Application.extend({
   start: function(options){
       this.recent = new recentLessons.Entities.RecentCollection();
       this.recent.on('sync', this.showContent, this);
-      this.recent.fetch({userId: Valamis.currentUserId});
+      this.recent.fetch();
   },
   showContent: function() {
     this.recent.each(function (model) {

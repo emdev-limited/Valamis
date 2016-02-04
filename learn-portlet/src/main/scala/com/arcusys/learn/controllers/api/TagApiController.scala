@@ -1,18 +1,12 @@
 package com.arcusys.learn.controllers.api
 
-import com.arcusys.learn.facades.TagFacadeContract
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission.PermissionUtil
+import com.arcusys.learn.controllers.api.base.BaseApiController
+import com.arcusys.learn.liferay.permission.PermissionUtil._
+import com.arcusys.learn.models.TagResponse
 import com.arcusys.learn.web.ServletBase
-import com.escalatesoft.subcut.inject.BindingModule
-import com.arcusys.learn.models.request.TagRequest
-import PermissionUtil._
+import com.arcusys.valamis.lesson.service.TagServiceContract
 
-/**
- * Created by Yuriy Gatilin on 26.01.15.
- */
-class TagApiController(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase {
-  def this() = this(Configuration)
+class TagApiController extends BaseApiController with ServletBase {
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)
@@ -24,23 +18,12 @@ class TagApiController(configuration: BindingModule) extends BaseApiController(c
     response.setHeader("Access-Control-Expose-Headers", "ETag,Last-Modified,Cache-Control,Content-Type,Content-Length,WWW-Authenticate,X-Experience-API-Version,X-Experience-API-Consistent-Through")
   }
 
-  private val tagFacade = inject[TagFacadeContract]
+  private val tagService = inject[TagServiceContract]
 
   //List Action
   get("/tags(/)")(jsonAction {
-    val tagRequest = TagRequest(this)
     val companyId = getCompanyId.toInt
-    tagFacade.getAll(companyId)
+    tagService.getAll(companyId)
+      .map(t => TagResponse(t.id, t.text))
   })
-  //
-  //  //Assign Action
-  //  post("/tags/:tagId(/)")(jsonAction {
-  //
-  //  })
-  //
-  //  //Unassign Action
-  //  delete("/tags/:tagId(/)")(jsonAction {
-  //
-  //  })
-
 }

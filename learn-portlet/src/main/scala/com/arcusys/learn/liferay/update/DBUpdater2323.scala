@@ -3,7 +3,7 @@ package com.arcusys.learn.liferay.update
 import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.valamis.core.SlickDBInfo
-import com.arcusys.valamis.social.schema.{CommentTableComponent, LikeTableComponent}
+import com.arcusys.learn.liferay.update.version240.social.{CommentTableComponent, LikeTableComponent}
 import com.escalatesoft.subcut.inject.Injectable
 
 import scala.slick.driver.JdbcProfile

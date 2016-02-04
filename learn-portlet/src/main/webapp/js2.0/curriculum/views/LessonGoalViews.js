@@ -50,6 +50,13 @@ AddLessonGoalsDialogView = Backbone.View.extend({
           model: this.paginator.model
         });
         this.$('.dropdown').valamisDropDown();
+        this.$('.js-search')
+            .on('focus', function() {
+                jQuery(this).parent('.val-search').addClass('focus');
+            })
+            .on('blur', function() {
+                jQuery(this).parent('.val-search').removeClass('focus');
+            });
     },
     appendTags: function() {
         this.tags.each(function(item) {

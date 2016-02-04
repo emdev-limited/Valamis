@@ -1,19 +1,17 @@
 package com.arcusys.learn.scorm.rte.service
 
-import com.arcusys.learn.controllers.api.BaseApiController
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission.PermissionUtil
+import com.arcusys.learn.controllers.api.base.BaseApiController
+import com.arcusys.learn.liferay.permission.PermissionUtil._
 import com.arcusys.learn.service.util.AntiSamyHelper
 import com.arcusys.learn.web.ServletBase
-import com.arcusys.valamis.lesson.scorm.model.tracking.{ ActivityStateNode, ObjectiveState, ActivityState }
+import com.arcusys.valamis.lesson.scorm.model.tracking.{ActivityState, ActivityStateNode, ObjectiveState}
 import com.arcusys.valamis.lesson.scorm.service.lms.DataModelService
 import com.arcusys.valamis.lesson.service.ActivityServiceContract
-import com.escalatesoft.subcut.inject.BindingModule
-import org.scalatra.{ CookieSupport, SinatraRouteMatcher }
-import PermissionUtil._
+import com.arcusys.valamis.util.serialization.JsonHelper
+import org.scalatra.SinatraRouteMatcher
 
-class RunTimeEnvironment(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase with CookieSupport {
-  def this() = this(Configuration)
+class RunTimeEnvironment extends BaseApiController with ServletBase {
+
   //next line fixes 404
   implicit override def string2RouteMatcher(path: String) = new SinatraRouteMatcher(path)
 
@@ -32,9 +30,9 @@ class RunTimeEnvironment(configuration: BindingModule) extends BaseApiController
     val stateTree = activityManager.getActivityStateTreeForAttemptOption(currentAttempt)
     if (stateTree.isEmpty) {
       activityManager.createActivityStateTreeForAttempt(currentAttempt)
-      json("status" -> false).get
+      JsonHelper.toJson("status" -> false)
     } else {
-      json("status" -> true).get
+      JsonHelper.toJson("status" -> true)
     }
   }
 
@@ -45,7 +43,7 @@ class RunTimeEnvironment(configuration: BindingModule) extends BaseApiController
     val currentAttempt = activityManager.getLastAttempltOption(userID, packageID).getOrElse(halt(404, "Attempt not found for this SCO and user"))
 
     val dataModel = new DataModelService(currentAttempt, activityID)
-    json(dataModel.getValue(parameter("key").required)).get
+    JsonHelper.toJson(dataModel.getValue(parameter("key").required))
   }
 
   get("/rte/GetValues") {
@@ -55,7 +53,7 @@ class RunTimeEnvironment(configuration: BindingModule) extends BaseApiController
     val currentAttempt = activityManager.getLastAttempltOption(userID, packageID).getOrElse(halt(404, "Attempt not found for this SCO and user"))
 
     val dataModel = new DataModelService(currentAttempt, activityID)
-    json(dataModel.getValues).get
+    JsonHelper.toJson(dataModel.getValues)
   }
 
   post("/rte/SetValue") {
@@ -109,14 +107,14 @@ class RunTimeEnvironment(configuration: BindingModule) extends BaseApiController
     val attempt = activityManager.getLastAttempltOption(userID, packageID).getOrElse(halt(404, "Attempt not found for this SCO and user"))
     val tree = activityManager.getActivityStateTreeForAttemptOption(attempt).get //OrElse(throw new Exception("Activity tree should exist!"))
     val activity = tree(parameter("activityID").required)
-    json(Map("attemptProgressStatus" -> activity.get.item.getCompletionStatus().isEmpty,
+    JsonHelper.toJson(Map("attemptProgressStatus" -> activity.get.item.getCompletionStatus().isEmpty,
       "attemptCompletionStatus" -> activity.get.item.getCompletionStatus(),
       "attemptCompletionAmount" -> activity.get.item.attemptCompletionAmount,
       "isActivitySuspended" -> activity.get.item.suspended,
       "primaryObjective" -> serializePrimaryObjective(activity.get.item),
       "activityObjectives" -> activity.get.item.activity.sequencing.nonPrimaryObjectives.map(objective =>
         serializeObjective(objective.id, activity.get.item.objectiveStates(objective.id)))
-    )).get
+    ))
   }
 
   post("/rte/ActivityInformation/:activityID") {

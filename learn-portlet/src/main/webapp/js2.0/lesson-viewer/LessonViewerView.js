@@ -8,8 +8,7 @@ PlayerView = Backbone.View.extend({
     'click #SCORMNavigationForward': 'doContinue',
     'click #SCORMToggleButton': 'toggleLeftMenu',
     'click #PlayerLaunchFullScreen': 'fullScreen',
-    'click #PlayerExitFullScreen': 'cancelFullscreen',
-    'click #SlideMap': 'slideMap'
+    'click #PlayerExitFullScreen': 'cancelFullscreen'
   },
 
   initialize: function (options) {
@@ -20,6 +19,10 @@ PlayerView = Backbone.View.extend({
 
     var that = this;
     jQueryValamis('#SCORMDataOutput').on('load', function() {
+      jQueryValamis('#SCORMNavigationSuspend').toggleClass('hidden',that.isTincan());
+      that.windowHeight = window.innerHeight;
+      that.headerHeight = that.$el.find('.content-wrapper .content-header').outerHeight(true);
+      that.footerHeight = that.isTincan() ? 0 : that.$el.find('.content-wrapper .content-footer').outerHeight(true);
       that.resizeIFrame();
     });
 
@@ -28,6 +31,8 @@ PlayerView = Backbone.View.extend({
             var element$ = that.getFullscreenElement();
             that.iPadSetElement2FullScreen(element$);
         }
+        that.windowHeight = window.innerHeight;
+        that.resizeIFrame();
     });
 
     document.addEventListener("fullscreenchange", _.bind(this.fullscreenChange, this));
@@ -39,6 +44,8 @@ PlayerView = Backbone.View.extend({
   render: function () {
     var template = jQueryValamis('#SCORMPlayerContent').html();
     this.$el.html(Mustache.to_html(template, this.language));
+    var toastrTemplate = jQueryValamis('#startConfirmationView').html();
+    jQueryValamis('#startConfirmationView').html(Mustache.to_html(toastrTemplate, this.language));
     this.$el.find('.js-toggle-sidebar').valamisSidebar();
   },
 
@@ -86,18 +93,16 @@ PlayerView = Backbone.View.extend({
   },
 
   resizeIFrame: function() {
-    var contentHeight = jQueryValamis('#SCORMDataOutput').contents().find('html').outerHeight(true);
-    var iframeHeight = Math.max(contentHeight, 700);    // minimum height - 700px;
+    var iframeHeight = this.windowHeight - this.headerHeight - this.footerHeight;
     jQueryValamis('#SCORMDataOutput').height(iframeHeight);
-    this.ifReveal();
   },
 
   resizeIFrameToFullscreen: function() {
-    var headerHeight = this.$el.find('.content-wrapper .content-header').outerHeight(true);
-    var footerHeight = this.$el.find('.content-wrapper .content-footer').outerHeight(true);
+    var footerHeight = this.footerHeight;
     if (!this.isTincan)    // place for scorm buttons by default
-      footerHeight = Math.max(footerHeight, 38);
-    jQueryValamis('#SCORMDataOutput').height(screen.height - headerHeight - footerHeight);
+      footerHeight = Math.max(this.footerHeight, 38);
+    var iframeHeight = screen.height - this.headerHeight - footerHeight;
+    jQueryValamis('#SCORMDataOutput').height(iframeHeight);
   },
 
   loadView: function (data) {
@@ -125,8 +130,6 @@ PlayerView = Backbone.View.extend({
       jQueryValamis('#SCORMNavigationForward').show();
       jQueryValamis('#SCORMNavigationBackward').show();
       jQueryValamis('#SCORMNavigationExit').show();
-      jQueryValamis('#SCORMNavigationSuspend').show();
-      jQueryValamis('#SlideMap').hide();
     }
 
     this.$el.find('#SCORMOrganizationsMenu').show();
@@ -140,7 +143,11 @@ PlayerView = Backbone.View.extend({
       this.cancelFullscreen();
       jQueryValamis.ajax({
         type: 'POST',
-        url: path.root + path.sequencing + "clearSession"
+        url: path.root + path.sequencing + "clearSession",
+        data: {'p_auth': Liferay.authToken},
+        headers: {
+          'X-CSRF-Token': Liferay.authToken
+        }
       });
     }
 
@@ -187,17 +194,18 @@ PlayerView = Backbone.View.extend({
 
     this.$el.find('#SCORMNavigationForward').hide();
     this.$el.find('#SCORMNavigationBackward').hide();
-    this.$el.find('#SCORMNavigationSuspend').hide();
     this.$el.find('#SCORMOrganizationsMenu').hide();
     this.$el.find('#SCORMNavigationExit').show();
-    this.$el.find('#SlideMap').show();
 
     var player = this;
     jQueryValamis.ajax({
       type: 'POST',
       dataType: 'json',
+      data: {'p_auth': Liferay.authToken},
       url: path.root + path.sequencing + 'Tincan/' + this.packageID,
-
+      headers: {
+        'X-CSRF-Token': Liferay.authToken
+      },
       success: function (data) {
         player.openTincanPackage(data.launchURL);
       }
@@ -256,7 +264,11 @@ PlayerView = Backbone.View.extend({
       this.trigger('player:endSession');
       jQueryValamis.ajax({
         type: 'POST',
-        url: path.root + path.sequencing + "clearSession"
+        url: path.root + path.sequencing + "clearSession",
+        data: {'p_auth': Liferay.authToken},
+        headers: {
+          'X-CSRF-Token': Liferay.authToken
+        }
       });
       jQueryValamis('#SCORMDataOutput').attr('src', '');
       FinishPackageAttempt(false);
@@ -278,10 +290,10 @@ PlayerView = Backbone.View.extend({
       jQueryValamis('#SCORMDataOutput').attr('src', this.getNavigationRequestURL('suspendAll'));
       this.onSuspend = true;
       FinishPackageAttempt(false);
+      this.cancelFullscreen();
+      window.frames.top.ValamisTick = null; //Destroy valamis tick variable, so that opening package doesn't continue countdown
+      navigationProxy.destroyNavigation()
     }
-    this.cancelFullscreen();
-    window.frames.top.ValamisTick = null; //Destroy valamis tick variable, so that opening package doesn't continue countdown
-    navigationProxy.destroyNavigation()
   },
 
   doChoice: function (id) {
@@ -363,6 +375,8 @@ PlayerView = Backbone.View.extend({
       document.mozCancelFullScreen();
     } else if (document.webkitExitFullscreen) {
       document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
     } else {
         this.iPadExitFullscreen();
     }
@@ -380,22 +394,7 @@ PlayerView = Backbone.View.extend({
       this.cancelFullscreenHelper();
   },
 
-  slideMap: function()
-  {
-    this.playerDisplayContentIframe().Reveal.toggleOverview();
-  },
-
   playerDisplayContentIframe: function() {
     return jQueryValamis("#SCORMDataOutput")[0].contentWindow;
-  },
-
-  ifReveal: function()
-  { if (this.playerDisplayContentIframe().Reveal) {
-      this.$el.find('#SlideMap').show();
-    }
-    else
-    {
-      this.$el.find('#SlideMap').hide();
-    }
   }
 });

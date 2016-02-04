@@ -1,15 +1,17 @@
 SelectStatementCollectionService = new Backbone.Service({ url: path.root,
     sync: {
         'read': {
-            'path': path.api.certificates,
+            'path': path.api.statements,
             'data': function (e, options) {
+                var sortBy = options.order.split(':')[0];
+                var asc = options.order.split(':')[1];
                 return {
-                    action: 'GETSTATEMENTS',
                     courseId: Utils.getCourseId(),
                     page: options.currentPage,
                     count: options.itemsOnPage,
                     filter: options.filter,
-                    sortAscDirection: options.order
+                    sortAscDirection: asc,
+                    sortBy: sortBy
                 }
             },
             'method': 'get'
@@ -31,31 +33,10 @@ var CertificateSelectStatementsRowView = Backbone.View.extend({
     },
     tagName: 'tr',
     initialize: function (options) {
-        function getLangDictionaryValue(value, lang) {
-            var langDict = value,
-                key;
-
-            if (typeof lang !== "undefined" && typeof langDict[lang] !== "undefined") {
-                return langDict[lang];
-            }
-            if (typeof langDict.und !== "undefined") {
-                return langDict.und;
-            }
-            if (typeof langDict["en-US"] !== "undefined") {
-                return langDict["en-US"];
-            }
-            for (key in langDict) {
-                if (langDict.hasOwnProperty(key)) {
-                    return langDict[key];
-                }
-            }
-
-            return "";
-        }
         this.options = options;
         this.model.on('change', this.render, this);
-        this.model.set('verbName',getLangDictionaryValue(this.model.get('verbName')));
-        this.model.set('objName',getLangDictionaryValue(this.model.get('objName')));
+        this.model.set('verbName',Utils.getLangDictionaryTincanValue(this.model.get('verbName')));
+        this.model.set('objName',Utils.getLangDictionaryTincanValue(this.model.get('objName')));
     },
     render: function () {
         var template = Mustache.to_html(jQuery('#selectStatementsRowView').html(), this.model.toJSON());
@@ -102,6 +83,13 @@ var CertificateSelectStatementsDialogView = Backbone.View.extend({
         var template = Mustache.to_html(jQuery('#selectStatementsDialogView').html(), this.language);
         this.$el.html(template);
         this.$('.dropdown').valamisDropDown();
+        this.$('.js-search')
+            .on('focus', function() {
+                jQuery(this).parent('.val-search').addClass('focus');
+            })
+            .on('blur', function() {
+                jQuery(this).parent('.val-search').removeClass('focus');
+            });
 
         var that = this;
         this.paginator = new ValamisPaginator({
@@ -149,21 +137,22 @@ var CertificateSelectStatementsDialogView = Backbone.View.extend({
        this.paginator.updateItems(details.total);
     },
 
-    fetchCollection: function (page) {
+    fetchCollection: function () {
         this.$('#statementsList').empty();
         this.collection.fetch({
           reset: true,
-          currentPage: page,
+          currentPage: this.paginator.currentPage(),
           itemsOnPage: this.paginator.itemsOnPage(),
           filter: this.$('#statementsSearch').val(),
           order: this.$('#sortStatements').data('value')
         });
     },
     reloadFirstPage: function () {
-        this.fetchCollection(1);
+        this.paginatorModel.set({'currentPage': 1});
+        this.fetchCollection();
     },
     reload: function () {
-        this.fetchCollection(this.paginator.currentPage());
+        this.fetchCollection();
     },
     addStatements: function () {
       var selectedStatements = this.collection.filter(function (item) {

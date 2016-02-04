@@ -12,11 +12,13 @@ case class EscapedToken(key: String, otag: String, ctag: String)
          val maxLength = (v.length * 1.2).toInt
          def write(out: StringBuilder): Unit =
            v.foreach {
-             case '<' => out.append("&lt;")
-             case '>' => out.append("&gt;")
-             case '&' => out.append("&amp;")
-             case '"' => out.append("&quot;")
-             case c   => out.append(c)
+             case '<'  => out.append("&lt;")
+             case '>'  => out.append("&gt;")
+             case '&'  => out.append("&amp;")
+             case '"'  => out.append("&quot;")
+             case '\'' => out.append("&#39;")
+             case '\\' => out.append("&#92;")
+             case c    => out.append(c)
            }
        }
      }

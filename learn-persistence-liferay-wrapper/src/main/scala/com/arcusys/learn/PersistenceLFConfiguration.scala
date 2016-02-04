@@ -1,9 +1,6 @@
 package com.arcusys.learn
 
 import com.arcusys.learn.packages.PackageGradesRepositoryImpl
-import com.arcusys.learn.questionbank.storage.impl.liferay.{QuestionAnswerStorageImpl, QuestionCategoryStorageImpl, QuestionStorageImpl}
-import com.arcusys.learn.quiz.storage.impl._
-import com.arcusys.learn.quiz.storage.impl.liferay.{LFQuizQuestionCategoryStorageImpl, LFQuizQuestionStorageImpl, LFQuizStorageImpl, LFQuizTreeStorageImpl}
 import com.arcusys.learn.scorm.course.impl.liferay.{CourseRepositoryImpl, PlayerScopeRuleRepositoryImpl}
 import com.arcusys.learn.scorm.manifest.sequencing.storage.impl._
 import com.arcusys.learn.scorm.manifest.storage.impl.liferay._
@@ -13,37 +10,25 @@ import com.arcusys.learn.scorm.tracking.states.impl.liferay._
 import com.arcusys.learn.scorm.tracking.states.storage.impl.ActivityStateTreeCreator
 import com.arcusys.learn.scorm.tracking.storage.impl.AttemptCreator
 import com.arcusys.learn.scorm.tracking.storage.impl.liferay.{AttemptStorageImpl, DataModelStorageImpl}
-import com.arcusys.learn.setting.storage.impl.{LRSToActivitySettingEntityStorage, SettingEntityStorage, SiteDependentSettingEntityStorage}
-import com.arcusys.learn.settings.model.{LFLRSToActivitySettingStorageImpl, LFSettingStorageImpl, LFSiteDependentSettingStorageImpl}
-import com.arcusys.learn.slide.{SlideElementRepository, SlideRepository, SlideSetRepository}
-import com.arcusys.learn.tincan.lrsEndpoint.LrsEndpointRepositoryImpl
+import com.arcusys.learn.setting.storage.impl.SiteDependentSettingEntityStorage
+import com.arcusys.learn.settings.model.LFSiteDependentSettingStorageImpl
 import com.arcusys.learn.tincan.manifest.storage.impl.liferay.{TincanManifestActivityRepositoryImpl, TincanPackageRepositoryImpl}
 import com.arcusys.learn.tincan.storage.impl.TincanURIEntityStorage
 import com.arcusys.learn.tincan.storage.impl.liferay.LFTincanURIStorageImpl
-import com.arcusys.valamis.gradebook.storage.{CourseGradeStorage, PackageGradesStorage}
+import com.arcusys.valamis.grade.storage.{CourseGradeStorage, PackageGradesStorage}
 import com.arcusys.valamis.lesson.scorm.model.manifest.{ExitConditionRule, PostConditionRule, PreConditionRule}
 import com.arcusys.valamis.lesson.scorm.storage.sequencing._
 import com.arcusys.valamis.lesson.scorm.storage.tracking._
 import com.arcusys.valamis.lesson.scorm.storage.{ActivityDataStorage, ActivityStorage, ResourcesStorage, ScormPackagesStorage}
 import com.arcusys.valamis.lesson.storage.{LessonLimitStorage, PackageScopeRuleStorage, PlayerScopeRuleStorage}
 import com.arcusys.valamis.lesson.tincan.storage.{TincanManifestActivityStorage, TincanPackageStorage}
-import com.arcusys.valamis.lrsEndpoint.storage.LrsEndpointStorage
-import com.arcusys.valamis.questionbank.storage.{QuestionAnswerStorage, QuestionCategoryStorage, QuestionStorage}
-import com.arcusys.valamis.quiz.storage.{QuizQuestionCategoryStorage, QuizQuestionStorage, QuizStorage, QuizTreeStorage}
-import com.arcusys.valamis.settings.storage.{LRSToActivitySettingStorage, SettingStorage, SiteDependentSettingStorage}
-import com.arcusys.valamis.slide.storage.{SlideElementRepositoryContract, SlideRepositoryContract, SlideSetRepositoryContract}
+import com.arcusys.valamis.settings.storage.SiteDependentSettingStorage
 import com.arcusys.valamis.uri.storage.TincanURIStorage
 import com.arcusys.valamis.user.storage.UserStorage
 import com.escalatesoft.subcut.inject.NewBindingModule
 
 class PersistenceLFConfiguration extends NewBindingModule(implicit module => {
     import module._
-
-    bind[QuestionAnswerStorage] toSingle new QuestionAnswerStorageImpl
-
-    bind[QuestionStorage] toProvider (module => new QuestionStorageImpl {
-      val answerStorage: QuestionAnswerStorage = module.inject[QuestionAnswerStorage](None)
-    })
 
     // Not related to tincan
     bind[ScormPackagesStorage].toProvider(module => new ScormPackageRepositoryImpl {
@@ -62,16 +47,6 @@ class PersistenceLFConfiguration extends NewBindingModule(implicit module => {
     })
 
     bind[ResourcesStorage] toSingle new ResourcesRepositoryImpl
-
-    bind[QuizStorage] toSingle new QuizEntityStorage with LFQuizStorageImpl
-    bind[QuizTreeStorage] toSingle new QuizTreeEntityStorage with LFQuizTreeStorageImpl
-    bind[QuestionCategoryStorage] toSingle new QuestionCategoryStorageImpl
-
-    bind[QuizQuestionCategoryStorage] toSingle new QuizQuestionCategoryEntityStorage with LFQuizQuestionCategoryStorageImpl
-
-    bind[QuizQuestionStorage].toProvider(module => new QuizQuestionEntityStorage with LFQuizQuestionStorageImpl with QuizQuestionCreator {
-      val questionStorage = module.inject[QuestionStorage](None)
-    })
 
     bind[AttemptStorage].toProvider(module => new AttemptStorageImpl with AttemptCreator {
       def userStorage: UserStorage = module.inject[UserStorage](None)
@@ -100,7 +75,6 @@ class PersistenceLFConfiguration extends NewBindingModule(implicit module => {
     })
 
     bind[CourseGradeStorage] toSingle new CourseRepositoryImpl
-    bind[PackageScopeRuleStorage] toSingle new PackageScopeRuleRepositoryImpl
     bind[PlayerScopeRuleStorage] toSingle new PlayerScopeRuleRepositoryImpl
 
     bind[SequencingStorage].toProvider(module => new SequencingEntityStorage with LFSequencingStorageImpl with SequencingCreator {
@@ -143,17 +117,11 @@ class PersistenceLFConfiguration extends NewBindingModule(implicit module => {
 
     bind[ActivityDataStorage] toSingle new ActivityDataRepositoryImpl
 
-    bind[SettingStorage] toSingle new SettingEntityStorage with LFSettingStorageImpl
-    bind[LRSToActivitySettingStorage] toSingle new LRSToActivitySettingEntityStorage with LFLRSToActivitySettingStorageImpl
     bind[SiteDependentSettingStorage] toSingle new SiteDependentSettingEntityStorage with LFSiteDependentSettingStorageImpl
 
     bind[TincanURIStorage] toSingle new TincanURIEntityStorage with LFTincanURIStorageImpl
 
     bind[PackageGradesStorage] toSingle new PackageGradesRepositoryImpl
-    bind[LrsEndpointStorage] toSingle new LrsEndpointRepositoryImpl
 
     bind[LessonLimitStorage] toSingle new LessonLimitRepositoryImpl
-    bind[SlideSetRepositoryContract] toSingle new SlideSetRepository
-    bind[SlideRepositoryContract] toSingle new SlideRepository
-    bind[SlideElementRepositoryContract] toSingle new SlideElementRepository
 })

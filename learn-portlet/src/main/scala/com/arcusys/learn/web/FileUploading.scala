@@ -1,14 +1,15 @@
 package com.arcusys.learn.web
 
-import org.scalatra.servlet.HasMultipartConfig
-import org.scalatra.ScalatraBase
-import org.scalatra.util._
-import org.apache.commons.fileupload.servlet.ServletFileUpload
-import org.apache.commons.fileupload.{ FileItemFactory, FileItem }
-import org.apache.commons.fileupload.disk.DiskFileItemFactory
-
-import java.util.{ List => JList, HashMap => JHashMap }
+import java.util.{HashMap => JHashMap, List => JList}
 import javax.servlet.http._
+
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import org.apache.commons.fileupload.servlet.ServletFileUpload
+import org.apache.commons.fileupload.{FileItem, FileItemFactory}
+import org.scalatra.ScalatraBase
+import org.scalatra.servlet.HasMultipartConfig
+import org.scalatra.util._
+
 import scala.collection.JavaConverters._
 
 trait FileUploading extends ServletBase with HasMultipartConfig {

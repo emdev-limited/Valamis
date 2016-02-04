@@ -82,25 +82,6 @@
         </portlet-info>
     </portlet>
 
-
-    <portlet>
-        <portlet-name>SCORMQuizes</portlet-name>
-        <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LessonDesignerView</portlet-class>
-
-        <expiration-cache>0</expiration-cache>
-
-        <supports>
-            <mime-type>text/html</mime-type>
-            <portlet-mode>view</portlet-mode>
-            <portlet-mode>edit</portlet-mode>
-        </supports>
-
-        <portlet-info>
-            <title>Lesson Designer</title>
-        </portlet-info>
-    </portlet>
-
     <portlet>
         <portlet-name>Gradebook</portlet-name>
         <display-name>Valamis</display-name>
@@ -158,7 +139,6 @@
         <supports>
             <mime-type>text/html</mime-type>
             <portlet-mode>view</portlet-mode>
-            <portlet-mode>edit</portlet-mode>
         </supports>
 
         <portlet-info>
@@ -444,7 +424,7 @@
     <portlet>
         <portlet-name>ValamisSlidesEditor</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.ValamisSlidesEditorView</portlet-class>
+        <portlet-class>com.arcusys.learn.view.LessonStudioView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -561,4 +541,37 @@
         </portlet-info>
     </portlet>
 
+    <portlet>
+        <portlet-name>MyCertificates</portlet-name>
+        <display-name>Valamis</display-name>
+        <portlet-class>com.arcusys.learn.view.MyCertificatesView</portlet-class>
+
+        <expiration-cache>0</expiration-cache>
+
+        <supports>
+            <mime-type>text/html</mime-type>
+            <portlet-mode>view</portlet-mode>
+        </supports>
+
+        <portlet-info>
+            <title>My Certificates</title>
+        </portlet-info>
+    </portlet>
+
+    <portlet>
+        <portlet-name>MyCourses</portlet-name>
+        <display-name>Valamis</display-name>
+        <portlet-class>com.arcusys.learn.view.MyCoursesView</portlet-class>
+
+        <expiration-cache>0</expiration-cache>
+
+        <supports>
+            <mime-type>text/html</mime-type>
+            <portlet-mode>view</portlet-mode>
+        </supports>
+
+        <portlet-info>
+            <title>My Courses</title>
+        </portlet-info>
+    </portlet>
 </portlet-app>

@@ -11,8 +11,9 @@
 <script type="text/template" id="packageManagerToolbarTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <span class="val-icon-search"></span>
-            <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            <div class="val-search">
+                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            </div>
         </div>
         <div class="dropdown filter-element shift-left js-category-filter" id="lessonManagerTags" data-value="">
             <button class="button medium simple">
@@ -75,7 +76,7 @@
         <button class="button medium simple no-text hide-s shift-right js-display-option js-tile-view">
             <span class="val-icon-grid-view">Grid View</span>
         </button>
-        <button class="button medium simple no-text hide-s shift-right js-display-option js-list-view active">
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-list-view">
             <span class="val-icon-list-view">List View</span>
         </button>
     </div>
@@ -86,7 +87,7 @@
     <div class="tile-content with-action">
         <div class="image"
              {{#logo}}
-                 style="background-image: url('/delegate/files/images?folderId=package_logo_{{id}}&file={{{logo}}}')"
+                 style="background-image: url('/delegate/packages/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
              {{/logo}}
              {{^logo}}
                  style="background-image: url('/learn-portlet/img/imgo.jpg')"
@@ -162,7 +163,7 @@
                 <div class="div-col content-col">
                     <img
                             {{#logo}}
-                            src="/delegate/files/images?folderId=package_logo_{{id}}&file={{{logo}}}"
+                            src="/delegate/packages/{{id}}/logo?courseId={{courseId}}"
                             {{/logo}}
 
                     {{^logo}}
@@ -266,7 +267,7 @@
         <td>
             <img
             {{#logo}}
-            src="/delegate/files/images?folderId=package_logo_{{id}}&file={{{logo}}}"
+            src="/delegate/packages/{{id}}/logo?courseId={{courseId}}"
             {{/logo}}
 
             {{^logo}}

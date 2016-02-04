@@ -8,11 +8,7 @@ import com.arcusys.valamis.lrs.tincan.Statement
 import org.joda.time.DateTime
 
 object StatementApiHelpers {
-  implicit def apiWithFilter(statementApi: StatementApi) = new {
-
-    def getAll(): Seq[Statement] = {
-      getByFilter(new StatementFilter)
-    }
+  implicit class apiWithFilter(val statementApi: StatementApi) extends AnyVal {
 
     def getByFilter(filter: StatementFilter): Seq[Statement] = {
       statementApi.getByParams(

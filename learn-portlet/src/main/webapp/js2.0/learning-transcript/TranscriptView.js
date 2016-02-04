@@ -62,7 +62,14 @@ TranscriptPackagesView = Backbone.View.extend({
 //        this.collection.each(this.addPackageDetails, this);
     },
     addOne: function (item) {
-        var template = Mustache.to_html(jQuery('#transcriptPackageItemTemplate').html(), _.extend(item.toJSON()));
+        var template = Mustache.to_html(
+            jQuery('#transcriptPackageItemTemplate').html(),
+            _.extend({
+                    gradeAutoShowing: Math.floor(item.get('gradeAuto') || 0),
+                    gradeShowing: Math.floor(item.get('grade'))
+                },
+                item.toJSON()));
+
         this.$el.append(template);
         this.addPackageDetails(item);
     },
@@ -460,16 +467,19 @@ GoalStatusView = Backbone.View.extend({
                         obj = stmnt.get('object').definition.name[key];
                     }
                 }
-            })
+            });
+
+            var objectName = this.model.get('tincanStmntObjName');
+            var objectTitle = objectName ? Utils.getLangDictionaryTincanValue(objectName) : this.model.get('tincanStmntObj');
 
             this.model.set({title: (this.language[verb] != undefined ? this.language[verb] : this.language[this.model.get('tincanStmntVerb')])
-                + ' ' + (obj != undefined ? obj : this.model.get('tincanStmntObj'))});
+                + ' ' + objectTitle});
         }
         else if (options.type == GOAL_TYPE.ACTIVITY) {
-            var name = this.model.get('title');
-            this.model.set({activityID: this.model.get('title'), title: this.language[this.model.get('title')], status: this.model.get('status'), dateFinish: this.model.get('dateFinish')});
-            if (name == 'participation' || name == 'contribution')
-                this.model.set({noDate: true });
+          this.model.set({
+            isActivity: true,
+            title: this.language[this.model.get('activityId')]
+          });
         }
     },
     render: function () {
@@ -526,22 +536,21 @@ TranscriptCertificateGoalView = Backbone.View.extend({
                 if (statuses != undefined) {
                     if (type == GOAL_TYPE.ACTIVITY) {
                         params = statuses.filter(function (i) {
-                            return i.name == item.get('title')
+                            return i.activityId == item.get('activityId')
                         }).map(function (i) {
                             return [i.status, i.dateFinish];
                         });
-                        item.set({isActivity: true });
                     }
                     else if (type == GOAL_TYPE.STATEMENT) {
                         params = statuses.filter(function (i) {
-                            return i.obj == item.get('tincanStmntObj') && i.verb == item.get('tincanStmntVerb')
+                            return i.tincanStmntObj == item.get('tincanStmntObj') && i.tincanStmntVerb == item.get('tincanStmntVerb')
                         }).map(function (i) {
                             return [i.status, i.dateFinish];
                         });
                     }
                     else if (type == GOAL_TYPE.COURSE) {
                         params = statuses.filter(function (i) {
-                            return i.id == item.id
+                            return i.courseGoalId == item.get('courseGoalId')
                         }).map(function (i) {
                             return [i.status, i.dateFinish];
                         });

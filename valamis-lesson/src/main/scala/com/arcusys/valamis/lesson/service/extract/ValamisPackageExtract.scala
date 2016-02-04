@@ -1,12 +1,12 @@
 package com.arcusys.valamis.lesson.service.extract
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.valamis.lesson.model.{ PackageState, ValamisPackage, LessonType }
+import com.arcusys.valamis.lesson.model.{BaseManifest, LessonType, PackageState, ValamisPackage}
 import com.arcusys.valamis.lesson.scorm.model.manifest.Manifest
-import com.arcusys.valamis.lesson.scorm.storage.tracking.{ ActivityStateTreeStorage, AttemptStorage }
-import com.arcusys.valamis.lesson.service.{ LessonLimitChecker, TagServiceContract }
+import com.arcusys.valamis.lesson.scorm.storage.tracking.{ActivityStateTreeStorage, AttemptStorage}
+import com.arcusys.valamis.lesson.service.{LessonLimitChecker, LessonStatementReader, TagServiceContract}
 import com.arcusys.valamis.lesson.tincan.model.TincanManifest
-import com.arcusys.valamis.lrs.api.StatementApi
+import com.arcusys.valamis.ratings.RatingService
 
 /**
  * Created by mminin on 06.03.15.
@@ -17,14 +17,33 @@ trait ValamisPackageExtract {
   protected def passingLimitChecker: LessonLimitChecker
   protected def attemptStorage: AttemptStorage
   protected def activityStateTreeStorage: ActivityStateTreeStorage
+  protected def statementReader: LessonStatementReader
+  private lazy val ratingService = new RatingService[BaseManifest]
 
-  protected def toValamisPackage(manifest: TincanManifest, user: LUser, statementApi: StatementApi): ValamisPackage = {
-    val isFinished = passingLimitChecker.isTincanPackageFinished(user, manifest.id, statementApi)
-    val attemptsCount = passingLimitChecker.getTincanAttemptsCount(user, manifest.id, statementApi)
+  def getRootActivityId(packageId: Long): String
+
+  protected def toValamisPackage(manifest: TincanManifest, user: LUser): ValamisPackage = {
+    val activityId = getRootActivityId(manifest.id)
+    val isFinished = statementReader.hasCompletedSuccess(user, activityId)
+
+    lazy val lastAttempt = statementReader.getLastAttempted(user, activityId)
+    lazy val completedStatements = statementReader.getCompleted(user, activityId)
+    lazy val isLastCompleted = lastAttempt.flatMap(_.id).exists(id => completedStatements
+      .flatMap(_.context)
+      .flatMap(_.contextActivities)
+      .flatMap(_.groupingIds)
+      .contains(id.toString)
+    )
 
     val packageState = if (isFinished) PackageState.Finished
-    else if (attemptsCount > 0) PackageState.Attempted
-    else PackageState.None
+    else if (lastAttempt.isEmpty) PackageState.None
+    else if (isLastCompleted) PackageState.Attempted
+    else PackageState.Suspended
+
+    val attemptsCount = if (manifest.passingLimit <= 0) 0
+    else completedStatements.size
+
+    val rating = ratingService.getRating(user.getUserId, manifest.id)
 
     ValamisPackage(manifest.id,
       manifest.title,
@@ -40,24 +59,29 @@ trait ValamisPackageExtract {
       manifest.rerunIntervalType,
       attemptsCount,
       packageState,
-      manifest.assetRefId.map(tagService.getEntryTags).getOrElse(Seq()),
+      tagService.getEntryTags(manifest),
       manifest.beginDate,
-      manifest.endDate
+      manifest.endDate,
+      rating
     )
   }
 
-  protected def toValamisPackage(manifest: Manifest, user: LUser, statementApi: StatementApi) = {
+  protected def toValamisPackage(manifest: Manifest, user: LUser): ValamisPackage = {
     val userId = user.getUserId.toInt
-    val isFinished = passingLimitChecker.isTincanPackageFinished(user, manifest.id, statementApi)
-    val attempt = attemptStorage.getActive(userId, manifest.id.toInt)
-    val activityId = if (attempt.isDefined) {
-      activityStateTreeStorage.get(attempt.get.id).map(_.item.activity.id)
-    } else None
+    val activityId = getRootActivityId(manifest.id)
+    val isFinished = statementReader.hasCompletedSuccess(user, activityId)
 
-    val attemptsCount = passingLimitChecker.getScormAttemptsCount(userId, manifest.id)
+    val suspendedId = attemptStorage.getActive(userId, manifest.id.toInt)
+      .flatMap(a => activityStateTreeStorage.get(a.id).map(_.item.activity.id))
+
+    val attemptsCount = attemptStorage.getAllComplete(userId, manifest.id).size
+
     val packageState = if (isFinished) PackageState.Finished
-    else if (attemptsCount > 0) PackageState.Attempted
-    else PackageState.None
+    else if (attemptsCount == 0) PackageState.None
+    else if (suspendedId.isDefined) PackageState.Suspended
+    else PackageState.Attempted
+
+    val rating = ratingService.getRating(user.getUserId, manifest.id)
 
     ValamisPackage(manifest.id,
       manifest.title,
@@ -67,15 +91,16 @@ trait ValamisPackageExtract {
       manifest.isDefault,
       LessonType.Scorm,
       manifest.logo,
-      activityId,
+      suspendedId,
       manifest.passingLimit,
       manifest.rerunInterval,
       manifest.rerunIntervalType,
       attemptsCount,
       packageState,
-      manifest.assetRefId.map(tagService.getEntryTags).getOrElse(Seq()),
+      tagService.getEntryTags(manifest),
       manifest.beginDate,
-      manifest.endDate
+      manifest.endDate,
+      rating
     )
   }
 }

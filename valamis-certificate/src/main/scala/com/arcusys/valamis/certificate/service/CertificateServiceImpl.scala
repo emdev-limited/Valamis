@@ -1,115 +1,132 @@
 package com.arcusys.valamis.certificate.service
 
-import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.services.SocialActivityLocalServiceHelper
 import com.arcusys.valamis.certificate.model._
-import com.arcusys.valamis.certificate.model.CertificateSortBy.CertificateSortBy
 import com.arcusys.valamis.certificate.storage._
+import com.arcusys.valamis.exception.EntityNotFoundException
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.lrs.api.StatementApi
-import com.arcusys.valamis.lrs.api.valamis.VerbApi
-import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.arcusys.valamis.lrs.tincan._
-import com.arcusys.valamis.lrs.util.StatementApiHelpers._
-import com.arcusys.valamis.model.{SkipTake, Order, PeriodTypes, RangeResult}
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
+import com.arcusys.valamis.lesson.model.CertificateActivityType
+import com.arcusys.valamis.model.PeriodTypes
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import org.joda.time.DateTime
-import scala.util._
-import com.arcusys.valamis.certificate.{CertificateSortBy => StorageCertificateSortBy, CertificateSortCriteria}
 
-class CertificateServiceImpl(
-    implicit val bindingModule: BindingModule)
+import scala.util._
+
+class CertificateServiceImpl(implicit val bindingModule: BindingModule)
   extends Injectable
   with CertificateService
   with CertificateGoalServiceImpl
   with CertificateUserServiceImpl {
 
   private lazy val certificateRepository = inject[CertificateRepository]
-  private lazy val certificateStateService = inject[CertificateStateService]
+  private lazy val certificateStatusRepository = inject[CertificateStateRepository]
   private lazy val courseGoalRepository = inject[CourseGoalStorage]
   private lazy val activityGoalRepository = inject[ActivityGoalStorage]
   private lazy val statementGoalRepository = inject[StatementGoalStorage]
   private lazy val packageGoalRepository = inject[PackageGoalStorage]
-  private lazy val lrsReader = inject[LrsClientManager]
   private lazy val fileService = inject[FileService]
+  private lazy val assetHelper = new CertificateAssetHelper()
+  private lazy val className = classOf[Certificate].getName
 
-  def create(companyId: Int, title: String, description: String): Certificate = {
-    val certificate = new Certificate(0, title, description, companyId = companyId, createdAt = new DateTime)
-    getById(certificateRepository.create(certificate).id)
+  private def logoPathPrefix(certificateId: Long) = s"$certificateId/"
+
+  private def logoPath(certificateId: Long, logo: String) = "files/" + logoPathPrefix(certificateId) + logo
+
+  def create(companyId: Long, title: String, description: String): Certificate = {
+    certificateRepository.create(new Certificate(
+      0,
+      title,
+      description,
+      companyId = companyId,
+      createdAt = new DateTime)
+    )
   }
 
-  def getById(certificateId: Int) = certificateRepository.getById(certificateId)
+  override def getLogo(id: Long) = {
+    def getLogo(certificate: Certificate) = {
+      val logoOpt = if (certificate.logo == "") None else Some(certificate.logo)
 
-  def getByCompany(companyId: Int): Seq[Certificate] = certificateRepository.getBy(companyId = companyId)
-
-  def getByIds(ids: Set[Long]): Seq[Certificate] = certificateRepository.getByIds(ids)
-
-  def getBy(companyId: Long, titlePattern: Option[String] = None) =
-    certificateRepository.getBy(companyId = companyId, titlePattern = titlePattern)
-
-  def getAll(
-    companyId: Int,
-    scope: Option[Long],
-    skip: Int,
-    take: Int,
-    titleFilter: String,
-    sortBy: CertificateSortBy,
-    isSortDirectionAsc: Boolean) = {
-      val sortCriteria = sortBy match {
-        case CertificateSortBy.CreationDate => CertificateSortCriteria.CreatedDate
-        case CertificateSortBy.Name         => CertificateSortCriteria.Title
-        case _ => throw new UnsupportedOperationException("Supported sort criterias: creationdate and name")
-      }
-
-      certificateRepository.getBy(
-        companyId = companyId,
-        titlePattern = Some(titleFilter),
-        scope = Some(scope),
-        sortBy = Some(StorageCertificateSortBy(sortCriteria, Order(isSortDirectionAsc))),
-        skipTake = Some(SkipTake(skip, take)))
+      logoOpt
+        .map(logoPath(id, _))
+        .flatMap(fileService.getFileContentOption)
+        .get
     }
 
-  def allCount(companyId: Int, titleFilter: String, scope: Option[Long]): Int =
-    certificateRepository.getCountBy(companyId = companyId, titlePattern = Some(titleFilter), scope = Some(scope))
-
-  def update(
-    id: Int,
-    title: String,
-    description: String,
-    validPeriodType: String,
-    validPeriodValue: Option[Int],
-    isOpenBadgesIntegration: Boolean,
-    shortDescription: String = "",
-    companyId: Int,
-    scope: Option[Long]): Certificate = {
-
-    val certificate = certificateRepository.getById(id)
-
-    val c = if (validPeriodValue.isEmpty || validPeriodValue.get < 1)
-      new Certificate(id, title, description, certificate.logo, true, isOpenBadgesIntegration, shortDescription,
-        companyId, PeriodTypes.UNLIMITED, 0, certificate.createdAt, certificate.isPublished, scope)
-    else
-      new Certificate(id, title, description, certificate.logo, true, isOpenBadgesIntegration, shortDescription, companyId,
-        PeriodTypes(validPeriodType), validPeriodValue.getOrElse(0), certificate.createdAt, certificate.isPublished, scope)
-
-    certificateRepository.update(c)
-    getById(id)
+    certificateRepository.getByIdOpt(id)
+      .map(getLogo)
   }
 
-  def changeLogo(id: Int, newLogo: String = "") {
+  override def setLogo(certificateId: Long, name: String, content: Array[Byte]) = {
+    val certificate = certificateRepository.getById(certificateId)
+    fileService.setFileContent(
+      folder = logoPathPrefix(certificateId),
+      name = name,
+      content = content,
+      deleteFolder = true
+    )
+
+    certificateRepository.update(certificate.copy(logo = name))
+  }
+
+  def update(id: Long,
+             title: String,
+             description: String,
+             validPeriodType: String,
+             validPeriodValue: Option[Int],
+             isOpenBadgesIntegration: Boolean,
+             shortDescription: String = "",
+             companyId: Long,
+             userId: Long,
+             scope: Option[Long]): Certificate = {
+
+    val stored = certificateRepository.getById(id)
+
+    val (period, periodValue) = if (validPeriodValue.isEmpty || validPeriodValue.get < 1)
+      (PeriodTypes.UNLIMITED, 0)
+    else
+      (PeriodTypes(validPeriodType), validPeriodValue.getOrElse(0))
+
+    val certificate = certificateRepository.update(new Certificate(
+      id,
+      title,
+      description,
+      stored.logo,
+      stored.isPermanent,
+      isOpenBadgesIntegration,
+      shortDescription,
+      companyId,
+      period,
+      periodValue,
+      stored.createdAt,
+      stored.isPublished,
+      scope)
+    )
+
+    if (certificate.isPublished) {
+      val assetEntryId = getAssetEntry(certificate.id).map(_.getEntryId)
+      assetHelper.updateCertificateAssetEntry(assetEntryId, certificate, Some(userId))
+    }
+    certificate
+  }
+
+  def changeLogo(id: Long, newLogo: String = "") {
     val certificate = certificateRepository.getById(id)
     certificateRepository.update(certificate.copy(logo = newLogo))
   }
 
-  def delete(id: Int) = {
-    certificateRepository.delete(id)
+  def delete(id: Long) = {
+    assetHelper.deleteAssetEntry(className, id)
+    SocialActivityLocalServiceHelper.deleteActivities(CertificateStateType.getClass.getName, id)
+    SocialActivityLocalServiceHelper.deleteActivities(CertificateActivityType.getClass.getName, id)
+    SocialActivityLocalServiceHelper.deleteActivities(className, id)
 
-    SocialActivityLocalServiceHelper.deleteActivities(classOf[Certificate].getName, id)
+    certificateRepository.delete(id)
+    fileService.deleteByPrefix(logoPathPrefix(id))
   }
 
-  def clone(certificateId: Int): Certificate = {
+  def clone(certificateId: Long): Certificate = {
     def getTitle(title: String, certificate: Certificate) = {
-      val certificates = certificateRepository.getBy(certificate.companyId, titlePattern = Some(title + " copy")) ++ Seq(certificate)
+      val certificates = certificateRepository.getBy(CertificateFilter(certificate.companyId, Some(title + " copy"))) ++ Seq(certificate)
 
       val maxIndex = certificates
         .map(c => c.title)
@@ -127,87 +144,100 @@ class CertificateServiceImpl(
     }
 
     val newCertificate =
-      certificateRepository.create(certificate.copy(title = newTitle,isPublished = false))
+      certificateRepository.create(certificate.copy(title = newTitle, isPublished = false))
 
     // copy relationships
     courseGoalRepository
       .getByCertificateId(certificate.id)
       .foreach(c =>
-        courseGoalRepository.create(
-          newCertificate.id,
-          c.courseId,
-          c.arrangementIndex,
-          c.periodValue,
-          c.periodType))
-
-    certificateStateService
-      .getBy(CertificateStateFilter(certificateId = Some(certificate.id)))
-      .foreach(certState =>
-        certificateStateService.create(
-          CertificateState(
-            certState.userId,
-            CertificateStatus.InProgress,
-            certState.statusAcquiredDate,
-            certState.userJoinedDate,
-            newCertificate.id)))
+      courseGoalRepository.create(
+        newCertificate.id,
+        c.courseId,
+        c.arrangementIndex,
+        c.periodValue,
+        c.periodType))
 
     activityGoalRepository
       .getByCertificateId(certificate.id)
       .foreach(activity =>
-        activityGoalRepository.create(
-          newCertificate.id,
-          activity.activityName,
-          1,
-          activity.periodValue,
-          activity.periodType))
+      activityGoalRepository.create(
+        newCertificate.id,
+        activity.activityName,
+        activity.count,
+        activity.periodValue,
+        activity.periodType))
 
     statementGoalRepository
       .getByCertificateId(certificate.id)
       .foreach(st =>
-        statementGoalRepository.create(
-          newCertificate.id,
-          st.verb,
-          st.obj,
-          st.periodValue,
-          st.periodType))
+      statementGoalRepository.create(
+        newCertificate.id,
+        st.verb,
+        st.obj,
+        st.periodValue,
+        st.periodType))
 
     packageGoalRepository
       .getByCertificateId(certificate.id)
       .foreach(g =>
-        packageGoalRepository.create(
-          newCertificate.id,
-          g.packageId,
-          g.periodValue,
-          g.periodType))
+      packageGoalRepository.create(
+        newCertificate.id,
+        g.packageId,
+        g.periodValue,
+        g.periodType))
 
     if (certificate.logo.nonEmpty) {
       val img = fileService.getFileContent(certificate.id.toString, certificate.logo)
       fileService.setFileContent(newCertificate.id.toString, certificate.logo, img)
     }
-    getById(newCertificate.id)
+    certificateRepository.getById(newCertificate.id)
   }
 
-  def publish(certificateId: Int): Certificate = {
-    val certificate = certificateRepository.getById(certificateId)
+  def publish(certificateId: Long, userId: Long, courseId: Long) {
+    val now = DateTime.now
+    val (certificate, counts) = certificateRepository.getByIdWithItemsCount(certificateId)
+      .getOrElse(throw new EntityNotFoundException(s"no certificate with id: $certificateId"))
+
+    val userStatus = counts match {
+      case CertificateItemsCount(_, 0, 0, 0, 0) => CertificateStatuses.Success
+      case _ => CertificateStatuses.InProgress
+    }
+
+    assetHelper.updateCertificateAssetEntry(
+      getAssetEntry(certificate.id).map(_.getPrimaryKey),
+      certificate
+    )
 
     certificateRepository.update(certificate.copy(isPublished = true))
+    certificateStatusRepository
+      .getByCertificateId(certificateId)
+      .foreach(s => certificateStatusRepository.update(s.copy(
+        status = userStatus,
+        userJoinedDate = now,
+        statusAcquiredDate = now
+      )))
 
-    certificateStateService
-      .getBy(CertificateStateFilter(certificateId = Some(certificateId)))
-      .map(_.copy(status = CertificateStatus.InProgress, userJoinedDate = DateTime.now, statusAcquiredDate = DateTime.now))
-      .foreach(certificateStateService.update)
-
-    getById(certificate.id)
+    SocialActivityLocalServiceHelper.addWithSet(certificate.companyId, userId, CertificateStateType.getClass.getName,
+      courseId = Some(courseId),
+      classPK = Some(certificateId),
+      `type` = Some(CertificateStateType.Publish.id)
+    )
   }
 
-  def unpublish(certificateId: Int): Certificate = {
+  def unpublish(certificateId: Long) {
     val certificate = certificateRepository.getById(certificateId)
 
+    assetHelper.updateCertificateAssetEntry(
+      getAssetEntry(certificateId).map(_.getPrimaryKey),
+      certificate,
+      isVisible = false
+    )
+
     certificateRepository.update(certificate.copy(isPublished = false))
-    getById(certificate.id)
   }
 
   private val copyRegex = "copy (\\d+)".r
+
   private def getCertificateIndexInTitle(title: String): Int = {
     copyRegex.findFirstMatchIn(title)
       .map(str => Try(str.group(1).toInt).getOrElse(0))
@@ -223,11 +253,7 @@ class CertificateServiceImpl(
       t.dropRight(1)
   }
 
-  def getUserCertificates(statementApi: StatementApi, id: Int, lUser: LUser, withOpenBadges: Boolean) = {
-    val certificateFacade = inject[CertificateService]
-    if (withOpenBadges) {
-      certificateFacade.getCertificatesByUserWithOpenBadges(statementApi, lUser.getCompanyId.toInt, id, true)
-    } else
-      certificateFacade.getForUser(id)
+  private def getAssetEntry(certificateId: Long) = {
+    assetHelper.getEntry(className, certificateId)
   }
 }

@@ -2,8 +2,6 @@ package com.arcusys.learn.service.util
 
 import com.arcusys.learn.models.valamispackage.PackageResponse
 import com.arcusys.valamis.lesson.model.BaseManifest
-import com.arcusys.valamis.lesson.scorm.model
-import com.arcusys.valamis.lesson.scorm.model.manifest
 import com.arcusys.valamis.lesson.scorm.model.manifest.Manifest
 import com.arcusys.valamis.lesson.tincan.model.TincanManifest
 
@@ -12,7 +10,7 @@ object PackageHelper {
 
     manifest match {
       case tincan: TincanManifest         => toPackageWithLogoUrl(tincan)
-      case scorm: model.manifest.Manifest => toPackageWithLogoUrl(scorm)
+      case scorm: Manifest => toPackageWithLogoUrl(scorm)
     }
   }
 
@@ -20,7 +18,7 @@ object PackageHelper {
     tincan.copy(logo = Some(getLogoUrl(tincan.id, tincan.logo)))
   }
 
-  def toPackageWithLogoUrl(scorm: manifest.Manifest): Manifest = {
+  def toPackageWithLogoUrl(scorm: Manifest): Manifest = {
     scorm.copy(logo = Some(getLogoUrl(scorm.id, scorm.logo)))
   }
 

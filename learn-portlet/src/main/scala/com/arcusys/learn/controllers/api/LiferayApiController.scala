@@ -1,52 +1,63 @@
 package com.arcusys.learn.controllers.api
 
-import com.arcusys.learn.facades.LiferayFacade
+import com.arcusys.learn.controllers.api.base.BaseJsonApiController
 import com.arcusys.learn.liferay.permission.PermissionUtil
-import com.escalatesoft.subcut.inject.BindingModule
-import com.arcusys.learn.ioc.Configuration
+import com.arcusys.learn.models.FileEntryModel
 import com.arcusys.learn.models.request.LiferayRequest
-import com.arcusys.learn.exceptions.BadRequestException
+import com.arcusys.learn.models.response.CollectionResponse
+import com.arcusys.valamis.file.service.FileEntryService
+import com.liferay.portlet.documentlibrary.model.DLFileEntry
 
-/**
- * User: Yulia.Glushonkova
- * Date: 11.07.14
- */
-class LiferayApiController(configuration: BindingModule) extends BaseApiController(configuration) {
-  def this() = this(Configuration)
-  val liferayFacade = new LiferayFacade(configuration)
+class LiferayApiController extends BaseJsonApiController {
+
+  private val fileService = inject[FileEntryService]
 
   before() {
     scentry.authenticate(LIFERAY_STRATEGY_NAME)
   }
 
-  get("/liferay(/)") {
-    val lfRequest = LiferayRequest(this)
+  get("/liferay/images(/)") {
+    val req = LiferayRequest(this)
 
-    lfRequest.action match {
-      case "GETIMAGES" => {
-        jsonAction {
-          liferayFacade.getImages(
-            PermissionUtil.getLiferayUser,
-            lfRequest.courseId,
-            lfRequest.filter,
-            lfRequest.page,
-            lfRequest.skip,
-            lfRequest.count,
-            lfRequest.isSortDirectionAsc)
-        }
-      }
-      case "GETVIDEO" => {
-        jsonAction {
-          liferayFacade.getVideo(
-            PermissionUtil.getLiferayUser,
-            lfRequest.courseId,
-            lfRequest.page,
-            lfRequest.skip,
-            lfRequest.count
-          )
-        }
-      }
-      case _ => throw new BadRequestException
-    }
+    val result = fileService.getImages(
+      PermissionUtil.getLiferayUser,
+      req.courseId,
+      req.filter,
+      req.skip,
+      req.count,
+      req.isSortDirectionAsc
+    )
+
+    CollectionResponse(
+      req.page,
+      result.items map toResponse,
+      result.total
+    )
   }
+  get("/liferay/video(/)") {
+    val req = LiferayRequest(this)
+
+    val result = fileService.getVideo(
+      PermissionUtil.getLiferayUser,
+      req.courseId,
+      req.skip,
+      req.count
+    )
+
+    CollectionResponse(
+      req.page,
+      result.items map toResponse,
+      result.total
+    )
+  }
+
+  private def toResponse(x: DLFileEntry) = FileEntryModel(
+      x.getFileEntryId,
+      x.getTitle,
+      x.getFolderId,
+      x.getVersion,
+      x.getMimeType,
+      x.getGroupId,
+      x.getUuid
+  )
 }

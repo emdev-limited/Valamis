@@ -44,11 +44,14 @@ QuestionService = new Backbone.Service({
     sync: {
         'read': {
             'path': function (model) {
-                return path.api.questions + model.id
+                if (parseInt(model.get('questionType')) == QuestionType.PlainText) {
+                    return path.api.plainText + model.get('id')
+                } else {
+                    return path.api.questions + model.get('id')
+                }
             },
             'data': function () {
                 var params = {
-                    'action' : 'getById',
                     'courseId': Utils.getCourseId()
                 };
 

@@ -21,14 +21,8 @@
     jQueryLRS2ActivityMapper(function () {
         Backbone.emulateJSON = true;
         Backbone.ajax = window.LearnAjax.ajax;
-        var defaultURL = Utils.getContextPath() + '/i18n/lrsToActivitiesMapper_en.properties';
-        var localizedURL = Utils.getContextPath() + '/i18n/lrsToActivitiesMapper_{{language}}.properties';
-        Utils.i18nLoader(localizedURL, defaultURL, onLRS2ActivityLanguageLoad, onLRS2ActivityLanguageError);
+        Utils.loadLanguage('lrsToActivitiesMapper', onLRS2ActivityLanguageLoad);
     });
-
-    function onLRS2ActivityLanguageError() {
-        toastr.error('Translation resource loading failed!');
-    }
 
     function onLRS2ActivityLanguageLoad(lang) {
         LRS2ActivityMapperApp.start({

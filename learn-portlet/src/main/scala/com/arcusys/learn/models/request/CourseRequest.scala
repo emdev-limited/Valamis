@@ -1,8 +1,7 @@
 package com.arcusys.learn.models.request
 
-import org.scalatra.{ ScalatraServlet, ScalatraBase }
 import com.arcusys.learn.service.util.Parameter
-import com.arcusys.learn.models.BaseCollectionRequestModel
+import org.scalatra.{ScalatraBase, ScalatraServlet}
 
 /**
  * Created by Iliya Tryapitsin on 29.05.2014.

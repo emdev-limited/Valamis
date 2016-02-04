@@ -41,6 +41,9 @@ var FileUploaderItemView = Backbone.View.extend({
  * @param {FileUploaderItemView} view - view of file item uploading process
  * @param {FileUploaderItemModel} model - model instance used for view
  */
+
+var MAX_NAME_LENGTH = 200;
+
 var FileUploader = Backbone.View.extend({
   initialize: function (options) {
     options = options || {};
@@ -49,16 +52,30 @@ var FileUploader = Backbone.View.extend({
     this.fileUploadAdditionalInfo = options.message || "";
     this.amount = 0;
     this.uploadsData = [];
+    this.autoUpload = options.autoUpload;
+    this.addMethod = options.addMethod;
   },
   render: function () {
+    var that = this;
     this.$el.html(Mustache.render(jQuery('#fileUploaderDropZone').html(), {
         fileUploadEndpoint: this.fileUploadEndpoint,
         fileUploadAdditionalInfo: this.fileUploadAdditionalInfo
     }));
-    this.$('#fileupload').fileupload({
+    var widgetOptions = {
       dataType: 'json',
-      dropZone: this.$('#dropzone')
-    }).bind('fileuploaddone', jQuery.proxy(this.onDone, this)).
+      dropZone: this.$('#dropzone'),
+      autoUpload: that.autoUpload,
+      headers: {'X-CSRF-Token': Liferay.authToken },
+      formData: function (form) {
+        var data = form.serializeArray();
+        data.push({name: 'p_auth', value: Liferay.authToken});
+        return data;
+      }
+    };
+    if(that.addMethod) _.extend(widgetOptions, { add: that.addMethod });
+
+    this.$('#fileupload').fileupload(widgetOptions).
+      bind('fileuploaddone', jQuery.proxy(this.onDone, this)).
       bind('fileuploadprogress', jQuery.proxy(this.onProgress, this)).
       bind('fileuploadprogressall', jQuery.proxy(this.onProgressAll, this)).
       bind('fileuploadadd', jQuery.proxy(this.onAdd, this));
@@ -78,22 +95,23 @@ var FileUploader = Backbone.View.extend({
   onAdd: function (e, data) {
     this.amount += 1;
     data.itemModel = new FileUploaderItemModel({
-      filename: data.files[0].name
+      filename: this._escapeFilename(data.files[0].name)
     });
     data.itemView = new this.itemViewClass({model: data.itemModel});
     this.$el.parent().append(data.itemView.render().$el);
     this.$('.dropzone-wrapper').hide();
     if (this.amount > 1) this.$('.progress').removeClass('hidden');
 
-    this.trigger('fileuploadadd',  data.files[0]);
+    this.trigger('fileuploadadd',  data.files[0], data);
   },
   onDone: function (e, data) {
     data.itemView.hideInfo();
 
-    data.result.filename = data.itemModel.get('filename');
+    var uploadResult = data.result || {};
+    uploadResult.filename = data.itemModel.get('filename');
 
-    this.trigger('itemDone', data.result, data.itemView, data.itemModel);
-    this.uploadsData.push(data.result);
+    this.trigger('itemDone', uploadResult, data.itemView, data.itemModel);
+    this.uploadsData.push(uploadResult);
 
     this.amount -= 1;
     if (this.amount === 0) {
@@ -155,5 +173,18 @@ var FileUploader = Backbone.View.extend({
       return (bits / 1000).toFixed(2) + ' kbit/s';
     }
     return bits.toFixed(2) + ' bit/s';
+  },
+  _escapeFilename: function (filename) {
+    filename = filename.replace(/\s/g, '_');
+
+    if(filename.length > MAX_NAME_LENGTH) {
+      var extPos = filename.lastIndexOf('.');
+      if(extPos == -1) extPos = filename.length;
+      var extension = filename.substring(extPos, filename.length);
+      var name = filename.substring(0, extPos);
+      filename = name.slice(0, Math.min(MAX_NAME_LENGTH - extension.length, name.length)) + extension;
+    }
+
+    return filename;
   }
 });

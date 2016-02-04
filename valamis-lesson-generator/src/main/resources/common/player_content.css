@@ -48,10 +48,12 @@
 }
 
 .playerPageNavigation .playerNext .button{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-transform: none;
 }
 
 .playerPageNavigation .playerPrevious .button{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-transform: none;
 }
 

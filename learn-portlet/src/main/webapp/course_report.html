@@ -55,17 +55,12 @@
 
     jQuery1816Report(function () {
         // upload translations
-        var defaultURL = Utils.getContextPath() + '/i18n/courseReport_en.properties';
-        var localizedURL = Utils.getContextPath() + '/i18n/courseReport_{{language}}.properties';
-        Utils.i18nLoader(localizedURL, defaultURL, onLanguageLoad, onLanguageError);
+        Utils.loadLanguage('courseReport', onCourseReportLanguageLoad);
 
         jQuery1816Report(".menu-toggle").click(function (e) {
             e.preventDefault();
             jQuery1816Report(".content-wrapper").toggleClass("active");
         });
-
-
-
     });
 
     function initView() {
@@ -81,15 +76,10 @@
 
     }
 
-    function onLanguageLoad(properties) {
+    function onCourseReportLanguageLoad(properties) {
         language = properties;
         initView();
     }
-
-    function onLanguageError() {
-        alert('Translation resource loading failed!');
-    }
-
 </script>
 
 

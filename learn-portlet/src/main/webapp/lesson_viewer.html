@@ -1,12 +1,8 @@
-<html>
-<head>
-
-</head>
-<body>
 <div class="projectLearnGeneric val-portlet" id="projectLearnGenericPlaceholder">
     <div id="SCORMPlayerContainer">
         <div id="packagePlayerList" class="SCORMPackageList"></div>
     </div>
+    <div class="loading-container"></div>
     <div id="SCORMPlayerView"></div>
 </div>
 <div id="player-modals-layout"></div>
@@ -23,7 +19,6 @@
 <input type="hidden" id="tincanActor" value="{{tincanActor}}">
 <input type="hidden" id="tincanLrsNotConfiguredMessage" value="{{tincanLrsNotConfigured}}">
 
-</body>
 <!--tincanLrsUserCredentials-->
 <script type="text/template" id="tincan-credentials-modal-template">
     <div class="bbm-modal__topbar">
@@ -58,7 +53,8 @@ var router;
 var endpointData = {{{endpointData}}};
 
 var permissionActionsLessonViewer = {
-    LV_SHARE: eval("{{permissionSharePackage}}")
+    LV_SHARE: eval("{{permissionSharePackage}}"),
+    LV_ORDER: eval("{{permissionOrderPackage}}")
 };
 
 TincanHelper.SetActor(JSON.parse(jQueryValamis("#tincanActor").val()));
@@ -75,9 +71,7 @@ jQueryValamis(function () {
     window.API = new SCORM12API();
 
     // upload translations
-    var defaultURL = Utils.getContextPath() + '/i18n/lessonViewer_en.properties';
-    var localizedURL = Utils.getContextPath() + '/i18n/lessonViewer_{{language}}.properties';
-    Utils.i18nLoader(localizedURL, defaultURL, onPlayerLanguageLoad, onPlayerLanguageError);
+    Utils.loadLanguage('lessonViewer', onPlayerLanguageLoad);
 });
 
 function onPlayerLanguageLoad(properties) {
@@ -87,10 +81,6 @@ function onPlayerLanguageLoad(properties) {
     router = new Router();
 
     if(!Backbone.History.started) Backbone.history.start();
-}
-
-function onPlayerLanguageError() {
-    alert('Translation resource loading failed!');
 }
 
 function initPlayerView() {
@@ -179,7 +169,15 @@ function saveSessionParameters(id, title, type) {
     jQueryValamis.ajax({
         type: 'POST',
         url: path.root + path.sequencing + "setSession",
-        data: {id: id, type: type, title: title, playerID: jQueryValamis("#playerID").val()}
+        data: {
+            id: id,
+            type: type,
+            title: title,
+            playerID: jQueryValamis("#playerID").val(),
+            p_auth: Liferay.authToken},
+        headers: {
+            'X-CSRF-Token': Liferay.authToken
+        }
 
     });
 }
@@ -187,7 +185,11 @@ function saveSessionParameters(id, title, type) {
 function clearSessionParameters() {
     jQueryValamis.ajax({
         type: 'POST',
-        url: path.root + path.sequencing + "clearSession"
+        url: path.root + path.sequencing + "clearSession",
+        data: {'p_auth': Liferay.authToken},
+        headers: {
+            'X-CSRF-Token': Liferay.authToken
+        }
     });
 }
 
@@ -238,7 +240,6 @@ var PlayerLayout = Backbone.Marionette.Layout.extend({
     }
 });
 
-
 var TincanModal = Backbone.Modal.extend({
     template: _.template(Mustache.to_html(jQueryValamis('#tincan-credentials-modal-template').html(), scormPlayerLanguageData)),
     submitEl: '.bbm-button',
@@ -287,7 +288,4 @@ var Router = Backbone.Router.extend({
     }
 });
 
-
-
 </script>
-</html>

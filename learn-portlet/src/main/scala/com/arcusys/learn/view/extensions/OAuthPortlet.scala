@@ -1,40 +1,44 @@
 package com.arcusys.learn.view.extensions
 
-import java.net.URL
+import java.net.{URL, URLEncoder}
 import javax.portlet._
-import com.arcusys.learn.utils.SessionKey
+import javax.servlet.http.HttpServletRequest
+
 import com.arcusys.learn.view.liferay.LiferayHelpers
-import com.arcusys.valamis.lrs.model.{EndpointInfo, OAuthParams}
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrs.model.OAuthParams
+import com.arcusys.valamis.lrs.service.{CurrentUserCredentials, LrsRegistration}
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
-import com.arcusys.valamis.lrsEndpoint.model.InternalAuthorization
+import com.arcusys.valamis.lrsEndpoint.model.AuthType
+import com.escalatesoft.subcut.inject.Injectable
+import com.liferay.portal.theme.ThemeDisplay
 import com.liferay.portal.util.PortalUtil
-import com.liferay.portlet.PortletURLFactoryUtil
 import net.oauth.{OAuth, OAuthException}
 import org.apache.http.client.RedirectException
+
+import scala.collection.JavaConverters._
 
 object OAuthPortlet {
   private val lock: AnyRef = new Object()
 }
-abstract class OAuthPortlet extends GenericPortlet with ConfigurableView {
+abstract class OAuthPortlet extends GenericPortlet with Injectable {
 
-  protected lazy val lrsClientManager = inject[LrsClientManager]
+  protected lazy val lrsRegistration = inject[LrsRegistration]
+  protected lazy val authCredentials = inject[CurrentUserCredentials]
 
   override def doDispatch(request: RenderRequest, response: RenderResponse) : Unit = {
     try {
       val session = request.getPortletSession
-
-      if (!isLrsAuthConfigured(request)) {
+        if (authCredentials.get(session).isEmpty) {
         OAuthPortlet.lock.synchronized {
 
-          if (!isLrsAuthConfigured(request)) {
-            val newEndpointInfo = lrsClientManager.requestProxyLrsEndpointInfo(
+          if (authCredentials.get(session).isEmpty) {
+            val newEndpointInfo = lrsRegistration.requestProxyLrsEndpointInfo(
               getOAuthParams(request),
               AuthorizationScope.All,
-              PortalUtil.getPortalURL(request)
+              PortalUtil.getPortalURL(request) + PortalUtil.getPathContext
             )
 
-            session.setAttribute(SessionKey.LrsEndpointInfo, newEndpointInfo, PortletSession.APPLICATION_SCOPE)
+            authCredentials.set(newEndpointInfo, request.getPortletSession)
           }
         }
       }
@@ -52,9 +56,10 @@ abstract class OAuthPortlet extends GenericPortlet with ConfigurableView {
         )
 
       case e: RedirectException =>
-        val settings = lrsClientManager.getLrsSettings
+        val settings = lrsRegistration.getLrsSettings
         val url = settings.auth match {
-          case _: InternalAuthorization => PortalUtil.getPortalURL(request) + new URL(e.getMessage).getFile
+          case AuthType.INTERNAL =>
+            PortalUtil.getPortalURL(request) + new URL(e.getMessage).getFile
           case _ => e.getMessage
         }
 
@@ -80,29 +85,27 @@ abstract class OAuthPortlet extends GenericPortlet with ConfigurableView {
   }
 
   private def getPortletUrl(implicit request: RenderRequest) = {
-    val portletId = PortalUtil.getPortletId(request)
     val httpRequest = PortalUtil.getOriginalServletRequest(
       PortalUtil.getHttpServletRequest(request)
     )
-    val themeDisplay = LiferayHelpers.getThemeDisplay(request)
-    val portletURL = PortletURLFactoryUtil.create(httpRequest, portletId, themeDisplay.getPlid, PortletRequest.RENDER_PHASE)
 
-    portletURL.toString
+    val themeDisplay = LiferayHelpers.getThemeDisplay(request)
+
+    getURLFromRequest(httpRequest, LiferayHelpers.getThemeDisplay(request))
   }
 
-  private def isLrsAuthConfigured(implicit request: RenderRequest) : Boolean = {
-    val session = request.getPortletSession
-    val endpointInfo = session.getAttribute(SessionKey.LrsEndpointInfo, PortletSession.APPLICATION_SCOPE)
+  private def getURLFromRequest(request: HttpServletRequest, themeDisplay: ThemeDisplay): String = {
 
-    // isInstanceOf to prevent classNotFoundException after redeploy
-    endpointInfo != null && endpointInfo.isInstanceOf[EndpointInfo]
+    val url = themeDisplay.getPortalURL+themeDisplay.getURLCurrent
+
+    "%s?%s".format(url, request.getParameterNames.asScala
+      .map(n => (n.toString, request.getParameter(n.toString))).foldLeft("") {(s: String, k: (String, String)) =>
+       s + k._1 + "=" + URLEncoder.encode(k._2, "UTF-8") + "&" }).dropRight(1)
   }
 
   def getEndpointInfo(implicit request: RenderRequest) = {
-    val session = request.getPortletSession
-
-    session.getAttribute(SessionKey.LrsEndpointInfo, PortletSession.APPLICATION_SCOPE) match {
-      case e: EndpointInfo => e
+    authCredentials.get(request.getPortletSession) match {
+      case Some(e) => e
       case _ => throw new NoSuchElementException("Endpoint Data")
     }
   }

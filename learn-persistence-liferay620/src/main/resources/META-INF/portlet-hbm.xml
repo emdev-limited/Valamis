@@ -14,7 +14,6 @@
 	<import class="com.arcusys.learn.persistence.liferay.model.LFBigDecimal" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFChildrenSelection" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFConditionRule" />
-	<import class="com.arcusys.learn.persistence.liferay.model.LFConfig" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFCourse" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFGlblObjectiveState" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFLessonLimit" />
@@ -41,9 +40,6 @@
 	<import class="com.arcusys.learn.persistence.liferay.model.LFSequencing" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFSequencingTracking" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFSiteDependentConfig" />
-	<import class="com.arcusys.learn.persistence.liferay.model.LFSlide" />
-	<import class="com.arcusys.learn.persistence.liferay.model.LFSlideEntity" />
-	<import class="com.arcusys.learn.persistence.liferay.model.LFSlideSet" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFTCClntApiStorage" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFTincanLrsEndpoint" />
 	<import class="com.arcusys.learn.persistence.liferay.model.LFTincanManifestAct" />
@@ -167,13 +163,6 @@
 		<property name="combination" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="ruleType" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="action" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-	</class>
-	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFConfigImpl" table="Learn_LFConfig">
-		<id name="id" column="id_" type="long">
-			<generator class="assigned" />
-		</id>
-		<property name="dataKey" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property name="dataValue" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 	</class>
 	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFCourseImpl" table="Learn_LFCourse">
 		<id name="id" column="id_" type="long">
@@ -459,45 +448,6 @@
 		<property name="dataKey" type="org.hibernate.type.StringType" />
 		<property name="dataValue" type="org.hibernate.type.StringType" />
 	</class>
-	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFSlideImpl" table="Learn_LFSlide">
-		<id name="id" column="id_" type="long">
-			<generator class="assigned" />
-		</id>
-		<property name="bgcolor" type="org.hibernate.type.StringType" />
-		<property name="bgimage" type="org.hibernate.type.StringType" />
-		<property name="title" type="org.hibernate.type.StringType" />
-		<property name="slideSetId" type="org.hibernate.type.LongType" />
-		<property name="topSlideId" type="org.hibernate.type.LongType" />
-		<property name="leftSlideId" type="org.hibernate.type.LongType" />
-		<property name="statementVerb" type="org.hibernate.type.StringType" />
-		<property name="statementObject" type="org.hibernate.type.StringType" />
-		<property name="statementCategoryId" type="org.hibernate.type.StringType" />
-	</class>
-	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFSlideEntityImpl" table="Learn_LFSlideEntity">
-		<id name="id" column="id_" type="long">
-			<generator class="assigned" />
-		</id>
-		<property name="top" type="org.hibernate.type.StringType" column="top_" />
-		<property name="left" type="org.hibernate.type.StringType" column="left_" />
-		<property name="width" type="org.hibernate.type.StringType" />
-		<property name="height" type="org.hibernate.type.StringType" />
-		<property name="zIndex" access="com.liferay.portal.dao.orm.hibernate.CamelCasePropertyAccessor" type="org.hibernate.type.StringType" />
-		<property name="content" type="org.hibernate.type.StringType" />
-		<property name="entityType" type="org.hibernate.type.StringType" />
-		<property name="slideId" type="org.hibernate.type.LongType" />
-		<property name="correctLinkedSlideId" type="org.hibernate.type.LongType" />
-		<property name="incorrectLinkedSlideId" type="org.hibernate.type.LongType" />
-		<property name="notifyCorrectAnswer" type="org.hibernate.type.BooleanType" />
-	</class>
-	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFSlideSetImpl" table="Learn_LFSlideSet">
-		<id name="id" column="id_" type="long">
-			<generator class="assigned" />
-		</id>
-		<property name="title" type="org.hibernate.type.StringType" />
-		<property name="description" type="org.hibernate.type.StringType" />
-		<property name="logo" type="org.hibernate.type.StringType" />
-		<property name="courseId" type="org.hibernate.type.LongType" />
-	</class>
 	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFTCClntApiStorageImpl" table="Learn_LFTCClntApiStorage">
 		<id name="id" column="id_" type="long">
 			<generator class="assigned" />
@@ -522,6 +472,7 @@
 		<property name="authType" type="org.hibernate.type.StringType" />
 		<property name="key" type="org.hibernate.type.StringType" column="key_" />
 		<property name="secret" type="org.hibernate.type.StringType" />
+		<property name="customHost" type="org.hibernate.type.StringType" />
 	</class>
 	<class name="com.arcusys.learn.persistence.liferay.model.impl.LFTincanManifestActImpl" table="Learn_LFTincanManifestAct">
 		<id name="id" column="id_" type="long">

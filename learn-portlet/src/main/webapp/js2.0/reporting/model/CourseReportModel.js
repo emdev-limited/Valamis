@@ -18,7 +18,7 @@ var CourseReportTargets = {
     }
 };
 
-CourseReportService = new Backbone.Service({ url: '/',targets: CourseReportTargets});
+CourseReportService = new Backbone.Service({ url: path.root,targets: CourseReportTargets});
 
 var CourseReportModel = Backbone.Model.extend({
     defaults: {

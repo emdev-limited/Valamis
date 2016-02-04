@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    var data = JSON.parse('{{{answers}}}');
+    var data = JSON.parse('{{{answers}}}'.replace(/\="/gi, "='").replace(/\">/gi, "'>"));
     var mappedData = [];
 
     jQuery(document).ready(function () {

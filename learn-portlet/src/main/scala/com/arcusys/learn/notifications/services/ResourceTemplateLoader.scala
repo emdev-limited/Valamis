@@ -1,7 +1,7 @@
 package com.arcusys.learn.notifications.services
 
 import com.arcusys.learn.notifications.MessageTemplateLoader.MessageTemplate
-import com.arcusys.learn.notifications.{ MessageTemplateLoader, MessageType }
+import com.arcusys.learn.notifications.{MessageTemplateLoader, MessageType}
 import com.arcusys.valamis.util.mustache.Mustache
 
 import scala.io.Source

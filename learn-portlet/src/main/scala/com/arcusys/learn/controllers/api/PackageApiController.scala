@@ -1,231 +1,224 @@
 package com.arcusys.learn.controllers.api
 
-import com.arcusys.learn.exceptions.BadRequestException
-import com.arcusys.learn.facades.{ PackageFacadeContract, TagFacadeContract }
-import com.arcusys.learn.ioc.Configuration
-import com.arcusys.learn.liferay.permission.{ PortletName, ModifyPermission, ViewPermission, PermissionUtil }
-import com.arcusys.learn.liferay.services.PermissionHelper
+import javax.servlet.http.HttpServletResponse
+
+import com.arcusys.learn.controllers.api.base.BaseJsonApiController
+import com.arcusys.learn.facades.PackageFacadeContract
+import com.arcusys.learn.liferay.permission.PermissionUtil._
+import com.arcusys.learn.models.TagResponse
 import com.arcusys.learn.models.request.PackageRequest
-import com.arcusys.learn.models.valamispackage.{ PackageSerializer, PackageUploadModel }
+import com.arcusys.learn.models.response.CollectionResponseHelper._
+import com.arcusys.learn.models.valamispackage.PackageSerializer
+import com.arcusys.learn.policies.api.PackagePolicy
 import com.arcusys.learn.web.ServletBase
-import com.arcusys.valamis.lesson.service.ValamisPackageService
-import com.arcusys.valamis.lrs.serializer.DateTimeSerializer
-import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.escalatesoft.subcut.inject.BindingModule
-import org.json4s.{ DefaultFormats, Formats }
-import PermissionUtil._
+import com.arcusys.valamis.lesson.model.{LessonType, PackageUploadModel}
+import com.arcusys.valamis.lesson.service.{TagServiceContract, ValamisPackageService}
+import com.arcusys.valamis.util.serialization.JsonHelper
+import org.json4s.ext.EnumNameSerializer
+import org.json4s.{DefaultFormats, Formats}
 
-class PackageApiController(configuration: BindingModule) extends BaseApiController(configuration) with ServletBase {
-  private val packageFacade = inject[PackageFacadeContract]
-  private val lrsReader = inject[LrsClientManager]
-  private val packageService = inject[ValamisPackageService]
+class PackageApiController
+  extends BaseJsonApiController
+  with PackagePolicy
+  with ServletBase {
 
+  private lazy val packageFacade = inject[PackageFacadeContract]
+  private lazy val packageService = inject[ValamisPackageService]
+  private lazy val req = PackageRequest(this)
+  private lazy val tagService = inject[TagServiceContract]
 
-  before() {
-    scentry.authenticate(LIFERAY_STRATEGY_NAME)
+  implicit override val jsonFormats: Formats =
+    DefaultFormats + new PackageSerializer + new EnumNameSerializer(LessonType)
+
+  get("/packages(/)", request.getParameter("action") == "VISIBLE"){
+    val companyId = req.companyId
+    val courseId = req.courseIdRequired
+    val pageId = req.pageIdRequired
+    val playerId = req.playerIdRequired
+    val user = getLiferayUser
+    val tagId = req.tagId
+
+    val filter = req.textFilter
+    packageFacade.getForPlayer(companyId, courseId, pageId, filter, tagId, playerId, user,
+      req.isSortDirectionAsc, req.sortBy, req.skipTake
+    )
+      .toCollectionResponse(req.page)
   }
 
-  options() {
-    response.setHeader("Access-Control-Allow-Methods", "HEAD,GET,POST,PUT,DELETE")
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type,Content-Length,Authorization,If-Match,If-None-Match,X-Experience-API-Version,X-Experience-API-Consistent-Through")
-    response.setHeader("Access-Control-Expose-Headers", "ETag,Last-Modified,Cache-Control,Content-Type,Content-Length,WWW-Authenticate,X-Experience-API-Version,X-Experience-API-Consistent-Through")
-  }
-  private val tagFacade = inject[TagFacadeContract]
+  get("/packages(/)", request.getParameter("action") == "ALL"){
+    val courseId = req.courseIdRequired
+    val companyId = req.companyId
+    val user = getLiferayUser
+    val scope = req.scope
 
-  def this() = this(Configuration)
+    val filter = req.textFilter
+    val tagId = req.tagId
+    val isSortDirectionAsc = req.isSortDirectionAsc
+    val packageType = req.packageType
 
-  get("/packages(/)") {
-    val packageRequest = PackageRequest(this)
-
-    packageRequest.action match {
-      case "VISIBLE" => jsonAction {
-
-        PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer)
-
-        val companyId = packageRequest.companyId
-        val courseId = packageRequest.courseId
-        val pageId = packageRequest.pageIdRequired
-        val playerId = packageRequest.playerIdRequired
-        val user = getLiferayUser
-        val tagId = packageRequest.tagId
-
-        val filter = packageRequest.filter
-        lrsReader.statementApi(
-          packageFacade.getForPlayer(_, companyId, courseId, pageId, filter, tagId, playerId, user,
-            packageRequest.isSortDirectionAsc, packageRequest.sortBy, packageRequest.page, packageRequest.count),
-          packageRequest.lrsAuth)
-      }
-      case "ALL" => jsonAction {
-
-        PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer, PortletName.LessonManager)
-
-        val courseId = packageRequest.courseId
-        val companyId = packageRequest.companyId
-        val user = getLiferayUser
-        val scope = packageRequest.scope
-
-        val filter = packageRequest.filter
-        val tagId = packageRequest.tagId
-        val isSortDirectionAsc = packageRequest.isSortDirectionAsc
-        val skip = packageRequest.skip
-        val count = packageRequest.count
-        val packageType = packageRequest.packageType
-        val page = packageRequest.page
-
-        packageFacade.getAllPackages(packageType, Some(courseId), scope, filter, tagId, isSortDirectionAsc, skip, count, page, companyId, user)
-      }
-      case _ => {
-        throw new BadRequestException
-      }
-    }
+    packageFacade.getAllPackages(packageType, Some(courseId), scope, filter, tagId, isSortDirectionAsc, req.skipTake, companyId, user)
+      .toCollectionResponse(req.page)
   }
 
-  get("/packages/getPersonalForPlayer") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer)
-    val packageRequest = PackageRequest(this)
-    jsonAction {
 
-      val playerId = packageRequest.playerIdRequired
-      val companyId = packageRequest.companyId
-      val groupId = getLiferayUser.getGroupId
-      val user = getLiferayUser
+  get("/packages/:id/logo"){
 
-      packageFacade.getForPlayerConfig(playerId, companyId, groupId, user)
-    }
+    val content = packageService.getLogo(req.packageId)
+      .getOrElse(halt(HttpServletResponse.SC_NOT_FOUND, s"Package with id: ${req.packageId} doesn't exist"))
+
+    response.reset()
+    response.setStatus(HttpServletResponse.SC_OK)
+    response.setContentType("image/png")
+    content
   }
 
-  get("/packages/getByScope") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonManager, PortletName.LessonViewer)
-    val packageRequest = PackageRequest(this)
-    jsonAction {
+  get("/packages/getPersonalForPlayer"){
 
-      val courseId = packageRequest.courseId
-      val pageId = packageRequest.pageId
-      val playerId = packageRequest.playerId
-      val companyId = packageRequest.companyId
-      val user = getLiferayUser
+    val playerId = req.playerIdRequired
+    val companyId = req.companyId
+    val groupId = getLiferayUser.getGroupId
+    val user = getLiferayUser
 
-      val scope = packageRequest.scope
-      val courseIds = List(getLiferayUser.getGroupId.toInt)
-
-      packageFacade.getByScopeType(courseId, scope, pageId, playerId, companyId, courseIds, user)
-    }
+    packageFacade.getForPlayerConfig(playerId, companyId, groupId, user)
   }
 
-  get("/packages/getLastOpen") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.RecentLessons)
-    val packageRequest = PackageRequest(this)
-    implicit val formats: Formats = DefaultFormats + DateTimeSerializer
-    jsonAction {
-      lrsReader.statementApi(statementApi => {
+  get("/packages/getByScope"){
+    val courseId = req.courseIdRequired
+    val pageId = req.pageId
+    val playerId = req.playerId
+    val companyId = req.companyId
+    val user = getLiferayUser
 
-        packageService.getLastPaskages( getUserId, statementApi,  packageRequest.countPackage, getCompanyId)
+    val scope = req.scope
+    val courseIds = List(getLiferayUser.getGroupId)
 
-      }, packageRequest.lrsAuth)
-    }
+    packageFacade.getByScopeType(courseId.toInt, scope, pageId, playerId, companyId, courseIds, user)
   }
 
-  post("/packages(/)")(jsonAction {
-    PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonManager)
-    val packageRequest = PackageRequest(this)
-    packageRequest.action match {
-      case "UPDATE" => {
-        val packageId = packageRequest.packageId
+  post("/packages(/)", request.getParameter("action") == "UPDATE"){
+    val packageId = req.packageId
 
-        val courseId = packageRequest.courseId
-        val companyId = packageRequest.companyId
-        val pageId = packageRequest.pageId
-        val playerId = packageRequest.playerId
-        val user = getLiferayUser
+    val courseId = req.courseIdRequired
+    val companyId = req.companyId
+    val pageId = req.pageId
+    val playerId = req.playerId
+    val user = getLiferayUser
+    val scope = req.scope
 
-        val scope = packageRequest.scope
+    val visibility = req.visibility
+    val isDefault = req.isDefault
+    val title = req.title.get
+    val description = req.description.getOrElse("")
+    val packageType = req.packageTypeRequired
 
-        val visibility = packageRequest.visibility
-        val isDefault = packageRequest.isDefault
-        val title = packageRequest.title.get
-        val description = packageRequest.description.getOrElse("")
-        val packageType = packageRequest.packageTypeRequired
+    val passingLimit = req.passingLimit
+    val rerunInterval = req.rerunInterval
+    val rerunIntervalType = req.rerunIntervalType
 
-        val passingLimit = packageRequest.passingLimit
-        val rerunInterval = packageRequest.rerunInterval
-        val rerunIntervalType = packageRequest.rerunIntervalType
+    val tags = req.tags
 
-        val tags = packageRequest.tags
+    val beginDate = req.beginDate
+    val endDate = req.endDate
 
-        val beginDate = packageRequest.beginDate
-        val endDate = packageRequest.endDate
+    packageFacade.updatePackage(packageId, tags, passingLimit, rerunInterval, rerunIntervalType, beginDate, endDate, scope, visibility, isDefault, companyId, courseId.toInt, title, description, packageType, pageId, playerId, user)
+  }
 
-        packageFacade.updatePackage(packageId, tags, passingLimit, rerunInterval, rerunIntervalType, beginDate, endDate, scope, visibility, isDefault, companyId, courseId, title, description, packageType, pageId, playerId, user)
+  post("/packages(/)", request.getParameter("action") == "UPDATELOGO"){
+    val packageId = req.packageId
+    val packageLogo = req.packageLogo
+    val packageType = req.packageTypeRequired
 
-      }
-      case "UPDATELOGO" => {
-        val packageId = packageRequest.packageId
-        val packageLogo = packageRequest.packageLogo
-        val packageType = packageRequest.packageTypeRequired
+    packageService.updatePackageLogo(packageType, packageId, packageLogo)
+  }
 
-        packageFacade.updatePackageLogo(packageId, packageType, packageLogo)
-      }
-      case "UPDATEPACKAGES" => {
-        implicit val fs: Formats = DefaultFormats + new PackageSerializer
-        val packages = parseJson[Seq[PackageUploadModel]](packageRequest.packages).get
+  post("/packages(/)", request.getParameter("action") == "UPDATEPACKAGES"){
+    val packages = JsonHelper.fromJson[Seq[PackageUploadModel]](req.packages)
 
-        val scope = packageRequest.scope
-        val courseId = packageRequest.courseId
-        val pageId = packageRequest.pageId
-        val playerId = packageRequest.playerId
+    val scope = req.scope
+    val courseId = req.courseIdRequired
+    val pageId = req.pageId
+    val playerId = req.playerId
 
-        packageFacade.uploadPackages(packages, scope, courseId, pageId, playerId)
-      }
-      case "DELETE" => {
-        val packageId = packageRequest.packageId
-        val packageType = packageRequest.packageTypeRequired
+    packageFacade.uploadPackages(packages, scope, courseId.toInt, pageId, playerId)
+  }
 
-        packageFacade.removePackage(packageId, packageType)
-      }
-      case "REMOVEPACKAGES" => {
-        val packageIds = packageRequest.packageIds
+  delete("/packages/:packageType/:id(/)"){
+    val packageId = req.packageId
+    val packageType = req.packageTypeRequired
 
-        packageFacade.removePackages(packageIds)
-      }
-      case _ => {
-        throw new BadRequestException
-      }
-    }
-  })
+    packageService.removePackage(packageId, packageType)
+  }
+
+  post("/packages(/)", request.getParameter("action") == "REMOVEPACKAGES"){
+    val packageIds = req.packageIds
+
+    packageService.removePackages(packageIds)
+  }
 
   post("/packages/updatePackageScopeVisibility/:id") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer)
-    val packageRequest = PackageRequest(this)
 
-    val courseId = packageRequest.courseId
-    val pageId = packageRequest.pageId
-    val playerId = packageRequest.playerId
-    val user = getLiferayUser
-    val scope = packageRequest.scope
+    val courseId = req.courseIdRequired
+    val pageId = req.pageId
+    val playerId = req.playerId
+    val userId = getLiferayUser.getUserId
+    val scope = req.scope
+    val id = req.packageId
+    val visibility = req.visibility
+    val isDefault = req.isDefault
 
-    val id = packageRequest.packageId
-    val visibility = packageRequest.visibility
-    val isDefault = packageRequest.isDefault
-
-    packageFacade.updatePackageScopeVisibility(id, scope, courseId, visibility, isDefault, pageId, playerId, user)
+    packageService.updatePackageScopeVisibility(id, scope, courseId.toInt, visibility, isDefault, pageId, playerId, userId)
   }
 
   post("/packages/addPackageToPlayer/:playerID") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer)
-    val packageRequest = PackageRequest(this)
+    val playerId = req.playerIdRequired
+    val packageId = req.packageId
 
-    val playerId = packageRequest.playerIdRequired
-    val packageId = packageRequest.packageId
-
-    packageFacade.addPackageToPlayer(playerId, packageId)
+    packageService.addPackageToPlayer(playerId, packageId)
   }
 
   post("/packages/updatePlayerScope") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer)
-    val packageRequest = PackageRequest(this)
-    val scope = packageRequest.scope
-    val playerId = packageRequest.playerIdRequired
+    val scope = req.scope
+    val playerId = req.playerIdRequired
 
-    packageFacade.updatePlayerScope(scope, playerId)
+    packageService.updatePlayerScope(scope, playerId)
+  }
+
+  get("/packages/tags(/)") {
+    val tags = req.playerId match {
+      case Some(playerId) =>
+        tagService.getPackagesTagsByPlayerId(playerId, req.companyId, req.courseIdRequired, req.pageId.get)
+
+      case None =>
+        req.courseId match {
+          case Some(courseId) => tagService.getPackagesTagsByCourse(courseId)
+          case None => tagService.getPackagesTagsByCompany(getCompanyId)
+        }
+    }
+
+    tags.map(t => TagResponse(t.id, t.text))
+  }
+
+  post("/packages/rate(/)", request.getParameter("action") == "UPDATERATING") {
+
+    val packageId = req.packageId
+    val ratingScore = req.ratingScore
+    val userId = getUserId
+
+    packageService.ratePackage(packageId, userId, ratingScore)
+  }
+
+  post("/packages/rate(/)", request.getParameter("action") == "DELETERATING") {
+
+    val packageId = req.packageId
+    val userId = getUserId
+
+    packageService.deletePackageRating(packageId, userId)
+  }
+
+  post("/packages/order(/)") {
+    packageService.updateOrder(
+      req.playerIdRequired,
+      req.packageIdsRequired
+    )
   }
 }

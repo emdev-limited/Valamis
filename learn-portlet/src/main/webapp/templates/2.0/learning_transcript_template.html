@@ -87,7 +87,7 @@
         <td>
             <span id="expandDetailsList" class="cursor-pointer val-icon-plus" data-package="{{id}}"></span> {{packageName}}
         </td>
-        <td> {{#grade}} {{grade}}% {{/grade}}</td>
+        <td> {{#grade}} {{gradeShowing}}% {{/grade}} {{^grade}} {{gradeAutoShowing}}% {{/grade}}</td>
     </tr>
     <tr id="packageDetailsLayout-{{id}}" class="hidden">
         <td colspan="2">
@@ -175,7 +175,7 @@
     {{/isActivity}}
 
     <td>
-        {{#url}} <a href="/web{{url}}" target="_blank">{{/url}}
+        {{#url}} <a href="{{url}}" target="_blank">{{/url}}
         {{title}}
         {{#url}}</a>{{/url}}
     </td>

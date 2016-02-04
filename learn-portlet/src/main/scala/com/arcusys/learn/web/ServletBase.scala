@@ -1,20 +1,20 @@
 package com.arcusys.learn.web
 
-import org.scalatra.ScalatraServlet
+import com.arcusys.learn.service.util.{OldParameterBase, Parameter}
+import com.arcusys.valamis.util.serialization.JsonHelper
 import com.escalatesoft.subcut.inject.Injectable
-import com.arcusys.learn.service.util.{ OldParameterBase, Parameter}
-import com.arcusys.valamis.util.JsonSupport
+import org.scalatra.ScalatraServlet
 
-trait ServletBase extends ScalatraServlet with JsonSupport with Injectable {
+trait ServletBase extends ScalatraServlet with Injectable {
 
   @deprecated
   class JsonModelBuilder[T](transform: T => Map[String, Any]) {
-    def apply(entity: T): String = json(transform(entity)).get
+    def apply(entity: T): String = JsonHelper.toJson(transform(entity))
 
-    def apply(entities: Seq[T]): String = json(entities.map(transform)).get
+    def apply(entities: Seq[T]): String = JsonHelper.toJson(entities.map(transform))
 
     def apply(entityOption: Option[T]): String = entityOption match {
-      case Some(entity) => json(transform(entity)).get
+      case Some(entity) => JsonHelper.toJson(transform(entity))
       case None         => halt(404, "Entity not found for given parameters")
     }
 

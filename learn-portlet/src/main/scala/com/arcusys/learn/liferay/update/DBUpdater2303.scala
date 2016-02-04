@@ -3,9 +3,6 @@ package com.arcusys.learn.liferay.update
 import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.learn.liferay.update.migration.{CertificateStorageMigration2303, FileStorageMigration2303}
-import com.arcusys.learn.persistence.liferay.service._
-import scala.collection.JavaConverters._
-import java.net.URLDecoder
 
 class DBUpdater2303 extends LUpgradeProcess with SQLRunner {
   override def getThreshold = 2303

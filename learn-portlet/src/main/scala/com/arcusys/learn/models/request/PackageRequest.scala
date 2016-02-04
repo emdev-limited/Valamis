@@ -1,10 +1,11 @@
 package com.arcusys.learn.models.request
 
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.learn.models.valamispackage.PackageSortBy
-import com.arcusys.learn.service.util.{ AntiSamyHelper, Parameter }
-import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.learn.service.util.Parameter
+import com.arcusys.valamis.lesson.model.{LessonType, PackageSortBy}
+import com.arcusys.valamis.model.{PeriodTypes, ScopeType}
 import org.scalatra.ScalatraBase
+
 import scala.util.Try
 
 object PackageRequest extends BaseCollectionFilteredRequest with BaseRequest {
@@ -35,16 +36,17 @@ object PackageRequest extends BaseCollectionFilteredRequest with BaseRequest {
   val RerunInterval = "rerunInterval"
   val RerunIntervalType = "rerunIntervalType"
 
-  val TagId = "tagID"
+  val TagId = "tagId"
   val Tags = "tags"
 
   val BeginDate = "beginDate"
   val EndDate = "endDate"
-  val CountPackage = "countPackage"
+
+  val RatingScore = "ratingScore"
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
 
-  class Model(val scalatra: ScalatraBase) extends BaseSortableCollectionFilteredRequestModel(scalatra, PackageSortBy.apply) with OAuthModel {
+  class Model(val scalatra: ScalatraBase) extends BaseSortableCollectionFilteredRequestModel(scalatra, PackageSortBy.apply) {
     def action = Parameter(Action).required
 
     def title = Parameter(Title).option
@@ -67,15 +69,18 @@ object PackageRequest extends BaseCollectionFilteredRequest with BaseRequest {
 
     def isDefault = Parameter(IsDefault).booleanRequired
 
-    def packageTypeRequired = Parameter(PackageType).required
-    def packageType = Parameter(PackageType).option
+    def packageTypeRequired = toPackageType(Parameter(PackageType).required)
+    def packageType = Parameter(PackageType).option("").map(toPackageType)
 
+    def packageIdsRequired = Parameter(PackageIds).multiLong
     def packageIds = Parameter(PackageIds).multiWithEmpty.map(x => x.toLong)
 
     def packages = Parameter(Packages).required
 
-    def courseId = Parameter(CourseId).intRequired
-    def scope = Parameter(Scope).required
+    def courseIdRequired = Parameter(CourseId).longRequired
+    def courseId = Parameter(CourseId).longOption
+
+    def scope = ScopeType.withName(Parameter(Scope).required)
     def pageIdRequired = Parameter(PageId).required
     def pageId = Parameter(PageId).option
     def playerId = Parameter(PlayerId).option
@@ -93,7 +98,13 @@ object PackageRequest extends BaseCollectionFilteredRequest with BaseRequest {
     def endDate = Parameter(EndDate).dateTimeOption("")
     def companyId = PortalUtilHelper.getCompanyId(scalatra.request)
 
-    def countPackage = Parameter(CountPackage).intRequired
+    private def toPackageType(lessonType:String) = lessonType match {
+      case "scorm" => LessonType.Scorm
+      case "tincan" => LessonType.Tincan
+      case _ => LessonType.withName(lessonType)
+    }
+
+    def ratingScore = Parameter(RatingScore).doubleRequired
   }
 
 }

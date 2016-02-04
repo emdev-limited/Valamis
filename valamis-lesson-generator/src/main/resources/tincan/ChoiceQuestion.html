@@ -1,15 +1,15 @@
-<section data-state="choice_{{id}}">
-    <div class="SCORMPlayerContentDisplay content{{id}}">
+<section data-state="choice_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
+    <div class="SCORMPlayerContentDisplay content{{id}}_{{questionNumber}}">
         <div class="playerHeader">
             <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
         </div>
-        <div class="playerMainArea playerMainArea{{id}}">
+        <div class="playerMainArea playerMainArea{{id}}_{{questionNumber}}">
             {{#answers}}
             {{#multipleChoice}}
             <span class="choiceAnswer">
                     <div>
-                        <input type="checkbox" id="scormAnswer{{id}}" class="checkbox" style="display: none;" data-score="{{score}}"/>
-                        <label class="choiceTextContainer" id="scormAnswerText{{id}}" for="scormAnswer{{id}}">
+                        <input type="checkbox" id="scormAnswer{{id}}_{{questionNumber}}" class="checkbox" style="display: none;" data-score="{{score}}"/>
+                        <label class="choiceTextContainer" id="scormAnswerText{{id}}_{{questionNumber}}" for="scormAnswer{{id}}_{{questionNumber}}">
                             <span>{{{text}}}</span>
                         </label>
                     </div>
@@ -18,8 +18,8 @@
             {{^multipleChoice}}
             <span class="choiceAnswer">
                     <div>
-                        <input type="radio" id="scormAnswer{{id}}" name="scormGroup1" class="radio" style="display: none;" data-score="{{score}}"/>
-                        <label class="choiceTextContainer" id="scormAnswerText{{id}}" for="scormAnswer{{id}}">
+                        <input type="radio" id="scormAnswer{{id}}_{{questionNumber}}" name="scormGroup1_{{questionNumber}}" class="radio" style="display: none;" data-score="{{score}}"/>
+                        <label class="choiceTextContainer" id="scormAnswerText{{id}}_{{questionNumber}}" for="scormAnswer{{id}}_{{questionNumber}}">
                             <span>{{{text}}}</span>
                         </label>
                     </div>
@@ -28,60 +28,75 @@
             {{/answers}}
         </div>
         <!--{{#autoShowAnswer}} -->
-        <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton" onclick="TinCanCourseHelpers['choiceShowAnswers_{{id}}']()">Check</button>
+        <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+                onclick="TinCanCourseHelpers['choiceShowAnswers_{{id}}_{{questionNumber}}']()">
+            Check
+        </button>
         <!--{{/autoShowAnswer}} -->
     </div>
     <!--{{#autoShowAnswer}} -->
-    <div class="answers answers{{id}}" style="display: none;">
-        <h2><span id="answerCorrectness{{id}}" style="vertical-align: baseline !important;"></span></h2>
+    <div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
+        <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
 
-        <div id="answerComparison{{id}}" style="display: none;">
-            <div style="display: none" class="verticalSeparator">
-                <h3>Your answers:</h3>
-                <div id="usersAnswers{{id}}">
+        <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
+            <div>
+                <p><strong>Your answers:</strong></p>
+                <div id="usersAnswers{{id}}_{{questionNumber}}">
                     {{#answers}}
                     {{#multipleChoice}}
-                    <div style="float: left;">
-                        <input type="checkbox" class="scormAnswer{{id}} checkbox" style="margin-right: 15px;" disabled/>
+                    <div class="val-row">
+                        <div class="s-2">
+                            <input type="checkbox" class="scormAnswer{{id}}_{{questionNumber}} checkbox" disabled/>
+                        </div>
+                        <div class="s-10">
+                            <div class="choiceTextContainer">
+                                <label>{{{text}}}</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="choiceTextContainer">
-                        <label>{{{text}}}</label>
-                    </div>
-
                     {{/multipleChoice}}
                     {{^multipleChoice}}
-                    <div style="float: left;">
-                        <input type="radio" class="scormAnswer{{id}} radio" name="scormGroup2" style="margin-right: 15px;" disabled/>
+                    <div class="val-row">
+                        <div class="s-2">
+                            <input type="radio" class="scormAnswer{{id}}_{{questionNumber}} radio" name="scormGroup2_{{questionNumber}}" disabled/>
+                        </div>
+                        <div class="s-10">
+                            <div class="choiceTextContainer">
+                                <label>{{{text}}}</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="choiceTextContainer">
-                        <label>{{{text}}}</label>
-                    </div>
-
                     {{/multipleChoice}}
                     {{/answers}}
                 </div>
             </div>
             <div>
-                <h3>Correct answers:</h3>
-
-                <div id="correctAnswers{{id}}">
+                <p><strong>Correct answers:</strong></p>
+                <div id="correctAnswers{{id}}_{{questionNumber}}">
                     {{#answers}}
                     {{#multipleChoice}}
-                    <div style="float: left;">
-                        <input type="checkbox" class="scormAnswer{{id}} checkbox" style="margin-right: 15px;" disabled/>
-                    </div>
-                    <div class="choiceTextContainer">
-                        <label>{{{text}}}</label>
+                    <div class="val-row">
+                        <div class="s-2">
+                            <input type="checkbox" class="scormAnswer{{id}}_{{questionNumber}} checkbox" disabled/>
+                        </div>
+                        <div class="s-10">
+                            <div class="choiceTextContainer">
+                                <label>{{{text}}}</label>
+                            </div>
+                        </div>
                     </div>
                     {{/multipleChoice}}
                     {{^multipleChoice}}
-                    <div style="float: left;">
-                        <input type="radio" class="scormAnswer{{id}} radio" name="scormGroup3" style="margin-right: 15px;" disabled/>
+                    <div class="val-row">
+                        <div class="s-2">
+                            <input type="radio" class="scormAnswer{{id}}_{{questionNumber}} radio" name="scormGroup3_{{questionNumber}}" disabled/>
+                        </div>
+                        <div class="s-10">
+                            <div class="choiceTextContainer">
+                                <label>{{{text}}}</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="choiceTextContainer">
-                        <label>{{{text}}}</label>
-                    </div>
-
                     {{/multipleChoice}}
                     {{/answers}}
                 </div>
@@ -102,7 +117,7 @@
 //    jQuery('.choiceAnswer').shuffle();
 
     /*{{#autoShowAnswer}}*/
-    TinCanCourseHelpers['choiceShowAnswers_{{id}}'] = function() {
+    TinCanCourseHelpers['choiceShowAnswers_{{id}}_{{questionNumber}}'] = function() {
         function check(parent, id) {
             //{{#multipleChoice}}
             jQuery("#"+parent+" .scormAnswer" + id).attr("checked", true);
@@ -112,78 +127,79 @@
             //{{/multipleChoice}}
         }
 
-        jQuery('.answers{{id}}').show();
-        jQuery('.content{{id}}').hide();
+        jQuery('.answers{{id}}_{{questionNumber}}').show();
+        jQuery('.content{{id}}_{{questionNumber}}').hide();
 
-        var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
+        var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
+        parent_el.prevAll('.rj-element').hide();
+        parent_el.nextAll('.rj-element').hide();
+
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
         var correct = answers.isPassed;
         var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
         if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
-        jQuery("#answerCorrectness{{id}}").html(correctness);
+        jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
         if (!correct) {
-            jQuery("#answerComparison{{id}}").show();
+            jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
             var learnerResponse = answers.rawLearnerResponse;
             var correctPattern = answers.rawCorrectResponse;
 
             var learnerResponseAnswers = learnerResponse.split("[,]");
             for (var i = 0; i < learnerResponseAnswers.length; i++) {
-                check("usersAnswers{{id}}", learnerResponseAnswers[i]);
+                check("usersAnswers{{id}}_{{questionNumber}}", learnerResponseAnswers[i]);
             }
 
-            var correctPatternAnswers = correctPattern;
+            var correctPatternAnswers = correctPattern.split("[,]");
             for (var i = 0; i < correctPatternAnswers.length; i++) {
-                check("correctAnswers{{id}}", correctPatternAnswers[i]);
+                check("correctAnswers{{id}}_{{questionNumber}}", correctPatternAnswers[i]);
             }
         }
         doScale();
     };
     /*{{/autoShowAnswer}}*/
 
-    TinCanCourseHelpers['collectAnswers_{{id}}'] = function() {
-        var dataToCompare = JSON.parse('{{{answer}}}');
+    TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function() {
+        //Replace all tags with /> to >, as we get not closed tags in answer
+        var dataToCompare = JSON.parse(unescapeElement('{{answer}}').replace(/[\s]+\/>/gi, '>'));
+        var dataToCompareWithNumber = dataToCompare.map(function(item) {return item + '_{{questionNumber}}'});
 
         // this will check is user answer right
         var userAnswersReadable = [], correctAnswersReadable = [];
-        var userAnswers = [];
-        //{{#multipleChoice}}
-        jQuery(".playerMainArea{{id}} input").each(function (index, elem) {
-            if (jQuery(elem).is(':checked') || jQuery(elem).attr("checked")) {
-                var id = jQuery(elem).attr('id').replace("scormAnswer", "");
+        var userAnswers = [],
+            rawUserAnswers = [];
+
+        jQuery(".playerMainArea{{id}}_{{questionNumber}} input").each(function (index, elem) {
+            if (jQuery(elem).is(':checked') || jQuery(elem).attr('checked')) {
+                var id = jQuery(elem).attr('id').replace('scormAnswer', '');
                 var answer = jQuery('#scormAnswerText' + id).html();
-                userAnswers.push(id);
-                userAnswersReadable.push(answer);
+                userAnswers.push(id.split('_')[0]);
+                rawUserAnswers.push(id);
+                userAnswersReadable.push(answer.replace(/\s{2,}/g, ' '));
             }
         });
-        //{{/multipleChoice}}
-        //{{^multipleChoice}}
-        jQuery(".playerMainArea{{id}} input").each(function (index, elem) {
-            if (jQuery(elem).prop("checked")) {
-                userAnswers.push((jQuery(elem).attr('id').replace("scormAnswer", "")));
-            }
-        });
-        //{{/multipleChoice}}
+
         var score = 0,
             isPassed = (userAnswers.length == dataToCompare.length);
 
-        for (var j = 0; j < dataToCompare.length; j++) {
-            var answer = jQuery('#scormAnswerText' + dataToCompare[j]).html();
-            correctAnswersReadable.push(answer);
+        for (var j = 0; j < dataToCompareWithNumber.length; j++) {
+            var answer = jQuery('#scormAnswerText' + dataToCompareWithNumber[j]).html();
+            correctAnswersReadable.push(answer.replace(/\s{2,}/g, ' '));
 
         }
 
         //if (isPassed) {
-            for (var i = 0; i < userAnswers.length; i++) {
+            for (var i = 0; i < rawUserAnswers.length; i++) {
                 var found = false;
                 for (var j = 0; j < dataToCompare.length; j++) {
                     if (dataToCompare[j] == userAnswers[i]) {
                         found = true;
-                        score += ~~jQuery('.playerMainArea{{id}} #scormAnswer' + dataToCompare[j]).data('score');
+                        score += ~~jQuery('.playerMainArea{{id}}_{{questionNumber}} #scormAnswer' + rawUserAnswers[i]).data('score');
                         break;
                     }
                 }
                 if (!found) {
-                    var answer = jQuery('.playerMainArea{{id}} #scormAnswer' + userAnswers[i]);
+                    var answer = jQuery('.playerMainArea{{id}}_{{questionNumber}} #scormAnswer' + rawUserAnswers[i]);
                     if (answer.data('score')) {
                         score += ~~answer.data('score');
                     }
@@ -197,23 +213,38 @@
         return {
             learnerResponse: userAnswersReadable.join("[,]"),
             correctResponse: correctAnswersReadable.join("[,]"),
-            rawLearnerResponse: userAnswers.join("[,]"),
-            rawCorrectResponse: dataToCompare,
+            rawLearnerResponse: rawUserAnswers.join("[,]"),
+            rawCorrectResponse: dataToCompareWithNumber.join("[,]"),
             isPassed: isPassed,
             score: (hasScore)?score:null
         }
     };
 
-    TinCanCourseModules['choice_{{id}}'] = function(tincan) {
-        var answers = TinCanCourseHelpers['collectAnswers_{{id}}']();
-        var taskID = 'task{{id}}';
+    TinCanCourseModules['choice_{{id}}_{{questionNumber}}'] = function(tincan) {
+        var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
+        var taskID = 'task{{id}}_{{questionNumber}}';
 
         if (answers.isPassed) {
-            tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'choice', answers.learnerResponse, answers.correctResponse, true, 100, answers.score));
+            tincan.sendStatement(GetQuestionAnswerStatement(
+                taskID, unescapeElement('{{text}}'), '{{title}}', 'choice', answers.learnerResponse, answers.correctResponse, true, 100, answers.score));
+
             return 1;
         } else {
-            tincan.sendStatement(GetQuestionAnswerStatement(taskID, '{{{text}}}', '{{title}}', 'choice', answers.learnerResponse, answers.correctResponse, false, 0, answers.score));
+            tincan.sendStatement(GetQuestionAnswerStatement(
+                taskID, unescapeElement('{{text}}'), '{{title}}', 'choice', answers.learnerResponse, answers.correctResponse, false, 0, answers.score));
+
             return 0;
         }
     };
+
+    TinCanCourseSetAnswers['choice_{{id}}_{{questionNumber}}'] = function(userAnswer) {
+        var answerIds = userAnswer.split("[,]");
+        answerIds.forEach(function (id) {
+            jQuery("#scormAnswer" + id).prop('checked', true);
+        });
+    };
+
+    TinCanCourseQuestionsAll['choice_{{id}}_{{questionNumber}}'] = unescapeElement('{{title}}');
+    TinCanCourseQuestionsContent['choice_{{id}}_{{questionNumber}}'] = unescapeElement('{{text}}');
+
 </script>

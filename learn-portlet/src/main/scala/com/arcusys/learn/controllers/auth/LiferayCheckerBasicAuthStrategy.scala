@@ -1,6 +1,6 @@
 package com.arcusys.learn.controllers.auth
 
-import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.liferay.portal.util.PortalUtil

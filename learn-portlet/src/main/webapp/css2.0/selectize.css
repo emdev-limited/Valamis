@@ -118,6 +118,7 @@
     color: #303030;
     font-family: inherit;
     font-size: 13px;
+    height: auto!important;
     line-height: 18px;
     -webkit-font-smoothing: inherit;
 }

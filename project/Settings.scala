@@ -24,7 +24,7 @@ object Settings {
 
   object Liferay620 {
     val dependencies = Dependencies.liferay620
-    val supportVersion = "6.2.3"
+    val supportVersion = "6.2.*"
     val version = Version.liferay620
     val lfPersistenceFolder = "learn-persistence-liferay620"
   }

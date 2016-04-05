@@ -40,7 +40,7 @@ class LrsOAuthClient(consumer: OAuthConsumer)(implicit val bindingModule: Bindin
       lrsTokenStorage.set(LrsToken(info.token,
         JsonHelper.toJson(info),
         AuthConstants.OAuth,
-        DateTime.now)
+        null)
       )
 
       throw new RedirectException(authorizationURL)

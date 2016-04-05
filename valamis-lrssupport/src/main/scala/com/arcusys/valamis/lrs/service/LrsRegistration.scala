@@ -95,7 +95,7 @@ class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Inj
       case _: OAuthAuthInfo => AuthConstants.OAuth
     }
 
-    lrsTokenStorage.set(new LrsToken(token, authInfo, authType, DateTime.now))
+    lrsTokenStorage.set(new LrsToken(token, authInfo, authType, null))
     EndpointInfo(hostUrl + ProxyLrsInfo.FullPrefix + "/", AuthConstants.Basic + " " + token)
   }
 

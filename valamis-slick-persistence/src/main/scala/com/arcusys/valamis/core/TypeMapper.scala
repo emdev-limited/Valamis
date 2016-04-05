@@ -16,7 +16,10 @@ trait TypeMapper {
   /** Type mapper for [[org.joda.time.DateTime]] */
   implicit val dateTimeMapper: BaseColumnType[DateTime] = MappedColumnType.base[DateTime, Timestamp](
     dt => {
-      new Timestamp(dt.getMillis)
+      if (dt != null) 
+      	new Timestamp(dt.getMillis) 
+      else 
+        null
     },
     ts => {
       new DateTime(ts.getTime)

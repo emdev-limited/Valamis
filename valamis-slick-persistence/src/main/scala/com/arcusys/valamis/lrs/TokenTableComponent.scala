@@ -18,7 +18,7 @@ trait TokenTableComponent {
     def authType = column[String]("TYPE", O.NotNull, O.DBType("varchar(512)"))
     def created = column[DateTime]("CREATED")
 
-    def * = (token, authInfo, authType, created) <> (LrsToken.tupled, LrsToken.unapply)
+    def * = (token, authInfo, authType) <> (LrsToken.tupled, LrsToken.unapply)
   }
 
   val tokens = TableQuery[TokenTable]

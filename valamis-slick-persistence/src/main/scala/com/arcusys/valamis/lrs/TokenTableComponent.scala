@@ -16,7 +16,6 @@ trait TokenTableComponent {
     def token = column[String]("TOKEN", O.PrimaryKey, O.DBType("varchar(255)"))
     def authInfo = column[String]("AUTH", O.NotNull, O.DBType("varchar(512)"))
     def authType = column[String]("TYPE", O.NotNull, O.DBType("varchar(512)"))
-    def created = column[DateTime]("CREATED")
 
     def * = (token, authInfo, authType) <> (LrsToken.tupled, LrsToken.unapply)
   }

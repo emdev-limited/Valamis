@@ -83,6 +83,9 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
         new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Passed))
       )
     } get
+    
+    //val autoGradePackage = Seq();
+    //val autoGradePackagePassed = Seq();
 
     var packages = packageService
       .getPackagesByCourse(courseId)
@@ -208,7 +211,7 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
 
     if (skip != -1 && count != -1)
       students.slice(skip, skip + count)
-
+      
     students
       .map(student => StudentResponse(
       id = student.getUserId,
@@ -279,6 +282,8 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
 
   def getBy(userId: Long, isCompleted: Boolean, skipTake: Option[SkipTake]): CollectionResponse[GradedPackageResponse] = {
     lazy val agent = UserLocalServiceHelper().getUser(userId).getAgentByUuid
+    
+    
     lazy val autoGradePackage = lrsClient.scaleApi{ api =>
       api.getMaxActivityScale(
         JsonHelper.toJson(agent, new AgentSerializer),
@@ -292,7 +297,10 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
         new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Passed))
       )
     }.get
-
+    
+//    val autoGradePackage = Seq();
+//    val autoGradePackagePassed = Seq();
+    
     val gradedPackageResponses = courseService.getByUserId(userId).flatMap { lGroup =>
       val unfinishedPackages =
         packageService
@@ -314,7 +322,7 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
             }
           }
 
-      unfinishedPackages.map( toResponse(lGroup, userId)(_, autoGradePackage ++ autoGradePackagePassed)).sortBy(_.sortGrade).reverse
+      unfinishedPackages.map(toResponse(lGroup, userId)(_, autoGradePackage ++ autoGradePackagePassed)).sortBy(_.sortGrade).reverse
     }
 
     val total = gradedPackageResponses.length
@@ -334,12 +342,15 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
 
   def getPieDataWithCompletedPackages(userId: Long): (Seq[PieData], Int) = {
     val agent = UserLocalServiceHelper().getUser(userId).getAgentByUuid
+    
     val autoGradePackage = lrsClient.scaleApi{ api =>
       api.getMaxActivityScale(
         JsonHelper.toJson(agent, new AgentSerializer),
         new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Completed))
       )
     } get
+    
+    //val autoGradePackage = Seq();
 
     val completedPackages = courseService.getByUserId(userId)
       .flatMap { lGroup => packageService.getPackagesByCourse(lGroup.getGroupId) }

@@ -31,6 +31,7 @@ class GradebookApiController extends BaseApiController with PollerProcessor {
         PermissionUtil.requirePermissionApi(ViewAllPermission, PortletName.GradeBook)
 
         val detailed = !gradebookRequest.isShortResult
+
         val students = gradebookFacade.getStudents( //TODO: use users controller
           gradebookRequest.courseId,
           gradebookRequest.skip,
@@ -46,9 +47,8 @@ class GradebookApiController extends BaseApiController with PollerProcessor {
           gradebookRequest.courseId,
           gradebookRequest.studentName,
           gradebookRequest.organizationName)
-
+                    
         CollectionResponse(gradebookRequest.page, students, studentsCount)
-
       case GradebookActionType.Grades =>
         PermissionUtil.requirePermissionApi(ViewPermission, PortletName.GradeBook, PortletName.LearningTranscript)
           gradebookFacade.getGradesForStudent(

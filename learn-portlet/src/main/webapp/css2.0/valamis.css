@@ -842,17 +842,17 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm a {
   transition: color 0.1s linear;
-  color: #2974A6;
+  color: #2974A6 !important;
   text-decoration: none;
   cursor: pointer;
 }
 
 .portlet-learn-scorm a:hover {
-  color: #1a4969;
+  color: #1a4969 !important;
 }
 
 .portlet-learn-scorm a:active, .portlet-learn-scorm a:focus {
-  color: #1a4969;
+  color: #1a4969 !important;
   outline: none;
 }
 

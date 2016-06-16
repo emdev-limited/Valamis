@@ -7,6 +7,7 @@ import com.arcusys.learn.liferay.util.IndexerRegistryUtilHelper
 import com.liferay.portal.service.UserLocalServiceUtil
 
 import scala.util.Try
+import java.util.Date
 
 class AssetHelper {
 
@@ -72,7 +73,15 @@ class AssetHelper {
     })
     assetEntry.setMimeType(ContentTypesHelper.TEXT_HTML)
     assetEntry.setVisible(isVisible)
-
+    
+    //Set create and modified date (needs for indexer)
+    if (assetEntry.isNew()){
+      assetEntry.setCreateDate(new Date());
+      assetEntry.setModifiedDate(new Date());
+    } else {
+      assetEntry.setModifiedDate(new Date());
+    }
+    
     AssetEntryLocalServiceHelper.updateAssetEntry(assetEntry)
 
     if (isVisible)

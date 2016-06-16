@@ -5,6 +5,7 @@ import com.liferay.portal.security.auth.CompanyThreadLocal
 import com.liferay.portal.service.{ServiceContextThreadLocal, CompanyLocalServiceUtil}
 import com.liferay.portal.util.PortalUtil
 import javax.servlet.http.HttpServletRequest
+import com.liferay.portal.kernel.util.GetterUtil
 
 object PortalUtilHelper {
   def getCompanyId(portletRequest: PortletRequest): Long =
@@ -37,6 +38,7 @@ object PortalUtilHelper {
 
     val hostName = company.getVirtualHostname
     val port = PortalUtil.getPortalPort(isSecure)
+
     PortalUtil.getPortalURL(hostName, port, isSecure) + PortalUtil.getPathContext
   }
 

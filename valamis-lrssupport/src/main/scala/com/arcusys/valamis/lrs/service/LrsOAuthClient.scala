@@ -39,8 +39,7 @@ class LrsOAuthClient(consumer: OAuthConsumer)(implicit val bindingModule: Bindin
       val info = OAuthAuthInfo(accessor.requestToken, "", accessor.tokenSecret)
       lrsTokenStorage.set(LrsToken(info.token,
         JsonHelper.toJson(info),
-        AuthConstants.OAuth,
-        null)
+        AuthConstants.OAuth)
       )
 
       throw new RedirectException(authorizationURL)

@@ -29,6 +29,7 @@ Thumbs.db
 *.sublime-workspace
 *.cache
 .cache-main
+.cache-tests
 
 # Folders to ignore
 .git

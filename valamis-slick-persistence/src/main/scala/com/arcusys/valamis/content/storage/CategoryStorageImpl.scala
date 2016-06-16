@@ -32,7 +32,9 @@ class CategoryStorageImpl(val db:     JdbcBackend#DatabaseDef,
   }
 
   override def update(category: Category): Unit = db.withSession { implicit session =>
-    questionCategories.filter(_.id === category.id).update(category)
+    questionCategories.filter(_.id === category.id).map(cat => (cat.title, 
+                                                                cat.description,  
+                                                                cat.courseId)).update((category.title, category.description, category.courseId))
   }
 
   override def delete(id: Long): Unit = db.withSession { implicit session =>

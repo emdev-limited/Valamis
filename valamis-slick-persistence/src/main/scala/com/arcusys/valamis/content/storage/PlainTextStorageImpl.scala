@@ -22,7 +22,10 @@ class PlainTextStorageImpl (val db:     JdbcBackend#DatabaseDef,
   }
 
   override def update(plainText: PlainText): Unit = db.withSession { implicit  s=>
-    plainTexts.filter(_.id === plainText.id).update(plainText)
+    plainTexts.filter(_.id === plainText.id).map(pt => (pt.categoryId, 
+                                                        pt.title,
+                                                        pt.text,
+                                                        pt.courseId)).update(plainText.categoryId, plainText.title, plainText.text, plainText.courseId);
   }
 
   override def delete(id: Long): Unit = db.withSession {implicit  s=>

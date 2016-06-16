@@ -30,6 +30,10 @@ class PackageCheckerImpl(implicit val bindingModule: BindingModule) extends Pack
     val agent = JsonHelper.toJson(userService.getUser(userId).getAgentByUuid, new AgentSerializer)
     val autoGradePackage = lrsClient.scaleApi(_.getMaxActivityScale(agent, new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Completed)))).get
     val autoGradePackagePassed = lrsClient.scaleApi(_.getMaxActivityScale(agent, new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Passed)))).get
+    
+//    val autoGradePackage = Seq();
+//    val autoGradePackagePassed = Seq();
+    
     val packageComplete = packageService.getPackagesByCourse(courseId)
       .count { pack => isPackageComplete(pack, userId, autoGradePackage) }
     val packagePassed = packageService.getPackagesByCourse(courseId)

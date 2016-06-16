@@ -166,6 +166,7 @@ trait ContentTableComponent {
     def * = (id.?, questionId, courseId, text, isCorrect, position, rangeFrom, rangeTo, value, score, answerType) <>(AnswerRow.tupled, AnswerRow.unapply)
 
     def question = foreignKey(fkName("ANSWERS_QUESTIONS"), questionId, questions)(_.id, onDelete = ForeignKeyAction.Cascade)
+    
   }
 
   val questionCategories = TableQuery[CategoryTable]

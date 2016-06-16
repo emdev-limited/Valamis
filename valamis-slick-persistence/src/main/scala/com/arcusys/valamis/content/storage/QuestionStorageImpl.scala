@@ -33,7 +33,16 @@ class QuestionStorageImpl(val db: JdbcBackend#DatabaseDef,
   }
 
   override def update(question: Question): Unit = db.withSession { implicit s =>
-    questions.filter(_.id === question.id).update(makeBaseQuestion(question))
+    questions.filter(_.id === question.id).map(q => (q.categoryId,
+                                                     q.courseId,
+                                                     q.title,
+                                                     q.text,
+                                                     q.explanationText, 
+                                                     q.rightAnswerText, 
+                                                     q.wrongAnswerText, 
+                                                     q.forceCorrectCount, 
+                                                     q.isCaseSensitive, 
+                                                     q.questionType)).update(getUnitForUpdate(question))
   }
 
   override def delete(id: Long): Unit = db.withSession { implicit s =>
@@ -96,6 +105,95 @@ class QuestionStorageImpl(val db: JdbcBackend#DatabaseDef,
 
   }
 
+  private def getUnitForUpdate (question : Question) = {
+    question value match {
+      case q: ChoiceQuestion => ((
+         question.categoryId,    
+         question.courseId,
+         question.title,
+         question.text,
+         question.explanationText, 
+         q.rightAnswerText, 
+         q.wrongAnswerText, 
+         q.forceCorrectCount, 
+         false, 
+         question.questionType
+      ))
+      case q: TextQuestion => ((
+         question.categoryId,    
+         question.courseId,
+         question.title,
+         question.text,
+         question.explanationText, 
+         q.rightAnswerText, 
+         q.wrongAnswerText, 
+         false, 
+         q.isCaseSensitive, 
+         question.questionType
+      ))
+      case q: NumericQuestion => ((
+          question.categoryId,
+          question.courseId,
+          question.title,
+          question.text,
+          question.explanationText,
+          q.rightAnswerText,
+          q.wrongAnswerText,
+          false,
+          false,
+          question.questionType
+      ))
+      case q: PositioningQuestion => ((
+          question.categoryId,
+          question.courseId,
+          question.title,
+          question.text,
+          question.explanationText,
+          q.rightAnswerText,
+          q.wrongAnswerText,
+          q.forceCorrectCount,
+          false,
+          question.questionType
+      ))
+      case q : MatchingQuestion => ((
+          question.categoryId,
+          question.courseId,
+          question.title,
+          question.text,
+          question.explanationText,
+          q.rightAnswerText,
+          q.wrongAnswerText,
+          false,
+          false,
+          question.questionType    
+      ))
+      case q: EssayQuestion => ((
+          question.categoryId,
+          question.courseId,
+          question.title,
+          question.text,
+          question.explanationText,
+          "",
+          "",
+          false,
+          false,
+          question.questionType    
+      ))
+      case q: CategorizationQuestion => ((
+          question.categoryId,
+          question.courseId,
+          question.title,
+          question.text,
+          question.explanationText,
+          q.rightAnswerText,
+          q.wrongAnswerText,
+          false,
+          false,
+          question.questionType    
+      ))
+    }
+  }
+  
 
   private def makeBaseQuestion(q: Question): BaseQuestion = {
     q match {

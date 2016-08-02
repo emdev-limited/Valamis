@@ -1,24 +1,25 @@
 package com.arcusys.learn.liferay.services
 
 import com.liferay.portal.NoSuchLayoutSetPrototypeException
-import com.liferay.portal.model.{ Group, Layout }
-import com.liferay.portal.service.{ ServiceContext, LayoutLocalServiceUtil }
-import java.io.{ InputStream, File }
+import com.liferay.portal.model.{Group, Layout}
+import com.liferay.portal.service.{LayoutLocalServiceUtil, ServiceContext}
+import java.io.{File, InputStream}
+
+import com.arcusys.learn.liferay.LiferayClasses.LLayout
 import com.liferay.portal.util.LayoutTypePortletFactoryUtil
 import com.liferay.portal.kernel.log.LogFactoryUtil
-
 
 import scala.collection.JavaConverters._
 
 object LayoutLocalServiceHelper {
   val logger = LogFactoryUtil.getLog(getClass)
-  def getLayouts(groupId: Long, privateLayout: Boolean): java.util.List[Layout] =
-    LayoutLocalServiceUtil.getLayouts(groupId, privateLayout)
+  def getLayouts(groupId: Long, privateLayout: Boolean): Seq[LLayout] =
+    LayoutLocalServiceUtil.getLayouts(groupId, privateLayout).asScala
 
   def getLayouts(groupId: Long, privateLayout: Boolean, layoutType: String): java.util.List[Layout] =
     LayoutLocalServiceUtil.getLayouts(groupId, privateLayout, layoutType)
 
-  def getLayout(plid: Long): Layout = LayoutLocalServiceUtil.getLayout(plid)
+  def getLayout(plid: Long): LLayout = LayoutLocalServiceUtil.getLayout(plid)
 
   def getFriendlyURLLayout(groupId: Long,
     privateLayout: Boolean,
@@ -72,7 +73,7 @@ object LayoutLocalServiceHelper {
     LayoutLocalServiceUtil.importPortletInfo(userId, plid, groupId, portletId, parameterMap, is)
   }
 
- def getPortletIds(layout: Layout) = {
+ def getPortletIds(layout: LLayout) = {
     try {
       LayoutTypePortletFactoryUtil.create(layout).getPortletIds.asScala
     }

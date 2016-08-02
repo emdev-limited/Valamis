@@ -4,8 +4,10 @@ import com.arcusys.learn.liferay.LiferayClasses.LUser
 import com.arcusys.valamis.certificate.model._
 import com.arcusys.valamis.certificate.model.badge._
 import com.arcusys.valamis.certificate.model.goal._
-import com.arcusys.valamis.model.PeriodTypes.PeriodType
-import com.arcusys.valamis.model.{SkipTake, RangeResult}
+import com.arcusys.valamis.lrs.tincan.Statement
+import com.arcusys.valamis.member.model.MemberTypes
+import com.arcusys.valamis.model.PeriodTypes._
+import com.arcusys.valamis.model.{PeriodTypes, SkipTake, RangeResult}
 import org.joda.time.DateTime
 
 trait CertificateService {
@@ -16,84 +18,60 @@ trait CertificateService {
 
   def setLogo(certificateId: Long, name: String, content: Array[Byte])
 
+  def changeLogo(id: Long, logo: String)
+
   def update(id: Long,
     title: String,
     description: String,
-    validPeriodType: String,
-    validPeriodValue: Option[Int],
+    periodType: PeriodTypes.PeriodType,
+    periodValue: Int,
     isOpenBadgesIntegration: Boolean,
     shortDescription: String = "",
     companyId: Long,
     ownerId: Long,
-    scope: Option[Long]): Certificate
-
-  def getGoalsStatistic(certificateId: Long, userId: Long): GoalStatistic
-
-  def getCourseGoalsCount(certificateId: Long): Int
-  def getStatementGoalsCount(certificateId: Long): Int
-  def getActivityGoalsCount(certificateId: Long): Int
-  def getPackageGoalsCount(certificateId: Long): Int
+    scope: Option[Long],
+    optionGoals: Int): Certificate
 
   def getCertificatesByUserWithOpenBadges(userId: Long,
                                           companyId: Long,
                                           sortAZ: Boolean,
                                           skipTake: Option[SkipTake],
-                                          titlePattern: Option[String]
-                                           ): RangeResult[Certificate]
+                                          titlePattern: Option[String]): RangeResult[Certificate]
 
   def getCertificatesByUserWithOpenBadges(userId: Long,
                                           companyId: Long,
-                                          titlePattern: Option[String] = None
-                                           ): Seq[Certificate]
+                                          titlePattern: Option[String] = None): Seq[Certificate]
 
-  def getPackageGoals(certificateId: Long): Seq[PackageGoal]
-  def addPackageGoal(certificateId: Long, packageId: Long): Option[PackageGoal]
-  def deletePackageGoal(certificateId: Long, packageId: Long): Unit
-  def changePackageGoalPeriod(certificateId: Long, packageId: Long, periodValue: Int, periodType: PeriodType): PackageGoal
+  def getAffectedCertificateIds(statements: Seq[Statement]): Seq[Long]
 
-  def getCourseGoals(certificateId: Long): Seq[CourseGoal]
-
-  def getStatementGoals(certificateId: Long): Iterable[StatementGoal]
-
-  def getActivityGoals(certificateId: Long): Iterable[ActivityGoal]
-
-  def addCourseGoal(certificateId: Long, courseId: Long)
-
-  def addUser(certificateId: Long, userId: Long, addActivity: Boolean = false, courseId: Option[Long] = None)
-
-  def addActivityGoal(certificateId: Long, activityName: String, count: Int)
-
-  def addStatementGoal(certificateId: Long, verb: String, obj: String)
-
-  def deleteCourseGoal(certificateId: Long, courseId: Long)
-
-  def deleteUser(certificateId: Long, userId: Long)
-
-  def deleteActivityGoal(certificateId: Long, activityName: String)
-
-  def deleteStatementGoal(certificateId: Long, verb: String, obj: String)
-
-  def changeLogo(id: Long, logo: String = "")
-
-  def changeCourseGoalPeriod(certificateId: Long, courseId: Long, v: Int, pT: PeriodType)
-
-  def changeActivityGoalPeriod(certificateId: Long, activityName: String, count: Int, v: Int, pT: PeriodType)
-
-  def changeStatementGoalPeriod(certificateId: Long, verb: String, obj: String, value: Int, period: PeriodType)
-
-  def delete(id: Long)
+  def delete(id: Long): Unit
 
   def getForUser(userId: Long,
                  companyId: Long,
                  sortAZ: Boolean = true,
                  skipTake: Option[SkipTake] = None,
                  titlePattern: Option[String] = None,
-                 isPublished: Option[Boolean] = None
-                  ): RangeResult[Certificate]
+                 isPublished: Option[Boolean] = None): RangeResult[Certificate]
 
   def getSuccessByUser(userId: Long, companyId: Long, titlePattern: Option[String] = None): Seq[Certificate]
 
   def hasUser(certificateId: Long, userId: Long): Boolean
+
+  def getUserStatus(certificateId: Long, userId: Long): String
+
+  def addMembers(certificateId: Long,
+                 memberIds: Seq[Long],
+                 memberType: MemberTypes.Value)
+
+  def addUserMember(certificateId: Long,
+                    userId: Long,
+                    courseId: Long)
+
+  def isUserJoined(certificateId: Long, userId: Long): Boolean
+
+  def deleteMembers(certificateId: Long,
+                    memberIds: Seq[Long],
+                    memberType: MemberTypes.Value): Unit
 
   def getAvailableForUser(userId:Long,
                           filter: CertificateFilter,
@@ -114,5 +92,36 @@ trait CertificateService {
 
   def unpublish(certificateId: Long): Unit
 
-  def reorderCourseGoals(certificateId: Long, courseIds: Seq[Long])
+  def addPackageGoalState(certificateId: Long, userId: Long): Unit
+  def addAssignmentGoalState(certificateId: Long, userId: Long): Unit
+
+  def getCourseGoals(certificateId: Long): Seq[CourseGoal]
+  def getActivityGoals(certificateId: Long): Iterable[ActivityGoal]
+  def getStatementGoals(certificateId: Long): Iterable[StatementGoal]
+  def getPackageGoals(certificateId: Long): Seq[PackageGoal]
+  def getAssignmentGoals(certificateId: Long): Seq[AssignmentGoal]
+
+  def addCourseGoal(certificateId: Long, courseId: Long): CourseGoal
+  def addActivityGoal(certificateId: Long, activityName: String, count: Int): ActivityGoal
+  def addStatementGoal(certificateId: Long, verb: String, obj: String): StatementGoal
+  def addPackageGoal(certificateId: Long, packageId: Long): PackageGoal
+  def addAssignmentGoal(certificateId: Long, assignmentId: Long): AssignmentGoal
+  def getGoalsStatistic(certificateId: Long, userId: Long): GoalStatistic
+
+  def updateGoalIndexes(goals: Map[String, Int])
+  def updateGoal(goalId: Long,
+                 periodValue: Int,
+                 periodType: PeriodType,
+                 arrangementIndex: Int,
+                 isOptional: Boolean,
+                 count: Option[Int],
+                 groupId: Option[Long]): CertificateGoal
+
+  def deleteGoal(goalId: Long): Unit
+  def deleteGoalGroup(groupId: Long, deletedContent: Boolean): Unit
+  def updateGoalGroup(goalGroup: GoalGroup): GoalGroup
+  def updateGoalsInGroup(groupId:Long, goalIds: Seq[Long]): Unit
+  def createGoalGroup(certificateId: Long, count: Int, goalIds: Seq[Long]): Unit
+  def getGoals(certificateId: Long): Seq[CertificateGoal]
+  def getGroups(certificateId: Long): Seq[GoalGroup]
 }

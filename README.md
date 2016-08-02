@@ -43,6 +43,11 @@ Download Valamis CE source code from this repository and compile the application
 Liferay 6.1 EE bundled with Tomcat 7 can throw errors while accessing uploaded content. To avoid this problems just turn off GZip conmpression:
 `com.liferay.portal.servlet.filters.gzip.GZipFilter=false`
 
+## Version 3.0 Update 02.08.2016
+The biggest new feature of Valamis 3.0 is the updated Gradebook portlet. The upgraded user interface places all courses, lessons and user information in a single place, allowing instructors to easily oversee all aspects of learning - from general data to specific activity details. It is designed to be more intuitive than ever before, providing clear access to all necessary information with a single click.
+Also, this update includes additional features such as Course-related portlets, improvements on the UX, UI and accessibility components.
+A detailed overview of each new feature of Valamis 3.0 is provided in the official release notes.
+
 ## Version 2.6 Update 3.2.2016
 
 The new release includes new features, especially for Lesson Studio, and general UX improvement. One of the biggest changes has been done to Lesson Studio, which now enables responsive content design for three device types: mobile, tablet and desktop. 

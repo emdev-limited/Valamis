@@ -4,12 +4,14 @@ import java.net.URLDecoder
 
 import com.arcusys.learn.liferay.update.version240.certificate._
 import com.arcusys.valamis.certificate.model.CertificateStatuses
-import com.arcusys.valamis.core.SlickProfile
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.learn.liferay.update.version240.file.FileTableComponent
+import com.arcusys.valamis.persistence.common.SlickProfile
 import org.joda.time.DateTime
+import slick.jdbc.GetResult
+
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery, GetResult, JdbcBackend}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 
 class CertificateStorageMigration2303(
     val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)

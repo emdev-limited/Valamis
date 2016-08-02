@@ -1,6 +1,6 @@
 package com.arcusys.valamis.lesson.scorm.service.parser
 
-import com.arcusys.valamis.lesson.scorm.model.manifest.{ ConditionType, RuleCondition }
+import com.arcusys.valamis.lesson.scorm.model.manifest.{ ConditionType, ConditionRuleItem }
 import com.arcusys.valamis.util.XMLImplicits
 import com.arcusys.valamis.util.XMLImplicits._
 
@@ -12,6 +12,6 @@ class SequencingRuleConditionParser(ruleConditionElement: Elem) {
     val conditionType = ruleConditionElement attr "condition" requiredEnum ConditionType
     val inverse = InverseOperatorParser.parse(ruleConditionElement attr "operator" withDefault "noOp")
     val measureThreshold = ruleConditionElement attr "measureThreshold" optional bigDecimal
-    new RuleCondition(conditionType, objectiveId, measureThreshold, inverse)
+    new ConditionRuleItem(conditionType, objectiveId, measureThreshold, inverse)
   }
 }

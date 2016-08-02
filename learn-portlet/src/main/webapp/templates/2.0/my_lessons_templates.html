@@ -52,7 +52,11 @@
 
                 <div class="val-progress-bar">
                     <div class="val-progress {{colorClass}}">
-                        <span style="width: {{lessonGrade}};"></span>
+                        <span style="width: {{lessonGrade}};"
+                            {{#isSuccess}}
+                                class="full-progress-bar"
+                            {{/isSuccess}}
+                        ></span>
                     </div>
                     <span class="val-percentage"> {{lessonGrade}} </span>
                 </div>

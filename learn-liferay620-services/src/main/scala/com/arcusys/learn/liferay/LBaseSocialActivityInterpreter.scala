@@ -4,9 +4,6 @@ import com.arcusys.learn.liferay.LiferayClasses._
 import com.liferay.portal.service.UserLocalServiceUtil
 import com.liferay.portlet.social.model.BaseSocialActivityInterpreter
 
-/**
- * Created by mminin on 26.06.15.
- */
 trait LBaseSocialActivityInterpreter extends BaseSocialActivityInterpreter{
 
   type Context = LServiceContext

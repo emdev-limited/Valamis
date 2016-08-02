@@ -17,11 +17,7 @@
             resourceName: 'dashboard',
             permissions: myLessonsPermission,
             app: myLessons,
-            appOptions: {},
-            options: {
-                contextPath: '{{{contextPath}}}',
-                apiPath: path.root + path.api.prefix
-            }
+            appOptions: {}
         };
 
         valamisApp.execute('subapp:start', myLessonsOptions);

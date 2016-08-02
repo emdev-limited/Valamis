@@ -47,5 +47,5 @@ var PdfElementModule = slidesApp.module('PdfElementModule', {
 });
 
 PdfElementModule.on('start', function() {
-    slidesApp.execute('toolbar:item:add', {title: 'PDF', label: 'PDF', slideEntityType: 'pdf'});
+    slidesApp.execute('toolbar:item:add', {title: 'download-import-right', label: Valamis.language['AddPdfPptFileLabel'], slideEntityType: 'imported'});
 });

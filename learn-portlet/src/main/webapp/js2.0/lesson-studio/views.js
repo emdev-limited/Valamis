@@ -39,15 +39,39 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
         onShow: function() {
             this.$('.js-lesson-title').focus();
         },
-        onValamisControlsInit: function () {},
+        onValamisControlsInit: function () {
+            var that = this;
+            this.tags = new Valamis.TagCollection();
+            this.tags.on('reset', function (tags) {
+                that.fillTagSelect(tags);
+            });
+
+            this.tags.fetch({reset: true});
+        },
         saveModelsTextValues: function () {
             var title = this.$('.js-lesson-title').val().trim() || Valamis.language['defaultLessonTitleLabel'];
             var description = this.$('.js-lesson-description').val();
 
+            var tagsElem = this.$('.val-tags')[0].selectize;
+            var tagsIds = tagsElem.getValue().split(',');
+
+            var tags = [], tagList = [];
+            if(tagsIds[0] != '') {
+                _.forEach(tagsIds, function (tagId) {
+                    tagList.push(tagsElem.options[tagId].text);
+                    tags.push({
+                        id: tagId,
+                        text: tagsElem.options[tagId].text
+                    });
+                });
+            }
+
             this.model.set({
                 title: title,
                 description: description,
-                courseId: Utils.getCourseId()
+                courseId: Utils.getCourseId(),
+                tags: tags,
+                tagList: tagList.join(' • ')
             });
             if(this.$('#toggleTemplates').is(':checked'))
                 this.model.set({
@@ -61,10 +85,28 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
         },
         onModelChanged: function () {
             this.saveModelsTextValues();
-            this.render();
         },
         onModelLogoChanged: function () {
             this.$('.js-logo').attr('src', this.model.get('logoSrc'));
+        },
+        fillTagSelect: function (tags) {
+            var selectTags = tags.map(function(model) {
+                return {
+                    id: model.get('id'),
+                    text: model.get('text')
+                }
+            });
+
+            var modelTags = _(this.model.get('tags')).map(function(tag) { return tag.id });
+
+            var selectize = this.$('.js-lesson-tags').selectize({
+                delimiter: ',',
+                persist: false,
+                valueField: 'id',
+                options: selectTags,
+                create: true
+            });
+            selectize[0].selectize.setValue(modelTags.value());
         }
     });
 
@@ -179,7 +221,8 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
             return {
                 'courseId': Utils.getCourseId,
                 'slidesCount': this.model.get('slidesCount'),
-                'timestamp': Date.now()
+                'timestamp': Date.now(),
+                'formattedVersion': parseFloat(this.model.get('version')).toFixed(1)
             }
         },
         className: 'tile s-12 m-4 l-2',
@@ -190,14 +233,16 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
             'click .dropdown-menu > li.js-lesson-publish': 'publishLesson',
             'click .dropdown-menu > li.js-lesson-export': 'exportLesson',
             'click .dropdown-menu > li.js-lesson-clone': 'cloneLesson',
-            'click .dropdown-menu > li.js-lesson-save-template': 'saveLessonTemplate'
+            'click .dropdown-menu > li.js-lesson-save-template': 'saveLessonTemplate',
+            'click .js-lesson-image': 'composeLesson'
         },
         behaviors: {
             ValamisUIControls: {}
         },
         /* set the template used to display this view */
         modelEvents: {
-          'lesson:saved': 'render'
+          'lesson:saved': 'render',
+          'change:status': 'render'
         },
         /* used to show the order in which these method are called */
         initialize: function(options){},
@@ -255,6 +300,26 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
             'lesson:compose':function(childView){
                 this.triggerMethod('lessonList:compose:lesson', childView.model);
             }
+        }
+    });
+
+    Views.publishLessonView = Marionette.ItemView.extend({
+        template: '#lessonStudioSetVisibilityTemplate',
+        templateHelpers: function() {
+            return {
+                isFirstVersion: this.options.isFirstVersion
+            }
+        },
+        events: {
+            'click .js-publish-lesson': 'publishLesson'
+        },
+        onShow: function() {
+            var value = (this.options.isVisible == undefined) ? 'some' : this.options.isVisible;
+            this.$('input[name="visibilitySettings"][value="'+ value +'"]').attr('checked', 'checked');
+        },
+        publishLesson: function() {
+            var visibilityType = this.$('input[name="visibilitySettings"]:checked').val() || 'all';
+            this.trigger('publish:lesson', visibilityType);
         }
     });
 
@@ -331,14 +396,18 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
                     }
                     slidesApp.isEditorReady = true;
                     slidesApp.toggleSavedState(true);
-                    jQueryValamis('.slideset-editor')
-                        .toggleClass('hidden',false);
+                    jQueryValamis('.slideset-editor').toggleClass('hidden',false);
 
                     slidesApp.initializing = true;
                     slidesApp.isUndoAction = false;
                     slidesApp.slideRegistry.items = {};
+                    slidesApp.selectedItemView = null;
                     showSlideSet(new lessonStudio.Entities.LessonModel(model.toJSON()));
                 };
+                valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel'], function(){
+                    //Confirm only if not saved
+                    return !slidesApp.historyManager.isSaved();
+                });
                 valamisApp.execute('notify', 'info', Valamis.language['lessonIsLoadingLabel'], {
                     'timeOut': '0',
                     'extendedTimeOut': '0',
@@ -346,23 +415,59 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
                 });
             },
             'lessonList:publish:lesson': function(childView, model){
-                valamisApp.execute('notify', 'info', Valamis.language['publishProcessingLabel'], { 'timeOut': '0', 'extendedTimeOut': '0' });
-                model.publish().then(
-                    function(){
-                        valamisApp.execute('notify', 'clear');
-                        valamisApp.execute('notify', 'success', Valamis.language['lessonPublishedLabel']);
-                    },
-                    function(data) {
-                        valamisApp.execute('notify', 'clear');
+                var that = this;
+                model.getLessonId().then(
+                  function (lesson) {
+                      var lessonId = lesson.id;
+                      var isFirstVersion = model.get('version') === 1;
 
-                        if (data != "Failed Dependency")
-                            valamisApp.execute('notify', 'error', Valamis.language['lessonFailedToPublishLabel']);
-                        else
-                            valamisApp.execute('notify', 'error', Valamis.language['lessonFailedToPublishNoQuestionLabel']);
-                    });
+                      var publishLessonView = new Views.publishLessonView({
+                          isVisible: lesson.isVisible,
+                          isFirstVersion: isFirstVersion
+                      });
+                      var modalView = new valamisApp.Views.ModalView({
+                          contentView: publishLessonView,
+                          className: 'lesson-studio-modal select-display-format-modal',
+                          header: Valamis.language['publishLessonLabel'],
+                          beforeCancel: function() {
+                              // remove prepared package entity if user close publishing first version draft
+                              if (isFirstVersion && model.get('status') == 'draft')
+                                model.deleteUnpublishedLesson({}, { lessonId: lessonId });
+                          }
+                      });
+                      publishLessonView.on('publish:lesson', function (visibilityType) {
+                          valamisApp.execute('modal:close', modalView);
+                          var isCustom = visibilityType === 'some';
+                          that.publishLesson(model);
+
+                          var isVisible = (isCustom) ? 'null' : (visibilityType);
+                          model.updateLessonVisibility({}, {
+                              lessonId: lessonId,
+                              isVisible: isVisible
+                          });
+
+                          if (isCustom) {
+                              var editVisibilityView = new valamisApp.Views.EditVisibility.EditVisibilityView({
+                                  packageId: lessonId
+                              });
+                              var editVisibilityModalView = new valamisApp.Views.ModalView({
+                                  contentView: editVisibilityView,
+                                  header: Valamis.language['editVisibilitySettingsLabel']
+                              });
+                              valamisApp.execute('modal:show', editVisibilityModalView);
+                          }
+                      });
+                      valamisApp.execute('modal:show', modalView);
+                  },
+                  function () {
+                      valamisApp.execute('notify', 'error', Valamis.language['lessonFailedToPublishLabel']);
+                  }
+                );
             },
             'lessonList:clone:lesson': function(childView, model){
+                valamisApp.execute('notify', 'info', Valamis.language['processingLabel'], { 'timeOut': '0', 'extendedTimeOut': '0' });
                 model.clone().then(function(){
+                    valamisApp.execute('notify', 'clear');
                     valamisApp.execute('notify', 'success', Valamis.language['lessonClonedLabel']);
                     lessonStudio.execute('lessons:reload');
                 });
@@ -379,7 +484,7 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
                 );
             },
             'lessonList:delete:lesson': function(childView, model){
-                model.destroy().then(
+                model.deleteAllVersions().then(
                     function() {
                         valamisApp.execute('notify', 'success', Valamis.language['lessonSuccessfullyDeletedLabel']);
                         lessonStudio.execute('lessons:reload');
@@ -437,6 +542,22 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
         updatePagination: function (details, context) {
             this.paginatorView.updateItems(details.total);
         },
+        publishLesson: function (model) {
+            valamisApp.execute('notify', 'info', Valamis.language['processingLabel'], { 'timeOut': '0', 'extendedTimeOut': '0' });
+
+            model.publish().then(
+              function () {
+                  model.set('status', 'published'); // todo: will not change if enumeration will be changed
+                  valamisApp.execute('notify', 'clear');
+                  valamisApp.execute('notify', 'success', Valamis.language['lessonPublishedLabel']);
+              },
+              function (data) {
+                  valamisApp.execute('notify', 'clear');
+                  var message = (data != "Failed Dependency") ? 'lessonFailedToPublishLabel' : 'lessonFailedToPublishNoQuestionLabel';
+                  valamisApp.execute('notify', 'error', Valamis.language[message]);
+              });
+
+        },
 
         /* called when the view displays in the UI */
         onShow: function() {}
@@ -461,12 +582,12 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
         },
         selectItem: function(e){
             e.preventDefault();
-            var selected = this.model.collection.where({selected: true});
-            if( this.model.get('selected') && selected.length == 1 ){
+            var isSelected = this.$el.is('.active');
+            var selected = this.$el.parent().find('li.active');
+            if(isSelected && selected.size() == 1){
                 return;
             }
-            this.model.set( 'selected', !this.model.get('selected') );
-            this.render();
+            this.$el.toggleClass('active', !isSelected);
         }
     });
 

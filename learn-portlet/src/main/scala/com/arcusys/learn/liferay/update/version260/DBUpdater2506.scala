@@ -1,10 +1,10 @@
 package com.arcusys.learn.liferay.update.version260
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.learn.liferay.update.version260.migrations.LrsEndpointMigration
-import com.arcusys.valamis.core.{SlickDBInfo, SlickProfile}
-import com.arcusys.valamis.lrs.LrsEndpointTableComponent
+import com.arcusys.valamis.persistence.impl.lrs.LrsEndpointTableComponent
+import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
 
 class DBUpdater2506

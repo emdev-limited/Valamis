@@ -1,9 +1,10 @@
 package com.arcusys.learn.liferay.update.version260
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.learn.liferay.update.version260.model.SlideElementPropertyTableComponent
-import com.arcusys.valamis.core.SlickDBInfo
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.web.configuration.ioc.Configuration
+
 import scala.slick.jdbc.JdbcBackend
 
 

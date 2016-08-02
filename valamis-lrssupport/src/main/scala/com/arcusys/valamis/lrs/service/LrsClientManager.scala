@@ -2,10 +2,11 @@ package com.arcusys.valamis.lrs.service
 
 import com.arcusys.valamis.lrs.api.valamis._
 import com.arcusys.valamis.lrs.api.{ActivityApi, ActivityProfileApi, StatementApi}
+import com.arcusys.valamis.lrs.tincan.Statement
 
 trait LrsClientManager {
 
-  def statementApi[T](action: StatementApi => T, authInfo: Option[String] = None): T
+  def statementApi[T](action: StatementApi => T, authInfo: Option[String] = None, statementsToCheck: Seq[Statement] = Seq()): T
 
   def verbApi[T](action: VerbApi => T, authInfo: Option[String] = None): T
 

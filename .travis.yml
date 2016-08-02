@@ -1,12 +1,14 @@
 language: scala
 
 scala:
-  - 2.11.7
+  - 2.11.8
 jdk:
   - openjdk7
   - openjdk6
   - oraclejdk7
   - oraclejdk8
+
+sbt_args: -J-XX:MaxPermSize=1024m -J-Xmx4096M -J-Xms2048M -J-Xss8M
 
 script: sbt clean portlet/compile
 

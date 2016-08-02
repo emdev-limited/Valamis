@@ -28,15 +28,18 @@ case class StatementGoalExport(
   tincanStmntObj: String,
   tincanStmntVerb: String,
   value: Int,
-  period: String)
+  period: String,
+  arrangementIndex: Int)
 
 case class PackageGoalExport(
   packageId: Long,
   value: Int,
-  period: String)
+  period: String,
+  arrangementIndex: Int)
 
 case class ActivityGoalExport(
   activityCount: Int,
   name: String,
   value: Int,
-  period: String)
+  period: String,
+  arrangementIndex: Int)

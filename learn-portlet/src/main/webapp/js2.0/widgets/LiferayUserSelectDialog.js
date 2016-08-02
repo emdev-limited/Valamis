@@ -1,3 +1,24 @@
+LiferayOrganizationModel = Backbone.Model.extend({
+  defaults: {
+    'id': '',
+    'name': ''
+  }
+});
+
+LiferayOrganizationCollectionService = new Backbone.Service({
+  url: path.root,
+  sync: {
+    'read': function () {
+      return  path.api.organizations;
+    }
+  }
+});
+
+LiferayOrganizationCollection = Backbone.Collection.extend({
+  model: LiferayOrganizationModel
+})
+.extend(LiferayOrganizationCollectionService);
+
 LiferayUserModel = Backbone.Model.extend({
   defaults: {
     userID: '',
@@ -16,7 +37,8 @@ LiferayUserModel = Backbone.Model.extend({
   }
 });
 
-LiferayUserCollectionService = new Backbone.Service({ url: path.root,
+LiferayUserCollectionService = new Backbone.Service({
+  url: path.root,
   sync: {
      'read': {
        'path': path.api.users,
@@ -38,26 +60,11 @@ LiferayUserCollectionService = new Backbone.Service({ url: path.root,
        },
        'method': 'get'
      }
-  },
-  targets: {
-    saveToCertificate: {
-      path: function (model, options) {
-        return path.api.certificates + jQuery('#selectedCertificateID').val() + '/users';
-      },
-      'data' : function(model, options){
-        var params = {
-          courseId:  Utils.getCourseId(),
-          userIDs : options.users
-        };
-
-        return params;
-      },
-      method: 'post'
-    }
   }
 });
 
 LiferayUserCollection = Backbone.Collection.extend({
+  model: LiferayUserModel,
   initialize: function(){
     this.modelsToSelect = [];
 
@@ -76,7 +83,6 @@ LiferayUserCollection = Backbone.Collection.extend({
     var index = this.modelsToSelect.indexOf(model.id);
     if(index > -1) this.modelsToSelect.splice(index, 1);
   },
-  model: LiferayUserModel,
   parse: function (response) {
     this.trigger('userCollection:updated', { total: response.total, currentPage: response.currentPage, listed: response.records.length });
 
@@ -222,16 +228,9 @@ LiferayUserSelectDialog = Backbone.View.extend({
   },
 
   addUsers: function () {
-    var selectedUsers = this.collection.modelsToSelect;
+    var selectedUserIds = this.collection.modelsToSelect;
 
-    var that = this;
-
-    this.collection.saveToCertificate({}, { users  : selectedUsers}).then(function (res) {
-      that.trigger('closeModal');
-      toastr.success(that.language['overlayCompleteMessageLabel']);
-    }, function (err, res) {
-      toastr.error(that.language['overlayFailedMessageLabel']);
-    });
+    this.trigger('addUsers', selectedUserIds)
   },
 
   reloadFirstPage: function () {

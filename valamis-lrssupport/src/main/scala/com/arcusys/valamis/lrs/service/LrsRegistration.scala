@@ -9,10 +9,9 @@ import com.arcusys.valamis.lrs.model._
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
 import com.arcusys.valamis.lrsEndpoint.model._
 import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
-import com.arcusys.valamis.lrsEndpoint.storage.{LrsTokenStorage, LrsEndpointStorage}
+import com.arcusys.valamis.lrsEndpoint.storage.LrsTokenStorage
 import com.arcusys.valamis.util.serialization.JsonHelper
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
-import com.liferay.portal.util.PortalUtil
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import org.joda.time.DateTime
 
 /**
@@ -60,8 +59,9 @@ class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Inj
         BasicAuthInfo(DatatypeConverter.printBase64Binary((username + ":" + password).toCharArray.map(_.toByte)))
       case LrsEndpoint(endpoint, AuthType.OAUTH, key, secret, _, _) =>
         getOAuthInfo(endpoint, key, secret, scope, params)
-      case LrsEndpoint(endpoint, AuthType.INTERNAL, key, secret, _, _) =>
-        getOAuthInfo(hostUrl + endpoint, key, secret, scope, params)
+      case LrsEndpoint(endpoint, AuthType.INTERNAL, key, secret, customHost, _) =>
+        val host = customHost getOrElse hostUrl
+        getOAuthInfo(host + endpoint, key, secret, scope, params)
     }
 
     createProxyEndpointInfo(auth, hostUrl)
@@ -80,7 +80,7 @@ class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Inj
     }
 
     val host = request match {
-      case Some(r) => PortalUtil.getPortalURL(r)
+      case Some(r) => PortalUtilHelper.getPortalURL(r)
       case _ => PortalUtilHelper.getLocalHostUrl
     }
 

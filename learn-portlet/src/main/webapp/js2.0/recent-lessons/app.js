@@ -5,17 +5,18 @@ var RecentLessons = Marionette.Application.extend({
       mainRegion: '#recentLessonsAppRegion'
     });
   },
-  start: function(options){
-      this.recent = new recentLessons.Entities.RecentCollection();
-      this.recent.on('sync', this.showContent, this);
-      this.recent.fetch();
+  onStart: function(options){
+    this.recent = new recentLessons.Entities.RecentCollection();
+    this.recent.on('sync', this.showContent, this);
+    this.recent.fetch();
   },
   showContent: function() {
     this.recent.each(function (model) {
-            if (model.get('throughDate') != '' && model.get('throughDate') != 0)
-                model.set('throughDate', moment(model.get('throughDate')).max().fromNow());
-
-        });
+      if (model.get('throughDate') != '' && model.get('throughDate') != 0) {
+        var lang = Utils.getUserLocale();
+        model.set('throughDate', moment(model.get('throughDate')).lang(lang).max().fromNow());
+      }
+    });
 
     var layoutView = new recentLessons.Views.AppLayoutView({collection: this.recent});
     this.mainRegion.show(layoutView);

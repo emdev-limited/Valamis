@@ -1,7 +1,6 @@
 package com.arcusys.valamis.slide.service
 
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.slide.exeptions.NoSlideElementException
 import com.arcusys.valamis.slide.model._
 import com.arcusys.valamis.slide.service.SlideModelConverters._
 import com.arcusys.valamis.slide.service.export.SlideSetHelper._
@@ -29,27 +28,14 @@ class SlideElementService(implicit val bindingModule: BindingModule)
           Some(s"slideData${slideElement.id}/${slideElement.content}")
         }
         else None
-      case Text | Iframe | Question | Video | Math | PlainText => None
+      case _ => None
     }
   }
 
-  override def create(slideElement: SlideElementModel) = {
+  override def create(slideElement: SlideElementModel): SlideElementModel = {
     val newSlideElement = slideElementRepository.create(slideElement)
-    slideElement.properties.foreach(createProperties(newSlideElement.id.get, _))
+    slideElementPropertyRepository.create(slideElement, newSlideElement.id.get)
     newSlideElement
-  }
-
-  private def createProperties(slideElementId: Long, elementProperties: SlideElementsProperties) = {
-    val deviceId = elementProperties.deviceId
-    elementProperties.properties.foreach(property =>
-      slideElementPropertyRepository.create(
-        SlideElementPropertyEntity(
-          slideElementId,
-          deviceId,
-          property.key,
-          property.value)
-      )
-    )
   }
 
   override def getAll = slideElementRepository.getAll
@@ -83,10 +69,9 @@ class SlideElementService(implicit val bindingModule: BindingModule)
     }
   }
 
-  override def update(slideElement: SlideElementModel) = {
+  override def update(slideElement: SlideElementModel): SlideElementModel = {
     val updatedElement = slideElementRepository.update(slideElement)
-    slideElementPropertyRepository.delete(updatedElement.id.get)
-    slideElement.properties.foreach(createProperties(updatedElement.id.get, _))
+    slideElementPropertyRepository.replace(slideElement, updatedElement.id.get)
     updatedElement
   }
 
@@ -99,21 +84,10 @@ class SlideElementService(implicit val bindingModule: BindingModule)
     slideElementRepository.delete(id)
   }
 
-  //TODO: too many arguments for clone command, check and remove unnecessary
-  override def clone(id: Long,
+  override def clone(slideElement: SlideElementModel,
                      slideId: Long,
-                     correctLinkedSlideId: Option[Long],
-                     incorrectLinkedSlideId: Option[Long],
-                     width: String,
-                     height: String,
-                     content: String,
-                     isTemplate: Boolean,
-                     properties: Seq[SlideElementsProperties]): SlideElementModel = {
+                     isTemplate: Boolean): SlideElementModel = {
     import com.arcusys.valamis.slide.model.SlideEntityType._
-
-    val slideElement = getById(id).getOrElse(
-      throw new NoSlideElementException(id)
-    )
 
     val cloneContent =
       if (isTemplate) {
@@ -121,22 +95,19 @@ class SlideElementService(implicit val bindingModule: BindingModule)
         else ""
       }
       else
-        content
+        slideElement.content
 
     val clonedSlideElement = create(
-      SlideElementModel(None,
-        slideElement.top,
-        slideElement.left,
-        width,
-        height,
+      SlideElementModel(
+        None,
         slideElement.zIndex,
         cloneContent,
         slideElement.slideEntityType,
         slideId,
-        correctLinkedSlideId,
-        incorrectLinkedSlideId,
+        slideElement.correctLinkedSlideId,
+        slideElement.incorrectLinkedSlideId,
         slideElement.notifyCorrectAnswer,
-        properties
+        slideElement.properties
       )
     )
     if (!isTemplate
@@ -147,40 +118,46 @@ class SlideElementService(implicit val bindingModule: BindingModule)
       val newPath = slideElement.slideEntityType match {
         case Image | Webgl =>
           val fileName = slideElement.content.takeWhile(_ != ' ')
-          fileService.copyFile(
-            filePathPrefix(slideElement),
-            fileName,
-            filePathPrefix(clonedSlideElement),
-            fileName,
-            false
-          )
-          fileName
+          try {
+            fileService.copyFile(
+              filePathPrefix(slideElement),
+              fileName,
+              filePathPrefix(clonedSlideElement),
+              fileName,
+              deleteFolder = false
+            )
+            fileName
+          }
+          catch {
+            case e: NoSuchElementException => ""
+          }
         case Pdf =>
           val fileName = slideElement.content.reverse.takeWhile(_ != '/').reverse
-          fileService.copyFile(
-            "slideData" + slideElement.id.get,
-            fileName,
-            "slideData" + clonedSlideElement.id.get,
-            fileName,
-            false
-          )
-          slideElement.content.replace(s"slideData${slideElement.id.get}", "slideData" + clonedSlideElement.id.get)
+          try {
+            fileService.copyFile(
+              "slideData" + slideElement.id.get,
+              fileName,
+              "slideData" + clonedSlideElement.id.get,
+              fileName,
+              deleteFolder = false
+            )
+            slideElement.content.replace(s"slideData${slideElement.id.get}", "slideData" + clonedSlideElement.id.get)
+          }
+          catch {
+            case e: NoSuchElementException => ""
+          }
       }
       update(
         SlideElementModel(
           clonedSlideElement.id,
-          slideElement.top,
-          slideElement.left,
-          width,
-          height,
           slideElement.zIndex,
           newPath,
           slideElement.slideEntityType,
           slideId,
-          correctLinkedSlideId,
-          incorrectLinkedSlideId,
+          slideElement.correctLinkedSlideId,
+          slideElement.incorrectLinkedSlideId,
           slideElement.notifyCorrectAnswer,
-          properties
+          slideElement.properties
         )
       )
     }
@@ -206,10 +183,6 @@ class SlideElementService(implicit val bindingModule: BindingModule)
 
     SlideElementModel(
       entity.id,
-      entity.top,
-      entity.left,
-      entity.width,
-      entity.height,
       entity.zIndex,
       entity.content,
       entity.slideEntityType,

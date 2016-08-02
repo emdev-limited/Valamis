@@ -5,11 +5,11 @@ ActivityMapperApp.module("Entities", function(Entities, ActivityMapperApp, Backb
       mappedVerb: null
     },
     persist: function(siteID) {
-      var url = path.root + path.api.settingsApi;
+      var url = path.root + path.api.activityToStatement;
       window.LearnAjax.post(url, {
         courseId: siteID,
-        keyID: this.get('activityID'),
-        value: this.get('mappedVerb')
+        activityClassName: this.get('activityID'),
+        verb: this.get('mappedVerb')
       });
     }
   });

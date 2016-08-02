@@ -54,6 +54,7 @@ var FileUploader = Backbone.View.extend({
     this.uploadsData = [];
     this.autoUpload = options.autoUpload;
     this.addMethod = options.addMethod;
+    if(options.onFailFunction) this.onFailFunction = options.onFailFunction;
   },
   render: function () {
     var that = this;
@@ -76,6 +77,7 @@ var FileUploader = Backbone.View.extend({
 
     this.$('#fileupload').fileupload(widgetOptions).
       bind('fileuploaddone', jQuery.proxy(this.onDone, this)).
+      bind('fileuploadfail', jQuery.proxy(this.onFail, this)).
       bind('fileuploadprogress', jQuery.proxy(this.onProgress, this)).
       bind('fileuploadprogressall', jQuery.proxy(this.onProgressAll, this)).
       bind('fileuploadadd', jQuery.proxy(this.onAdd, this));
@@ -118,6 +120,10 @@ var FileUploader = Backbone.View.extend({
       this.$('.progress').addClass('hidden');
       this.trigger('fileuploaddone', this.uploadsData.length === 1 ? this.uploadsData[0] : this.uploadsData);
     }
+  },
+  onFail: function (e, data) {
+      if(_.isFunction(this.onFailFunction))
+          this.onFailFunction(e, data);
   },
   onProgress: function (e, data) {
     var progress = ~~(data.loaded / data.total * 100);

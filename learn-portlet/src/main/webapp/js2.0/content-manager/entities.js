@@ -569,7 +569,8 @@ contentManager.module("Entities", function (Entities, contentManager, Backbone, 
             contentType: 'category',
             level: 1,
             selected: false,
-            courseId: ''
+            courseId: '',
+            hidden: false
         },
         getParentId: function () {
             return this.get('parentId');

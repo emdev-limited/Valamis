@@ -71,7 +71,8 @@ case class Manifest(
     rerunInterval: Int = 0,
     rerunIntervalType: PeriodType = UNLIMITED,
     beginDate: Option[DateTime],
-    endDate: Option[DateTime]) extends BaseManifest {
+    endDate: Option[DateTime],
+    content: Option[String] = None) extends BaseManifest {
   base foreach {
     value => require(!value.startsWith("/") && value.endsWith("/"), "If common base is defined, it should not start with a '/' and should end with a '/'")
   }

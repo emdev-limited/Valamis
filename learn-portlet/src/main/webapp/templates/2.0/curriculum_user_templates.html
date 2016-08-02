@@ -1,0 +1,311 @@
+
+<script type="text/template" id="curriculumUserAppLayoutTemplate">
+    <ul class="nav nav-tabs" id="certificateCollectionTabs">
+        <li class="">
+            <a href="#myCertificates" data-toggle="tab"> {{curriculumMyTabsHeaderLabel}} </a>
+        </li>
+        <li>
+            <a href="#availableCertificates" data-toggle="tab"> {{curriculumAvailableTabsHeaderLabel}} </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="myCertificates" data-toggle="tab" class="tab-pane"></div>
+        <div id="availableCertificates" data-toggle="tab" class="tab-pane"></div>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumUserMainLayoutTemplate">
+    <div id="certificateListToolbar"></div>
+    <div id="certificateList"></div>
+    <div id="certificateListPaginator" class="val-paginator text-center"></div>
+</script>
+
+<script type="text/template" id="curriculumUserToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            </div>
+        </div>
+
+        {{#isAvailableCollection}}
+        <div class="dropdown filter-element shift-left js-scope-filter" data-value="">
+            <button class="button medium simple">
+                <span class="dropdown-text"> {{instanceScopeLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value=""> {{instanceScopeLabel}} </li>
+                <li data-value="{{currentCourseId}}"> {{currentSiteScopeLabel}} </li>
+            </ul>
+        </div>
+        {{/isAvailableCollection}}
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="certificateListPaginatorShowing"> </div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="creationDate:false">
+            <button class="button medium simple">
+                <span class="dropdown-text"> {{newestLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+
+        <button class="button medium simple no-text hide-s shift-right js-display-option" data-value="{{tilesModeOption}}">
+            <span class="val-icon-grid-view">Grid View</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option" data-value="{{listModeOption}}">
+            <span class="val-icon-list-view">List View</span>
+        </button>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumUserCertificatesItemTemplate">
+    <div class="tile-content with-action">
+        <div class="image certificate"
+             {{#logo}}
+             style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
+             {{/logo}} >
+        </div>
+        <ul>
+            <li class="title">{{title}}</li>
+            <li class="description">{{description}}</li>
+            <li class="categories"> {{userCount}}&nbsp;{{usersSubtitleLabel}} • {{goalsCount}}&nbsp;{{goalsSubtitleLabel}} </li>
+            {{#certificateStatus}}
+            <li class="status {{cssClass}}">
+                <span class="val-label">
+                    {{label}}
+                </span>
+            </li>
+            {{/certificateStatus}}
+        </ul>
+        <div class="dropdown actions shift-right">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-view-details"> {{viewDetailsLabel}} </li>
+                <li class="js-view-goals"> {{viewGoalsLabel}} </li>
+
+                {{#isAvailableCollection}}
+                <li class="js-join-certificate"> {{joinCertificate}} </li>
+                {{/isAvailableCollection}}
+
+                {{^isAvailableCollection}}
+                <li class="js-leave-certificate"> {{leaveCertificate}} </li>
+                {{/isAvailableCollection}}
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumUserModalTemplate">
+    <div class="modal-content"></div>
+</script>
+
+<script type="text/template" id="curriculumUserModalMainLayoutViewTemplate">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="certificateDatailsTabs">
+            <li class="active"><a href="#certificateDetails" data-toggle="tab">{{detailsLabel}}</a></li>
+            <li class=""><a href="#certificateGoals" data-toggle="tab">{{learningGoalsLabel}}</a></li>
+        </ul>
+
+        <div class="tab-content" style="position: relative">
+            <div id="certificateDetails" class="tab-pane active"> </div>
+            <div id="certificateGoals" class="tab-pane"> </div>
+        </div>
+    </div>
+
+    <div class="modal-close val-icon-exit"></div>
+</script>
+
+<script type="text/html" id="curriculumUserCertificateDetailsViewTemplate">
+    <div class="div-table val-info-table">
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{coverImageLabel}}
+            </div>
+
+            <div class="div-col content-col">
+                <img class="val-img-logo preview certificate"
+                     src="{{#logo}}/delegate/certificates/{{id}}/logo?courseId={{courseId}}{{/logo}}"/>
+            </div>
+        </div>
+
+        {{#userStatus}}
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{certificateStatusLabel}}
+            </div>
+            <div class="div-col content-col">
+                {{labelText}}
+            </div>
+        </div>
+        {{/userStatus}}
+
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{certificateTitleLabel}}
+            </div>
+            <div class="div-col content-col">
+                {{title}}
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{{certificateDescriptionLabel}}}
+            </div>
+            <div class="div-col content-col">
+                {{description}}
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{validPeriodLabel}}
+            </div>
+            <div class="div-col content-col">
+                {{#isPermanent}}
+                    {{permanentLabel}}
+                {{/isPermanent}}
+                {{^isPermanent}}
+                    {{validityPeriodText}}
+                {{/isPermanent}}
+            </div>
+        </div>
+    </div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+
+        {{#isOpenBadgesIntegration}}
+        {{#isSuccess}}
+        <button class="button bbm-button big primary js-issue-badge">{{earnbadgeLabel}}</button>
+        {{/isSuccess}}
+        {{/isOpenBadgesIntegration}}
+
+        {{^isJoined}}
+        <button class="button bbm-button big primary js-join-certificate">{{joinCertificate}}</button>
+        {{/isJoined}}
+        {{#isJoined}}
+        <button class="button bbm-button big danger js-leave-certificate">{{leaveCertificate}}</button>
+        {{/isJoined}}
+    </div>
+</script>
+
+<script type="text/template" id="curriculumUserCertificateGoalsCollectionViewTemplate">
+    <label class="valamis-info-label shifted hidden js-no-goals-label"> {{noAvailableGoalsLabel}} </label>
+
+    <div class="val-list-table">
+        <div class="val-row val-list-table-header js-certificate-goals-header">
+            <div class="s-5"> {{learningGoalLabel}} </div>
+            {{^isUserJoined}}<div class="s-2">&nbsp;</div>{{/isUserJoined}}
+            <div class="s-2">{{typeLabel}}</div>
+            <div class="s-2">{{deadlineLabel}}</div>
+            <div class="s-1 text-center">{{optionalLabel}}</div>
+            {{#isUserJoined}}
+            <div class="s-2 text-right">{{statusLabel}}</div>
+            {{/isUserJoined}}
+        </div>
+        <ul class="js-certificate-goals">
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumUserCertificateGroupGoalItemViewTemplate">
+    <div class="val-row list-table-row">
+        <div class="s-5 title">
+            {{group1Label}}
+            <input type="text" class="onlyDigits js-digits-only js-group-count" value="{{count}}" disabled="disabled" />
+            {{group2Label}}
+        </div>
+
+        {{^isUserJoined}}<div class="s-2">&nbsp;</div>{{/isUserJoined}}
+
+        <div class="s-2">&nbsp;</div>
+
+        <div class="s-2">
+            <div class="clearfix val-during-period shift-right">
+                <input type="text" class="onlyDigits shift-left js-digits-only js-period-value" value="{{periodValue}}"
+                       disabled="disabled" />
+
+                <div class="val-select shift-left">
+                    <select class="js-period-type" {{^canModify}} disabled="disabled" {{/canModify}} >
+                    <option value="DAYS">{{daysLabel}}</option>
+                    <option value="WEEKS">{{weeksLabel}}</option>
+                    <option value="MONTH">{{monthLabel}}</option>
+                    <option value="YEAR">{{yearLabel}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="s-1">&nbsp;</div>
+
+        {{#isUserJoined}}
+        <div class="s-2 text-right">{{statusItemLabelText}}</div>
+        {{/isUserJoined}}
+    </div>
+    <ul class="js-items goals-group"></ul>
+</script>
+
+<script type="text/template" id="curriculumUserCertificateGoalItemViewTemplate">
+    <div class="val-row list-table-row">
+        <div class="s-5 title">
+            {{#isActivity}}
+            <input type="text" class="onlyDigits js-digits-only js-activity-count" value="{{count}}" disabled="disabled" />
+            {{/isActivity}}
+
+            {{#isDeleted}} <span class="valamis-info-label"> {{deletedItemLabel}} </span> {{/isDeleted}}
+
+            {{^isDeleted}}
+            {{#url}}<a href="{{url}}" target="_blank">{{/url}}
+            {{title}}
+            {{#url}}</a>{{/url}}
+            {{/isDeleted}}
+        </div>
+
+        {{^isUserJoined}}<div class="s-2">&nbsp;</div>{{/isUserJoined}}
+
+        <div class="s-2">{{goalItemTypeText}}&nbsp;</div>
+
+        <div class="s-2">
+            {{#groupId}}
+            &nbsp;
+            {{/groupId}}
+
+            {{^groupId}}
+            <div class="clearfix val-during-period shift-right">
+                <input type="text" class="onlyDigits shift-left js-digits-only js-period-value" value="{{periodValue}}"
+                       disabled="disabled"/>
+
+                <div class="val-select shift-left">
+                    <select class="js-period-type" disabled="disabled" >
+                        <option value="DAYS">{{daysLabel}}</option>
+                        <option value="WEEKS">{{weeksLabel}}</option>
+                        <option value="MONTH">{{monthLabel}}</option>
+                        <option value="YEAR">{{yearLabel}}</option>
+                    </select>
+                </div>
+            </div>
+            {{/groupId}}
+        </div>
+
+        <div class="s-1 text-center">
+            {{^groupId}}
+            <input type="checkbox" id="optionalGoal1_{{uniqueId}}" class="val-checkbox js-is-optional" disabled="disabled"
+                   {{#isOptional}}checked{{/isOptional}}/>
+            <label class="checkbox-label" for="optionalGoal1_{{uniqueId}}"> </label>
+            {{/groupId}}
+            &nbsp;
+        </div>
+
+        {{#isUserJoined}}
+        <div class="s-2 text-right">{{^isDeleted}} {{statusItemLabelText}} {{/isDeleted}}</div>
+        {{/isUserJoined}}
+    </div>
+</script>

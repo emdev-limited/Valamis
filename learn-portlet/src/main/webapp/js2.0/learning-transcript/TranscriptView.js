@@ -65,8 +65,8 @@ TranscriptPackagesView = Backbone.View.extend({
         var template = Mustache.to_html(
             jQuery('#transcriptPackageItemTemplate').html(),
             _.extend({
-                    gradeAutoShowing: Math.floor(item.get('gradeAuto') || 0),
-                    gradeShowing: Math.floor(item.get('grade'))
+                    gradeAutoShowing: Utils.gradeToPercent(item.get('gradeAuto') || 0),
+                    gradeShowing: Utils.gradeToPercent(item.get('grade'))
                 },
                 item.toJSON()));
 
@@ -188,7 +188,10 @@ TranscriptPackageStatementItemView = Backbone.View.extend({
             }
             this.model.set({answer: this.answer});
         }
-        this.storedTime = options.model.get('stored').replace(/T/g, " ").replace(/Z/g, "").replace(/-/g, "/");
+
+        var storedTime = new Date(options.model.get('stored'));
+
+        this.storedTime = storedTime.toLocaleDateString() + " " + storedTime.toLocaleTimeString();
         this.which = options.which;
         this.model.set({verb: this.verb, object: this.object, storedTime: this.storedTime, which: this.which});
     },
@@ -254,7 +257,7 @@ TranscriptCoursesItemView = Backbone.View.extend({
             var packages = new PackagesCollection();
             var that = this;
             packages.on('packageCollection:updated', function(grade) {
-                that.$('#expandPackageTitle').append(" - " + that.language['gradeLabel'] + " " + grade.totalGrade +"%");
+                that.$('#expandPackageTitle').append(" - " + that.language['gradeLabel'] + " " + Utils.gradeToPercent(grade.totalGrade) +"%");
             });
 
             packages.fetch({courseId: this.model.id, success: function () {
@@ -323,19 +326,23 @@ TranscriptCertificatesItemView = Backbone.View.extend({
                   if(activities.length > 0 || courses.length > 0 || stmnts.length > 0 || packages.length > 0) {
                       for (var i = 0; i < activities.length; i++) {
                           var item = new CertificateGoalStatus(activities[i]);
-                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));
+                          if (!item.get('dateFinish')){
+                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));}
                       }
                       for (var i = 0; i < courses.length; i++) {
                           var item = new CertificateGoalStatus(courses[i]);
-                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));
+                          if (!item.get('dateFinish')){
+                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));}
                       }
                       for (var i = 0; i < stmnts.length; i++) {
                           var item = new CertificateGoalStatus(stmnts[i]);
-                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));
+                          if (!item.get('dateFinish')){
+                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));}
                       }
                       for (var i = 0; i < packages.length; i++) {
                           var item = new CertificateGoalStatus(packages[i]);
-                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));
+                          if (!item.get('dateFinish')){
+                          datesFinish.push([item.get('dateFinish').slice(0, item.get('dateFinish').lastIndexOf("/") + 1), "20", item.get('dateFinish').slice(item.get('dateFinish').lastIndexOf("/") + 1)].join(""));}
                       }
 
                       datesFinish.sort(function (a, b) {
@@ -349,8 +356,9 @@ TranscriptCertificatesItemView = Backbone.View.extend({
                   }
 
                   if(issueDate != "") {
-                      var validPeriodType = certificates.models[0].get('validPeriod').valueType;
-                      var validDuration = certificates.models[0].get('validPeriod').value;
+                      var validPeriodType = certificates.models[0].get('periodType');
+
+                      var validDuration = certificates.models[0].get('periodValue');
                       if (validPeriodType.toLowerCase() != 'unlimited') {
                           var expirationDate = that.dateAdd(issueDate, validPeriodType, validDuration);
                           expirationDate = that.dateFormat(expirationDate);
@@ -454,11 +462,12 @@ GoalStatusView = Backbone.View.extend({
             type: options.type,
             certificateID: options.certificateID,
             status: options.status,
-            dateFinish: options.dateFinish
+            dateFinish: options.dateFinish,
+            title: options.title
         });
 
-        var obj = this.model.get('tincanStmntObj');
-        var verb = this.model.get('tincanStmntVerb');
+        var obj = this.model.get('obj');
+        var verb = this.model.get('verb');
 
         if (options.type == GOAL_TYPE.STATEMENT) {
             this.statements.each(function(stmnt){
@@ -469,16 +478,16 @@ GoalStatusView = Backbone.View.extend({
                 }
             });
 
-            var objectName = this.model.get('tincanStmntObjName');
-            var objectTitle = objectName ? Utils.getLangDictionaryTincanValue(objectName) : this.model.get('tincanStmntObj');
+            var objectName = this.model.get('objName');
+            var objectTitle = objectName ? Utils.getLangDictionaryTincanValue(objectName) : this.model.get('obj');
 
-            this.model.set({title: (this.language[verb] != undefined ? this.language[verb] : this.language[this.model.get('tincanStmntVerb')])
+            this.model.set({title: (this.language[verb] != undefined ? this.language[verb] : this.language[this.model.get('verb')])
                 + ' ' + objectTitle});
         }
         else if (options.type == GOAL_TYPE.ACTIVITY) {
           this.model.set({
             isActivity: true,
-            title: this.language[this.model.get('activityId')]
+            title: this.language[this.model.get('activityName')]
           });
         }
     },
@@ -512,60 +521,61 @@ TranscriptCertificateGoalView = Backbone.View.extend({
     addAll: function () {
         this.collection.each(
             function(item){
-                if(item.get('courses').length > 0)
+                if(item.attributes.courseCount > 0)
                     this.$el.find('#certificateCoursesTable').closest('div').toggleClass('hidden');
-                if(item.get('statements').length > 0)
+                if(item.attributes.statementCount > 0)
                     this.$el.find('#certificateStatementsTable').closest('div').toggleClass('hidden');
-                if(item.get('activities').length > 0)
+                if(item.attributes.activityCount > 0)
                     this.$el.find('#certificateActivitiesTable').closest('div').toggleClass('hidden');
-                if(item.get('packages').length > 0)
+                if(item.attributes.packageCount > 0)
                     this.$el.find('#lessonGoalsTable').closest('div').toggleClass('hidden');
 
-                this.renderGoals(item.get('courses'), this.statuses.get('courses'), GOAL_TYPE.COURSE);
-                this.renderGoals(item.get('statements'), this.statuses.get('statements'), GOAL_TYPE.STATEMENT);
-                this.renderGoals(item.get('activities'), this.statuses.get('activities'), GOAL_TYPE.ACTIVITY);
-                this.renderGoals(item.get('packages'), this.statuses.get('packages'), GOAL_TYPE.PACKAGE);
+
+                this.renderGoals(item.attributes.courseCount, this.statuses.get('courses'), GOAL_TYPE.COURSE);
+                this.renderGoals(item.attributes.statementCount, this.statuses.get('statements'), GOAL_TYPE.STATEMENT);
+                this.renderGoals(item.attributes.activityCount, this.statuses.get('activities'), GOAL_TYPE.ACTIVITY);
+                this.renderGoals(item.attributes.packageCount, this.statuses.get('packages'), GOAL_TYPE.PACKAGE);
             }, this);
     },
 
     renderGoals: function (goals, statuses, type) {
         if (goals != undefined) {
-            for (var i = 0; i < goals.length; i++) {
+            for (var i = 0; i < goals; i++) {
                 var params;
-                var item = new CertificateGoalStatus(goals[i]);
+                var item = new CertificateGoalStatus(statuses[i]);
                 if (statuses != undefined) {
                     if (type == GOAL_TYPE.ACTIVITY) {
                         params = statuses.filter(function (i) {
-                            return i.activityId == item.get('activityId')
+                            return i.activityName == item.get('activityName')
                         }).map(function (i) {
                             return [i.status, i.dateFinish];
                         });
                     }
                     else if (type == GOAL_TYPE.STATEMENT) {
                         params = statuses.filter(function (i) {
-                            return i.tincanStmntObj == item.get('tincanStmntObj') && i.tincanStmntVerb == item.get('tincanStmntVerb')
+                            return i.obj == item.get('obj') && i.verb == item.get('verb')
                         }).map(function (i) {
                             return [i.status, i.dateFinish];
                         });
                     }
                     else if (type == GOAL_TYPE.COURSE) {
                         params = statuses.filter(function (i) {
-                            return i.courseGoalId == item.get('courseGoalId')
+                            return i.courseId == item.get('courseId')
                         }).map(function (i) {
-                            return [i.status, i.dateFinish];
+                            return [i.status, i.dateFinish, i.title];
                         });
                     }
                     else if (type == GOAL_TYPE.PACKAGE) {
                       params = statuses.filter(function (i) {
                         return i.packageId == item.get('packageId')
                       }).map(function (i) {
-                        return [i.status, i.dateFinish];
+                        return [i.status, i.dateFinish, i.title];
                       });
                     }
                 }
 
 
-                var view = new GoalStatusView({model: item, status: params[0][0], certificateID: this.certificateID, statements: this.statements, type: type, language: this.language, dateFinish: params[0][1]});
+                var view = new GoalStatusView({model: item, status: params[0][0], certificateID: this.certificateID, statements: this.statements, type: type, language: this.language, dateFinish: params[0][1], title: params[0][2]});
 
                 var template = view.render().$el;
                 if (type == GOAL_TYPE.COURSE) {

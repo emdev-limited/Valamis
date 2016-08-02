@@ -1,7 +1,8 @@
 import sbt._
 
 object Version {
-  val scala             = "2.11.7"
+  val valamis           = "3.0.4"
+  val scala             = "2.11.8"
   val json4s            = "3.2.11"
   val sprayJson         = "1.3.2"
   val scalatest         = "2.2.3"
@@ -15,20 +16,19 @@ object Version {
   val prettyTime        = "3.2.7.Final"
   val commonsValidator  = "1.4.1"
   val subcut            = "2.1"
-  val lrs               = "2.6.1"
+  val lrs               = "3.0.1"
 
   val portletApi        = "2.0"
   val servletApi        = "2.5"
   val javaxMail         = "1.4"
   val javaxInject       = "1"
-  val liferay620        = "6.2.3"
+
+  val liferay620           = "6.2.5"
+
   val junit             = "4.12"
   val specs             = "2.3.13"
   val scalaMock         = "3.2.2"
   val mockito           = "1.10.17"
-  val slick             = "2.1.0"
-  val slickMigration    = "2.1.0.3"
-  val slickJodaMapper   = "1.2.0"
   val guiceScala        = "4.0.0"
   val guice             = "4.0"
   val scalatra          = "2.3.1"
@@ -38,13 +38,17 @@ object Version {
   val httpClient        = "4.4"
   val poi               = "3.14-beta2-arcusys-0.2.0"
   val antiSamy          = "1.5.1"
-  val quartz            = "2.2.1"
   val nimbusJose        = "3.2"
   val antiXml           = "0.5.2"
 
   val apachePDF         = "2.0.0-SNAPSHOT"
   val apacheXML         = "1.1"
   val apacheAvalon      = "4.3.1"
+
+  val slick             = "3.0.3"
+  val hikari            = "2.3.7"
+  val slickMigration    = "3.0.2"
+  val slickDrivers      = "3.0.3"
 }
 
 object Libraries {
@@ -67,12 +71,10 @@ object Libraries {
   val scalatraJson = "org.scalatra" %% "scalatra-json" % Version.scalatra
 
   // json4s
-  val json4s       = "org.json4s" %% "json4s-jackson" % Version.json4s
   val json4sJakson = "org.json4s" %% "json4s-jackson" % Version.json4s
   val json4sCore   = "org.json4s" %% "json4s-core"    % Version.json4s
   val json4sAst    = "org.json4s" %% "json4s-ast"     % Version.json4s
   val json4sExt    = "org.json4s" %% "json4s-ext"     % Version.json4s
-  val sprayJson    = "io.spray"   %% "spray-json"     % Version.sprayJson
 
   // liferay
   val lfPortalService620 = "com.liferay.portal" % "portal-service" % Version.liferay620
@@ -91,8 +93,14 @@ object Libraries {
 
   // slick
   val slick           = "com.typesafe.slick" %% "slick"           % Version.slick
-  val slickDrivers    = "com.arcusys.slick"  %% "slick-drivers"   % Version.slick
-  val slickMigration  = "com.arcusys.slick" %% "slick-migration" % Version.slickMigration
+  // slick -> com.zaxxer » HikariCP-java6
+  val hikari          = "com.zaxxer"         %  "HikariCP-java6"  % Version.hikari
+
+  val slickDrivers    = "com.arcusys.slick"  %% "slick-drivers"   % Version.slickDrivers
+  // slickDrivers -> resource
+  val scalaARM        = "com.jsuereth"       %% "scala-arm"       % "1.4"
+
+  val slickMigration  = "com.arcusys.slick"  %% "slick-migration" % Version.slickMigration
 
   // guice
   val guiceScala        = "net.codingwell"               %% "scala-guice"        % Version.guiceScala
@@ -115,20 +123,19 @@ object Libraries {
   val oauthHttpClient = "net.oauth.core" % "oauth-httpclient4" % Version.oauthHttpClient
 
   //apache xml graphics
-  val apacheXml        = "org.apache.xmlgraphics"      % "fop"                   % Version.apacheXML
+  val apacheXmlFop     = "org.apache.xmlgraphics"      % "fop"                   % Version.apacheXML
   val apacheAvalonApi  = "org.apache.avalon.framework" % "avalon-framework-api"  % Version.apacheAvalon
   val apacheAvalonImpl = "org.apache.avalon.framework" % "avalon-framework-impl" % Version.apacheAvalon
 
   //selenium
-  val selenium = "org.seleniumhq.selenium" % "selenium-java" % "2.48.2"
-  val seleniumFF = "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.48.2"
+  val selenium = "org.seleniumhq.selenium" % "selenium-java" % "2.53.0"
+  val seleniumFF = "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.0"
 
   // other
   val poiOoxml   = "org.apache.poi"            % "poi-ooxml"       % Version.poi
   val poiScratchPad   = "org.apache.poi"       % "poi-scratchpad"  % Version.poi
   val httpClient = "org.apache.httpcomponents" % "httpclient"      % Version.httpClient
   val antiSamy   = "org.owasp.antisamy"        % "antisamy"        % Version.antiSamy
-  val quartz     = "org.quartz-scheduler"      % "quartz"          % Version.quartz
   val antiXml    = "no.arktekk"                %% "anti-xml"       % Version.antiXml
   val apachePDF  = "org.apache.pdfbox"         % "pdfbox"          % Version.apachePDF
 }
@@ -138,7 +145,6 @@ object Dependencies {
 
   val common = Seq(
     jodaTime,
-    jodaConvert,
     scalatest % Test,
     specs     % Test,
     mockito   % Test,
@@ -147,7 +153,7 @@ object Dependencies {
   )
 
   val apacheXml = Seq(
-    Libraries.apacheXml
+    Libraries.apacheXmlFop
       exclude("org.apache.avalon.framework", "avalon-framework-api")
       exclude("org.apache.avalon.framework", "avalon-framework-impl"),
     Libraries.apacheAvalonApi,
@@ -158,8 +164,12 @@ object Dependencies {
     guiceScala
   )
 
-  val json4s = Seq(
+  val json4sBase = Seq(
     json4sJakson,
+    javaxInject // required in runtime, json4s-jackson -> json4s-core -> paranamer-2.6.jar -> javax.inject
+  )
+
+  val json4s = json4sBase ++ Seq(
     json4sCore,
     json4sAst,
     json4sExt
@@ -170,23 +180,23 @@ object Dependencies {
   val oauthClient = Seq(
     oauthCore,
     oauthConsumer,
-    oauthHttpClient,
+    oauthHttpClient
+      exclude("net.oauth.core", "oauth-consumer"),
     httpClient
   )
 
   val slick = Seq(
-    Libraries.slick,
-    slickDrivers,
+    Libraries.slick, hikari,
+    slickDrivers, scalaARM,
     h2DB % Test,
     slickMigration
   )
 
   val lrs = Seq(
     lrsApi
-      exclude("org.json4s", "json4s-ext_2.11")
-      exclude("com.typesafe.akka", "akka-actor_2.11")
-      exclude("com.google.inject", "guice")
-      exclude("com.google.inject.extensions", "guice-servlet"),
+      exclude("commons-fileupload", "commons-fileupload")
+      exclude("commons-lang", "commons-lang")
+      exclude("org.json4s", "json4s-ext_2.11"),
     commonsValidator,
     commonsLang
   )
@@ -198,9 +208,7 @@ object Dependencies {
       exclude("org.json4s", "json4s-core_2.11")
   )
 
-  val internalPortlets = slick ++ Seq(sprayJson) ++ javax
-
-  val liferay620 = javax ++ Seq(Libraries.lfUtilJava620, lfPortalService620, lfPortalImpl620).map( _ % Provided)
+  val liferay620 = javax ++ Seq(lfUtilJava620, lfPortalService620, lfPortalImpl620).map( _ % Provided)
 
   val uiTests = Seq(
     selenium   % Test,

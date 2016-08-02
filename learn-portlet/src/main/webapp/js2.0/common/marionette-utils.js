@@ -23,7 +23,6 @@ Marionette.Renderer = {
 
         _.extend(data, Valamis.language);
         _.extend(data, Valamis.permissions);
-        _.extend(data, Valamis.additionalOptions);
 
         if (!template) {
             throw new Marionette.Error({
@@ -77,6 +76,7 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
         'uploadLogoMessage' : 'uploadLogoMessage',
         'fileUploadModalHeader' : 'fileUploadModalHeader',
         'selectImageModalHeader': 'selectImageModalHeader',
+        'rootUrl': function() {return ''},
         'getFolderId' : function() {return 'getDefaultFolderId'},
         'getFileUploaderUrl': function() {return ''},
         'fileUploaderLayout': '',
@@ -97,11 +97,11 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
         'addMethod': function(e, data, context) {
             var acceptFileTypes = new RegExp(context.options.acceptFileTypes(context.view.model) + '$', 'gi');
             var allowUpload = !!data.originalFiles[0].type &&
-                acceptFileTypes.test(getExtByMime(data.originalFiles[0].type));
+                acceptFileTypes.test(Utils.getExtByMime(data.originalFiles[0].type));
             if(!allowUpload) {
                 var message = Valamis.language['unsupportedFileTypeMessage'] + '\n' +
                     Valamis.language['supportedFileTypesLabel'] + ' ' +
-                    _.map(getMimeTypeGroupValues(context.view.model.get('slideEntityType')), function(tpe) {
+                    _.map(Utils.getMimeTypeGroupValues(context.view.model.get('slideEntityType')), function(tpe) {
                         return '<i>' + tpe + '</i>';
                     }).join(', ');
                 valamisApp.execute('notify', 'warning', message, { timeOut: 5000 });
@@ -114,7 +114,8 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
     events: {
         'click .js-upload-image': 'onInitStart',
         'click .js-select-from-media-gallery': 'onInitStart',
-        'click .js-select-from-media-gallery-video': 'onInitStart'
+        'click .js-select-from-media-gallery-video': 'onInitStart',
+        'click .js-design-new-badge': 'onInitStart'
     },
     initialize: function(){
         var that = this;
@@ -126,22 +127,78 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
           that.logoData.setPortletFileUploaderUrl(portletFileUploaderUrl);
           that.logoData.submitData({success: function(name) { callback(name);} });
         });
+
+        // for design badge support
+        window.onmessage = function (e) {
+            if (e.origin == 'https://www.openbadges.me' && e.data !== 'cancelled') {
+                var fileName = 'icon.png';
+                var postponeLoading = that.options.postponeLoading;
+                if(postponeLoading && that.logoData.supports()){
+                    that.logoData.setSetting(IMAGE_PARAM_TYPE.CONTENT_TYPE, 'base64-icon');
+                    that.logoData.setSetting(IMAGE_PARAM_TYPE.INPUT_BASE64, e.data);
+                    that.logoData.setSetting(IMAGE_PARAM_TYPE.FILE_NAME, fileName);
+                }
+                // for old browsers saving images immediately
+                else {
+                    var endpointparam = {
+                        action: 'ADD',
+                        courseId: Utils.getCourseId(),
+                        contentType: 'base64-icon',
+                        folderId: that.view.model.get('id')
+                    };
+
+                    var portletFileUploaderUrl = that.options.getFileUploaderUrl(that.view.model);
+                    var fileUploaderUrl = (portletFileUploaderUrl || path.root + path.api.files) + "?" + jQueryValamis.param(endpointparam);
+
+                    var formData = {
+                        'contentType': 'base64-icon',
+                        'inputBase64': e.data,
+                        'p_auth': Liferay.authToken
+                    };
+
+                    jQueryValamis.ajax({
+                        url: fileUploaderUrl,
+                        type: 'POST',
+                        data: formData,
+                        headers: {
+                            'X-CSRF-Token': Liferay.authToken
+                        }
+                    });
+                }
+
+                var data = e.data.split(';');
+                var src = e.data.slice(0, -(data[data.length - 1].length + 1));
+                that.view.model.set({ 'logoSrc': src });
+                that.view.model.set({ 'logo': fileName });
+            }
+        };
     },
     onInitStart: function(e) {
         var callback = this.uploadImage;
         if(e) {
             var el = jQueryValamis(e.target).closest('button,img');
-            callback = (el.hasClass('js-upload-image'))
-                ? this.uploadImage
-                : (el.hasClass('js-select-from-media-gallery'))
-                    ? this.selectImage
-                    : this.selectVideo;
+
+            if (el.hasClass('js-upload-image'))
+                callback = this.uploadImage;
+            else if (el.hasClass('js-select-from-media-gallery'))
+                callback = this.selectImage;
+            else if (el.hasClass('js-select-from-media-gallery-video'))
+                callback = this.selectVideo;
+            else if (el.hasClass('js-design-new-badge'))
+                callback = this.openBadgeDesigner;
         }
+        this.view.trigger('element-modal:open');
         this.options.onBeforeInit(this.view.model, this, callback);
+    },
+    openBadgeDesigner: function(that) {
+        var URL = 'https://www.openbadges.me/designer.html?origin=http://' + that.options.rootUrl();
+        URL = URL + '&email=developer@example.com';
+        URL = URL + '&close=true';
+        var options = 'width=1015,height=680,location=0,menubar=0,status=0,toolbar=0';
+        var designerWindow = window.open(URL, '', options);
     },
     uploadImage: function(that) {
         that.autoUpload = that.options.autoUpload(that.view.model);
-        that.selectDisplayFormatView = that.options.selectDisplayFormatView(that.view);
         var postponeLoading = that.options.postponeLoading;
         var imageModel = {
           logo: '',
@@ -156,7 +213,7 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
           var endpointparam = {
             action:'ADD',
             courseId:  Utils.getCourseId(),
-            contentType: 'icon',
+            contentType: that.options.contentType(that.view.model),
             folderId: folderId
           };
           var portletFileUploaderUrl = that.options.getFileUploaderUrl(that.view.model);
@@ -175,7 +232,7 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
 
         if(postponeLoading && that.logoData.supports()){
           uploader.on('fileuploadadd', function (data) {
-            that.logoData.setSetting(IMAGE_PARAM_TYPE.CONTENT_TYPE, 'icon');
+            that.logoData.setSetting(IMAGE_PARAM_TYPE.CONTENT_TYPE, that.options.contentType(that.view.model));
             that.logoData.setSetting(IMAGE_PARAM_TYPE.FILE, data);
 
             var filename = data.name;
@@ -185,36 +242,54 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
           });
         }
         else {
-            // An additional view to show between selecting files for upload and uploading them
-            if(that.selectDisplayFormatView) {
-                var modalView = new valamisApp.Views.ModalView({
-                    contentView: that.selectDisplayFormatView,
-                    className: 'lesson-studio-modal light-val-modal select-display-format-modal',
-                    header: that.options.fileUploadModalHeader
-                });
+            // use one uploader modal for pdf and ppt in lesson studio, set fileUploaderUrl after mime checking
+            if (that.view.model.get('slideEntityType') === 'imported') {
                 uploader.on('fileuploadadd', function (file, data) {
                     var formData = data;
-                    that.selectDisplayFormatView.on('contentType:selected', function (contentType, entityId) {
-                        that.view.model.set('contentType', contentType);
-                        that.view.model.set('entityId', entityId);
-                        that.logoData.setSetting(IMAGE_PARAM_TYPE.CONTENT_TYPE, contentType);
-                        that.logoData.setSetting(IMAGE_PARAM_TYPE.FILE, file);
-                        // This is necessary because otherwise "progress" does not happen in uploader
-                        formData.url = that.options.getFileUploaderUrl(that.view.model);
-                        formData.submit().done(function(result) {
-                            valamisApp.execute('modal:close', modalView);
-                            that.view.triggerMethod('FileAdded', formData, result);
+                    var fileExt = Utils.getExtByMime(formData.originalFiles[0].type);
+                    that.view.model.set('fileExt', fileExt);
+                    that.selectDisplayFormatView = that.options.selectDisplayFormatView(that.view);
+
+                    if(that.selectDisplayFormatView) {
+                        var modalView = new valamisApp.Views.ModalView({
+                            contentView: that.selectDisplayFormatView,
+                            className: 'lesson-studio-modal select-display-format-modal',
+                            header: that.options.fileUploadModalHeader,
+                            beforeCancel: function () {
+                                that.uploadImage(that);
+                            }
                         });
 
-                        valamisApp.execute('modal:close', this);
-                        that.view.$('.js-select-google-file').hide();
-                    });
-                    valamisApp.execute('modal:show', modalView);
+                        that.selectDisplayFormatView.on('contentType:selected', function (contentType, entityId, orientationFormat) {
+                            that.view.model.set('contentType', contentType);
+                            that.view.model.set('entityId', entityId);
+                            that.logoData.setSetting(IMAGE_PARAM_TYPE.CONTENT_TYPE, contentType);
+                            that.logoData.setSetting(IMAGE_PARAM_TYPE.FILE, file);
+                            // This is necessary because otherwise "progress" does not happen in uploader
+                            formData.url = that.options.getFileUploaderUrl(that.view.model);
+                            formData.submit().done(function (result) {
+                                                valamisApp.execute('modal:close', modalView);
+                                                that.view.triggerMethod('FileAdded', formData, result, orientationFormat);
+                                             })
+                                             .fail(function() {
+                                                valamisApp.execute('notify', 'error', Valamis.language['failedUploadLabel']);
+                                                valamisApp.execute('modal:close', modalView);
+                                             });
+
+                            valamisApp.execute('modal:close', this);
+                            that.view.$('.js-select-google-file').hide();
+                            that.view.$('.js-upload-hint-label').addClass('hidden');
+                            that.view.$('.js-processing-hint-label').removeClass('hidden');
+                            that.view.$('.js-converting-hint-label').toggleClass('hidden', contentType == 'pdf');
+                        });
+                        valamisApp.execute('modal:show', modalView);
+                    }
                 });
             }
             else {
                 uploader.on('fileuploadadd', function (file, data) {
                     that.options.fileuploadaddCallback(that, file, data);
+                    that.view.$('.js-select-google-file').hide();
                 });
                 uploader.on('fileuploaddone', function (result) {
                     that.options.fileuploaddoneCallback(result, uploader, that);
@@ -227,7 +302,10 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
         if (showModal) {
             var imageUploaderModalView = new valamisApp.Views.ModalView({
                 contentView: uploader,
-                header: that.options.fileUploadModalHeader
+                header: that.options.fileUploadModalHeader,
+                onDestroy: function(){
+                    that.view.trigger('element-modal:close');
+                }
             });
 
             uploader.on('fileupload:done', function (result) {
@@ -267,7 +345,10 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
         var galleryModalView = new valamisApp.Views.ModalView({
             contentView: galleryView,
             submitEl: '.js-save-package',
-            header: Valamis.language['selectImageModalHeader']
+            header: Valamis.language['selectImageModalHeader'],
+            onDestroy: function(){
+                that.view.trigger('element-modal:close');
+            }
         });
 
         galleryView.on('savedLogo', function (data) {
@@ -305,8 +386,8 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
                     that.onImageGalleryUploaded(galleryModalView, imgdata);
                 } else { // old browsers, image saved immediately in GalleryContainer
                     // Using mimeToExt object from lesson-studio/helper.js to add extension to the filename
-                    if (typeof mimeToExt === 'object') {
-                        var fileExt = getExtByMime ? getExtByMime(data.get('mimeType')) : null;
+                    if (typeof Utils.mimeToExt === 'object') {
+                        var fileExt = Utils.getExtByMime ? Utils.getExtByMime(data.get('mimeType')) : null;
                         data.set({
                             title: fileExt
                                 ? data.get('title') + '.' + fileExt
@@ -353,13 +434,18 @@ Behaviors.ImageUpload = Backbone.Marionette.Behavior.extend({
     },
     selectVideo: function (that) {
         var videoModel = new Backbone.Model();
-        var videoModalView = new VideoModal({ model: videoModel });
+        var videoModalView = new VideoModal({
+            model: videoModel,
+            onDestroy: function(){
+                that.view.trigger('element-modal:close');
+            }
+        });
 
         videoModalView.on('video:added', function (data) {
             var src = '/documents/' + Utils.getCourseId() + '/0/' +
                     data.get('title') + '/' + data.get('uuid') +
                     '?groupId=' + data.get('groupID') +
-                    '&ext=' + getExtByMime(data.get('mimeType'));
+                    '&ext=' + Utils.getExtByMime(data.get('mimeType'));
             that.onImageGalleryUploaded(videoModalView, { src: src, fileName: src });
         });
         valamisApp.execute('modal:show', videoModalView);

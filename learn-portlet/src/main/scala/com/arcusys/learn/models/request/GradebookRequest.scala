@@ -2,10 +2,11 @@ package com.arcusys.learn.models.request
 
 import java.util.UUID
 
-import com.arcusys.learn.liferay.permission.PermissionUtil
 import com.arcusys.learn.models.request.GradebookActionType._
-import com.arcusys.learn.service.util.{AntiSamyHelper, Parameter}
+import com.arcusys.learn.service.AntiSamyHelper
 import com.arcusys.valamis.gradebook.model.GradebookUserSortBy
+import com.arcusys.valamis.web.servlet.base.PermissionUtil
+import com.arcusys.valamis.web.servlet.request.{BaseCollectionFilteredRequest, BaseRequest, BaseSortableCollectionFilteredRequestModel, Parameter}
 import org.scalatra.ScalatraBase
 
 import scala.util.Try
@@ -51,10 +52,7 @@ object GradebookRequest extends BaseCollectionFilteredRequest with BaseRequest {
       case None        => ""
     }
 
-    def studentName = Parameter(StudentNameFilter).option match {
-      case Some(value) => value
-      case None        => ""
-    }
+    def studentNameFilter = Parameter(StudentNameFilter).option.filter(_.nonEmpty)
 
     def isShortResult = Parameter(ResultAs).option match {
       case Some(value) => value != "detailed"

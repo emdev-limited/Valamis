@@ -28,7 +28,7 @@ class GradeReportGenerator(implicit val bindingModule: BindingModule) extends In
 
     def parseActivity(activity: TreeNode[Activity]): GradeReportNode = activity.item match {
       case organization: Organization => new GradeReportRoot(organization, activity.children.filter(_.item.sequencing.tracking.isDefined) map parseActivity,
-        if (essayComment.get(organization.id) != None) essayComment.get(organization.id).get.get else "", attempt.packageID)
+        if (essayComment.get(organization.id) != None) essayComment.get(organization.id).get.get else "", attempt.packageID.toInt)
       case container: ContainerActivity => new GradeReportBranch(container, activity.children.filter(_.item.sequencing.tracking.isDefined) map parseActivity,
         if (essayComment.get(container.id) != None) essayComment.get(container.id).get.get else "", attempt.packageID)
       case leaf: LeafActivity => new GradeReportLeaf(leaf,

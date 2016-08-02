@@ -6,7 +6,7 @@ import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.certificate.model.goal.{ ActivityGoal, CourseGoal, PackageGoal, StatementGoal }
 import com.arcusys.valamis.certificate.storage._
 import com.arcusys.valamis.course.CourseService
-import com.arcusys.valamis.export.ImportProcessor
+import com.arcusys.valamis.util.export.ImportProcessor
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.util.FileSystemUtil
@@ -24,7 +24,11 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
   private lazy val statementGoalStorage = inject[StatementGoalStorage]
   private lazy val packageGoalStorage = inject[PackageGoalStorage]
 
-  override protected def importItems(certificates: List[CertificateExportModel], companyId: Long, tempDirectory: File, userId: Long): Unit = {
+  override protected def importItems(certificates: List[CertificateExportModel],
+                                     companyId: Long,
+                                     tempDirectory: File,
+                                     userId: Long,
+                                     data: String): Unit = {
     certificates.foreach(c => {
 
       val importedCertificate = importCertificate(c, companyId, logo = "")
@@ -79,10 +83,10 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
     courseOption.map(course => courseGoalStorage.create(
       certificate.id,
       course.getGroupId.toInt,
-      goalInfo.arrangementIndex,
       goalInfo.value,
-      PeriodTypes(goalInfo.period)
-    ))
+      PeriodTypes(goalInfo.period),
+      goalInfo.arrangementIndex)
+    )
   }
 
   private def importStatementGoal(goalInfo: StatementGoalExport, certificate: Certificate): StatementGoal = {
@@ -91,8 +95,8 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
       goalInfo.tincanStmntVerb,
       goalInfo.tincanStmntObj,
       goalInfo.value,
-      PeriodTypes.parse(goalInfo.period)
-    )
+      PeriodTypes.parse(goalInfo.period),
+      goalInfo.arrangementIndex)
   }
 
   private def importPackageGoal(goalInfo: PackageGoalExport, certificate: Certificate): PackageGoal = {
@@ -100,8 +104,8 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
       certificate.id,
       goalInfo.packageId,
       goalInfo.value,
-      PeriodTypes.parse(goalInfo.period)
-    )
+      PeriodTypes.parse(goalInfo.period),
+      goalInfo.arrangementIndex)
   }
 
   private def importActivityGoal(goalInfo: ActivityGoalExport, certificate: Certificate): ActivityGoal = {
@@ -110,7 +114,7 @@ class CertificateImportProcessor(implicit val bindingModule: BindingModule) exte
       goalInfo.name,
       goalInfo.activityCount,
       goalInfo.value,
-      PeriodTypes.parse(goalInfo.period)
-    )
+      PeriodTypes.parse(goalInfo.period),
+      goalInfo.arrangementIndex)
   }
 }

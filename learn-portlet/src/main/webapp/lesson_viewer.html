@@ -1,291 +1,56 @@
-<div class="projectLearnGeneric val-portlet" id="projectLearnGenericPlaceholder">
-    <div id="SCORMPlayerContainer">
-        <div id="packagePlayerList" class="SCORMPackageList"></div>
-    </div>
-    <div class="loading-container"></div>
-    <div id="SCORMPlayerView"></div>
+<div id="#lessonViewerAppRegion" class="val-portlet">
+    <div id="listRegion"></div>
+    <div id="playerRegion" class="player-region" style="display: none;"></div>
+
+    <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 </div>
-<div id="player-modals-layout"></div>
-<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
-<input type="hidden" id="playerPackageId" value="{{packageId}}"/>
-<input type="hidden" id="playerPackageTitle" value="{{packageTitle}}"/>
-<input type="hidden" id="playerPackageType" value="{{packageType}}"/>
-<input type="hidden" id="pageID" value="{{pageID}}"/>
-<input type="hidden" id="playerID" value="{{playerID}}"/>
-<input type="hidden" id="isCompleteByUser" value="{{isCompleteByUser}}">
-<input type="hidden" id="defaultPackageID" value="{{defaultPackageID}}">
-<input type="hidden" id="userName" value="{{userName}}">
-<input type="hidden" id="userEmail" value="{{userEmail}}">
-<input type="hidden" id="tincanActor" value="{{tincanActor}}">
-<input type="hidden" id="tincanLrsNotConfiguredMessage" value="{{tincanLrsNotConfigured}}">
 
-<!--tincanLrsUserCredentials-->
-<script type="text/template" id="tincan-credentials-modal-template">
-    <div class="bbm-modal__topbar">
-        <h3 class="bbm-modal__title valamis">{{tincanLrsCredentialsDialogLabel}}</h3>
+<script type="text/javascript">
 
-        <div class="modal-close val-icon-exit">
-        </div>
-    </div>
+    jQueryValamis(function () {
 
-    <div class="bbm-modal__section val-row shifted">
-        <h5> {{tincanLrsCredentialsDialogMessage}}</h5>
-
-        <label class="issuerSettingLabel" for="tincanLoginCredentialsDialog">{{tincanLrsCredentialsDialogLoginLabel}}</label>
-        <input class="issuerSettingValue form-input" id="tincanLoginCredentialsDialog" type="text" />
-
-        <label class="issuerSettingLabel" for="tincanPasswordCredentialsDialog">{{tincanLrsCredentialsDialogPasswordLabel}}</label>
-        <input class="issuerSettingValue form-input" id="tincanPasswordCredentialsDialog" type="password"/>
-    </div>
-
-    <div class="bbm-modal__bottombar">
-        <input type="button" class="button big primary" value="{{tincanLrsCredentialsDialogButtonLable}}"
-               onclick="setLRSFromCredentialsDialog()"/>
-    </div>
-</script>
-<script type="text/javascript" language="javascript">
-
-var scormPlayerPackages = new PlayerPackageModelCollection();
-var scormPlayer;
-var scormPlayerPackagesView;
-var scormPlayerLanguageData = {};
-var router;
-var endpointData = {{{endpointData}}};
-
-var permissionActionsLessonViewer = {
-    LV_SHARE: eval("{{permissionSharePackage}}"),
-    LV_ORDER: eval("{{permissionOrderPackage}}")
-};
-
-TincanHelper.SetActor(JSON.parse(jQueryValamis("#tincanActor").val()));
-TincanHelper.SetLRS(endpointData);
-
-var playerSettings = new SettingsHelper({url: window.location.href, portlet: 'player'});
-playerSettings.fetch();
-
-jQueryValamis(function () {
-    Backbone.emulateJSON = true;
-    Backbone.ajax = window.LearnAjax.ajax;
-    jQueryValamis("#playerPackageId").val("{{packageId}}");
-    window.API_1484_11 = new SCORM2004_4API();
-    window.API = new SCORM12API();
-
-    // upload translations
-    Utils.loadLanguage('lessonViewer', onPlayerLanguageLoad);
-});
-
-function onPlayerLanguageLoad(properties) {
-    scormPlayerLanguageData = properties;
-    initPlayerView();
-
-    router = new Router();
-
-    if(!Backbone.History.started) Backbone.history.start();
-}
-
-function initPlayerView() {
-    scormPlayer = new PlayerView({el: jQueryValamis("#SCORMPlayerView"), language: scormPlayerLanguageData});
-    jQueryValamis("#SCORMPlayerView").hide();
-    scormPlayer.on('player:suspend', endSession);
-    scormPlayer.on('player:endSession', endSession);
-    window.scormPlayerView = scormPlayer;
-
-    scormPlayerPackagesView = new PlayerPackageListView({
-        el: jQueryValamis("#packagePlayerList"),
-        collection: scormPlayerPackages,
-        language: scormPlayerLanguageData,
-        permissions: permissionActionsLessonViewer
-    });
-    scormPlayerPackages.on('packageCollection:updated', function(obj){
-        scormPlayerPackagesView.paginator.updateItems(obj.total);
-    });
-    scormPlayerPackagesView.on('showSharePackageModal', function(model){
-        var view = new SharePackageModal(model);
-        window.playerLayout.modals.show(view);
-    });
-    scormPlayerPackages.fetch({
-        reset: true,
-        currentPage: 1,
-        itemsOnPage: scormPlayerPackagesView.paginatorModel.get('itemsOnPage'),
-        success: jQueryValamis.proxy(function (arg) {
-            //This code shouldn't work, because this callback previously wasn't called. Ever. But I'm afraid to remove it.
-//                var packageToOpen = parseInt("{{entryID}}");
-//                if (packageToOpen) {
-//                    startPackage(scormPlayerPackages.get(packageToOpen));
-//                }
-            //END of theoretically not working code section.
-
-            if(window.localStorage.getItem('playerSettings') !== null){
-                var pdata = JSON.parse(window.localStorage.getItem('playerSettings'));
-
-                var idList = arg.map(function(x){ return x.id; });
-                var pdataId = parseInt(pdata.id);
-                if(_.contains(idList, pdataId)){
-                    window.location.hash = '/lesson/'+pdata['id']+'/'+ pdata['type'] + '/' + pdata['title'] + '/' + pdata['isSuspended'];
-                } else {
-                    window.localStorage.removeItem('playerSettings');
-                }
-            }
-            else {
-                if (jQueryValamis("#playerPackageId").val()) {
-                    window.location.hash = '/lesson/' + jQueryValamis("#playerPackageId").val() + '/' + jQueryValamis("#playerPackageType").val() + '/' + jQueryValamis("#playerPackageTitle").val() +'/false';
-                }
-            }
-
-    }, this)});
-
-    window.playerLayout = new PlayerLayout();
-    jQueryValamis('#player-modals-layout').append(playerLayout.render().el);
-    window.tincanModal = new TincanModal();
-}
-
-function setLRSFromCredentialsDialog() {
-    var login = jQueryValamis("#tincanLoginCredentialsDialog").val();
-    var password = jQueryValamis("#tincanPasswordCredentialsDialog").val();
-
-    //jQueryValamis('#tincanLrsUserCredentials').dialog('close');
-    window.tincanModal.close();
-    TincanHelper.SetLRSAuth("Basic " + btoa(login + ":" + password))
-}
-
-function packageStart(packageId, packageTitle, packageType, isSuspended) {
-    if (packageId) {
-        TincanHelper.SetActor(JSON.parse(jQueryValamis("#tincanActor").val()));
-        TincanHelper.initialize(function () {
-            saveParameters(packageId, packageTitle, packageType, isSuspended);
-            scormPlayer.setName(packageTitle);
-            if (isSuspended == "true") {
-                scormPlayer.loadAndResume(packageId, packageType, packageTitle);
-            }
-            else {
-                scormPlayer.load(packageId, packageType, packageTitle);
-            }
-            showLessonContent();
-        });
-    }
-}
-
-function saveSessionParameters(id, title, type) {
-    jQueryValamis.ajax({
-        type: 'POST',
-        url: path.root + path.sequencing + "setSession",
-        data: {
-            id: id,
-            type: type,
-            title: title,
-            playerID: jQueryValamis("#playerID").val(),
-            p_auth: Liferay.authToken},
-        headers: {
-            'X-CSRF-Token': Liferay.authToken
+        if (!valamisApp.started) {
+            valamisApp.start();
         }
 
-    });
-}
-
-function clearSessionParameters() {
-    jQueryValamis.ajax({
-        type: 'POST',
-        url: path.root + path.sequencing + "clearSession",
-        data: {'p_auth': Liferay.authToken},
-        headers: {
-            'X-CSRF-Token': Liferay.authToken
+        /**
+         * Mobile IE10 hack
+         */
+        if ('-ms-user-select' in document.documentElement.style && navigator.userAgent.match(/IEMobile\/10\.0/)) {
+            var msViewportStyle = document.createElement('style');
+            msViewportStyle.appendChild(
+                    document.createTextNode('@-ms-viewport{width:auto!important}')
+            );
+            document.getElementsByTagName('head')[0].appendChild(msViewportStyle);
         }
+        /** Mobile IE10 hack */
+
+        var lessonViewerPermissions = {
+            'LessonViewer': {
+                LV_SHARE: eval('{{permissionSharePackage}}'),
+                LV_ORDER: eval('{{permissionOrderPackage}}')
+            }
+        };
+
+        var servletContextPath = '{{servletContextPath}}';
+
+        var lessonViewerOptions = {
+            resourceName: 'lessonViewer',
+            permissions: lessonViewerPermissions,
+            app: lessonViewer,
+            appOptions: {
+                playerId: '{{playerId}}',
+                lessonToStartId: '{{lessonToStartId}}',
+                lessonToStartTitle: '{{lessonToStartTitle}}',
+                lessonToStartType: '{{lessonToStartType}}',
+                tincanActor: '{{{tincanActor}}}',
+                endpointData: '{{{endpointData}}}',
+                servletContextPath: (!!servletContextPath) ? servletContextPath + '/' : ''
+            }
+        };
+
+        valamisApp.execute('subapp:start', lessonViewerOptions);
+
     });
-}
-
-function saveParameters(id, title, type, isSuspended){
-    var pdata = {id: id, type: type, title: title, isSuspended: isSuspended, playerID: jQueryValamis("#playerID").val()};
-    localStorage.setItem('playerSettings', JSON.stringify(pdata));
-}
-
-function clearParameters(){
-    localStorage.removeItem('playerSettings');
-}
-
-function scormGetNext() {
-    scormPlayer.doContinue();
-}
-function scormGetPrev() {
-    scormPlayer.doPrevious();
-}
-function scormJump(target) {
-    scormPlayer.doJump(target);
-}
-
-function endSession() {
-    showLessonList();
-    clearParameters();
-    router.navigate('/');
-    scormPlayerPackagesView.reloadPackageList();
-}
-
-function showLessonList() {
-    jQueryValamis("#SCORMPlayerContainer").show();
-    jQueryValamis("#SCORMPlayerView").hide();
-}
-
-function showLessonContent() {
-    jQueryValamis("#SCORMPlayerContainer").hide();
-    jQueryValamis("#SCORMPlayerView").show();
-    jQueryValamis('#SCORMDataOutput').focus();
-}
-
-var PlayerLayout = Backbone.Marionette.Layout.extend({
-    template: _.template(Mustache.to_html(jQueryValamis('#player-modals-template').html(), scormPlayerLanguageData)),
-    regions: {
-        modals: {
-            selector: '.player-modals-container',
-            regionType: Backbone.Marionette.Modals
-        }
-    }
-});
-
-var TincanModal = Backbone.Modal.extend({
-    template: _.template(Mustache.to_html(jQueryValamis('#tincan-credentials-modal-template').html(), scormPlayerLanguageData)),
-    submitEl: '.bbm-button',
-    cancelEl: '.modal-close',
-    initialize: function (options) {
-    }
-});
-
-var SharePackageModal = Backbone.Modal.extend({
-    template: function() {
-        return Mustache.to_html(jQueryValamis('#player-modal-template').html(), {playerModalLabel: scormPlayerLanguageData['packageCommentLabel'] })
-    },
-    className: 'val-modal',
-    submitEl: '.js-post-share-package',
-    cancelEl: '.modal-close',
-    initialize: function (model) {
-        this.packageModel = model;
-    },
-    onRender: function () {
-        var dialog = new SharePackageModalView({
-            language: scormPlayerLanguageData
-        });
-        this.$('.player-dialog').html(dialog.render().$el);
-    },
-    submit: function() {
-        this.packageModel.sharePackage({}, {comment: this.$('.js-package-comment').val()}).then(function (result) {
-            toastr.success(scormPlayerLanguageData['overlayCompleteMessageLabel']);
-        }, function (err, res) {
-            toastr.error(scormPlayerLanguageData['overlayFailedMessageLabel']);
-        });
-    }
-});
-
-var Router = Backbone.Router.extend({
-    routes: {
-        ''     : 'index',
-        'lesson/:id/:type/:title/:isSuspended' : 'lesson'
-    },
-
-    index: function(){
-
-    },
-
-    lesson: function(id, type, title, isSuspended){
-        packageStart(id, title, type, isSuspended);
-    }
-});
 
 </script>

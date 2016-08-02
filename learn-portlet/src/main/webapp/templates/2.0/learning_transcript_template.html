@@ -1,29 +1,30 @@
 <script type="text/html" id="transcriptButtonsTemplate">
-    <div class="div-table div-info-table" id="transcriptSelectedUser"> </div>
+    <table class="val-table big list no-border no-out-margin">
+        <tbody id="transcriptSelectedUser"></tbody>
+    </table>
 </script>
 
 <script type="text/html" id="transcriptUserDetailsTemplate">
-        <div class="div-row">
-            <div class="div-col single-element-col">
-                {{#pageUrl}}
-                <a href="{{pageUrl}}" target="_blank">
-                    {{/pageUrl}}
-                    <img src="{{picture}}" alt="{{name}}" class="img-circle">
-                    {{#pageUrl}}
-                </a>
-                {{/pageUrl}}
-            </div>
-            <div class="div-col">
-                {{name}}
-            </div>
-            <div class="div-col text-right">
-                {{#isTeacher}}<button class="button medium primary" id="selectUserButton">{{selectUserLabel}}</button>{{/isTeacher}}
-                <button id="printTranscriptButton" class="button medium primary">{{printTranscriptLabel}}
-                    <a id="printLink" href="/delegate/print/?action=PRINT_TRANSCRIPT&companyID={{companyID}}&userID={{userID}}&courseId={{courseId}}" target="_blank"></a>
-                </button>
-            </div>
-        </div>
-    </div>
+    <tr>
+        <td class="narrow-col">
+            {{#pageUrl}}
+            <a href="{{pageUrl}}" target="_blank">
+            {{/pageUrl}}
+                <img src="{{picture}}" alt="{{name}}" class="img-circle">
+            {{#pageUrl}}
+            </a>
+            {{/pageUrl}}
+        </td>
+        <td>
+            {{name}}
+        </td>
+        <td class="text-right">
+            {{#isTeacher}}<button class="button medium primary" id="selectUserButton">{{selectUserLabel}}</button>{{/isTeacher}}
+            <button id="printTranscriptButton" class="button medium primary">{{printTranscriptLabel}}
+                <a id="printLink" href="/delegate/print/?action=PRINT_TRANSCRIPT&companyID={{companyID}}&userID={{userID}}&courseId={{courseId}}" target="_blank"></a>
+            </button>
+        </td>
+    </tr>
 </script>
 
 <script type="text/html" id="transcriptCertificatesTemplate">
@@ -169,8 +170,8 @@
 
 <script type="text/html" id="goalRowTemplate">
     {{#isActivity}}
-    <td class="single-element-col">
-        {{activityCount}}
+    <td class="narrow-col">
+        {{count}}
     </td>
     {{/isActivity}}
 
@@ -180,7 +181,7 @@
         {{#url}}</a>{{/url}}
     </td>
 
-    <td class="text-right status-col">
+    <td class="narrow-col">
         {{dateFinish}}
     </td>
 </script>

@@ -1,0 +1,29 @@
+
+<div id="learningPathsSettingsRegion">
+    <div class="val-row filters-row h5">
+        <div class="filter-element shift-left">{{showCertificatesLabel}}</div>
+        <div class="filter-element shift-left">
+            <input type="radio" value="instance" name="certificateScope" id="instanceScope" class="val-radio"
+                   onclick="saveScopeSettings(this)">
+            <label for="instanceScope" class="radio-label">{{instanceScopeLabel}}</label>
+        </div>
+
+        <div class="filter-element shift-left">
+            <input type="radio" value="current" name="certificateScope" id="currentCourse" class="val-radio"
+                   onclick="saveScopeSettings(this)">
+            <label for="currentCourse" class="radio-label">{{currentCourseLabel}}</label>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQueryValamis(function () {
+        jQueryValamis('input[name="certificateScope"][value="{{certificateScope}}"]').attr('checked', 'checked');
+    });
+
+    function saveScopeSettings(radioButton) {
+        var params = {};
+        params['{{namespace}}' + 'certificateScope'] = radioButton.value;
+        window.LearnAjax.post('{{{actionURL}}}', params);
+    }
+</script>

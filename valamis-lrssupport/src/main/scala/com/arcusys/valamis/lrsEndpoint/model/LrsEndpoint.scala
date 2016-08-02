@@ -12,6 +12,4 @@ object AuthType extends Enumeration {
   val INTERNAL = Value("Internal")
   val BASIC = Value("Basic")
   val OAUTH = Value("OAuth")
-
-  def isValid(s: String) = values.exists(_.toString == s)
 }

@@ -474,19 +474,18 @@ var makeEqualHeight = function($tiles){
     $tiles.height(max);
 };
 
+var unsetHeight = function($tiles) {
+    $tiles.height('auto');
+};
+
 jQuery(window).resize(function(){
     makeEqualHeight(jQuery('.portlet-learn-scorm .tiles .tile'));
-});
-
-jQuery(window).on('viewModeChanged', function(event, elem) {
-    makeEqualHeight(jQuery(elem).find('.tile'));
+    unsetHeight(jQuery('.portlet-learn-scorm .list .tile'));
 });
 
 jQuery(window).on('recompute:tile:sizes', function(event, elem) {
-    makeEqualHeight(jQuery(elem).find('.tile'));
-});
-
-jQuery(window).on('portlet-ready', function(){
-    makeEqualHeight(jQuery('.portlet-learn-scorm .tiles .tile'));
-
+    if (jQuery(elem).hasClass('tiles') || jQuery(elem).find('.tiles').length)
+        makeEqualHeight(jQuery(elem).find('.tile'));
+    else
+        unsetHeight(jQuery(elem).find('.tile'));
 });

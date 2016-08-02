@@ -1,20 +1,20 @@
 package com.arcusys.learn.liferay.services
 
-import com.arcusys.learn.liferay.LiferayClasses.LUser
+import com.arcusys.learn.liferay.LiferayClasses.{LPermissionChecker, LUser}
 import com.liferay.portal.security.auth.PrincipalThreadLocal
-import com.liferay.portal.security.permission.{ PermissionCheckerFactoryUtil, PermissionThreadLocal, PermissionChecker }
+import com.liferay.portal.security.permission.{PermissionCheckerFactoryUtil, PermissionThreadLocal}
 import com.liferay.portal.service.UserLocalServiceUtil
 
 /**
- * Created by asemenov on 22.01.15.
- */
+  * Created by asemenov on 22.01.15.
+  */
 object PermissionHelper {
 
-  def getPermissionChecker(): PermissionChecker = {
+  def getPermissionChecker(): LPermissionChecker = {
     PermissionThreadLocal.getPermissionChecker
   }
 
-  def getPermissionChecker(user: LUser): PermissionChecker = {
+  def getPermissionChecker(user: LUser): LPermissionChecker = {
     PermissionCheckerFactoryUtil.create(user)
   }
 

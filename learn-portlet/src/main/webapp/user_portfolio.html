@@ -1,90 +1,40 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-    <script type="text/javascript">
-        var jQuery1816User = jQuery.noConflict();
-        var scormLanguageDataUser = {};
-        var userAccountModel = new UserAccountModel();
-        var userId = '{{userID}}';
-
-        jQuery1816User(function () {
-            Backbone.emulateJSON = true;
-            Backbone.ajax = window.LearnAjax.ajax;
-            Utils.loadLanguage('curriculum', onUserPortfolioLanguageLoad);
-        });
-
-        function onUserPortfolioLanguageLoad(properties) {
-            scormLanguageDataUser = properties;
-            initUserView();
-        }
-
-        var ViewCertificateLayout = Backbone.Marionette.Layout.extend({
-            template: _.template(jQuery('#certificate-modals-template').html()),
-            regions: {
-                modals: {
-                    selector: '.certificate-modals-container',
-                    regionType: Backbone.Marionette.Modals
-                }
-            }
-        });
-
-        var viewCertificateLayout = new ViewCertificateLayout();
-
-        var ViewCertificateModal = Backbone.Modal.extend({
-            template: function(){
-                return Mustache.to_html(jQuery('#certificate-common-modal-template').html(), {certificateModalTitle: scormLanguageDataUser['goalsLabel']})
-            },
-            viewContainer: '.edit-certificate-container',
-            className: 'val-modal',
-            submitEl: '.bbm-button',
-            cancelEl: '.modal-close',
-            onRender: function () {
-                this.goalsView = new ViewUserDetailsDialog({language: scormLanguageDataUser});
-                this.$('.certificate-modal-content').html(this.goalsView.render().$el);
-            },
-            init: function (data, view, isUserMember) {
-                jQuery('#selectedUserCertificateID').val(data.id);
-                this.goalsView.setCertificateID(data.id, userId, isUserMember);
-            }
-        });
-
-        function initUserView() {
-            jQuery('#user-portfolio-modals-layout').append(viewCertificateLayout.render().el);
-
-            userAccountModel.fetch({
-                data: {userId: userId},
-                success: function () {
-                    var  certificateList = new UserAccountView({
-                        el: jQuery1816User('#user-portfolio-layout'),
-                        model: userAccountModel,
-                        language: scormLanguageDataUser
-                    });
-                    certificateList.on('viewCertificateGoals', function (certificateID) {
-                        var view = new ViewCertificateModal();
-                        viewCertificateLayout.modals.show(view);
-                        view.init(certificateID, 'goals');
-                    }, this);
-
-                }
-            });
-
-        }
-    </script>
-
-</head>
-<body>
-<div class="projectLearnGeneric">
-    <div id="user-portfolio-layout"></div>
-    <div id="user-portfolio-modals-layout"></div>
+<div class="overflow-hidden">
+    <div id="userPortfolioAppRegion"></div>
 
     <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
-    <input type="hidden" id="companyID" value="{{companyID}}">
-    <input type="hidden" id="rootUrl" value="{{root}}"/>
 </div>
 
-</body>
-</html>
+<script type="text/javascript">
+
+    jQueryValamis(function () {
+
+        if (!valamisApp.started) {
+            valamisApp.start();
+        }
+
+        /**
+         * Mobile IE10 hack
+         */
+        if ("-ms-user-select" in document.documentElement.style && navigator.userAgent.match(/IEMobile\/10\.0/)) {
+            var msViewportStyle = document.createElement("style");
+            msViewportStyle.appendChild(
+                    document.createTextNode("@-ms-viewport{width:auto!important}")
+            );
+            document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
+        }
+        /** Mobile IE10 hack */
+
+
+
+        var userPortfolioOptions = {
+            resourceName: 'curriculum',
+            permissions: {},
+            app: userPortfolio,
+            appOptions: {}
+        };
+
+        valamisApp.execute('subapp:start', userPortfolioOptions);
+    });
+
+</script>

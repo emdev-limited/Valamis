@@ -1,27 +1,20 @@
 package com.arcusys.learn.liferay.update.version260
 
-import java.sql.SQLException
-
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses._
+import com.arcusys.learn.liferay.services.{CompanyLocalServiceHelper, UserLocalServiceHelper}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.learn.persistence.liferay.model.LFUser
-import com.arcusys.slick.drivers.SQLServerDriver
-import com.arcusys.valamis.core.SlickDBInfo
 import com.arcusys.valamis.lrs.LrsType
-import com.arcusys.valamis.lrs.tincan.Account
-import com.liferay.portal.model.Company
-import com.liferay.portal.service.{UserLocalServiceUtil, CompanyLocalServiceUtil}
-import com.liferay.portal.util.PortalUtil
-
-import scala.collection.JavaConverters._
 import com.arcusys.learn.liferay.update.version260.lrs.ActorsSchema
 import com.arcusys.learn.liferay.update.version260.lrs.AccountsSchema
-import com.arcusys.valamis.core.{LongKeyTableComponent, SlickProfile}
-import com.arcusys.valamis.lrs.util.TincanHelper
+import slick.jdbc.JdbcBackend
+import slick.jdbc.meta.MTable
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickDBInfo}
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 
-import scala.slick.jdbc.{StaticQuery, JdbcBackend}
-import scala.slick.jdbc.meta.MTable
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class DBUpdater2507(dbInfo: SlickDBInfo) extends LUpgradeProcess
 with ActorsSchema
@@ -40,14 +33,19 @@ with AccountsSchema {
   override def doUpgrade(): Unit = {
     val lrsType = LrsType.Simple
 
+    val tableActorsName = "lrs_actors"
+    val tableAccountsName = "lrs_accounts"
+
+    val hasTables = Await.result(db.run {
+      for {
+        actorsTable <- MTable.getTables(tableActorsName).headOption
+        accountsTable <- MTable.getTables(tableAccountsName).headOption
+      } yield actorsTable.isDefined && accountsTable.isDefined
+    }, Duration.Inf)
+
     db.withTransaction { implicit s =>
-      val tableActorsName = "lrs_actors"
-      val tableAccountsName = "lrs_accounts"
-      val hasTables =  MTable.getTables(tableActorsName).firstOption.isDefined && MTable.getTables(tableAccountsName).firstOption.isDefined
-
-
-      if (hasTables){
-        val companies = CompanyLocalServiceUtil.getCompanies(-1, -1)
+      if (hasTables) {
+        val companies = CompanyLocalServiceHelper.getCompanies
         val actorsWithEmail = actors.filterNot(a => a.mBox === "").list
 
         actorsWithEmail.foreach { a =>
@@ -57,11 +55,11 @@ with AccountsSchema {
     }
   }
 
-  def updateActor(companies: List[Company], email: String)(implicit session: JdbcBackend#SessionDef) = {
+  def updateActor(companies: List[LCompany], email: String)(implicit session: JdbcBackend#SessionDef) = {
     val companyForUser = getCompaniesForUser(companies, email)
 
     val account = companyForUser
-      .find { case (company, user) => company.getCompanyId == PortalUtil.getDefaultCompanyId }
+      .find { case (company, user) => company.getCompanyId == PortalUtilHelper.getDefaultCompanyId }
       .orElse(companyForUser.headOption)
       .map { case (company, user) => (PortalUtilHelper.getHostName(company.getCompanyId), user.getUuid) }
 
@@ -84,11 +82,11 @@ with AccountsSchema {
     }
   }
 
-  def getCompaniesForUser(companies: List[Company], email: String): Seq[(Company, LUser)] = {
+  def getCompaniesForUser(companies: List[LCompany], email: String): Seq[(LCompany, LUser)] = {
     val mailPrefix = "mailto:"
     companies.flatMap { company =>
       val emailValamis = email.replace(mailPrefix, "")
-      Option(UserLocalServiceUtil.fetchUserByEmailAddress(company.getCompanyId, emailValamis))
+      Option(UserLocalServiceHelper().fetchUserByEmailAddress(company.getCompanyId, emailValamis))
         .map(user => (company, user))
     }
   }

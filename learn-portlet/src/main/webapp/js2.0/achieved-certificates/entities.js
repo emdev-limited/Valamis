@@ -8,6 +8,7 @@ achievedCertificates.module('Entities', function(Entities, achievedCertificates,
         'data': function (collection) {
           var params = {
             courseId: Utils.getCourseId(),
+            plid: Utils.getPlid(),
             statuses: 'Success'
           };
           return params;

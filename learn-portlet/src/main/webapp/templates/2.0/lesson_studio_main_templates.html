@@ -59,15 +59,22 @@
 
 <script type="text/html" id="lessonStudioItemView">
     <div class="tile-content with-action">
-        <div class="image"
+        <div class="image cursor-pointer js-lesson-image"
         {{#logo}}
         style="background-image: url('/delegate/slidesets/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
         {{/logo}} ></div>
 
         <ul>
             <li class="title">{{title}}</li>
+            <li class="categories">{{tagList}}</li>
             <li class="description">{{description}}</li>
-            <li class="categories"> {{slidesCount}} {{elementsLabel}}</li>
+            <li class="categories"> {{slidesCount}} {{pagesLabel}}</li>
+            <li class="status">
+                <span class="val-label">
+                    {{status}}
+                </span>
+                <span>{{versionLabel}} {{formattedVersion}}</span>
+            </li>
         </ul>
         <div class="dropdown actions shift-right">
             <button class="button medium neutral">
@@ -115,15 +122,8 @@
         <div class="div-row">
             <div class="div-col name-col">{{slidesetLogoLabel}}</div>
             <div class="div-col content-col">
-                <img
-                    {{#logo}}
-                    src="/delegate/slidesets/{{id}}/logo?courseId={{courseId}}"
-                    {{/logo}}
-
-                    {{^logo}}
-                    src="/learn-portlet/img/imgo.jpg"
-                    {{/logo}}
-                    class='js-logo shift-left val-img-logo js-upload-image'>
+                <img class="js-logo shift-left val-img-logo js-upload-image"
+                     src="{{#logo}}/delegate/slidesets/{{id}}/logo?courseId={{courseId}} {{/logo}}" />
                 <div class="button-block shift-left">
                     <button class="button medium primary js-upload-image">
                         {{uploadLabel}}
@@ -140,6 +140,12 @@
                 <label>
                     <textarea class="js-lesson-description" placeholder="{{defaultLessonDescriptionLabel}}">{{description}}</textarea>
                 </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col">{{slidesetTagsLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <input type="text" class="js-lesson-tags val-tags demo-default selectized" title="Lesson tags" tabindex="-1" style="display: none;"/>
             </div>
         </div>
         <!--<div class="div-row js-template-row">
@@ -175,59 +181,62 @@
     </div>
 </script>
 
-<script type="text/template" id="packageManagerNewPackageList">
-    <table class="val-table medium list new-packages-list-table">
-        <tbody class="js-new-package-items">
+<script type="text/template" id="lessonStudioSetVisibilityTemplate">
+    <label class="group-label"> {{setVisibilityLabel}} </label>
 
-        </tbody>
-    </table>
-    <div class="bbm-modal__bottombar">
-        <a href="#" class="button big neutral modal-close js-cancel-upload-data">Cancel</a>
-        <button class="button big primary js-save-packages-data js-submit-button">Save</button>
-
-    </div>
-</script>
-
-<script type="text/html" id="packageManagerNewPackagesItemView">
-    <td>
-        <img
-        {{#logo}}
-        src="/delegate/packages/{{id}}/logo?courseId={{courseId}}"
-        {{/logo}}
-
-        {{^logo}}
-        src="/learn-portlet/img/imgo.jpg"
-        {{/logo}}
-
-        class="val-img-logo js-logo js-upload-image" />
-    </td>
-    <td>
-        <div class="div-table val-info-table">
-            <div class="div-row without-bottom-border">
-                <div class="div-col name-col">{{editPackageItemFilenameLabel}}</div>
-                <div class="div-col content-col">{{filename}}</div>
+    <div class="div-table display-options-table">
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="visibilitySettings" value="true" id="setPublic">
             </div>
-            <div class="div-row">
-                <div class="div-col name-col">{{editPackageItemTitleLabel}}</div>
-                <div class="div-col content-col">
-                    <input type='text' class="js-new-package-title text-input box-sizing no-margin" value='{{title}}' placeholder="New lesson"/>
-                </div>
+            <div class="div-col">
+                <label for="setPublic"> {{visibilityPublicLabel}} </label>
             </div>
         </div>
-    </td>
-</script>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{visibilityPublicHintLabel}}
+            </div>
+        </div>
 
-<script type="text/template" id="valamisAppLayoutTemplate">
-    <div id="valamisAppModalRegion" class="portlet-body"></div>
-</script>
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="visibilitySettings" value="false" id="setHidden">
+            </div>
+            <div class="div-col">
+                <label for="setHidden"> {{visibilityHiddenLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{visibilityHiddenHintLabel}}
+            </div>
+        </div>
 
-<script type="text/template" id="valamisAppModalTemplate">
-    <div class="bbm-modal__topbar" style="margin-bottom: 0px;">
-        <h3 class="bbm-modal__title">{{header}}</h3>
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="visibilitySettings" value="some" id="setCustom">
+            </div>
+            <div class="div-col">
+                <label for="setCustom"> {{visibilityCustomLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{#isFirstVersion}}
+                    {{firstVersionVisibilityCustomHintLabel}}
+                {{/isFirstVersion}}
 
-        <div class="modal-close val-icon-exit"></div>
+                {{^isFirstVersion}}
+                    {{notFirstVersionVisibilityCustomHintLabel}}
+                {{/isFirstVersion}}
+
+            </div>
+        </div>
     </div>
-    <div class="bbm-modal__section modal-content">
 
-    </div>
+    <button class="button big primary js-publish-lesson"> {{publishLessonLabel}} </button>
 </script>

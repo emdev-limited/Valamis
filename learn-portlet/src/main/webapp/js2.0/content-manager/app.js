@@ -52,7 +52,7 @@ var ContentManager = Marionette.Application.extend({
             workArea = workArea.add('#valamisAppModalRegion');
         }
 
-        if( !isButton && jQueryValamis(target).closest(workArea,context).size() === 0 ){
+        if( !!contentRegion && !isButton  &&  jQueryValamis(target).closest(workArea,context).size() === 0 ){
             contentRegion.$el.find('.js-content-list li').removeClass('active-item');
             contentRegion.activeItemId = '';
             if( contentRegion.preview.currentView ){
@@ -125,9 +125,13 @@ contentManager.commands.setHandler('category:edit', function(category){
         },
         submit: function(){
             category.save();
+        },
+        onDestroy: function() {
+            valamisApp.execute('portlet:unset:onbeforeunload');
         }
     });
     valamisApp.execute('modal:show', modalView);
+    valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
 });
 
 contentManager.commands.setHandler('category:delete', function(category){
@@ -155,10 +159,14 @@ contentManager.commands.setHandler('category:add', function(category, parent) {
                 parent.nodes.add(newCategory);
                 newCategory.fetchChildren();
             });
+        },
+        onDestroy: function () {
+            valamisApp.execute('portlet:unset:onbeforeunload');
         }
     });
 
     valamisApp.execute('modal:show', modalView);
+    valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
 });
 
 contentManager.commands.setHandler('content:items:update', function() {
@@ -196,10 +204,14 @@ contentManager.commands.setHandler('question:edit', function(question){
         submit: function(){
             editQuestionView.updateModel();
             question.save();
+        },
+        onDestroy: function() {
+            valamisApp.execute('portlet:unset:onbeforeunload');
         }
     });
 
     valamisApp.execute('modal:show', modalView);
+    valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
 });
 
 contentManager.commands.setHandler('question:delete', function(question){
@@ -228,10 +240,14 @@ contentManager.commands.setHandler('question:add', function(question, parent){
                 question.set('defaultIndex', parent.nodes.length);
                 parent.nodes.add(question);
             });
+        },
+        onDestroy: function() {
+            valamisApp.execute('portlet:unset:onbeforeunload');
         }
     });
 
     valamisApp.execute('modal:show', modalView);
+    valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
 });
 
 
@@ -274,10 +290,14 @@ contentManager.commands.setHandler('content:add', function(content, parent){
                 content.set('defaultIndex', parent.nodes.length);
                 parent.nodes.add(content);
             });
+        },
+        onDestroy: function() {
+            valamisApp.execute('portlet:unset:onbeforeunload');
         }
     });
 
     valamisApp.execute('modal:show', modalView);
+    valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
 });
 
 contentManager.commands.setHandler('content:edit', function(content){
@@ -294,10 +314,14 @@ contentManager.commands.setHandler('content:edit', function(content){
         submit: function(){
             editQuestionView.updateModel();
             content.save();
+        },
+        onDestroy: function() {
+            valamisApp.execute('portlet:unset:onbeforeunload');
         }
     });
 
     valamisApp.execute('modal:show', modalView);
+    valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
 });
 
 contentManager.commands.setHandler('content:delete', function(content){
@@ -339,7 +363,7 @@ contentManager.commands.setHandler('content:items:move:to:course', function(cont
         return;
     }
 
-    var siteSelectView = new valamisApp.Views.LiferaySiteSelectLayout({singleSelect: true});
+    var siteSelectView = new valamisApp.Views.SelectSite.LiferaySiteSelectLayout({ singleSelect: true });
 
     var modalView = new valamisApp.Views.ModalView({
         header: Valamis.language['moveToCourseLabel'],

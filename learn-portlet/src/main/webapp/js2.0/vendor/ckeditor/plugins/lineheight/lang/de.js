@@ -1,3 +1,3 @@
-CKEDITOR.plugins.setLang('lineheight','de', {
+﻿CKEDITOR.plugins.setLang('lineheight','de', {
     title: 'Zeilenhöhe'
 } );

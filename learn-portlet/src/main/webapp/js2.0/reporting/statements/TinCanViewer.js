@@ -708,6 +708,7 @@ TINCAN.Viewer.prototype.renderStatements = function (statements) {
 
             stmtStr.push(" <span class='verb'>" + escapeHTML(verb) + "</span> ");
             stmtStr.push(" <span class='object'>'" + escapeHTML(stmt.target) + "'</span> ");
+            if (stmt.context.revision) stmtStr.push(" <span class='object'>" + "("+stmt.context.revision+")"+ "</span> ");
             stmtStr.push(answer !== null ? answer : "");
             stmtStr.push("<span class='extensions'>");
             for(var ext in stmt.context.extensions) {

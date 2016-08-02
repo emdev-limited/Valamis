@@ -7,8 +7,7 @@ CKEDITOR.editorConfig = function( config ) {
 	
 	// %REMOVE_START%
 	// The configuration options below are needed when running CKEditor from source files.
-	config.plugins = 'dialogui,dialog,about,basicstyles,clipboard,button,panelbutton,panel,floatpanel,colorbutton,colordialog,enterkey,entities,floatingspace,listblock,richcombo,format,image,imagepaste,imageresize,indent,indentlist,fakeobjects,link,list,sourcedialog,table,toolbar,undo,wysiwygarea,font,justify,insertpre,lineutils,widget,codesnippet';
-	config.extraPlugins = 'sourcearea';
+	config.plugins = 'dialogui,dialog,about,basicstyles,clipboard,button,toolbar,enterkey,entities,floatingspace,wysiwygarea,indent,indentlist,fakeobjects,link,list,undo,lineutils,widget,codesnippet,panelbutton,panel,floatpanel,colorbutton,colordialog,listblock,richcombo,font,lineheight,format,image,imagepaste,imageresize,insertpre,justify,sourcedialog,table,sourcearea,menu,contextmenu,tabletools';
 	config.skin = 'bootstrapck';
 	// %REMOVE_END%
 

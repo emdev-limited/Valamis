@@ -1,13 +1,14 @@
 package com.arcusys.learn.liferay.update.version260
 
 import java.sql.Connection
-import com.arcusys.learn.liferay.update.version260.migrations.PackageScopeRuleMigration
-import com.arcusys.valamis.lesson.PackageScopeRuleTableComponent
-import com.arcusys.valamis.lesson.model.PackageScopeRule
-import com.arcusys.valamis.model.ScopeType
+
+import com.arcusys.learn.liferay.update.version260.migrations._
+import com.arcusys.valamis.persistence.common.SlickProfile
+
 import scala.slick.driver.H2Driver
 import scala.slick.driver.H2Driver.simple._
 import org.scalatest.{BeforeAndAfter, FunSuite}
+
 import scala.slick.jdbc.StaticQuery
 import scala.util.Try
 
@@ -17,14 +18,14 @@ class PackageScopeRuleMigrationTest extends FunSuite with BeforeAndAfter {
   var connection: Connection = _
 
   before {
-    connection = db.createConnection()
+    connection = db.source.createConnection()
   }
   after {
     connection.close()
   }
 
-  val table = new PackageScopeRuleTableComponent {
-    override protected val driver = H2Driver
+  val table = new PackageScopeRuleTableComponent with SlickProfile {
+    override val driver = H2Driver
   }
 
   private val scopeInstance = "instance"

@@ -4,12 +4,12 @@ recentLessons.module('Entities', function(Entities, recentLessons, Backbone, Mar
     url: path.root,
     sync: {
       'read': {
-        'path': path.api.gradebooks,
+        'path': path.api.lessonResults + 'recent-lessons/',
         'data': function (collection, options) {
           var params = {
-            action: 'LAST_OPEN',
             courseId: Utils.getCourseId(),
-            packagesCount: 3
+            plid: Utils.getPlid(),
+            count: 3
           };
           return params;
         },
@@ -21,9 +21,9 @@ recentLessons.module('Entities', function(Entities, recentLessons, Backbone, Mar
   Entities.RecentCollection = Backbone.Collection.extend({
     model: Backbone.Model.extend({}),
     parse: function(response) {
-      return _.map(response, function(pkg) {
-        pkg['packageUrl'] = Utils.getPackageUrl(pkg.packageId);
-        return pkg;
+      return _.map(response, function(e) {
+        e.lessonUrl = Utils.getPackageUrl(e.lessonId);
+        return e;
       });
     }
   }).extend(RecentCollectionService);

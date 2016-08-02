@@ -6,8 +6,6 @@ var iframeElementModule = slidesApp.module('IframeElementModule', {
             template: '#iframeElementTemplate',
             className: 'rj-element rj-iframe no-select',
             events: _.extend({}, this.BaseView.prototype.events, {
-                'click .js-item-open-settings': 'openItemSettings',
-                'click .js-item-close-settings': 'closeItemSettings',
                 'click .js-update-iframe-url': function() { this.updateUrl(this.$('.iframe-url').val()); }
             }),
             onRender: function() {
@@ -16,26 +14,28 @@ var iframeElementModule = slidesApp.module('IframeElementModule', {
                 this.constructor.__super__.onRender.apply(this, arguments);
             },
             updateUrl: function(url) {
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'itemContentChanged';
-                slidesApp.oldValue = {contentType: 'url', content: this.model.get('content')};
+                var that = this;
+
+                this.$('.warning').hide();
+
                 this.model.set('content', url || this.$('.iframe-url').val());
-                slidesApp.newValue = {contentType: 'url', content: this.model.get('content')};
-                slidesApp.execute('action:push');
                 this.$('iframe').attr('src', url || this.$('.iframe-url').val());
                 this.closeItemSettings();
                 this.$('.content-icon-iframe').first().hide();
                 this.$('.iframe-item').show();
-            },
-            openItemSettings: function() {
-                this.$('.item-settings').show();
-                this.$('.iframe-url').focus();
-                slidesApp.isEditing = true;
-            },
-            closeItemSettings: function() {
-                this.$('.item-settings').hide();
-                slidesApp.isEditing = false;
-                this.selectEl();
+
+                jQueryValamis.ajax(path.root + path.api.urlCheck, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': Liferay.authToken },
+                    data: {
+                        url: this.model.get('content'),
+                        courseId: Liferay.ThemeDisplay.getScopeGroupId()
+                    },
+                    complete: function (data) {
+                        if(data.responseText === 'false')
+                            that.$('.warning').show()
+                    }
+                });
             }
         });
 

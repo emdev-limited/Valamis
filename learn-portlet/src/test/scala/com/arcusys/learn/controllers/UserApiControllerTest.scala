@@ -10,7 +10,7 @@
 //import org.scalatest.{ BeforeAndAfterEach, FlatSpec }
 //import com.arcusys.learn.facades.{ UserFacadeContract, CertificateFacadeContract }
 //import com.arcusys.learn.mocks.Mocks
-//import com.arcusys.valamis.util.JsonSupport
+//import com.arcusys.valamis.utils.JsonSupport
 //import com.arcusys.learn.controllers.api.{ UserApiController }
 //
 ///**

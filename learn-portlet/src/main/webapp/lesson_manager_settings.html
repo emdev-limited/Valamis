@@ -63,7 +63,7 @@
                 var that = this;
                 var uploader = new FileUploader({
                     endpoint: path.root + path.api.files + '?action=ADD&contentType=import-package&courseId=' + Utils.getCourseId(),
-                    message: '{{importMessage}}'
+                    message: '{{importMessageLabel}}'
                 });
 
                 uploader.on('fileuploaddone', function (data) {
@@ -89,7 +89,7 @@
 <body >
 
 <div style="height: 100px; padding: 10px;">
-    <button class="button big primary bbm-button val-icon-download" onclick="exportPackages()">
+    <button class="button big primary bbm-button val-icon-download-import-down" onclick="exportPackages()">
         {{exportAllLabel}}
     </button>
     <button class="button big primary bbm-button val-icon-upload" onclick="importPackages()">

@@ -9,7 +9,7 @@ import com.arcusys.valamis.lrsEndpoint.storage.LrsTokenStorage
 import com.arcusys.valamis.oauth.HttpClientPoolImpl
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-import net.oauth.{OAuthAccessor, OAuth, OAuthProblemException, OAuthException}
+import net.oauth.{OAuth, OAuthAccessor, OAuthException, OAuthProblemException}
 import net.oauth.client.OAuthClient
 import net.oauth.client.httpclient4.HttpClient4
 import net.oauth.http.HttpMessage

@@ -1,0 +1,1123 @@
+@charset "UTF-8";
+/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+/**
+ * 1. Set default font family to sans-serif.
+ * 2. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+html {
+  font-family: sans-serif;
+  /* 1 */
+  -ms-text-size-adjust: 100%;
+  /* 2 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+}
+
+/**
+ * Remove default margin.
+ */
+body {
+  margin: 0;
+}
+
+/* HTML5 display definitions
+   ========================================================================== */
+/**
+ * Correct `block` display not defined for any HTML5 element in IE 8/9.
+ * Correct `block` display not defined for `details` or `summary` in IE 10/11
+ * and Firefox.
+ * Correct `block` display not defined for `main` in IE 11.
+ */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+/**
+ * 1. Correct `inline-block` display not defined in IE 8/9.
+ * 2. Normalize vertical alignment of `progress` in Chrome, Firefox, and Opera.
+ */
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  /* 1 */
+  vertical-align: baseline;
+  /* 2 */
+}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+/**
+ * Address `[hidden]` styling not present in IE 8/9/10.
+ * Hide the `template` element in IE 8/9/11, Safari, and Firefox < 22.
+ */
+[hidden],
+template {
+  display: none;
+}
+
+/* Links
+   ========================================================================== */
+/**
+ * Remove the gray background color from active links in IE 10.
+ */
+a {
+  background-color: transparent;
+}
+
+/**
+ * Improve readability when focused and also mouse hovered in all browsers.
+ */
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * Address styling not present in IE 8/9/10/11, Safari, and Chrome.
+ */
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+/**
+ * Address style set to `bolder` in Firefox 4+, Safari, and Chrome.
+ */
+b,
+strong {
+  font-weight: bold;
+}
+
+/**
+ * Address styling not present in Safari and Chrome.
+ */
+dfn {
+  font-style: italic;
+}
+
+/**
+ * Address variable `h1` font-size and margin within `section` and `article`
+ * contexts in Firefox 4+, Safari, and Chrome.
+ */
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+/**
+ * Address styling not present in IE 8/9.
+ */
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+/**
+ * Address inconsistent and variable font size in all browsers.
+ */
+small {
+  font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` affecting `line-height` in all browsers.
+ */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Embedded content
+   ========================================================================== */
+/**
+ * Remove border when inside `a` element in IE 8/9/10.
+ */
+img {
+  border: 0;
+}
+
+/**
+ * Correct overflow not hidden in IE 9/10/11.
+ */
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/* Grouping content
+   ========================================================================== */
+/**
+ * Address margin not present in IE 8/9 and Safari.
+ */
+figure {
+  margin: 1em 40px;
+}
+
+/**
+ * Address differences between Firefox and other browsers.
+ */
+hr {
+  box-sizing: content-box;
+  height: 0;
+}
+
+/**
+ * Contain overflow in all browsers.
+ */
+pre {
+  overflow: auto;
+}
+
+/**
+ * Address odd `em`-unit font size rendering in all browsers.
+ */
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+/* Forms
+   ========================================================================== */
+/**
+ * Known limitation: by default, Chrome and Safari on OS X allow very limited
+ * styling of `select`, unless a `border` property is set.
+ */
+/**
+ * 1. Correct color not being inherited.
+ *    Known issue: affects color of disabled elements.
+ * 2. Correct font properties not being inherited.
+ * 3. Address margins set differently in Firefox 4+, Safari, and Chrome.
+ */
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+  margin: 0;
+  /* 3 */
+}
+
+/**
+ * Address `overflow` set to `hidden` in IE 8/9/10/11.
+ */
+button {
+  overflow: visible;
+}
+
+/**
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Firefox, IE 8/9/10/11, and Opera.
+ * Correct `select` style inheritance in Firefox.
+ */
+button,
+select {
+  text-transform: none;
+}
+
+/**
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
+ *    and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type
+ *    `input` and others.
+ */
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  /* 2 */
+  cursor: pointer;
+  /* 3 */
+}
+
+/**
+ * Re-set default cursor for disabled elements.
+ */
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+/**
+ * Remove inner padding and border in Firefox 4+.
+ */
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/**
+ * Address Firefox 4+ setting `line-height` on `input` using `!important` in
+ * the UA stylesheet.
+ */
+input {
+  line-height: normal;
+}
+
+/**
+ * It's recommended that you don't attempt to style these elements.
+ * Firefox's implementation doesn't respect box-sizing, padding, or width.
+ *
+ * 1. Address box sizing set to `content-box` in IE 8/9/10.
+ * 2. Remove excess padding in IE 8/9/10.
+ */
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+ * Fix the cursor style for Chrome's increment/decrement buttons. For certain
+ * `font-size` values of the `input`, it causes the cursor style of the
+ * decrement button to change from `default` to `text`.
+ */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/**
+ * 1. Address `appearance` set to `searchfield` in Safari and Chrome.
+ * 2. Address `box-sizing` set to `border-box` in Safari and Chrome
+ *    (include `-moz` to future-proof).
+ */
+input[type="search"] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  /* 2 */
+  box-sizing: content-box;
+}
+
+/**
+ * Remove inner padding and search cancel button in Safari and Chrome on OS X.
+ * Safari (but not Chrome) clips the cancel button when the search input has
+ * padding (and `textfield` appearance).
+ */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/**
+ * Define consistent border, margin, and padding.
+ */
+/**
+ * 1. Correct `color` not being inherited in IE 8/9/10/11.
+ * 2. Remove padding so people aren't caught out if they zero out fieldsets.
+ */
+legend {
+  border: 0;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+ * Remove default vertical scrollbar in IE 8/9/10/11.
+ */
+textarea {
+  overflow: auto;
+}
+
+/**
+ * Don't inherit the `font-weight` (applied by a rule above).
+ * NOTE: the default cannot safely be changed in Chrome and Safari on OS X.
+ */
+optgroup {
+  font-weight: bold;
+}
+
+/* Tables
+   ========================================================================== */
+/**
+ * Remove most spacing between table cells.
+ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+/**
+ *
+ * @author Lassi Vehviläinen, Yury Gatilin, Lubov Potakhina
+ *
+ * @name Valamis Sass Theme
+ *
+ *
+ */
+.portlet-learn-scorm .reveal-wrapper {
+  /* Bitters 0.10.0
+ * http://bitters.bourbon.io
+ * Copyright 2013–2014 thoughtbot, inc.
+ * MIT License */
+  /* Neat 1.7.0
+ * http://neat.bourbon.io
+ * Copyright 2012-2014 thoughtbot, inc.
+ * MIT License */
+  /**
+ * Valamis Slides Editor theme for reveal.js.
+ * Author: Lassi Vehviläinen
+ */
+  /**
+ * Slides Editor colors by Lassi Vehviläinen
+ */
+  /*********************************************
+ * GLOBAL STYLES
+ *********************************************/
+  /******************* LINKS *******************/
+  /******************* TEXT FORMATS *******************/
+  /******************* IMAGES *******************/
+  /******************* NAVIGATION CONTROLS *******************/
+  /******************* LESSON SUMMARY *******************/
+  background: #F8F8F8;
+  background-color: #F8F8F8;
+}
+
+@font-face {
+  .portlet-learn-scorm .reveal-wrapper {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-size: 18.0px;
+    font-style: normal;
+  }
+}
+
+.portlet-learn-scorm .reveal-wrapper .reveal {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 18.0px;
+  font-weight: normal;
+  letter-spacing: -0.02em;
+  color: #1C1C1C;
+  line-height: 1.5;
+}
+
+.portlet-learn-scorm .reveal-wrapper .reveal table td {
+  border-bottom: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper h1, .portlet-learn-scorm .reveal-wrapper h2, .portlet-learn-scorm .reveal-wrapper h3, .portlet-learn-scorm .reveal-wrapper h4, .portlet-learn-scorm .reveal-wrapper h5, .portlet-learn-scorm .reveal-wrapper h6 {
+  margin: 0 0 20px 0;
+  color: #1C1C1C;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1em;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+  font-weight: normal;
+  -webkit-hyphens: manual;
+      -ms-hyphens: manual;
+          hyphens: manual;
+  word-wrap: normal;
+}
+
+.portlet-learn-scorm .reveal-wrapper a:not(.image) {
+  color: #268bd2;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.portlet-learn-scorm .reveal-wrapper a:not(.image):hover {
+  color: #78b9e6;
+  text-shadow: none;
+  border: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper .roll span:after {
+  color: #FFF;
+  background: #1a6091;
+}
+
+.portlet-learn-scorm .reveal-wrapper address {
+  font-style: italic;
+}
+
+.portlet-learn-scorm .reveal-wrapper pre {
+  padding: 12px;
+  font-size: 1em;
+  background-color: #EAEAEA;
+}
+
+.portlet-learn-scorm .reveal-wrapper section img {
+  margin: 15px 0px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 4px solid #657b83;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s linear;
+}
+
+.portlet-learn-scorm .reveal-wrapper a:hover img {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #268bd2;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.55);
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button {
+  outline: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-left {
+  border-right-color: #268bd2;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-left:hover {
+  border-right-color: #78b9e6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-right {
+  border-left-color: #268bd2;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-right:hover {
+  border-left-color: #78b9e6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-up {
+  border-bottom-color: #268bd2;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-up:hover {
+  border-bottom-color: #78b9e6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-down {
+  border-top-color: #268bd2;
+}
+
+.portlet-learn-scorm .reveal-wrapper .controls button.navigate-down:hover {
+  border-top-color: #78b9e6;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary {
+  display: table;
+  margin: 0 auto;
+  font-size: 18px;
+  text-align: left;
+  height: 100%;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary [class^="val-icon-"]:before,
+.portlet-learn-scorm .reveal-wrapper #lesson-summary [class*="val-icon-"]:before {
+  font-size: 26px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-summary-results {
+  text-align: left;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-progress, .portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-result {
+  font-size: 24px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-progress {
+  margin-right: 40px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .prompt-small {
+  font-size: 15px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .prompt-small * {
+  text-align: left !important;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .prompt-bold {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-questions {
+  margin-top: 10px;
+  height: 100%;
+  padding-bottom: 10px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-questions tr {
+  margin-bottom: 5px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .lesson-questions tr td {
+  padding-bottom: 5px;
+  border-bottom: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .progress-col div.checkmark {
+  background-color: #DEDEDE;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  display: inline-block;
+  color: white;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .progress-col div.checkmark span {
+  vertical-align: baseline !important;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .progress-col.success .checkmark {
+  background-color: #598000;
+}
+
+.portlet-learn-scorm .reveal-wrapper #lesson-summary .progress-col.failed .checkmark {
+  background-color: #CC4233;
+}
+
+.portlet-learn-scorm .reveal-wrapper .check-answer-button {
+  background-color: #a9cb4f;
+  border: 1px solid #98b647;
+  text-transform: uppercase;
+}
+
+.portlet-learn-scorm .reveal-wrapper .check-answer-button:hover {
+  box-shadow: inset 0px -20px 20px 0px rgba(0, 0, 0, 0.03), inset 0px -50px 50px 0px rgba(0, 0, 0, 0.03);
+  text-decoration: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMainArea {
+  color: black;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .SCORMPlayerContentDisplay.plaintext-element {
+  color: inherit;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers {
+  font-size: 20px;
+  display: table;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingAnswerBox {
+  background-color: #DEDEDE;
+  border: 2px dashed #AAA;
+  padding: 4px;
+  border-radius: 3px;
+  margin: 5px;
+  text-align: center;
+  display: inline-block;
+  width: 80%;
+  list-style-type: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingAnswerBox .answerContainer {
+  height: auto;
+  list-style-type: none;
+  margin: 0;
+  min-height: 70px;
+  padding: 5px;
+  width: 100%;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingAnswerBox .answerContainer li {
+  background-color: #FFF;
+  border: 2px solid #FFF;
+  padding: 10px;
+  border-radius: 3px;
+  margin: 10px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingQuestionBlock {
+  width: 40%;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingQuestionBlock .matchingAnswerBox {
+  width: 100%;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingQuestionBlock li {
+  background: #FFF;
+  border: 2px dashed #FFF;
+  padding: 10px;
+  border-radius: 3px;
+  margin: 10px;
+  color: #1C1C1C;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerMatchingAnswers .matchingAnswerBlock {
+  width: 50%;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .choiceAnswer .choiceTextContainer {
+  background-color: white;
+  min-height: 50px;
+  border-radius: 3px;
+  width: 100%;
+  margin-bottom: 5px;
+  float: left;
+  text-align: left;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .choiceAnswer .choiceTextContainer > span {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 5px 0;
+  height: 50px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .choiceAnswer .choiceTextContainer > span p {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 18px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerShortAnswerField {
+  background: #FFF;
+  border: 2px solid #DEDEDE;
+  padding: 4px;
+  border-radius: 3px;
+  height: 60px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerLongAnswerField {
+  background: #FFF;
+  border: 2px solid #DEDEDE;
+  padding: 4px;
+  border-radius: 3px;
+  font-size: 20px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers {
+  font-size: 20px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers ul {
+  list-style-type: none;
+  padding: 5px;
+  display: block;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers ul li {
+  border: 2px solid #F8F8F8;
+  color: #1c1c1c;
+  margin: 8px auto;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  line-height: 1.2em;
+  border-radius: 3px;
+  background: #FFF;
+  min-height: 60px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers ul li div {
+  display: block;
+  padding: 2px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers ul li div[class*="val-icon-"] {
+  float: left;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers ul li div[class*="val-icon-"] + div {
+  margin-left: 30px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerPlacingAnswers ul li.ui-state-highlight {
+  height: 60px;
+  line-height: 1.2em;
+  background-color: #DEDEDE;
+  border: 2px dashed #AAA;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers tr td {
+  text-align: center;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox {
+  box-sizing: border-box;
+  position: relative;
+  min-height: 140px;
+  min-width: 204px;
+  line-height: 1.2em;
+  background-color: #DEDEDE;
+  border: 2px dashed #AAA;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox.hoverBox {
+  border-color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox.noHoverBox {
+  border-color: #AAA;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox .answerContainer {
+  min-height: 100px;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  list-style-type: none;
+  margin: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox .answerContainer span {
+  font-weight: normal;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox th {
+  font-size: 14px;
+  font-weight: normal;
+  background: #666;
+  padding: 1px 2px 3px 2px;
+  color: #FFF;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerBox td {
+  background-color: #FFF;
+  min-height: 100px;
+  font-size: 14px;
+  padding: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers .categorizationAnswerElements {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.categorizationAnswerElements,
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.answerContainer {
+  box-sizing: border-box;
+  list-style-type: none;
+  height: 45px;
+  width: 100%;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.categorizationAnswerElements li,
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.answerContainer li {
+  padding: 5px;
+  min-width: 180px;
+  margin-bottom: 5px;
+  line-height: 1.2em;
+  color: #2c2c2c;
+  z-index: 1000;
+  background: white;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.categorizationAnswerElements li .val-icon-sort,
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.answerContainer li .val-icon-sort {
+  color: #AAA;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.categorizationAnswerElements li > span,
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.answerContainer li > span {
+  display: table-cell;
+  vertical-align: middle;
+  height: 30px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.categorizationAnswerElements li > span > p,
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.answerContainer li > span > p {
+  margin: 0;
+  float: left;
+  padding-left: 10px;
+  font-size: 15px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element .playerCategorizeAnswers ul.categorizationAnswerElements {
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 100%;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element {
+  cursor: default;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element ul.categorizationAnswerElements li {
+  cursor: move;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element ul.categorizationAnswerElements li:hover {
+  box-shadow: inset 0 0 0 2px #2974A6;
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .choiceAnswer input[type=checkbox].checkbox + label,
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .choiceAnswer input[type=radio].radio + label {
+  cursor: pointer;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .choiceAnswer input[type=checkbox].checkbox:checked + label,
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .choiceAnswer input[type=radio].radio:checked + label {
+  box-shadow: inset 0 0 0 2px #2974A6;
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .matchingAnswerBox:hover {
+  border-color: #2974A6;
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .matchingAnswerBox .answerContainer li:hover {
+  cursor: move;
+  border-color: #2974A6;
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .matchingQuestionBlock li:hover {
+  cursor: move;
+  border-color: #2974A6;
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .playerPlacingAnswers ul li:hover {
+  cursor: move;
+  border-color: #2974A6;
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .playerShortAnswerField:focus,
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .playerLongAnswerField:focus {
+  border-color: #2974A6;
+  color: #2c2c2c;
+  background-color: white;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers {
+  display: none;
+  font-size: 18px;
+  text-align: left;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .feedback-block-label {
+  font-weight: bold;
+  margin: 40px 0 20px 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .feedback-correctness-label {
+  font-size: 30px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .categorizationAnswerBoxs th, .portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .categorizationAnswerBoxs td {
+  border: none;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .answers-table {
+  margin: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .answers-table tr td:first-child {
+  padding-left: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .answers .answers-table tr td:last-child {
+  padding-right: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .question-element.lesson-element .invisible-font {
+  position: absolute;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar {
+  line-height: inherit;
+  position: relative;
+  display: inline-block;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress {
+  background-color: #DEDEDE;
+  height: 6px;
+  width: 100px;
+  border-radius: 2px;
+  position: relative;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress span {
+  display: inline-block;
+  border-radius: 2px 0 0 2px;
+  height: 6px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress span.full-progress-bar {
+  border-radius: 2px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress span[style^="width: 100%;"], .portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress span[style^="width:100%;"] {
+  border-radius: 2px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress.failed span {
+  background-color: #CC4233;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress.inprogress span {
+  background-color: #f7ac1d;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-progress.success span {
+  background-color: #598000;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar.wide {
+  display: block;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar.wide .val-progress {
+  width: 100%;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-bar .val-percentage {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-legend-block {
+  height: 15px;
+  width: 15px;
+  border-radius: 2px;
+  background: #D1D1D1;
+  display: inline-block;
+  vertical-align: text-top;
+  margin-left: 20px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-legend-block:first-child {
+  margin-left: 0;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-legend-block.success {
+  background: #598000;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-legend-block.inprogress {
+  background: #f7ac1d;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-legend-block.failed {
+  background: #CC4233;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-chart {
+  width: 100%;
+  height: 40px;
+  position: relative;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-chart div {
+  height: 4px;
+  margin-bottom: 6px;
+  border-radius: 1px;
+  background: #D1D1D1;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-chart div:first-child {
+  margin-top: 3px;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-chart div.progress-success {
+  background: #598000;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-chart div.progress-inprogress {
+  background: #f7ac1d;
+}
+
+.portlet-learn-scorm .reveal-wrapper .val-progress-chart div.progress-failed {
+  background: #CC4233;
+}
+
+.portlet-learn-scorm #show-package-duration {
+  height: 30px;
+  width: 30px;
+  background-color: #1C1C1C;
+  border-radius: 3px;
+  opacity: 0.5;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+      flex-direction: row;
+  -ms-flex-pack: center;
+      justify-content: center;
+  position: absolute;
+  top: auto;
+  bottom: 30px;
+  left: 30px;
+}
+
+.portlet-learn-scorm #show-package-duration.active {
+  width: 83px;
+}
+
+.portlet-learn-scorm #show-package-duration .val-icon-clock {
+  color: #AAA;
+  padding-top: 5px;
+}
+
+.portlet-learn-scorm #show-package-duration .val-icon-clock.active {
+  color: #FFF;
+}
+
+.portlet-learn-scorm #show-package-duration #packageDuration {
+  font-size: 11px;
+  font-weight: bold;
+  color: #FFF;
+  padding: 10px 0px 0px 5px;
+}
+
+@media (max-width: 376px) {
+  .portlet-learn-scorm #show-package-duration {
+    bottom: 20px;
+    left: 20px;
+  }
+}

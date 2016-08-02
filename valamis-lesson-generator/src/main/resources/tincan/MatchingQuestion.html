@@ -6,7 +6,7 @@
     <div class="playerMainArea">
 
         <div class="playerMatchingAnswers" id="scormQuestionData{{id}}_{{questionNumber}}">
-               <div class =maschingQuestionBlock>
+               <div class =matchingQuestionBlock>
                 <div class="matchingAnswerBox matchingAnswerBoxs{{id}}_{{questionNumber}}">
                         <div class="matchingQuestionVariant">
                             <!--{{{answerText}}}-->
@@ -14,6 +14,8 @@
 
                         <ul class="answerContainer container{{id}}_{{questionNumber}} ui-droppable" id="containerTemp">
                             {{#answersMatching}}
+
+                            <span class="invisible-font">Matching element</span>
                             <li class="ui-state-default acceptable categorization{{id}}_{{questionNumber}} matchingQuestion val-icon-drag" id="matchingAnswer{{answerId}}">
                                 {{{matchingText}}}
                             </li>
@@ -21,9 +23,10 @@
                         </ul>
                 </div>
                 </div>
-                <div class =maschingAnswerBlock>
+                <div class =matchingAnswerBlock>
                 {{#answers}}
                     <ul class="matchingAnswerBox matchingAnswerBoxs{{id}}_{{questionNumber}}">
+                        <span class="invisible-font">Matching container</span>
                         <li>
                             <div class="matchingQuestionVariant">
                                 {{{answerText}}}
@@ -36,32 +39,29 @@
         </div>
     </div>
     <!--{{#autoShowAnswer}} -->
-    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+    <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
             onclick="TinCanCourseHelpers['matchingShowAnswers_{{id}}_{{questionNumber}}']()">
         Check
     </button>
     <!--{{/autoShowAnswer}} -->
 </div>
 <!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
-    <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
+<div class="answers answers{{id}}_{{questionNumber}}">
+    <div class="feedback-block-label">{{{text}}}</div>
+    <div class="feedback-correctness-label" id="answerCorrectness{{id}}_{{questionNumber}}"></div>
 
-    <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
-        <div style="display: none;" class="verticalSeparator">
-            <p><strong>Your answers:</strong></p>
-
-            <div id="usersAnswers{{id}}_{{questionNumber}}"></div>
-        </div>
-        <div style="display: inline-block;">
-            <p><strong>Correct answers:</strong></p>
-
-            <div id="correctAnswers{{id}}_{{questionNumber}}"></div>
-        </div>
-        <br>
+    <div class="feedback-block-label js-localized-label" data-value="yourAnswersLabel"></div>
+    <div id="usersAnswers{{id}}_{{questionNumber}}" class="clearfix">
+        <table class="answers-table"></table>
     </div>
-    {{#hasExplanation}}
-    <h4>Explanation:</h4>
 
+    <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersLabel"></div>
+    <div id="correctAnswers{{id}}_{{questionNumber}}" class="clearfix hidden js-correct-answers">
+        <table class="answers-table"></table>
+    </div>
+
+    {{#hasExplanation}}
+    <div class="js-localized-label feedback-block-label" data-value="explanationLabel"></div>
     <div id="explanation">{{{explanation}}}</div>
     {{/hasExplanation}}
 </div>
@@ -73,42 +73,48 @@
         /*{{#autoShowAnswer}}*/
         TinCanCourseHelpers['matchingShowAnswers_{{id}}_{{questionNumber}}'] = function () {
             function addMatchedLine(target, line) {
-               var matchedLeft = jQuery("<span>").addClass("matchedLeft").html(line[0]);
-              var matchedMiddle = jQuery("<span>").addClass("matchedMiddle").html(" -> ");
-                var matchedRight = jQuery("<span>").addClass("matchedRight").html(line[1]);
-                target.append(jQuery("<div>").addClass("matchedLine").append(matchedLeft).append(matchedMiddle).append(matchedRight));
+                var matchedLeft = jQuery("<td>").html(line[0]);
+                var matchedMiddle = jQuery("<td>").html("&mdash;");
+                var matchedRight = jQuery("<td>").html(line[1]);
+
+                target.append(jQuery("<tr>").append(matchedLeft).append(matchedMiddle).append(matchedRight));
             }
 
             jQuery('.answers{{id}}_{{questionNumber}}').show();
             jQuery('.content{{id}}_{{questionNumber}}').hide();
 
             var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
-            parent_el.prevAll('.rj-element').hide();
-            parent_el.nextAll('.rj-element').hide();
+            parent_el.siblings('.rj-element').hide();
 
             var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
             var correct = answers.isPassed;
             var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
-            if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
+            if (correctness === "")
+                correctness = (correct) ? LESSON_LABELS['yourAnswerIsCorrectLabel'] : LESSON_LABELS['yourAnswerIsIncorrectLabel'];
             jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
-            if (!correct) {
-                jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
-                var learnerResponse = answers.learnerResponse;
-                var correctPattern = answers.correctResponse;
-
+            var learnerResponse = answers.learnerResponse;
+            if (learnerResponse.length) {
                 var learnerResponseLines = learnerResponse.split("[,]");
                 for (var i = 0; i < learnerResponseLines.length; i++) {
                     var learnerResponseAnswer = learnerResponseLines[i].split("[.]");
-                    addMatchedLine(jQuery("#usersAnswers{{id}}_{{questionNumber}}"), learnerResponseAnswer);
+                    addMatchedLine(jQuery("#usersAnswers{{id}}_{{questionNumber}} table"), learnerResponseAnswer);
                 }
+            }
+            else
+                jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(LESSON_LABELS['noAnswerLabel']);
 
+            if (!correct) {
+                jQuery('.answers{{id}}_{{questionNumber}} .js-correct-answers').removeClass('hidden');
+
+                var correctPattern = answers.correctResponse;
                 var correctPatternLines = correctPattern.split("[,]");
                 for (var i = 0; i < correctPatternLines.length; i++) {
                     var correctPatterAnswer = correctPatternLines[i].split("[.]");
-                    addMatchedLine(jQuery("#correctAnswers{{id}}_{{questionNumber}}"), correctPatterAnswer);
+                    addMatchedLine(jQuery("#correctAnswers{{id}}_{{questionNumber}} table"), correctPatterAnswer);
                 }
             }
+            moveAnswers({{questionNumber}});
             doScale();
         };
         /*{{/autoShowAnswer}}*/
@@ -124,16 +130,17 @@
                     learnerResponse = [],
                     rawLearnerResponse = [];
 
-            jQuery(".matchingAnswerBoxs{{id}}_{{questionNumber}}").each(function (index, element) {
-                var question = jQuery.trim(jQuery(".matchingQuestionVariant  ", jQuery(element)).html().toString());
+            jQuery(".matchingAnswerBlock .matchingAnswerBoxs{{id}}_{{questionNumber}}").each(function (index, element) {
+                var groupHtml = jQuery(".matchingQuestionVariant", jQuery(element)).get(0).innerHTML.trim();
                 var answers = jQuery(".answerContainer > li", jQuery(element));
                 answers.each(function (answerIndex, answerElement) {
                     var answerId = jQuery(answerElement).attr('id').replace('matchingAnswer', '');
                     rawLearnerResponse.push([index, answerId].join("[.]"));
 
-                    var answer = jQuery.trim(jQuery(answerElement).html().toString());
-                    learnerResponse.push([question, answer].join("[.]"));
-                    var answerObject = {text: question, matchingText: answer};
+                    var answerText = jQuery(answerElement).html().toString().trim();
+                    learnerResponse.push([groupHtml, answerText].join("[.]"));
+
+                    var answerObject = {text: groupHtml, matchingText: answerText};
                     userAnswers.push(answerObject);
                 });
             });
@@ -179,7 +186,7 @@
             var boxIndex = item.split("[.]")[0];
             var answerId = item.split("[.]")[1];
 
-            var box = jQuery(".answerContainer", jQuery(".matchingAnswerBoxs{{id}}_{{questionNumber}}")[boxIndex]);
+            var box = jQuery(".answerContainer", jQuery(".matchingAnswerBlock .matchingAnswerBoxs{{id}}_{{questionNumber}}")[boxIndex]);
             var answerElem = jQuery("#matchingAnswer" + answerId + ".categorization{{id}}_{{questionNumber}}");
 
             jQuery(answerElem).appendTo(box);

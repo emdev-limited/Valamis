@@ -6,6 +6,8 @@ var ROOT_ACTIVITY_ID = '';
 var ROOT_ACTIVITY_TITLE = '';
 var ROOT_ACTIVITY_DESCRIPTION = '';
 var SCORE_LIMIT = null;
+var VERSION = '';
+var LESSON_LABELS = {};
 
 var TinCanCourseModules = {},
     TinCanCourseHelpers = {},
@@ -38,16 +40,59 @@ function ProcessTinCan(id) {
     }
 }
 
+function moveAnswers(questionNumber) {
+    var answersContainer = jQuery("#slideEntity_" + questionNumber);
+
+    var leftIndent = Math.max((jQuery('.slides').width() - answersContainer.width()) / 2, 0),
+        topIndent = Math.max((jQuery('.slides').height() - answersContainer.height()) / 2, 0);
+
+    answersContainer.css({top: topIndent, left: leftIndent});
+}
+
 function markSlideAsViewed() {
     var indices = Reveal.getIndices();
     TinCanViewedSlides[indices.h + '_' + indices.v] = 1;
 }
 
 function checkIsLessonSummary() {
-    if (jQuery('#lesson-summary', Reveal.getCurrentSlide()).length)
+    if (jQuery('#lesson-summary', Reveal.getCurrentSlide()).length){
         ComposeLessonSummarySlide();
-    else
+    } else {
         markSlideAsViewed();
+    }
+}
+
+function disableQuestion(revealSlide) {
+    var $slide = jQuery(revealSlide);
+
+    // slidechanged event triggered by windows resize event,
+    // and window resize event triggered in categorizations answers also by some reason
+    if(!$slide) return;
+
+    var question = $slide.find('.question-element')[0];
+    if (!question) return;
+
+    var $question = jQuery(question);
+    if ( !$question.attr('disabled')) {
+        var currentIndices = Reveal.getIndices(revealSlide);
+        var currentIndicesString = currentIndices.h + '_' + currentIndices.v;
+        var isViewed = _.some(_.keys(TinCanViewedSlides), function(item){
+            return item === currentIndicesString;
+        });
+
+       if(isViewed) {
+            var type = $slide.data('state').split('_')[0];
+            var answer = $question.find('.SCORMPlayerContentDisplay .playerMainArea *');
+            if (_.contains(['matching', 'categorization'], type)){
+                answer.draggable({disabled: true});
+            } else if (type == 'positioning') {
+                answer.sortable({disabled: true});
+            } else {
+                answer.attr('disabled', true);
+            }
+           $question.attr('disabled', true);
+        }
+    }
 }
 
 function prepareLessonSummary() {
@@ -136,10 +181,11 @@ function PrepareCategorizationQuestionView(id) {
         opacity:0.4,
         revertDuration: 0,
         start: function() {
-           Reveal.configure({ touch: false });
+            Reveal.configure({ touch: false });
         },
         stop: function() {
-           Reveal.configure({ touch: true });
+            Reveal.configure({ touch: true });
+            jQuery(window).trigger('resize');//Trigger on resize events
         }
     });
     jQuery('.answerContainer.container' + id).droppable({
@@ -187,7 +233,7 @@ function shuffle(myArray) {
 
 function packageBegin() {
     tincan = new TinCan({
-        url: window.location.search,
+        url: window.location.href,
         activity: {
             id: ROOT_ACTIVITY_ID,
             definition: {
@@ -205,37 +251,32 @@ function packageBegin() {
     prepareAttemptedStatement();
 }
 
+function isUserAnonymous(actor){
+    return actor && actor.account && actor.account.name && actor.account.name == 'anonymous';
+}
+
 function prepareAttemptedStatement() {
-    var attemeptedResult = tincan.getStatements({params: {
-        activity: {id: ROOT_ACTIVITY_ID},
-        agent: tincan.actor,
-        related_activities: true,
-        limit: 1,
-        verb: {id: "http://adlnet.gov/expapi/verbs/attempted"}}
-    });
 
-    if (attemeptedResult
-        && attemeptedResult.statementsResult
-        && attemeptedResult.statementsResult.statements
-        && attemeptedResult.statementsResult.statements[0]) {
+    if(!isUserAnonymous(tincan.actor)) {
+        var lastAttemptStatement = getLastStatement(ROOT_ACTIVITY_ID, "http://adlnet.gov/expapi/verbs/attempted");
 
-        var lastAttemptStatement = attemeptedResult.statementsResult.statements[0];
+        if (lastAttemptStatement) {
+            var lastResultByActivityId = getLastStatement(ROOT_ACTIVITY_ID);
 
-        var completedResult = tincan.getStatements({params: {
-            activity: {id: lastAttemptStatement.id},
-            agent: tincan.actor,
-            related_activities: true,
-            limit: 1,
-            verb: {id: "http://adlnet.gov/expapi/verbs/completed"}}
-        });
+            // for support both old and new valamis packages (will be fixed with VALAMIS-3367)
+            var lastResult = (lastResultByActivityId)
+                ? lastResultByActivityId
+                : getLastStatement(lastAttemptStatement.id);
 
-        if (completedResult
-            && completedResult.statementsResult
-            && completedResult.statementsResult.statements
-            && !completedResult.statementsResult.statements[0]) {
+            var wasSuspended = (lastResult && lastResult.verb.id == "http://adlnet.gov/expapi/verbs/suspended");
+            var isLastAttempt = (lastResultByActivityId)
+                ? (lastResultByActivityId.context.statement && lastResultByActivityId.context.statement.id == lastAttemptStatement.id)
+                : true;
 
-            packageResume(lastAttemptStatement);
-            return;
+            if (wasSuspended && isLastAttempt) {
+                packageResume(lastAttemptStatement, lastResult);
+                return;
+            }
         }
     }
 
@@ -254,7 +295,7 @@ function packageEnd(currentTinCanState) {
     tincan.sendStatement(GetPackageCompletedStatement(summary.score, summary.success));
 }
 
-function packageResume(lastAttemptStatement) {
+function packageResume(lastAttemptStatement, lastSuspendedStatement) {
     AttemptStatementId = lastAttemptStatement.id;
 
     var stateResult = tincan.getState(
@@ -266,8 +307,19 @@ function packageResume(lastAttemptStatement) {
     if (stateResult
         && stateResult.state
         && stateResult.state.contents) {
+
+        var stateContent = JSON.parse(stateResult.state.contents);
+
+        if (stateContent.results)
+            TinCanCourseResults = stateContent.results;
+
+        if (stateContent.answers) {
+            TinCanUserAnswers = stateContent.answers;
+            setStoredUserAnswers();
+        }
+
         onOpenToastr();
-        toastr.info(jQuery('#startConfirmationView', window.parent.document).html(), '',
+        toastr.info(jQuery('#startConfirmationView').html(), '',
             {
                 'tapToDismiss': false,
                 'positionClass': 'toast-center toast-center-for-viewer',
@@ -277,11 +329,13 @@ function packageResume(lastAttemptStatement) {
                 'extendedTimeOut': '0'
             }
         ).addClass('toastr-start-package-confirmation');
+        setTranslations(toastr.getContainer());
         toastr.getContainer().find('.js-confirmation').click(function() {
             onToastrConfirm();
             onCloseToastr();
         });
         toastr.getContainer().find('.js-decline').click(function() {
+            onToastrDecline();
             onCloseToastr();
         });
     }
@@ -294,10 +348,6 @@ function packageResume(lastAttemptStatement) {
     );
 
     function onToastrConfirm() {
-        var stateContent = JSON.parse(stateResult.state.contents);
-
-        if (stateContent.results)
-            TinCanCourseResults = stateContent.results;
 
         if (stateContent.viewedSlides) {
             TinCanViewedSlides = stateContent.viewedSlides;
@@ -307,17 +357,21 @@ function packageResume(lastAttemptStatement) {
             });
         }
 
-        if (stateContent.answers) {
-            TinCanUserAnswers = stateContent.answers;
-            setStoredUserAnswers();
-        }
-
         if (stateContent.slide) {
             Reveal.slide(stateContent.slide.h, stateContent.slide.v, stateContent.slide.f);
             toggleNavigation(stateContent.slide.h, stateContent.slide.v);
         }
 
         checkIsLessonSummary();
+        tincan.sendStatement(getResumeStatement(lastSuspendedStatement.result.duration));
+
+        jQuery('#packageDuration').trigger('setTimer', [DURATION * 60 - lastSuspendedStatement.result.duration]);
+    }
+
+    function onToastrDecline() {
+        //We start new attempt as old one is declined
+        packageEnd(currentTinCanState);
+        AttemptStatementId = tincan.sendStatement(GetPackageAttemptedStatement()).statement.id;
     }
 
     function onOpenToastr(){
@@ -357,6 +411,8 @@ function packageSuspend(currentTinCanState) {
             agent: tincan.actor
         }
     );
+
+    tincan.sendStatement(getSuspendStatement());
 }
 
 function onPackageSlideEnd(slideId, slideTitle) {
@@ -377,14 +433,18 @@ function GetQuestionAnswerStatement(id, questionText, title, questionType, learn
                 'en-US': title
             },
             description: {
-                'en-US': questionText
+                'en-US': replaceStringTags(questionText)
             },
             interactionType: questionType,
             correctResponsesPattern: [
-                String(correctAnswer)
+                String(replaceStringTags(correctAnswer))
             ]
         }
     };
+
+    var parser = document.createElement('a');
+    parser.href = ROOT_ACTIVITY_ID;
+    var url = parser.protocol + '//' + parser.host + '/question/score';
 
     return {
         verb: {
@@ -401,17 +461,19 @@ function GetQuestionAnswerStatement(id, questionText, title, questionType, learn
                 min: 0,
                 max: 100
             },
-            response: String(learnerResponse),
+            response: String(replaceStringTags(learnerResponse)),
             success: wasCorrect,
             extensions: {
-                "http://valamislearning.com/question/score": questionScore || 0
+                url: questionScore || 0
             }
         },
         context: getContext(ROOT_ACTIVITY_ID)
     };
 }
 
-function GetPackageCompletedStatement(score, success){
+function GetPackageCompletedStatement(score, success) {
+    var context = getContext(ROOT_ACTIVITY_ID);
+
     return {
         verb: {
             "id": "http://adlnet.gov/expapi/verbs/completed",
@@ -428,9 +490,14 @@ function GetPackageCompletedStatement(score, success){
         },
         result: {
             score: { scaled: score },
-            success: success
+            success: success,
+            duration: getDurationFromStatements()
         },
-        context: getContext(ROOT_ACTIVITY_ID)
+        context: {
+            contextActivities: context.contextActivities,
+            statement: context.statement,
+            revision: 'version ' + VERSION
+        }
     };
 }
 
@@ -450,7 +517,8 @@ function GetPackageAttemptedStatement(){
         context: {
             contextActivities: {
                 grouping: [{id: ROOT_ACTIVITY_ID}]
-            }
+            },
+            revision: 'version ' + VERSION
         }
     };
 }
@@ -520,6 +588,57 @@ function GetVideoStatement(verbName, videoId, videoTitle, videoDuration, start, 
     return stmnt;
 }
 
+function getSuspendStatement() {
+    var context = getContext(ROOT_ACTIVITY_ID);
+    return {
+        verb: {
+            "id": "http://adlnet.gov/expapi/verbs/suspended",
+            "display": {"en-US": "suspended"}
+        },
+        object: {
+            id: ROOT_ACTIVITY_ID,
+            definition: {
+                type: 'http://adlnet.gov/expapi/activities/course',
+                name: {'en-US': ROOT_ACTIVITY_TITLE}
+            }
+        },
+        result: {
+            //Saving in seconds
+            duration: getDurationFromStatements()
+        },
+        context: {
+            contextActivities: context.contextActivities,
+            statement: context.statement,
+            revision: 'version ' + VERSION
+        }
+    };
+}
+
+function getResumeStatement(duration) {
+    var context =  getContext(ROOT_ACTIVITY_ID);
+    return {
+        verb: {
+            "id": "http://adlnet.gov/expapi/verbs/resumed",
+            "display": {"en-US": "resumed"}
+        },
+        object: {
+            id: ROOT_ACTIVITY_ID,
+            definition: {
+                type: 'http://adlnet.gov/expapi/activities/course',
+                name: {'en-US': ROOT_ACTIVITY_TITLE}
+            }
+        },
+        result: {
+            duration: duration
+        },
+        context: {
+            contextActivities: context.contextActivities,
+            statement: context.statement,
+            revision: 'version ' + VERSION
+        }
+    };
+}
+
 function getContext(parentActivityId, category) {
     if(category) {
         var categoryUri = category.substr(0, category.lastIndexOf('/'));
@@ -527,8 +646,7 @@ function getContext(parentActivityId, category) {
     }
     var contextActivities = {
         grouping: [
-            {id: ROOT_ACTIVITY_ID},
-            {id: AttemptStatementId}
+            {id: ROOT_ACTIVITY_ID}
         ]
     };
     if(category)
@@ -540,11 +658,56 @@ function getContext(parentActivityId, category) {
                 }
             }
         };
-    return { contextActivities: contextActivities };
+
+    var statementRef = new TinCan.StatementRef({
+        "objectType": "StatementRef",
+        "id": AttemptStatementId
+    })
+
+    return {
+        contextActivities: contextActivities,
+        statement: statementRef
+    };
+}
+
+function getLastStatement(activityId, verbId) {
+    var result = tincan.getStatements({params: {
+        activity: {id: activityId},
+        agent: tincan.actor,
+        related_activities: true,
+        limit: 1,
+        verb: {id: verbId || ""}}
+    });
+
+    try {
+        return result.statementsResult.statements[0];
+    } catch (e) {
+        return null;
+    }
+}
+
+function getDurationFromStatements() {
+    var startTime = new Date();
+    var duration = 0;
+
+    //Check last resumed statement send or attempted one
+    var lastResumed = getLastStatement(AttemptStatementId, "http://adlnet.gov/expapi/verbs/resumed");
+    if(lastResumed) {
+        duration = parseInt(lastResumed.result.duration);
+        startTime = new Date(lastResumed.timestamp);
+    } else {
+        var lastAttempted = getLastStatement(ROOT_ACTIVITY_ID, "http://adlnet.gov/expapi/verbs/attempted");
+        if(lastAttempted)
+            startTime = new Date(lastAttempted.timestamp);
+    }
+
+    return Math.round((new Date() - startTime) / 1000) + duration
 }
 
 function startTimer(duration, display){
     var timer = duration, hours, minutes, seconds;
+
+    display.bind('setTimer', function(e, value) { timer = value });
     setInterval(function () {
         hours = parseInt(timer / 3600, 10);
         minutes = parseInt(timer % 3600 / 60, 10);
@@ -591,3 +754,24 @@ var escapeElement = function(str) {
     });
     return str;
 };
+
+var replaceStringTags = function(str) { // replace tags in string by space to exclude sticking words
+    return (typeof str == 'string') ? str.replace(/<\/?[^>]+>/g, ' ') : str;
+};
+
+function setTranslations(container) {
+    var locale = getParameterByName('locale') || 'en';
+    LESSON_LABELS =  LessonTranslations.get(locale);
+
+    container.find('.js-localized-label').each(function(index) {
+        var labelData = jQuery(this).attr('data-value');
+        jQuery(this).html(LESSON_LABELS[labelData]);
+    });
+}
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+    return results === null ? "" : results[1].replace(/\+/g, " ");
+}

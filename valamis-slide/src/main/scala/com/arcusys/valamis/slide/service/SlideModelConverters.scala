@@ -1,10 +1,16 @@
 package com.arcusys.valamis.slide.service
 
 import com.arcusys.valamis.slide.model._
+import com.arcusys.valamis.tag.model.ValamisTag
+
 
 object SlideModelConverters {
 
-  implicit def slideSetModelConversion(entity: SlideSetEntity, slides: List[SlideModel], slidesCount: Option[Long] = None) =
+  implicit def slideSetModelConversion(
+    entity: SlideSetEntity,
+    slides: List[SlideModel],
+    slidesCount: Option[Long] = None,
+    tags: Seq[ValamisTag] = Seq()) =
     SlideSetModel(
       entity.id,
       entity.title,
@@ -18,7 +24,14 @@ object SlideModelConverters {
       entity.duration,
       entity.scoreLimit,
       entity.playerTitle,
-      slidesCount)
+      slidesCount,
+      entity.topDownNavigation,
+      entity.activityId,
+      entity.status,
+      entity.version,
+      entity.modifiedDate,
+      entity.oneAnswerAttempt,
+      tags)
 
   implicit def slideElementPropertyConversion(entity: SlideElementPropertyEntity):SlideElementProperty =
     SlideElementProperty(

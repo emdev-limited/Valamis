@@ -3,8 +3,7 @@ package com.arcusys.valamis.lesson.scorm.storage.tracking
 import com.arcusys.valamis.lesson.scorm.model.tracking.ActivityStateNode
 
 trait ActivityStateNodeStorage {
-  def createAndGetID(treeID: Int, parentID: Option[Int], node: ActivityStateNode): Int
+  def createAndGetID(treeId: Long, parentId: Option[Long], node: ActivityStateNode): Long
 
-  def getAllNodes(treeID: Int): Seq[ActivityStateNode]
-  def renew()
+  def getTree(treeId: Long): Option[ActivityStateNode]
 }

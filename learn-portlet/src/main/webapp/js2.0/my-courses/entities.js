@@ -36,17 +36,14 @@ myCourses.module('Entities', function(Entities, myCourses, Backbone, Marionette,
     sync: {
       'read': {
         'path': function (model, options) {
-          return path.api.users;
+          return path.api.lessonResults + 'course/'+ options.groupId + '/users/';
         },
         'data': function (collection, options) {
           var params = {
-            groupId: options.groupId,
-            courseId: Utils.getCourseId(),
             sortBy: 'name',
             sortAscDirection: true,
             page: options.page,
-            count: options.count,
-            withStat: true
+            count: options.count
           };
           return params;
         },

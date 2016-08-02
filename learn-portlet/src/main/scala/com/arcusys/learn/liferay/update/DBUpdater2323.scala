@@ -1,28 +1,29 @@
 package com.arcusys.learn.liferay.update
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.valamis.core.SlickDBInfo
 import com.arcusys.learn.liferay.update.version240.social.{CommentTableComponent, LikeTableComponent}
+import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
 
-import scala.slick.driver.JdbcProfile
-
-class DBUpdater2323 extends LUpgradeProcess with Injectable {
+class DBUpdater2323 extends LUpgradeProcess
+  with Injectable
+  with LikeTableComponent
+  with CommentTableComponent
+  with SlickProfile {
   implicit lazy val bindingModule = Configuration
+
+  val slickDBInfo = inject[SlickDBInfo]
+  val db = slickDBInfo.databaseDef
+  val driver = slickDBInfo.slickProfile
 
   override def getThreshold = 2323
 
   override def doUpgrade(): Unit = {
-    val dbInfo = inject[SlickDBInfo]
-
-    new LikeTableComponent with CommentTableComponent {
-      override val driver: JdbcProfile = dbInfo.slickProfile
       import driver.simple._
 
-      dbInfo.databaseDef.withSession { implicit session =>
+      db.withSession { implicit session =>
         (likes.ddl ++ comments.ddl).create
       }
-    }
   }
 }

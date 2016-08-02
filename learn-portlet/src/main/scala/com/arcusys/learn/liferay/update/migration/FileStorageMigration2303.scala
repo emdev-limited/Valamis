@@ -1,13 +1,16 @@
 package com.arcusys.learn.liferay.update.migration
 
 import com.arcusys.learn.liferay.util.Base64Helper
-import com.arcusys.valamis.file.FileTableComponent
 import com.arcusys.valamis.file.model.FileRecord
+import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 
-class FileStorageMigration2303(val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile) extends FileTableComponent {
+class FileStorageMigration2303(val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
+  extends FileTableComponent
+    with SlickProfile {
   import driver.simple._
 
   def migrate(): Unit = {

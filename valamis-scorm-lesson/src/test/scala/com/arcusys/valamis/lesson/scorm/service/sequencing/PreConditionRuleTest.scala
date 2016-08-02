@@ -16,8 +16,8 @@ class PreConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 5,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       preConditionRules = Seq(
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
       )
     )
     activity.preConditionRuleApplies(PreConditionAction.HiddenFromChoice) should equal(true)
@@ -27,8 +27,8 @@ class PreConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       preConditionRules = Seq(
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
       )
     )
     activity.preConditionRuleApplies(PreConditionAction.HiddenFromChoice) should equal(true)
@@ -38,7 +38,7 @@ class PreConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       preConditionRules = Seq(
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
       )
     )
     activity.preConditionRuleApplies(PreConditionAction.HiddenFromChoice) should equal(true)
@@ -48,8 +48,8 @@ class PreConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       preConditionRules = Seq(
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
       )
     )
     activity.preConditionRuleApplies(PreConditionAction.HiddenFromChoice) should equal(false)
@@ -59,7 +59,7 @@ class PreConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       preConditionRules = Seq(
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice)
       )
     )
     activity.preConditionRuleApplies(PreConditionAction.HiddenFromChoice) should equal(false)
@@ -77,9 +77,9 @@ class PreConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       preConditionRules = Seq(
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice),
-        new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.Skip)
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PreConditionAction.HiddenFromChoice),
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PreConditionAction.HiddenFromChoice),
+        new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.Skip)
       )
     )
     activity.preConditionRuleApplies(PreConditionAction.HiddenFromChoice) should equal(false)

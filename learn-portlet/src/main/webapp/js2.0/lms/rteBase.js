@@ -240,16 +240,16 @@ SCORM2004_4API.prototype.Terminate = function (param) {
                 if (this.adlNavRequest != '_none_') {
                     switch (this.adlNavRequest.replace(/{.+}/g, "")) {
                         case 'continue':
-                            this.navTimeout = setTimeout('scormGetNext();', 200);
+                            this.navTimeout = setTimeout('lessonViewer.scormGetNext();', 200);
                             break;
                         case 'previous':
-                            this.navTimeout = setTimeout('scormGetPrev();', 200);
+                            this.navTimeout = setTimeout('lessonViewer.scormGetPrev();', 200);
                             break;
                         case 'choice':
                             break;
                         case 'jump':
                             var target = this.adlNavRequest.match(/{.+}/).toString().replace('{',"").replace('}',"").replace("target=","");
-                            this.navTimeout = setTimeout('scormJump("'+target+'");', 200);
+                            this.navTimeout = setTimeout('lessonViewer.scormJump("'+target+'");', 200);
                             break;
                         case 'exit':
                             break;

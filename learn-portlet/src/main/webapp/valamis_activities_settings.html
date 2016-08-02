@@ -1,0 +1,106 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+
+    <script type="text/template" id="activities-modals-template">
+        <div class="activities-settings-modals-container"></div>
+    </script>
+
+
+    <script type="text/javascript">
+        var jQuerySettings = jQuery.noConflict();
+
+        var ActivitiesSettingsLayout = Backbone.Marionette.LayoutView.extend({
+            template: _.template(Mustache.to_html(jQuery('#activities-modals-template').html())),
+            regions: {
+                modals: {
+                    selector: '.activities-settings-modals-container',
+                    regionType: Backbone.Marionette.Modals
+                }
+            }
+        });
+
+        var vaSettingsLayout = new ActivitiesSettingsLayout();
+
+        jQuerySettings(function () {
+            jQuery('#va-settings-layout').append(vaSettingsLayout.render().el);
+            if ('{{showBlogs}}' == 'true') {
+                jQuery('#showBlogs').attr('checked', 'checked');
+            }
+            if ('{{showBookmarks}}' == 'true') {
+                jQuery('#showBookmarks').attr('checked', 'checked');
+            }
+            if ('{{showEvents}}' == 'true') {
+                jQuery('#showEvents').attr('checked', 'checked');
+            }
+            if ('{{showDocuments}}' == 'true') {
+                jQuery('#showDocuments').attr('checked', 'checked');
+            }
+            if ('{{showWebContents}}' == 'true') {
+                jQuery('#showWebContents').attr('checked', 'checked');
+            }
+        });
+
+        function saveSettings() {
+            window.LearnAjax.post('{{actionURL}}', {
+                saveSettings: "true",
+                showBlogs: jQuery("#showBlogs").is(':checked'),
+                showBookmarks: jQuery("#showBookmarks").is(':checked'),
+                showEvents: jQuery("#showEvents").is(':checked'),
+                showDocuments: jQuery("#showDocuments").is(':checked'),
+                showWebContents: jQuery("#showWebContents").is(':checked'),
+                activitiesCount: jQuery("#feedActivitiesCount").val()
+            }).done(function () {
+            });
+        }
+
+    </script>
+</head>
+<body>
+
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<div style="padding: 10px;">
+
+    <div class="div-row">
+        <div class="div-col">
+            {{activitiesCountLabel}}
+        </div>
+        <div class="div-col text-center">
+            <input type="text" class="onlyDigits js-digits-only" id="feedActivitiesCount" value="{{activitiesCount}}"/>
+        </div>
+    </div>
+
+    <div class="div-col">
+        {{activitiesSettingsLabel}}
+    </div>
+
+    <input type="checkbox" id="showBlogs" class="val-checkbox"/>
+    <label class="checkbox-label shift-left" for="showBlogs"></label>
+    <label for="showBlogs"> {{showBlogsLabel}} </label>
+
+    <input type="checkbox" id="showBookmarks" class="val-checkbox"/>
+    <label class="checkbox-label shift-left" for="showBookmarks"></label>
+    <label for="showBookmarks"> {{showBookmarksLabel}} </label>
+
+    <input type="checkbox" id="showEvents" class="val-checkbox"/>
+    <label class="checkbox-label shift-left" for="showEvents"></label>
+    <label for="showEvents"> {{showEventsLabel}} </label>
+
+    <input type="checkbox" id="showDocuments" class="val-checkbox"/>
+    <label class="checkbox-label shift-left" for="showDocuments"></label>
+    <label for="showDocuments"> {{showDocumentsLabel}} </label>
+
+    <input type="checkbox" id="showWebContents" class="val-checkbox"/>
+    <label class="checkbox-label shift-left" for="showWebContents"></label>
+    <label for="showWebContents"> {{showWebContentsLabel}} </label>
+
+    <button class="button valamis big primary val-icon-save-next" onclick="saveSettings()">
+        {{saveSettingsLabel}}
+    </button>
+</div>
+
+<div id="va-settings-layout"></div>
+</body>
+</html>

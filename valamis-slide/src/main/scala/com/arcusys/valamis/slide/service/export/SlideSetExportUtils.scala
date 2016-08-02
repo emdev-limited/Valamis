@@ -15,8 +15,10 @@ import scala.util.matching.Regex
 case class QuestionResponse(tpe: Int, json: String, answersJson:Option[String])
 case class PlainTextResponse(json: String)
 
-case class ExportFormat(version: Option[String], questions: List[QuestionResponse], plaintexts: List[PlainTextResponse], slideSet: SlideSetModel)
-
+case class ExportFormat(version: Option[String],
+                        questions: List[QuestionResponse],
+                        plaintexts: List[PlainTextResponse],
+                        slideSet: SlideSetModel)
 
 object QuestionExternalFormat {
   def exportQuestion(question: Question, answers: Seq[Answer]): QuestionResponse = {

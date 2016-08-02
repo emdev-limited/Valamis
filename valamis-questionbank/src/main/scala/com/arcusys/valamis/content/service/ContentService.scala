@@ -1,9 +1,14 @@
 package com.arcusys.valamis.content.service
 
-import com.arcusys.valamis.content.exceptions.{NoCategoryException, NoQuestionException}
+import com.arcusys.valamis.content.exceptions.NoCategoryException
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.storage._
+import com.arcusys.valamis.persistence.common.DatabaseLayer
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 trait ContentService {
   def getTree(courseId: Long): ContentTree
@@ -28,49 +33,64 @@ class ContentServiceImpl(implicit val bindingModule: BindingModule)
 
   lazy val answerStorage = inject[AnswerStorage]
 
-  override def getTree(courseId: Long): ContentTree = {
-    val categoriesByCategory = categoryStorage.getByCourse(courseId).groupBy(x => x.categoryId)
-    val plainTextsByCategory = plainTextStorage.getByCourse(courseId).groupBy(x => x.categoryId)
-    val questionsByCategory = questionStorage.getByCourse(courseId).groupBy(x => x.categoryId)
-    val answersByQuestion = answerStorage.getByCourse(courseId).groupBy(x => x.questionId.get)
+  lazy val dbLayer = inject[DatabaseLayer]
 
-    new TreeBuilder(
-      x => categoriesByCategory.getOrElse(x, Seq()),
-      x => plainTextsByCategory.getOrElse(x, Seq()),
-      x => questionsByCategory.getOrElse(x, Seq()),
-      x => answersByQuestion.getOrElse(x, Seq())
-    ).getTree()
+  import dbLayer._
+  import DatabaseLayer.dbTimeout
+
+  override def getTree(courseId: Long): ContentTree = {
+    val categoryTask = execAsync(categoryStorage.getByCourse(courseId).map(_.groupBy(x => x.categoryId)))
+    val plainTextTask = execAsync(plainTextStorage.getByCourse(courseId).map(_.groupBy(x => x.categoryId)))
+    val questionTask = execAsync(questionStorage.getByCourse(courseId).map(_.groupBy(x => x.categoryId)))
+    val answerTask = execAsync(answerStorage.getByCourse(courseId).map(_.groupBy(x => x.questionId.get)))
+
+    val treeTask = for {
+      categoriesByCategory <- categoryTask
+      plainTextsByCategory <- plainTextTask
+      questionsByCategory <- questionTask
+      answersByQuestion <- answerTask
+    } yield
+      new TreeBuilder(
+        x => categoriesByCategory.getOrElse(x, Seq()),
+        x => plainTextsByCategory.getOrElse(x, Seq()),
+        x => questionsByCategory.getOrElse(x, Seq()),
+        x => answersByQuestion.getOrElse(x, Seq())
+      ).getTree()
+
+    Await.result(treeTask, dbTimeout)
   }
 
 
   override def getTreeFromCategory(categoryId: Long): CategoryTreeNode = {
-    categoryStorage.getById(categoryId).fold(throw new NoCategoryException(categoryId))(category =>
+    execSync(categoryStorage.getById(categoryId)).fold(throw new NoCategoryException(categoryId)) { category =>
       new TreeBuilder(
-        x => categoryStorage.getByCategory(x, category.courseId),
-        x => plainTextStorage.getByCategory(x, category.courseId),
-        x => questionStorage.getByCategory(x, category.courseId),
-        answerStorage.getByQuestion
+        x => execSync(categoryStorage.getByCategory(x, category.courseId)),
+        x => execSync(plainTextStorage.getByCategory(x, category.courseId)),
+        x => execSync(questionStorage.getByCategory(x, category.courseId)),
+        qId => execSync(answerStorage.getByQuestion(qId))
       ).getCategoryNode(category)
-    )
+    }
   }
 
   private def getCount(c: Category): Int = {
-    val count = categoryStorage.getByCategory(c.id, c.courseId)
+    val count = execSync(categoryStorage.getByCategory(c.id, c.courseId))
       .map(getCount)
       .sum
     count +
-      plainTextStorage.getCountByCategory(c.id, c.courseId) +
-      questionStorage.getCountByCategory(c.id, c.courseId)
+      execSync(plainTextStorage.getCountByCategory(c.id, c.courseId)) +
+      execSync(questionStorage.getCountByCategory(c.id, c.courseId))
   }
 
   override def getContentCountFromCategory(categoryId: Long): Int = {
-    categoryStorage.getById(categoryId).fold(0)(getCount)
+    execSync(categoryStorage.getById(categoryId)).fold(0)(getCount)
   }
 
-  override def getContentCount(courseId: Long): Int = {
-    //categoryStorage.getCountByCourse(courseId) +//categories should not be counted
-    plainTextStorage.getCountByCourse(courseId) +
-      questionStorage.getCountByCourse(courseId)
+  //categories should not be counted
+  override def getContentCount(courseId: Long): Int = execSync {
+    for {
+      plTextCount <- plainTextStorage.getCountByCourse(courseId)
+      qCount <- questionStorage.getCountByCourse(courseId)
+    } yield plTextCount + qCount
   }
 }
 

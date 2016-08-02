@@ -139,8 +139,8 @@ class SequencingParser(val sequencingElement: Elem, val shared: Boolean, sharedS
     //TODO: warning if there's extended contribution stuff defined while activity doesn't contribute at all
     val parsedRollupRules = rollupRulesElement children ("imsss", "rollupRule") map parseRollupRule
     val rollupRules = if (parsedRollupRules.isEmpty) {
-      Seq(new RollupRule(ChildActivitySetAll, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ObjectiveSatisfied)), ConditionCombination.Any), RollupAction.Satisfied),
-        new RollupRule(ChildActivitySetAll, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ObjectiveStatusKnown)), ConditionCombination.Any), RollupAction.NotSatisfied))
+      Seq(new RollupRule(ChildActivitySetAll, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ObjectiveSatisfied)), ConditionCombination.Any), RollupAction.Satisfied),
+        new RollupRule(ChildActivitySetAll, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ObjectiveStatusKnown)), ConditionCombination.Any), RollupAction.NotSatisfied))
     } else parsedRollupRules
 
     val preConditionRules = (sequencingRulesElement children ("imsss", "preConditionRule") map parsePreConditionRule) ++ defaultSharedSequencing.preConditionRules

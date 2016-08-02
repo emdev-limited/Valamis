@@ -3,7 +3,6 @@
     <div class="portlet-wrapper">
         <div class="portlet-sidebar">
             <div class="sidebar-content no-header">
-                <div class="sidebar-row"></div>
                 <div id="contentManagerContentsView"></div>
             </div>
         </div>
@@ -98,7 +97,7 @@
             </div>
 
             <div class="dropdown actions shift-right">
-                    <button class="button medium primary">
+                    <button class="js-add-new-content button medium primary">
                         <span class="dropdown-text">{{buttonNewLabel}}</span>
                         <span class="val-icon-dropdown val-icon-right"></span>
                     </button>
@@ -130,7 +129,7 @@
             </div>
             <div>
                 <button class="js-select-all button medium neutral">
-                    <span class="val-icon-checkbutton"></span>{{selectAllLabel}}
+                    <span class="val-icon-checkmark"></span>{{selectAllLabel}}
                 </button>
             </div>
             <div class="dropdown actions">
@@ -155,7 +154,7 @@
         <div class="content-controls">
             <div>
                 <button class="js-select-all button medium neutral">
-                    <span class="val-icon-checkbutton"></span>{{selectAllLabel}}
+                    <span class="val-icon-checkmark"></span>{{selectAllLabel}}
                 </button>
             </div>
 
@@ -180,23 +179,23 @@
 
 <script type="text/template" id="contentManagerContentRootNodeTemplate">
     <ul class="val-tree">
-        <li class="expanded js-root selected-entity" data-id="{{id}}">
-            <span class="js-tree-item js-tree-root-item tree-item tree-root-item active">
+        <li class="expanded js-root" data-id="{{id}}">
+            <div class="js-tree-item js-tree-root-item tree-item tree-root-item active">
                 <span class="js-tree-item-icon tree-item-icon"></span>
                 <span class="js-tree-item-title tree-parent-title tree-item-title" data-count="{{childrenAmount}}">{{title}}</span>
-            </span>
+            </div>
             <ul class="sortable tree-items"></ul>
         </li>
     </ul>
 </script>
 
 <script type="text/template" id="contentManagerContentNodeTemplate">
-    <span class="js-tree-category js-tree-item tree-item">
+    <div class="js-tree-category js-tree-item tree-item">
         <span class="js-tree-item-icon tree-item-icon"></span>
         <span class="js-tree-item-title tree-parent-title tree-item-title" {{#needShowChildrenAmount}} data-count="{{childrenAmount}} {{/needShowChildrenAmount}}">
             {{title}}
         </span>
-    </span>
+    </div>
     <ul class="sortable tree-items"></ul>
 </script>
 
@@ -219,7 +218,7 @@
             <label class="checkbox-label js-select-entity-label" for="selectEntityCheckbox{{uniqueId}}"></label>
         </span>
         <span class="js-content-entity lesson-item-title val-icon-folder s-4">{{title}}</span>
-        <span class="s-3" style="font-weight: normal;">Category</span>
+        <span class="s-3 lesson-item-type">{{typeLabelCategory}}</span>
         {{#ContentManager.MODIFY}}
         <span class="lesson-item-controls shift-right">
             <button class="js-edit-content button medium simple no-text">
@@ -245,7 +244,7 @@
             <label class="checkbox-label js-select-entity-label" for="selectEntityCheckbox{{uniqueId}}"></label>
         </span>
         <span class="js-content-entity lesson-item-title s-4">{{title}}</span>
-        <span class="s-3" style="font-weight: normal;">{{type}}</span>
+        <span class="s-3 lesson-item-type">{{type}}</span>
         {{#ContentManager.MODIFY}}
         <span class="lesson-item-controls shift-right">
             <button class="js-edit-content button medium simple no-text">
@@ -996,7 +995,7 @@
     <td class="text-center">
         <div class="js-plus-minus js-score"></div>
     </td>
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button id="SCORMAnswerRemove"  class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
@@ -1012,7 +1011,7 @@
     <td class="text-center">
         <div class="js-plus-minus js-score"></div>
     </td>
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button class="button medium danger no-text js-delete"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
@@ -1032,7 +1031,7 @@
         <div class="js-score js-plus-minus"></div>
     </td>
 
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
@@ -1045,7 +1044,7 @@
     <td>
         <textarea type="text" id="answerText_{{position}}">{{answerText}}</textarea>
     </td>
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button class="button medium danger no-text js-delete"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
@@ -1060,7 +1059,7 @@
     <td class="text-center">
         <div class="js-score js-plus-minus"></div>
     </td>
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
@@ -1074,7 +1073,7 @@
     <td class="text-center">
       <div class="js-score js-plus-minus" id="SCORMAnswerScore"></div>
     </td>
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button class="js-delete button medium simple no-text"> <span class="val-icon-trash"></span>Delete </button>
     </td>
 </script>
@@ -1094,7 +1093,7 @@
             {{categorizationAddNewMatchingElementLabel}}
         </button>
     </td>
-    <td class="single-element-col text-right">
+    <td class="narrow-col">
         <button class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>

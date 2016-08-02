@@ -1,7 +1,8 @@
 package com.arcusys.learn.liferay.util
 
-import com.liferay.portal.model.Country
 import java.util.Locale
+
+import com.liferay.portal.model.Country
 
 /**
  * User: Yulia.Glushonkova

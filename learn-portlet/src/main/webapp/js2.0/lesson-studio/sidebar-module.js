@@ -14,36 +14,42 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
             }
         },
         onMouseDown: function(e) {
-            if(_.indexOf(['pptx', 'pdf', 'question'], this.model.get('slideEntityType')) == -1)
-                slidesApp.execute('drag:prepare:new', this.model, e.clientX, e.clientY);
+            if (!_.contains(['pptx', 'pdf', 'question', 'imported'], this.model.get('slideEntityType'))){
+                slidesApp.activeElement.isMoving = true;
+                slidesApp.activeElement.moduleName = slidesApp.getModuleName(this.model.get('slideEntityType'));
+                this.$el.one('mouseout', function(event){
+                    //Create and drag new element
+                    if(slidesApp.activeElement.isMoving){
+                        slidesApp.activeElement.startX = event.clientX;
+                        slidesApp.activeElement.startY = event.clientY;
+                        slidesApp.execute('item:create', null, true);
+                        e.type = "mousedown.draggable";
+                        e.target = slidesApp.activeElement.view.$el.get(0);
+                        slidesApp.activeElement.view.$el.trigger(e);
+                    }
+                })
+            }
         },
         onClick: function(e) {
-            var that = this;
-            if(_.indexOf(['pdf', 'pptx'], this.model.get('slideEntityType')) > -1) {
-                if(this.model.get('slideEntityType') === 'pptx') {
-                    if (!slidesApp.activeSlideModel.get('id'))
-                        slidesApp.activeSlideModel.save().then(function (slideModel) {
-                            that.showDisplayFormatSelectionView();
-                        });
-                    else
-                        that.showDisplayFormatSelectionView();
-                }
-                else this.showDisplayFormatSelectionView();
+            if (_.contains(['pdf', 'pptx', 'imported'], this.model.get('slideEntityType'))) {
+                this.showDisplayFormatSelectionView();
             } else if (_.indexOf(['question'], this.model.get('slideEntityType')) > -1) {
                 slidesApp.execute('contentmanager:show:modal', this.model);
             }
             else {
-                slidesApp.execute('drag:prepare:new', this.model, 0, 0);
                 slidesApp.activeElement.isMoving = false;
-                slidesApp.execute('item:create', true);
+                slidesApp.execute('item:create', null, true);
             }
         },
         showDisplayFormatSelectionView: function() {
             var fileSelectView = new sidebarModule.fileSelectView({ model: this.model });
             var modalView = new valamisApp.Views.ModalView({
                 contentView: fileSelectView,
-                className: 'lesson-studio-modal light-val-modal select-display-format-modal',
-                header: (this.model.get('slideEntityType') === 'pdf') ? Valamis.language['AddPDFFileLabel'] : Valamis.language['AddPPTXFileLabel']
+                className: 'lesson-studio-modal select-display-format-modal',
+                header: Valamis.language['AddPdfPptFileLabel'],
+                beforeCancel: function() {
+                    fileSelectView.isCanceled = true;
+                }
             });
             valamisApp.execute('modal:show', modalView);
         }
@@ -51,7 +57,6 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
 
     SideBarModule.fileSelectView = Marionette.ItemView.extend({
         template: '#fileSelectMethodViewTemplate',
-        className: 'text-center',
         events: {
             'click .js-select-google-file': 'loadGooglePicker'
         },
@@ -59,9 +64,10 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
             ImageUpload: {
                 'postponeLoading': false,
                 'fileUploaderLayout': '.js-file-uploader',
-                'autoUpload': function(model) { return model.get('slideEntityType') !== 'pdf'; },
+                'autoUpload': function(model) { return model.get('slideEntityType') !== 'imported'; },
                 'getFileUploaderUrl': function (model) {
                     var contentType = model.get('contentType') || 'import-from-pptx';
+                    var slideSetId = slidesApp.slideSetModel.get('id');
                     var uploaderUrl = path.root + path.api.files +
                         '?action=ADD&contentType=' + contentType +
                         '&courseId=' + Utils.getCourseId();
@@ -69,42 +75,28 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
                         uploaderUrl += '&entityId=' + model.get('entityId');
                     // If a document (PDF or PPTX) needs to be split in separate pages
                     else
-                        uploaderUrl += '&slideSetId=' + slidesApp.slideSetModel.get('id') + '&slideId=' + model.get('slideId');
+                        uploaderUrl += '&slideSetId=' + slideSetId;
 
                     return uploaderUrl;
                 },
                 'uploadLogoMessage' : function() {
                     return Valamis.language['uploadFileMessage'];
                 },
-                'fileUploadModalHeader' : function() { return Valamis.language['selectDisplayFormatLabel']; },
+                'fileUploadModalHeader' : function() { return Valamis.language['displaySettingsLabel']; },
                 'selectDisplayFormatView': function(parentModalView) {
-                    if(parentModalView.model.get('slideEntityType') === 'pdf')
-                        return new sidebarModule.selectDisplayFormatView({});
+                    if(parentModalView.model.get('slideEntityType') === 'imported')
+                        return new sidebarModule.selectDisplayFormatView({ fileExt: parentModalView.model.get('fileExt') });
                 },
                 'onBeforeInit': function (model, context, callback) {
                     slidesApp.fileTypeGroup = model.get('slideEntityType');
-                    slidesApp.saveSlideset().then(function() {
-                        if(!slidesApp.activeSlideModel.get('id'))
-                            slidesApp.activeSlideModel.save().then(function(newSlideModel) {
-                                // Creating a model, because a plain object is returned.
-                                // Need tempId attribute to update the rest of slide refs when saving the whole lesson.
-                                model.set('slideId', newSlideModel.id);
-                                var slideModel = new lessonStudio.Entities.LessonPageModel(newSlideModel).set({ tempId: model.get('slideId') });
-                                var slideIndices = { h: Reveal.getIndices().h, v: Reveal.getIndices().v };
-                                slidesApp.slideRegistry.update( model.get('slideId'), slideModel.get('id'), slideIndices );
-                                callback(context);
-                            });
-                        else {
-                            model.set('slideId', slidesApp.activeSlideModel.get('id'));
-                            if(typeof callback === 'function')
-                                callback(context);
-                        }
-                    });
+                    if (typeof callback === 'function') {
+                        callback(context);
+                    }
                 },
                 'acceptFileTypes': function(model) {
-                    var types = _.has(mimeToExt, model.get('slideEntityType'))
+                    var types = _.has(Utils.mimeToExt, model.get('slideEntityType'))
                         ? '(' +
-                            _.reduce(getMimeTypeGroupValues(model.get('slideEntityType')), function(a, b) {
+                            _.reduce(Utils.getMimeTypeGroupValues(model.get('slideEntityType')), function(a, b) {
                                 return a + ')|(' + b;
                             }) + ')'
                         : '';
@@ -118,71 +110,146 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
                 }
             }
         },
+        templateHelpers: function() {
+            return {
+                googleClientApiAvailable: lessonStudio.googleApiConfigured
+            };
+        },
         initialize: function() {
             this.isShown = false;
         },
         onShow: function () {
+            this.isCanceled = false;
             if(!this.isShown) this.triggerMethod('InitStart');
-            this.isShown = true;
         },
         loadGooglePicker: function(e) {
             loadPicker();
             valamisApp.execute('modal:close', this);
         },
-        onFileAdded: function (file, data) {
-            var filedata = _.clone(data);
-            if (this.model.get('contentType') === 'pdf')
-                slidesApp.activeElement.view.updateUrl(filedata.name, slidesApp.activeElement.view.model.get('content'));
-            else {
-                for(var i = 0; i < filedata.length; i++) {
-                    slidesApp.execute('reveal:page:changeBackgroundImage', filedata[i]['_2'] + " contain");
-                    if(i != 0)
-                        slidesApp.tempSlideIds.push(slidesApp.activeSlideModel.id);
-                    if(i != filedata.length - 1) {
-                        var model = new lessonStudio.Entities.LessonPageModel({
-                            id: filedata[i + 1]['_1'],
-                            slideSetId: slidesApp.slideSetModel.id
-                        });
-                        slidesApp.execute('reveal:page:add', 'down', model, 'pdf');
-                        slidesApp.execute('reveal:page:applyTheme', model, true, true);
-                    }
-                }
-
-                slidesApp.viewId = undefined;
-                slidesApp.actionType = 'documentImported';
-                slidesApp.oldValue = undefined;
-                slidesApp.newValue = { slideCount: filedata.length };
-                slidesApp.execute('action:push');
+        onFileAdded: function (file, data, orientationFormat) {
+            var that = this;
+            if (that.isCanceled) {
+                return;
             }
-            valamisApp.execute('modal:close', this);
-            slidesApp.execute('item:blur');
+            var fileData = _.clone(data);
+            if (this.model.get('contentType') === 'pdf') {
+                slidesApp.activeElement.view.updateUrl(fileData.name, slidesApp.activeElement.view.model.get('content'));
+                valamisApp.execute('modal:close', this);
+                slidesApp.execute('item:blur');
+            } else {
+                var results = [];
+                var initial = jQueryValamis.Deferred().resolve();
+                var res = fileData.reduce(function(prev, src) {
+                    return prev.then(function(){ return dataUriToBlobUrl("data:image/png;base64," + src,results); });
+                }, initial);
+
+                res.then(function() {
+                    if (that.isCanceled) {
+                        return;
+                    }
+                    for (var i = 0; i < results.length; i++) {
+                        var formData = new FormData();
+                        formData.append('p_auth', Liferay.authToken);
+                        formData.append('files[]', results[i].blob, results[i].fileName + ".png");
+                        slidesApp.activeSlideModel.set("formData", formData);
+                        slidesApp.activeSlideModel.set("fileUrl", results[i].blobUrl);
+                        slidesApp.activeSlideModel.set("originalBgImageName", results[i].fileName + ".png contain");
+                        slidesApp.activeSlideModel.unset("slideId");
+
+                        slidesApp.execute('reveal:page:changeBackgroundImage', results[i].blobUrl + " contain");
+
+                        if (i != results.length - 1) {
+                            var model = new lessonStudio.Entities.LessonPageModel({
+                                tempId: slidesApp.newSlideId--,
+                                slideSetId: slidesApp.slideSetModel.id
+                            });
+                            slidesApp.execute('reveal:page:add', orientationFormat, model, 'pdf');
+                            slidesApp.execute('reveal:page:applyTheme', model, true);
+                        }
+                    }
+
+                    slidesApp.viewId = undefined;
+                    slidesApp.actionType = 'documentImported';
+                    slidesApp.oldValue = undefined;
+                    slidesApp.newValue = { slideCount: fileData.length };
+                    slidesApp.execute('action:push');
+
+                    valamisApp.execute('modal:close', that);
+                    slidesApp.execute('item:blur');
+                });
+            }
         }
     });
 
     SideBarModule.selectDisplayFormatView = Marionette.ItemView.extend({
         template: '#selectDisplayFormatViewTemplate',
-        className: 'text-center',
         events: {
-            'click .js-select-display-format': 'selectDisplayFormat'
+            'click .js-import-file': 'importFile',
+            'change input[name="displayFormat"]': 'changeDisplayFormat',
+            'click .js-select-orientation': 'changeOrientationFormat'
         },
         templateHelpers: function() {
             return {
-                singleSlideDisplayLabel: Valamis.language['buttonSingleSlidePdfDisplay'],
-                splitLabel: Valamis.language['buttonSplitPdf']
+                isPdf: (this.fileExt === 'pdf'),
+                isTopDownEnabled: this.topDownEnabled
             };
         },
-        selectDisplayFormat: function(e) {
+        initialize: function() {
+            this.fileExt = this.options.fileExt;
+            this.topDownEnabled = slidesApp.slideSetModel.get('topDownNavigation');
+            this.orientationFormat = 'right';
+        },
+        onRender: function() {
+            this.$('.valamis-tooltip').tooltip();
+            if (_.contains('pptx', this.fileExt)) {  // for ppt and pptx
+                this.$('.js-orientation-options').removeClass('hidden');
+                this.toggleDisableButton(!!this.topDownEnabled);
+            }
+        },
+        changeOrientationFormat: function(e) {
+            this.$('.js-select-orientation').removeClass('selected');
+            var elem = $(e.target).closest('.js-select-orientation');
+            elem.addClass('selected');
+            this.orientationFormat = elem.data('value');
+            this.toggleDisableButton(false);
+        },
+        changeDisplayFormat: function(e) {
+            var value = $(e.target).attr('value');
+
+            if (value === 'single') {
+                this.$('.js-orientation-options').addClass('hidden');
+                this.toggleDisableButton(false);
+            }
+
+            if (value === 'split') {
+                this.$('.js-orientation-options').removeClass('hidden');
+                this.toggleDisableButton(this.topDownEnabled);
+            }
+        },
+        toggleDisableButton: function(isDisable) {
+            this.$('.js-import-file')
+              .prop('disabled', isDisable)
+              .toggleClass('primary', !isDisable)
+              .toggleClass('neutral', isDisable);
+        },
+        importFile: function(e) {
             var that = this;
-            this.contentType = jQueryValamis(e.target).attr('data-value');
-            if(this.contentType === 'pdf') {
+            var isSingle = this.$('input#singleFileFormat').is(':checked');
+
+            if (this.fileExt === 'pdf')
+                this.contentType = (isSingle) ? 'pdf' : 'import-from-pdf';
+            else if (_.contains('pptx', this.fileExt)) // for ppt and pptx
+                this.contentType = 'import-from-pptx';
+
+            if (isSingle) {
                 var toolbarItemModel = new Backbone.Model();
                 toolbarItemModel.set({
                     title: 'PDF',
                     slideEntityType: 'pdf'
                 });
 
-                slidesApp.execute('drag:prepare:new', toolbarItemModel, 0, 0);
-                slidesApp.execute('item:create', true);
+                slidesApp.execute('prepare:new', toolbarItemModel);
+                slidesApp.execute('item:create');
                 slidesApp.activeElement.isMoving = false;
                 var slideId = slidesApp.activeElement.view.model.get('slideId');
                 if (slideId < 0) {
@@ -205,7 +272,7 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
             });
         },
         triggerPdfUpload: function(entityId) {
-            this.trigger('contentType:selected', this.contentType, entityId);
+            this.trigger('contentType:selected', this.contentType, entityId, this.orientationFormat);
         }
     });
 
@@ -222,7 +289,8 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
                 .on('inserted.bs.tooltip', function () {
                     jQueryValamis(this).data('bs.tooltip').$tip
                         .css({
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            'margin-top': '-10px'
                         });
                 });
         }

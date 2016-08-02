@@ -59,10 +59,11 @@ var UserCoursesCollection = Backbone.Collection.extend({
 PackagesCollectionService = new Backbone.Service({ url: path.root,
     sync: {
         'read': {
-            'path': path.api.gradebooks,
+            'path': function (model) {
+                return path.api.teacherGrades + 'course/' + Utils.getCourseId() + '/user/' + Utils.getUserId() + '/result'
+            },
             'data': function (e, options) {
                 return {
-                    action: "GRADES",
                     studyCourseId: options.courseId,
                     courseId: Utils.getCourseId(),
                     studentId: jQuery('#transcriptUserID').val(),

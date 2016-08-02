@@ -10,11 +10,11 @@ trait ActivityStorage {
 
   def getAllOrganizations(packageId: Long): Seq[Organization]
 
-  def getOrganizationTree(packageId: Long, organizationID: String): TreeNode[Activity]
+  def getOrganizationTree(packageId: Long, organizationId: String): TreeNode[Activity]
 
-  def getParent(packageId: Long, activityID: String): Option[Activity]
+  def getParent(packageId: Long, activityId: String): Option[Activity]
 
-  def getChildren(packageId: Long, activityID: Option[String]): Seq[Activity]
+  def getChildren(packageId: Long, activityId: Option[String]): Seq[Activity]
 
   /**
    * Forms the activity path as the ordered series of activities from the Current Activity to the common ancestor
@@ -22,10 +22,10 @@ trait ActivityStorage {
    * @param activityID given activity ID
    * @return activity path
    */
-  def getActivityPath(packageId: Long, activityID: String): Seq[Activity]
+  def getActivityPath(packageId: Long, activityId: String): Seq[Activity]
 
   def get(packageId: Long, id: String): Option[Activity]
 
   def create(packageId: Long, entity: Activity)
-  def renew()
+
 }

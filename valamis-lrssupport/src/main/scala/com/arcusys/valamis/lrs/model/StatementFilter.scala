@@ -1,8 +1,8 @@
 package com.arcusys.valamis.lrs.model
 
-import java.util.{ Date, UUID }
-
+import java.util.UUID
 import com.arcusys.valamis.lrs.tincan.Actor
+import org.joda.time.DateTime
 
 object FormatType extends Enumeration {
   val exact = Value("exact")
@@ -17,8 +17,8 @@ case class StatementFilter(
   verb: Option[String] = None,
   activity: Option[String] = None,
   registration: Option[UUID] = None,
-  since: Option[Date] = None,
-  until: Option[Date] = None,
+  since: Option[DateTime] = None,
+  until: Option[DateTime] = None,
   relatedActivities: Option[Boolean] = None,
   relatedAgents: Option[Boolean] = None,
   limit: Option[Int] = None,

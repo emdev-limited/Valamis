@@ -1,0 +1,33 @@
+
+<div id="coursesManagerAppRegion"></div>
+
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(document).ready(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var allCoursesPermission = {
+            'ALLCOURSE': {
+                'CREATE_COURSE': eval('{{canCreateNewCourse}}'),
+                'MODIFY_ACTION': eval('{{canEditCourse}}')
+            }
+        };
+
+        var allCoursesOptions = {
+            language: '{{language}}',
+            resourceName: 'allCourses',
+            permissions: allCoursesPermission,
+            app: allCourses,
+            appOptions: { editor: true }
+        };
+
+        valamisApp.execute('subapp:start', allCoursesOptions);
+
+    });
+
+</script>

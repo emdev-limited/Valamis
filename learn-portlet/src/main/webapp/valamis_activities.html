@@ -8,6 +8,9 @@
     var Valamis = Valamis || {};
     Valamis.currentUserId = parseInt("{{userID}}");
 
+    var resourceURL = "{{{resourceURL}}}";
+    var activitiesCount = {{activitiesCount}};
+
     jQueryValamis(document).ready(function () {
 
         if (!valamisApp.started) {
@@ -21,7 +24,10 @@
             resourceName: 'dashboard',
             permissions: permissionActionsValamisActivities,
             app: valamisActivities,
-            appOptions: {}
+            appOptions: {
+                activitiesCount: activitiesCount,
+                resourceURL: resourceURL
+            }
         };
 
         valamisApp.execute('subapp:start', activitiesOptions);

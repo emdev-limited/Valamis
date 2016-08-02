@@ -4,9 +4,8 @@ import com.arcusys.valamis.lesson.scorm.model.manifest.Resource
 
 trait ResourcesStorage {
   def getAll: Seq[Resource]
-  def getByPackageID(packageId: Long): Seq[Resource]
+  def getByPackageId(packageId: Long): Seq[Resource]
   def getByID(packageId: Long, resourceID: String): Option[Resource]
-  def createForPackageAndGetID(packageId: Long, entity: Resource): Int
+  def createForPackageAndGetId(packageId: Long, entity: Resource): Long
   def delete(packageId: Long)
-  def renew()
 }

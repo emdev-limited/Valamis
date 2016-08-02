@@ -1,7 +1,7 @@
 package com.arcusys.learn.models.request
 
 import com.arcusys.learn.models.request.PrintActionType._
-import com.arcusys.learn.service.util.Parameter
+import com.arcusys.valamis.web.servlet.request.{BaseCollectionFilteredRequest, BaseCollectionFilteredRequestModel, BaseRequest, Parameter}
 import org.scalatra.ScalatraBase
 
 object PrintRequest extends BaseCollectionFilteredRequest with BaseRequest {

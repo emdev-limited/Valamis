@@ -1,13 +1,13 @@
 package com.arcusys.learn.liferay.update.version250.cleaner
 
 import com.arcusys.valamis.certificate.storage.CertificateRepository
-import com.arcusys.valamis.file.FileTableComponent
+import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 
-import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.JdbcBackend
 
-trait CertificateFileCleanerComponent extends FileTableComponent {
-  protected val driver: JdbcProfile
+trait CertificateFileCleanerComponent extends FileTableComponent
+  with SlickProfile {
   protected val certificateRepository: CertificateRepository
 
   import driver.simple._

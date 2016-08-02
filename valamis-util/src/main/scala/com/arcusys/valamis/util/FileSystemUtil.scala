@@ -17,10 +17,14 @@ object FileSystemUtil {
     else Math.abs(n).toString
   }
 
-  def getTempDirectory(prefix: String) = {
+  def getTempDirectory(prefix: String): File = {
     val newDir = new File(valamisTempDirectory, prefix + getRandomName)
     newDir.mkdirs
     newDir
+  }
+
+  def getValamisTempDirectory: String = {
+    valamisTempDirectory.getPath
   }
 
   def getTempFile(prefix: String, extension: String = "tmp"): File = {
@@ -35,7 +39,7 @@ object FileSystemUtil {
     file.delete
   }
 
-  def streamToTempFile(inputStream: InputStream, prefix: String, extension: String): File = {
+  def streamToTempFile(inputStream: InputStream, prefix: String, extension: String = "tmp"): File = {
     val newFile = FileSystemUtil.getTempFile(prefix, extension)
 
     val outputStream = new FileOutputStream(newFile)

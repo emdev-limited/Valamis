@@ -1,9 +1,9 @@
 package com.arcusys.valamis.file.service
 
+import com.arcusys.learn.liferay.LiferayClasses.LDLFileEntry
 import com.arcusys.learn.liferay.services.FileEntryServiceHelper
 import com.arcusys.valamis.file.storage.FileStorage
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-import com.liferay.portlet.documentlibrary.model.DLFileEntry
 
 class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injectable with FileService {
 
@@ -46,7 +46,7 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
   override def getFileContent(folder: String, name: String): Array[Byte] = {
     val content = getFileContentOption(getPath(folder, name))
     if (content.isEmpty) {
-      throw new Exception("file not found: " + name)
+      throw new NoSuchElementException("file not found: " + name)
     }
     content.get
   }
@@ -66,10 +66,6 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
                         deleteFolder: Boolean = true): Unit = {
     setFileContent(destFolder, destName, getFileContent(sourceFolder, sourceName), deleteFolder)
   }
-
-  @deprecated("""Shouldn't require "files/" in path. see deleteFile""")
-  override def deleteFileStoryTree(name: String): Unit =
-    fileStorage.delete(name, asDirectory = false)
 
   override def deleteFile(name: String): Unit =
     fileStorage.delete(getPath(name))
@@ -94,7 +90,7 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
     )
   }
 
-  override def getFileEntry(uuid: String, groupId: Long): DLFileEntry = {
+  override def getFileEntry(uuid: String, groupId: Long): LDLFileEntry = {
     FileEntryServiceHelper.getFileEntry(uuid, groupId)
   }
 }

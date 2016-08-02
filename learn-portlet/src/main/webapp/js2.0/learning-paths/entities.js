@@ -2,34 +2,35 @@ learningPaths.module('Entities', function(Entities, learningPaths, Backbone, Mar
 
   var CertificateService = new Backbone.Service({
     url: path.root,
-    sync: {
-      'read': {
-        'path': function (model) {
-          return path.api.certificates + model.id + '?courseId=' + Utils.getCourseId();
-        }
+    targets: {
+      'getUserGoalsStatuses': {
+        'path': function (model, options) {
+          var userId = Utils.getUserId();
+          return path.api.users + userId + '/certificates/' + model.get('id') + '/goals';
+        },
+        method: 'get'
       }
     }
   });
 
-  Entities.CertificateModel = Backbone.Model.extend({
-    parse: function(response) {
-      response['url'] = Utils.getCertificateUrl(response.id);
-      response['packages'] = _.map(response['packages'], function(pkg) {
-        pkg['url'] = Utils.getPackageUrl(pkg.packageId);
-        return pkg;
-      });
-      return response;
-    }
-  }).extend(CertificateService);
+  Entities.CertificateModel = Backbone.Model.extend(CertificateService);
 
   var CertificateCollectionService = new Backbone.Service({
     url: path.root,
     sync: {
       'read': {
         'path': path.api.certificateStates,
-        'data': {
+        'data': function() {
+          var params= {
             courseId: Utils.getCourseId(),
+            plid: Utils.getPlid(),
             statuses: ['InProgress', 'Failed']
+          };
+
+          if (!learningPaths.showInstanceCertificates)
+            params.scopeId = Utils.getCourseId();
+
+          return params;
         },
         'method': 'get'
       }
@@ -46,24 +47,49 @@ learningPaths.module('Entities', function(Entities, learningPaths, Backbone, Mar
     }
   }).extend(CertificateCollectionService);
 
+  Entities.GoalModel = Backbone.Model.extend({
+    idAttribute: 'uniqueId'
+  });
 
-  var UserGoalModelService = new Backbone.Service({
+  var GoalCollectionService = new Backbone.Service({
     url: path.root,
     sync: {
       'read': {
-        'path': function (model, options) {
-          return path.api.users + options.userId + '/certificates/'+ options.certificateId + '/goals';
+        'path': function (collection) {
+          return path.api.certificates + collection.certificateId + '/goals'
         },
-        method: 'get'
+        'data': {
+          courseId: Utils.getCourseId()
+        },
+        'method': 'get'
       }
     }
   });
 
-  Entities.UserGoalModel = Backbone.Model.extend({
-  }).extend(UserGoalModelService);
+  Entities.GoalsCollection = valamisApp.Entities.BaseGoalsCollection.extend({
+    model: Entities.GoalModel,
+    initialize: function(models, options) {
+      this.certificateId = options.certificateId;
+    },
+    parse: function(response) {
+      var singleGoals = _.filter(response.goals, function(goal){
+        return goal.goalData.groupId == undefined
+      });
 
-  Entities.UserGoalCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({})
-  });
+      var that = this;
+      _.each(response.groups, function(item) {
+        var filteredGoals = _.filter(response.goals, function (goal) {
+          return goal.goalData.groupId == item.id
+        });
+        item.collection = new Entities.GoalsCollection(
+          that.toGroupResponse(filteredGoals),
+          { certificateId: that.certificateId }
+        );
+        item.isGroup = true;
+        item.uniqueId = 'group_' + item.id;
+      });
 
+      return [].concat(this.toGroupResponse(singleGoals), response.groups);
+    }
+  }).extend(GoalCollectionService);
 });

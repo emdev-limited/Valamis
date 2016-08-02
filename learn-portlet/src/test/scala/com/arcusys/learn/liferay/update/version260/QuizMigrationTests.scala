@@ -19,7 +19,7 @@ class QuizMigrationTests extends FunSuite with BeforeAndAfter {
 
   // db data will be released after connection close
   before {
-    connection = db.createConnection()
+    connection = db.source.createConnection()
     createSchema()
   }
   after {

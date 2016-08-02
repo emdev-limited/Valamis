@@ -27,6 +27,8 @@
         <portlet id="ContentManager">ContentManager</portlet>
         <portlet id="PackageManager">PackageManager</portlet>
         <portlet id="ValamisSlidesEditor">Lesson Studio</portlet>
+        <portlet id="AllCourses">All Courses</portlet>
+        <portlet id="AllCoursesStudent">Courses Browser</portlet>
     </category>
 
     <category name="Valamis Administration">

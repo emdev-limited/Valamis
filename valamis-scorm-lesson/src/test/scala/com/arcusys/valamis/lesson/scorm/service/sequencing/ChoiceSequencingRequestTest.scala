@@ -10,7 +10,7 @@ class ChoiceSequencingRequestTest extends SequencingRequestServiceTestBase(Seque
   }
 
   it should "fail if target or one of its ancestors is hidden from choice via precondition rules (3.3.1)" in {
-    val hidingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.HiddenFromChoice))
+    val hidingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.HiddenFromChoice))
     expectResultWithTarget(SequencingResponseInvalid,
       (threeLevelTree(rightRightPreConditionRules = hidingRuleSet), _.children(1).children(1).item.activity.id),
       (threeLevelTree(rightPreConditionRules = hidingRuleSet), _.children(1).children(1).item.activity.id),
@@ -35,7 +35,7 @@ class ChoiceSequencingRequestTest extends SequencingRequestServiceTestBase(Seque
   }
 
   it should "fail if target activity is sibling ahead and current activity has stop forward traversal precondition rule (8.5.2.1, case #2)" in {
-    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
+    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
     val tree = twoLevelWideTree(currentLevel = Some(1), leftPreConditionRules = stoppingRuleSet)
     expectResultWithTarget(SequencingResponseInvalid,
       (tree, _.children(2).item.activity.id)
@@ -43,7 +43,7 @@ class ChoiceSequencingRequestTest extends SequencingRequestServiceTestBase(Seque
   }
 
   it should "fail if target activity is sibling ahead and one of activites between current and targer has stop forward traversal precondition rule (8.5.2.1, case #2)" in {
-    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
+    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
     val tree = twoLevelWideTree(currentLevel = Some(1), midPreConditionRules = stoppingRuleSet)
     expectResultWithTarget(SequencingResponseInvalid,
       (tree, _.children(2).item.activity.id)
@@ -67,7 +67,7 @@ class ChoiceSequencingRequestTest extends SequencingRequestServiceTestBase(Seque
   }
 
   it should "fail if target is below current and one of target's ancestors up to current has stop forward traversal precondition rule (9.3.2.1, case #3)" in {
-    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
+    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
     expectResultWithTarget(SequencingResponseInvalid,
       (threeLevelTree(currentLevel = Some(0), rootPreConditionRules = stoppingRuleSet), _.children(1).children(1).item.activity.id),
       (threeLevelTree(currentLevel = Some(0), rightPreConditionRules = stoppingRuleSet), _.children(1).children(1).item.activity.id),
@@ -83,7 +83,7 @@ class ChoiceSequencingRequestTest extends SequencingRequestServiceTestBase(Seque
   }
 
   it should "fail if current is not defined and one of target's ancestors has stop forward traversal precondition rule (9.3.2.1., case #3)" in {
-    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
+    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
     expectResultWithTarget(SequencingResponseInvalid,
       (threeLevelTree(rootPreConditionRules = stoppingRuleSet), _.children(1).children(1).item.activity.id),
       (threeLevelTree(rightPreConditionRules = stoppingRuleSet), _.children(1).children(1).item.activity.id),
@@ -126,7 +126,7 @@ class ChoiceSequencingRequestTest extends SequencingRequestServiceTestBase(Seque
   }
 
   it should "fail if target is in other branch with current, forward in tree, and one of target's ancestors has stop forward traversal precondition rule (11.8.1.2.1, case #5)" in {
-    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new RuleCondition(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
+    val stoppingRuleSet = Seq(new PreConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.Always)), PreConditionAction.StopForwardTraversal))
     expectResultWithTarget(SequencingResponseInvalid,
       (threeLevelTree(currentLevel = Some(1), rootPreConditionRules = stoppingRuleSet), _.children(1).children(1).item.activity.id),
       (threeLevelTree(currentLevel = Some(1), rightPreConditionRules = stoppingRuleSet), _.children(1).children(1).item.activity.id),

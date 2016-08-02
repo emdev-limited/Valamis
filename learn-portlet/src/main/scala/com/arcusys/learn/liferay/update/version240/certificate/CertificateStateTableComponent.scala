@@ -1,21 +1,17 @@
 package com.arcusys.learn.liferay.update.version240.certificate
 
-import java.sql.{Time, Timestamp, Date}
-
 import com.arcusys.valamis.certificate.model.CertificateStatuses
-import com.arcusys.valamis.core.DbNameUtils._
-import com.arcusys.valamis.core.SlickProfile
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.persistence.common.{SlickProfile, TypeMapper}
 import org.joda.time._
-import com.arcusys.valamis.joda._
 
-import scala.slick.driver.JdbcDriver
+trait CertificateStateTableComponent extends CertificateTableComponent
+  with TypeMapper { self: SlickProfile =>
 
-trait CertificateStateTableComponent extends CertificateTableComponent{ self: SlickProfile =>
   import driver.simple._
 
   type CertificateState = (Long, CertificateStatuses.Value, DateTime, DateTime, Long)
   class CertificateStateTable(tag: Tag) extends Table[CertificateState](tag, tblName("CERT_STATE")) {
-    implicit val jodaMapper = new JodaDateTimeMapper(driver.asInstanceOf[JdbcDriver]).typeMapper
     implicit val CertificateStatusTypeMapper = MappedColumnType.base[CertificateStatuses.Value, String](
       s => s.toString,
       s => CertificateStatuses.withName(s)

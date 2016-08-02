@@ -1,10 +1,10 @@
 package com.arcusys.learn.liferay.update.version250
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.valamis.core.SlickDBInfo
-import com.arcusys.valamis.file.FileTableComponent
 import com.arcusys.valamis.file.model.FileRecord
+import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
 
 import scala.slick.driver.JdbcProfile
@@ -16,11 +16,13 @@ import scala.slick.jdbc.StaticQuery
 class DBUpdater2404
   extends LUpgradeProcess
   with Injectable
+  with SlickProfile
   with FileTableComponent {
 
   val dbInfo = inject[SlickDBInfo]
 
   override val driver: JdbcProfile = dbInfo.slickProfile
+
   import driver.simple._
 
   implicit lazy val bindingModule = Configuration

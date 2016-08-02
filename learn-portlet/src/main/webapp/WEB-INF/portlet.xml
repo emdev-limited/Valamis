@@ -2,10 +2,11 @@
              xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
+
     <portlet>
         <portlet-name>SCORMApplication</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LessonViewerView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.LessonViewerView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -32,7 +33,7 @@
     <portlet>
         <portlet-name>SCORMApplicationAdmin</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.AdminView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.AdminView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -49,7 +50,7 @@
     <portlet>
         <portlet-name>PackageManager</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LessonManagerView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.LessonManagerView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -67,7 +68,7 @@
     <portlet>
         <portlet-name>ContentManager</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.ContentManagerView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.ContentManagerView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -85,7 +86,7 @@
     <portlet>
         <portlet-name>Gradebook</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.GradebookView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.GradebookView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -113,7 +114,7 @@
     <portlet>
         <portlet-name>Curriculum</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.CurriculumAdmin</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.CurriculumAdmin</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -132,7 +133,7 @@
     <portlet>
         <portlet-name>CurriculumUser</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.CurriculumUser</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.CurriculumUser</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -160,7 +161,7 @@
     <portlet>
         <portlet-name>SCORMUserAccount</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.UserPortfolioView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.UserPortfolioView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -188,7 +189,7 @@
     <portlet>
         <portlet-name>TinCanStatementViewer</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanStatementViewerView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanStatementViewerView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -205,7 +206,7 @@
     <portlet>
         <portlet-name>TinCanReportViewer</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanReportViewerView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanReportViewerView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -222,7 +223,7 @@
     <portlet>
         <portlet-name>TinCanReportByPeriod</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanReportByPeriodView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanReportByPeriodView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -239,7 +240,7 @@
     <portlet>
         <portlet-name>CourseEventReport</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.CourseEventReportView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.CourseEventReportView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -256,7 +257,7 @@
     <portlet>
         <portlet-name>ParticipantReport</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.ParticipantReportView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.ParticipantReportView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -273,7 +274,7 @@
     <portlet>
         <portlet-name>TinCanLatestStatements</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanLatestStatementsView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanLatestStatementsView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -297,7 +298,7 @@
     <portlet>
         <portlet-name>TinCanStudentsLatestStatements</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanStudentsLatestStatementsView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanStudentsLatestStatementsView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -314,7 +315,7 @@
     <portlet>
         <portlet-name>TinCanMostActiveStudents</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanMostActiveStudentsView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanMostActiveStudentsView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -331,7 +332,7 @@
     <portlet>
         <portlet-name>TinCanStudentsLeaderboard</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanStudentsLeaderboardView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanStudentsLeaderboardView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -348,7 +349,7 @@
     <portlet>
         <portlet-name>TinCanCourseReport</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.TinCanCourseReportView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.TinCanCourseReportView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -365,7 +366,7 @@
     <portlet>
         <portlet-name>SocialActivitiesTinCanMapper</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.SocialActivitiesTinCanMapperView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.SocialActivitiesTinCanMapperView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -383,7 +384,7 @@
     <portlet>
         <portlet-name>LearningTranscript</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LearningTranscriptView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.LearningTranscriptView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -407,7 +408,7 @@
     <portlet>
         <portlet-name>LRSToActivityMapper</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LRSToActivityMapperView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.LRSToActivityMapperView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -424,7 +425,7 @@
     <portlet>
         <portlet-name>ValamisSlidesEditor</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LessonStudioView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.LessonStudioView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -442,7 +443,7 @@
     <portlet>
         <portlet-name>AchievedCertificates</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.AchievedCertificatesView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.AchievedCertificatesView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -459,13 +460,14 @@
     <portlet>
         <portlet-name>LearningPaths</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.LearningPathsView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.LearningPathsView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
         <supports>
             <mime-type>text/html</mime-type>
             <portlet-mode>view</portlet-mode>
+            <portlet-mode>edit</portlet-mode>
         </supports>
 
         <portlet-info>
@@ -476,7 +478,7 @@
     <portlet>
         <portlet-name>MyLessons</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.MyLessonsView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.MyLessonsView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -493,13 +495,14 @@
     <portlet>
         <portlet-name>ValamisActivities</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.ValamisActivitiesView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.ValamisActivitiesView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
         <supports>
             <mime-type>text/html</mime-type>
             <portlet-mode>view</portlet-mode>
+            <portlet-mode>edit</portlet-mode>
         </supports>
 
         <portlet-info>
@@ -510,7 +513,7 @@
     <portlet>
         <portlet-name>ValamisStudySummary</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.ValamisStudySummaryView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.ValamisStudySummaryView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -527,7 +530,7 @@
     <portlet>
         <portlet-name>RecentLessons</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.RecentLessonsView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.RecentLessonsView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -544,7 +547,7 @@
     <portlet>
         <portlet-name>MyCertificates</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.MyCertificatesView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.MyCertificatesView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -561,7 +564,7 @@
     <portlet>
         <portlet-name>MyCourses</portlet-name>
         <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.learn.view.MyCoursesView</portlet-class>
+        <portlet-class>com.arcusys.valamis.web.portlet.MyCoursesView</portlet-class>
 
         <expiration-cache>0</expiration-cache>
 
@@ -572,6 +575,40 @@
 
         <portlet-info>
             <title>My Courses</title>
+        </portlet-info>
+    </portlet>
+
+    <portlet>
+        <portlet-name>AllCourses</portlet-name>
+        <display-name>Valamis</display-name>
+        <portlet-class>com.arcusys.valamis.web.portlet.AllCoursesView</portlet-class>
+
+        <expiration-cache>0</expiration-cache>
+
+        <supports>
+            <mime-type>text/html</mime-type>
+            <portlet-mode>view</portlet-mode>
+        </supports>
+
+        <portlet-info>
+            <title>Courses Manager</title>
+        </portlet-info>
+    </portlet>
+
+    <portlet>
+        <portlet-name>AllCoursesStudent</portlet-name>
+        <display-name>Valamis</display-name>
+        <portlet-class>com.arcusys.valamis.web.portlet.AllCoursesStudentView</portlet-class>
+
+        <expiration-cache>0</expiration-cache>
+
+        <supports>
+            <mime-type>text/html</mime-type>
+            <portlet-mode>view</portlet-mode>
+        </supports>
+
+        <portlet-info>
+            <title>Courses Browser</title>
         </portlet-info>
     </portlet>
 </portlet-app>

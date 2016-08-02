@@ -1,35 +1,64 @@
 package com.arcusys.valamis.lesson.service.export
 
 import java.io.File
+import java.util.NoSuchElementException
 
-import com.arcusys.valamis.export.ImportProcessor
-import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.lesson.service.{ PackageUploadManager, ValamisPackageService }
-import com.arcusys.valamis.lesson.storage.LessonLimitStorage
+import com.arcusys.valamis.util.export.ImportProcessor
+import com.arcusys.valamis.lesson.model.LessonLimit
+import com.arcusys.valamis.lesson.service.{LessonService, PackageUploadManager}
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.util.FileSystemUtil
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 class PackageImportProcessor(implicit val bindingModule: BindingModule) extends ImportProcessor[PackageExportModel] with Injectable {
 
-  private lazy val fileService = inject[FileService]
   private lazy val packageUploader = inject[PackageUploadManager]
-  private lazy val packageService = inject[ValamisPackageService]
-  private lazy val lessonLimitStorage = inject[LessonLimitStorage]
+  private lazy val lessonService = inject[LessonService]
 
-  override protected def importItems(packages: List[PackageExportModel], courseId: Long, tempDirectory: File, userId: Long): Unit = {
+  override protected def importItems(packages: List[PackageExportModel],
+                                     courseId: Long,
+                                     tempDirectory: File,
+                                     userId: Long,
+                                     data: String): Unit = {
     packages.foreach(p => {
       // new logo name for package logo file
       val newLogo = if (p.logo.nonEmpty) p.logo.substring(Math.max(p.logo.indexOf("_") + 1, 0)) else ""
+      val rerunIntervalType = try {
+        PeriodTypes.withName(p.rerunIntervalType)
+      } catch {
+        case e: NoSuchElementException => PeriodTypes.UNLIMITED
+      }
 
-      val (packageId, packageType) = packageUploader.uploadPackage(p.title, p.summary.getOrElse(""), courseId, userId, new File(tempDirectory, p.packageFile))
+      val lesson = packageUploader.uploadPackage(
+        p.title,
+        p.summary.getOrElse(""),
+        courseId,
+        userId,
+        p.packageFile,
+        new File(tempDirectory, p.packageFile)
+      )
 
-      lessonLimitStorage.setLimit(packageId, packageType, p.passingLimit, p.rerunInterval, PeriodTypes.parse(p.rerunIntervalType))
+      val passingLimit = Some(p.passingLimit).filterNot(_ == 0)
+      val rerunInterval = Some(p.rerunInterval).filterNot(_ == 0)
+      val limit = LessonLimit(lesson.id, passingLimit, rerunInterval, rerunIntervalType)
+      val isVisible = p.visibility orElse Some(false)
+      val tags = Nil
+      lessonService.update(
+        lesson.id,
+        lesson.title,
+        lesson.description,
+        isVisible,
+        p.beginDate,
+        p.endDate,
+        tags,
+        lesson.requiredReview,
+        lesson.scoreLimit
+      )
+
       if (p.logo.nonEmpty) {
         try {
           val content = FileSystemUtil.getFileContent(new File(tempDirectory, p.logo))
-          fileService.setFileContent("package_logo_" + packageId, newLogo, content)
-          packageService.updatePackageLogo(packageType, packageId, Option(newLogo))
+          lessonService.setLogo(lesson.id, newLogo, content)
         } catch {
           case _: Throwable => // if logo saving failed, no logo in package
         }

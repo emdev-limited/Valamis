@@ -4,13 +4,12 @@ package com.arcusys.learn.liferay
  * Created by aklimov on 05.02.15.
  */
 
-import com.arcusys.learn.ioc.Configuration
+import com.arcusys.learn.liferay.LiferayClasses.{LNoSuchVocabularyException, LSimpleAction}
 import com.arcusys.learn.liferay.services.{AssetVocabularyLocalServiceHelper, GroupLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
-import com.liferay.portal.kernel.events.SimpleAction
-import com.liferay.portlet.asset.NoSuchVocabularyException
 
-class CreateTagVocabulary extends SimpleAction with Injectable {
+class CreateTagVocabulary extends LSimpleAction with Injectable {
   implicit lazy val bindingModule = Configuration
 
   override def run(companyIds: Array[String]): Unit = {
@@ -28,7 +27,7 @@ class CreateTagVocabulary extends SimpleAction with Injectable {
     try {
       GroupLocalServiceHelper.getGroupVocabulary(globalGroupId, vocabularyName)
     } catch {
-      case e: NoSuchVocabularyException =>
+      case e: LNoSuchVocabularyException =>
         AssetVocabularyLocalServiceHelper.addAssetVocabulary(companyId, vocabularyName)
     }
   }

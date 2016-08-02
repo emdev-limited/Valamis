@@ -1,12 +1,13 @@
 package com.arcusys.learn.controllers.api
 
-import com.arcusys.learn.controllers.api.base.BaseApiController
-import com.arcusys.learn.facades.TranscriptPrintFacadeContract
+import com.arcusys.learn.facade.{TranscriptPrintFacade, TranscriptPrintFacadeContract}
 import com.arcusys.learn.models.request.{PrintActionType, PrintRequest}
+import com.arcusys.valamis.web.servlet.base.BaseApiController
 
 class TranscriptPrintApiController extends BaseApiController {
 
-  lazy val printFacade = inject[TranscriptPrintFacadeContract]
+  //TODO: use inject
+  lazy val printFacade: TranscriptPrintFacadeContract = new TranscriptPrintFacade
 
   before() {
     response.setHeader("Pragma", "no-cache")

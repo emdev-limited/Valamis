@@ -1,5 +1,6 @@
 package com.arcusys.learn.models.request
 
+import com.arcusys.valamis.web.servlet.request.{BaseCollectionFilteredRequestModel, BaseRequest}
 import org.scalatra.{ScalatraBase, ScalatraServlet}
 
 /**

@@ -34,7 +34,7 @@ var PageModel = Backbone.Model.extend({
         firstPage: {page: 0, isActive: false},
         lastPage: {page: 0, isActive: false},
         showPages: 5,
-        isPrevVisible: true,
+        isPrevVisible: false,
         isNextVisible: false,
         allowShowAll: false,
         isShowingAll: false
@@ -127,10 +127,10 @@ var ValamisPaginator = Backbone.View.extend({
         this.$el.html(template);
 
         this.model.on('showAll', function() {
-            this.$el.find(".pagination-group").addClass('hidden');
+            this.$el.find('.pagination-group').addClass('hidden');
         }, this);
 
-        this.$el.find(".pagination-group").toggleClass('hidden', this.model.get('totalElements') <= this.model.get('itemsOnPage'));
+        this.$el.find('.pagination-group').toggleClass('hidden', this.model.get('totalElements') <= this.model.get('itemsOnPage'));
 
         return this;
     },
@@ -184,11 +184,11 @@ var ValamisPaginatorShowing = Backbone.View.extend({
     },
     showAllItems: function () {
         this.model.set({'isShowingAll': true});
-        this.model.trigger('showAll', this);
+        this.model.trigger('showAll', true);
     },
     showPageItems: function () {
         this.model.set({'isShowingAll': false});
-        this.model.trigger('pageChanged', this);
+        this.model.trigger('showAll', false);
     },
     initialize: function (options) {
         var settings = options || {};
@@ -202,6 +202,7 @@ var ValamisPaginatorShowing = Backbone.View.extend({
         var template = Mustache.to_html(templateContainer.html(), _.extend({}, this.model.toJSON(), this.options.language));
 
         this.$el.html(template);
+        this.$el.find('.js-show-all-items').toggleClass('hidden', this.model.get('totalElements') <= this.model.get('itemsOnPage'));
         return this;
     }
 });

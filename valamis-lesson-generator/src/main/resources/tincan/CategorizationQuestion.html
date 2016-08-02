@@ -10,7 +10,7 @@
                         {{#answerText}}
                         <td class="categorizationAnswerBoxs{{id}}_{{questionNumber}}" style="padding-bottom: 40px;">
                             <div class="categorizationAnswerBox">
-                                {{{.}}}
+                                <div class="js-answer-text"> {{{.}}} </div>
                                 <ul class="answerContainer container{{id}}_{{questionNumber}} ui-droppable"></ul>
                             </div>
                         </td>
@@ -23,7 +23,7 @@
                             <ul id="sortable" class="categorizationAnswerElements">
                                 <li class="ui-state-default acceptable categorization{{id}}_{{questionNumber}}" id="categorizationAnswer{{answerId}}">
                                     <span class="val-icon-drag"></span>
-                                    <span>{{#matchingText}} {{{.}}} {{/matchingText}}</span>
+                                    <span class="js-matching-text">{{#matchingText}} {{{.}}} {{/matchingText}}</span>
                                 </li>
                             </ul>
                         </td>
@@ -35,45 +35,38 @@
         </div>
         <div class="clear"></div>
         <!--{{#autoShowAnswer}} -->
-        <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+        <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
                 onclick="TinCanCourseHelpers['categorizationShowAnswers_{{id}}_{{questionNumber}}']()">
             Check
         </button>
         <!--{{/autoShowAnswer}} -->
     </div>
     <!--{{#autoShowAnswer}} -->
-    <div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
-        <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
+    <div class="answers answers{{id}}_{{questionNumber}}">
+        <div class="feedback-block-label">{{{text}}}</div>
+        <div class="feedback-correctness-label" id="answerCorrectness{{id}}_{{questionNumber}}"></div>
 
-        <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
-            <div style="display: none" class="verticalSeparator">
-                <p><strong>Your answers:</strong></p>
+        <div class="feedback-block-label js-localized-label" data-value="yourAnswersLabel"></div>
+        <div id="usersAnswers{{id}}_{{questionNumber}}" class="clearfix"></div>
 
-                <div id="usersAnswers{{id}}_{{questionNumber}}"></div>
-            </div>
-            <div style="display: inline-block;">
-                <p><strong>Correct answers:</strong></p>
+        <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersLabel"></div>
+        <div id="correctAnswers{{id}}_{{questionNumber}}" class="clearfix hidden js-correct-answers"></div>
 
-                <div id="correctAnswers{{id}}_{{questionNumber}}"></div>
-            </div>
-            <br>
-        </div>
         {{#hasExplanation}}
-        <h4>Explanation:</h4>
-
+        <div class="js-localized-label feedback-block-label" data-value="explanationLabel"></div>
         <div id="explanation">{{{explanation}}}</div>
         {{/hasExplanation}}
     </div>
 
     <!-- template -->
-    <div id="tableTemplate" style="display: none;">
+    <div id="categorizationTableTemplate" style="display: none;">
         <table class="categorizationAnswerBoxs shift-left">
             <tr>
-                <th class="tableTitle"></th>
+                <th class="js-category-title"></th>
             </tr>
             <tr>
                 <td>
-                    <ul class="answerContainer"></ul>
+                    <ul class="js-category-elements"></ul>
                 </td>
             </tr>
         </table>
@@ -92,21 +85,18 @@
             jQuery('.content{{id}}_{{questionNumber}}').hide();
 
             var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
-            parent_el.prevAll('.rj-element').hide();
-            parent_el.nextAll('.rj-element').hide();
+            parent_el.siblings('.rj-element').hide();
 
             var correct = answers.isPassed;
             var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
-            if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
+            if (correctness === "")
+                correctness = (correct) ? LESSON_LABELS['yourAnswerIsCorrectLabel'] : LESSON_LABELS['yourAnswerIsIncorrectLabel'];
             jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
-            if (!correct) {
-                jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
-                var learnerResponse = answers.learnerResponse;
-                var correctPattern = answers.correctResponse;
+            var learnerResponse = answers.learnerResponse;
+            var learnerResponseData = {};
 
-                var learnerResponseData = {};
-
+            if (learnerResponse.length) {
                 var learnerResponseLines = learnerResponse.split("[,]");
                 for (var i = 0; i < learnerResponseLines.length; i++) {
                     var learnerResponseAnswer = learnerResponseLines[i].split("[.]");
@@ -116,7 +106,14 @@
                     learnerResponseData[learnerResponseAnswer[0]].push(learnerResponseAnswer[1]);
                 }
                 addMatchedLine(jQuery("#usersAnswers{{id}}_{{questionNumber}}"), learnerResponseData);
+            }
+            else
+                jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(LESSON_LABELS['noAnswerLabel']);
 
+            if (!correct) {
+                jQuery('.answers{{id}}_{{questionNumber}} .js-correct-answers').removeClass('hidden');
+
+                var correctPattern = answers.correctResponse;
                 var correctPatternData = {};
 
                 var correctPatternLines = correctPattern.split("[,]");
@@ -129,18 +126,18 @@
                 }
                 addMatchedLine(jQuery("#correctAnswers{{id}}_{{questionNumber}}"), correctPatternData);
             }
+            moveAnswers({{questionNumber}});
             doScale();
         };
 
         function addMatchedLine(target, data) {
             for (var key in data) {
-                var table = jQuery('#tableTemplate').children().clone();
-                jQuery(".tableTitle", table).html(key);
+                var table = jQuery('#categorizationTableTemplate').children().clone();
+                jQuery(".js-category-title", table).html(key);
                 for (var i = 0; i < data[key].length; i++) {
                     var li = jQuery("<li>");
-                    li.addClass("ui-state-default");
                     li.html(data[key][i]);
-                    jQuery(".answerContainer", table).append(li);
+                    jQuery(".js-category-elements", table).append(li);
                 }
                 table.show();
                 target.append(table);
@@ -153,8 +150,7 @@
             //Replace all tags with /> to >, as we get not closed tags in answer
             var dataToCompare = JSON.parse(unescapeElement('{{answers}}').replace(/[\s]+\/>/gi, '>'));
 
-            var userAnswers = [],
-                    rawLearnerResponse = [],
+            var rawLearnerResponse = [],
                     patterAnswers = [],
                     hasScore = false,
                     score = 0,
@@ -164,37 +160,34 @@
                     groupedResponse = {};
 
             jQuery(".categorizationAnswerBoxs{{id}}_{{questionNumber}}").each(function (index, element) {
-                var group = jQuery.trim(jQuery(".categorizationAnswerBox > p", jQuery(element)).html().toString());
+                var groupHtml = jQuery(".categorizationAnswerBox > .js-answer-text", jQuery(element)).get(0).innerHTML.trim();
                 var answers = jQuery("ul > li", jQuery(element));
                 answers.each(function (answerIndex, answerElement) {
                     var answerId = jQuery(answerElement).attr('id').replace('categorizationAnswer', '');
                     rawLearnerResponse.push([index, answerId].join("[.]"));
 
-                    var answer = jQuery("> span:nth-child(2) > p", jQuery(answerElement));
-                    var answerText = jQuery.trim(jQuery(answer).html().toString());
-                    learnerResponse.push([group, answerText].join("[.]"));
-                    var answerObject = {text: group, matchingText: answerText};
-                    userAnswers.push(answerObject);
+                    var answerHtml = jQuery("> .js-matching-text", jQuery(answerElement)).get(0).innerHTML.trim();
+                    learnerResponse.push([groupHtml, answerHtml].join("[.]"));
 
-                    if (!groupedResponse.hasOwnProperty(group)) groupedResponse[group] = [];
-                    groupedResponse[group].push(answerObject);
+                    if (!groupedResponse.hasOwnProperty(groupHtml)) groupedResponse[groupHtml] = [];
+                    groupedResponse[groupHtml].push(answerHtml);
                 });
             });
 
             var isPassed = true;
             for (var i = 0; i < dataToCompare.length; i++) {
-                var group = dataToCompare[i].text;
+                var group = dataToCompare[i].text.trim();
                 if (!groupedAnswers.hasOwnProperty(group)) groupedAnswers[group] = [];
                 groupedAnswers[group].push(dataToCompare[i]);
 
                 if (dataToCompare[i].matchingText == null || dataToCompare[i].matchingText == "") continue; // We are trying to compare to an empty category -> always true
-                var cmpString = dataToCompare[i].text + "[.]" + dataToCompare[i].matchingText;
+                var cmpString = dataToCompare[i].text.trim() + "[.]" + dataToCompare[i].matchingText.trim();
                 patterAnswers.push(cmpString);
                 var found = false;
-                for (var j = 0; j < userAnswers.length; j++) {
-                    var userAnswer = '<p>' + userAnswers[j].text + '</p>[.]<p>' + userAnswers[j].matchingText + '</p>';
-                    if (cmpString.toLowerCase() == userAnswer.toLowerCase() ||
-                            jQuery('<textarea />').html(cmpString).text().toLowerCase() == userAnswer.toLowerCase()) {
+
+                for (var j = 0; j < learnerResponse.length; j++) {
+                    if (cmpString.toLowerCase() == learnerResponse[j].toLowerCase() ||
+                            jQuery('<textarea />').html(cmpString).text().toLowerCase() == learnerResponse[j].toLowerCase()) {
                         found = true;
                         break;
                     }
@@ -204,20 +197,17 @@
                 }
             }
 
-            for (var keyGroup in groupedAnswers) {
-                var key = keyGroup.replace(/<\/*p>/gi,'');
-                if (groupedResponse.hasOwnProperty(key)) {
-                    var userResponses = groupedResponse[key],
-                            correctResponses = groupedAnswers[keyGroup];
+            for (var key in groupedAnswers) {
+                var userResponses = (groupedResponse.hasOwnProperty(key)) ? groupedResponse[key] : [];
+                var correctResponses = (groupedAnswers.hasOwnProperty(key)) ? groupedAnswers[key] : [];
 
-                    for (var i = 0; i < correctResponses.length; i++) {
-                        var correct = correctResponses[i].matchingText.replace(/<\/*p>/gi,'');
-                        for (var j = 0; j < userResponses.length; j++) {
-                            var user = userResponses[j].matchingText;
-                            if (user === correct && correctResponses[i].score) {
-                                hasScore = true;
-                                score += correctResponses[i].score;
-                            }
+                for (var i = 0; i < correctResponses.length; i++) {
+                    var correct = correctResponses[i].matchingText;
+                    for (var j = 0; j < userResponses.length; j++) {
+                        var user = userResponses[j];
+                        if (user === correct && correctResponses[i].score) {
+                            hasScore = true;
+                            score += correctResponses[i].score;
                         }
                     }
                 }

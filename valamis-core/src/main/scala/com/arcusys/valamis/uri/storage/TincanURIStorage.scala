@@ -1,13 +1,13 @@
 package com.arcusys.valamis.uri.storage
 
-import com.arcusys.valamis.uri.model.ValamisURI
-import com.arcusys.valamis.uri.model.ValamisURIType._
+import com.arcusys.valamis.model.SkipTake
+import com.arcusys.valamis.uri.model.TincanURI
+import com.arcusys.valamis.uri.model.TincanURIType._
 
 trait TincanURIStorage {
-  def get(uri: String): Option[ValamisURI]
-  def getById(objId: String, objType: ValamisURIType): Option[ValamisURI]
-  def getById(start: Int, end: Int, filter: String): Seq[ValamisURI]
-  def create(uri: String, objId: String, objType: ValamisURIType, content: String): Unit
+  def get(uri: String): Option[TincanURI]
+  def getById(objId: String, objType: TincanURIType): Option[TincanURI]
+  def getAll(skipTake: Option[SkipTake], filter: String): Seq[TincanURI]
+  def create(uri: String, objId: String, objType: TincanURIType, content: String): TincanURI
   def delete(uri: String)
-  def renew()
 }

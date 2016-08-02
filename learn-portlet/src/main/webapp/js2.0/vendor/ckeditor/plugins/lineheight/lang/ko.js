@@ -1,3 +1,3 @@
-CKEDITOR.plugins.setLang('lineheight','ko', {
+﻿CKEDITOR.plugins.setLang('lineheight','ko', {
     title: '줄 높이'
 } );

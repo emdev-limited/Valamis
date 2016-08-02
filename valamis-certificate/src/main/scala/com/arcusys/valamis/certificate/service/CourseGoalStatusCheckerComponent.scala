@@ -2,28 +2,31 @@ package com.arcusys.valamis.certificate.service
 
 import com.arcusys.learn.liferay.services.PermissionHelper
 import com.arcusys.valamis.certificate.model.goal._
-import com.arcusys.valamis.certificate.storage.{CertificateStateRepository, CourseGoalStorage}
-import com.arcusys.valamis.grade.model.CourseGrade
-import com.arcusys.valamis.grade.storage.CourseGradeStorage
+import com.arcusys.valamis.certificate.storage.{CertificateGoalRepository, CertificateGoalStateRepository, CertificateStateRepository, CourseGoalStorage}
+import com.arcusys.valamis.gradebook.model.CourseGrade
+import com.arcusys.valamis.gradebook.service.TeacherCourseGradeService
 import com.arcusys.valamis.model.PeriodTypes
 import org.joda.time.DateTime
 
 trait CourseGoalStatusCheckerComponent extends CourseGoalStatusChecker {
   protected def courseGoalStorage: CourseGoalStorage
-  protected def courseGradeStorage: CourseGradeStorage
+  protected def courseGradeStorage: TeacherCourseGradeService
   protected def certificateStateRepository: CertificateStateRepository
+  protected def goalStateRepository: CertificateGoalStateRepository
+  protected def goalRepository: CertificateGoalRepository
 
   override def getCourseGoalsStatus(certificateId: Long, userId: Long): Seq[GoalStatus[CourseGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
 
     val certificateState = certificateStateRepository.getBy(userId, certificateId).get
-    val goals = courseGoalStorage.getByCertificateId(certificateId).sortBy(_.arrangementIndex)
+    val goals = courseGoalStorage.getByCertificateId(certificateId)
 
     goals.map { goal =>
+      val goalData = goalRepository.getById(goal.goalId)
       val grade = courseGradeStorage.get(goal.courseId, userId)
-      val status = checkCourseGoal(userId, certificateState.userJoinedDate, grade)(goal)
+      val status = checkCourseGoal(userId, certificateState.userJoinedDate, grade)(goal, goalData)
       val finishDate =
-        if (status == GoalStatuses.Success) Some(grade.get.date.get)
+        if (status == GoalStatuses.Success) Some(grade.get.date)
         else None
 
       GoalStatus(goal, status, finishDate)
@@ -34,9 +37,10 @@ trait CourseGoalStatusCheckerComponent extends CourseGoalStatusChecker {
     PermissionHelper.preparePermissionChecker(userId)
 
     val startDate = certificateStateRepository.getBy(userId, certificateId).get.userJoinedDate
-    courseGoalStorage.getByCertificateId(certificateId).sortBy(_.arrangementIndex)
+    courseGoalStorage.getByCertificateId(certificateId)
       .map { goal =>
-      GoalDeadline(goal, PeriodTypes.getEndDateOption(goal.periodType, goal.periodValue, startDate))
+        val goalData = goalRepository.getById(goal.goalId)
+      GoalDeadline(goal, PeriodTypes.getEndDateOption(goalData.periodType, goalData.periodValue, startDate))
     }
   }
 
@@ -47,23 +51,37 @@ trait CourseGoalStatusCheckerComponent extends CourseGoalStatusChecker {
 
   protected def checkCourseGoal(userId: Long,
                                 userJoinedDate: DateTime)
-                               (goal: CourseGoal): GoalStatuses.Value = {
+                               (goal: CourseGoal, goalData: CertificateGoal): GoalStatuses.Value = {
     val grade = courseGradeStorage.get(goal.courseId, userId)
-    checkCourseGoal(userId, userJoinedDate, grade)(goal)
+    checkCourseGoal(userId, userJoinedDate, grade)(goal, goalData)
   }
   
-  protected def checkCourseGoal(userId: Long, 
-                                userJoinedDate: DateTime, 
+  protected def checkCourseGoal(userId: Long,
+                                userJoinedDate: DateTime,
                                 grade: Option[CourseGrade])
-                               (goal: CourseGoal): GoalStatuses.Value = {
+                               (goal: CourseGoal, goalData: CertificateGoal): GoalStatuses.Value = {
+
     val isTimeOut =
       PeriodTypes
-        .getEndDate(goal.periodType, goal.periodValue, userJoinedDate)
-        .isBefore(grade.flatMap(_.date).getOrElse(DateTime.now))
+        .getEndDate(goalData.periodType, goalData.periodValue, userJoinedDate)
+        .isBefore(grade.map(_.date).getOrElse(DateTime.now))
     lazy val isGoalCompleted = grade.exists(_.grade.nonEmpty)
 
-    if (isTimeOut) GoalStatuses.Failed
+    val status = if (isTimeOut) GoalStatuses.Failed
     else if (isGoalCompleted) GoalStatuses.Success
     else GoalStatuses.InProgress
+
+    goalStateRepository.getBy(userId, goal.goalId) match {
+      case Some(goal) => goalStateRepository.modify(goal.goalId, userId, status, new DateTime())
+      case None => goalStateRepository.create(
+        CertificateGoalState(
+          userId,
+          goal.certificateId,
+          goal.goalId,
+          status,
+          new DateTime(),
+          goalData.isOptional))
+    }
+    status
   }
 }

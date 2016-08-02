@@ -2,9 +2,9 @@ package com.arcusys.valamis.model
 
 case class RangeResult[T](
   total: Long,
-  items: Seq[T]) {
-  def map[T2](f: T => T2) = {
-    RangeResult(total, items.map(f(_)))
+  records: Seq[T]) {
+  def map[T2](f: T => T2): RangeResult[T2] = {
+    RangeResult(total, records.map(f(_)))
   }
 }
 

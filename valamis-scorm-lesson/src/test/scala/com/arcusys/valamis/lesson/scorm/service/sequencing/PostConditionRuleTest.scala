@@ -16,8 +16,8 @@ class PostConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 5,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       postConditionRules = Seq(
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
       )
     )
     activity.postConditionRuleAction should equal(Some(PostConditionAction.Continue))
@@ -27,8 +27,8 @@ class PostConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       postConditionRules = Seq(
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
       )
     )
     activity.postConditionRuleAction should equal(Some(PostConditionAction.ExitAll))
@@ -38,8 +38,8 @@ class PostConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 5,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       postConditionRules = Seq(
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
       )
     )
     activity.postConditionRuleAction should equal(Some(PostConditionAction.Continue))
@@ -49,7 +49,7 @@ class PostConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 5,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       postConditionRules = Seq(
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
       )
     )
     activity.postConditionRuleAction should equal(Some(PostConditionAction.ExitAll))
@@ -59,8 +59,8 @@ class PostConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       postConditionRules = Seq(
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded)), PostConditionAction.Continue),
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
       )
     )
     activity.postConditionRuleAction should equal(None)
@@ -70,7 +70,7 @@ class PostConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       postConditionRules = Seq(
-        new PostConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
+        new PostConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))), PostConditionAction.ExitAll)
       )
     )
     activity.postConditionRuleAction should equal(None)

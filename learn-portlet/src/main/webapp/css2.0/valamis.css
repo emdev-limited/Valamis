@@ -263,7 +263,8 @@ select {
  *    `input` and others.
  */
 button,
-html input[type="button"], input[type="reset"],
+html input[type="button"],
+input[type="reset"],
 input[type="submit"] {
   -webkit-appearance: button;
   /* 2 */
@@ -346,12 +347,6 @@ input[type="search"]::-webkit-search-decoration {
 /**
  * Define consistent border, margin, and padding.
  */
-fieldset {
-  border: 1px solid #c0c0c0;
-  margin: 0 2px;
-  padding: 0.35em 0.625em 0.75em;
-}
-
 /**
  * 1. Correct `color` not being inherited in IE 8/9/10/11.
  * 2. Remove padding so people aren't caught out if they zero out fieldsets.
@@ -405,7 +400,7 @@ th {
   font-family: "valamis-icons";
   font-style: normal;
   font-weight: normal;
-  src: url('../fonts/valamis-icons26.eot?#iefix') format("embedded-opentype"), url('../fonts/valamis-icons26.woff') format("woff"), url('../fonts/valamis-icons26.ttf') format("truetype"), url('../fonts/valamis-icons26.svg#valamis-icons') format("svg");
+  src: url('../fonts/valamis-icons30.eot?#iefix') format("embedded-opentype"), url('../fonts/valamis-icons30.woff') format("woff"), url('../fonts/valamis-icons30.ttf') format("truetype"), url('../fonts/valamis-icons30.svg#valamis-icons') format("svg");
 }
 
 @font-face {
@@ -427,6 +422,7 @@ th {
   /* columns of same height styles */
   /* vertical alignment styles */
   /* Dropdown Buttons */
+  /* selectize */
   /* Button Groups */
   /* Helpers */
 }
@@ -479,22 +475,15 @@ th {
   display: inline-block;
 }
 
-@font-face {
-  .portlet-learn-scorm {
-    font-family: "valamis-icons";
-    src: url("../fonts/valamis-icons26.eot");
-    src: url("../fonts/valamis-icons26.eot?#iefix") format("embedded-opentype"), url("../fonts/valamis-icons26.woff") format("woff"), url("../fonts/valamis-icons26.ttf") format("truetype"), url("../fonts/valamis-icons26.svg#valamis-icons") format("svg");
-    font-weight: normal;
-    font-style: normal;
-  }
-}
-
 .portlet-learn-scorm .val-icon-arrow-down-two:before {
-  content: "a";
+  content: "y";
 }
 
 .portlet-learn-scorm .val-icon-arrow-right-two:before {
-  content: "b";
+  content: "y";
+  -ms-transform: rotate(270deg);
+      transform: rotate(270deg);
+  display: inline-block;
 }
 
 .portlet-learn-scorm .val-icon-drag:before {
@@ -502,7 +491,7 @@ th {
 }
 
 .portlet-learn-scorm .val-icon-bell:before {
-  content: "d";
+  content: "F";
 }
 
 .portlet-learn-scorm .val-icon-heart:before {
@@ -510,250 +499,261 @@ th {
 }
 
 .portlet-learn-scorm .val-icon-menu-hamburger:before {
-  content: "f";
-}
-
-.portlet-learn-scorm .val-icon-settings:before {
-  content: "g";
-}
-
-.portlet-learn-scorm .val-icon-star:before {
-  content: "h";
-}
-
-.portlet-learn-scorm .val-icon-link:before {
-  content: "i";
-}
-
-.portlet-learn-scorm .val-icon-arrange:before {
-  content: "j";
-}
-
-.portlet-learn-scorm .val-icon-arrow-down:before {
-  content: "k";
-}
-
-.portlet-learn-scorm .val-icon-arrow-left:before {
-  content: "l";
-}
-
-.portlet-learn-scorm .val-icon-arrow-right:before {
-  content: "m";
-}
-
-.portlet-learn-scorm .val-icon-arrow-up:before {
-  content: "n";
-}
-
-.portlet-learn-scorm .val-icon-dropdown:before {
-  content: "o";
-}
-
-.portlet-learn-scorm .val-icon-menu:before {
-  content: "p";
-}
-
-.portlet-learn-scorm .val-icon-upload:before {
-  content: "q";
-}
-
-.portlet-learn-scorm .val-icon-video:before {
-  content: "r";
-}
-
-.portlet-learn-scorm .val-icon-minus:before {
-  content: "s";
-}
-
-.portlet-learn-scorm .val-icon-duplicate:before {
-  content: "t";
-}
-
-.portlet-learn-scorm .val-icon-edit:before {
-  content: "u";
-}
-
-.portlet-learn-scorm .val-icon-pause:before {
-  content: "v";
-}
-
-.portlet-learn-scorm .val-icon-pdf:before {
-  content: "w";
-}
-
-.portlet-learn-scorm .val-icon-plus:before {
-  content: "x";
-}
-
-.portlet-learn-scorm .val-icon-ppt:before {
-  content: "y";
-}
-
-.portlet-learn-scorm .val-icon-book:before {
-  content: "z";
-}
-
-.portlet-learn-scorm .val-icon-checkbox:before {
-  content: "A";
-}
-
-.portlet-learn-scorm .val-icon-checkbutton:before {
-  content: "B";
-}
-
-.portlet-learn-scorm .val-icon-clock:before {
-  content: "C";
-}
-
-.portlet-learn-scorm .val-icon-content:before {
-  content: "D";
-}
-
-.portlet-learn-scorm .val-icon-dots-menu:before {
-  content: "E";
-}
-
-.portlet-learn-scorm .val-icon-download:before {
-  content: "F";
-}
-
-.portlet-learn-scorm .val-icon-drop:before {
-  content: "G";
-}
-
-.portlet-learn-scorm .val-icon-list-view:before {
-  content: "H";
-}
-
-.portlet-learn-scorm .val-icon-image-bg:before {
-  content: "I";
-}
-
-.portlet-learn-scorm .val-icon-image:before {
-  content: "J";
-}
-
-.portlet-learn-scorm .val-icon-iframe:before {
-  content: "K";
-}
-
-.portlet-learn-scorm .val-icon-grid-view:before {
-  content: "L";
-}
-
-.portlet-learn-scorm .val-icon-globe:before {
-  content: "M";
-}
-
-.portlet-learn-scorm .val-icon-fullscreen-exit:before {
-  content: "N";
-}
-
-.portlet-learn-scorm .val-icon-fullscreen:before {
-  content: "O";
-}
-
-.portlet-learn-scorm .val-icon-folder:before {
-  content: "P";
-}
-
-.portlet-learn-scorm .val-icon-exit:before {
-  content: "Q";
-}
-
-.portlet-learn-scorm .val-icon-presentation:before {
-  content: "R";
-}
-
-.portlet-learn-scorm .val-icon-preview:before {
-  content: "S";
-}
-
-.portlet-learn-scorm .val-icon-question:before {
-  content: "T";
-}
-
-.portlet-learn-scorm .val-icon-search:before {
-  content: "U";
-}
-
-.portlet-learn-scorm .val-icon-sort:before {
-  content: "V";
-}
-
-.portlet-learn-scorm .val-icon-text:before {
-  content: "W";
-}
-
-.portlet-learn-scorm .val-icon-trash:before {
-  content: "X";
-}
-
-.portlet-learn-scorm .val-icon-display:before {
-  content: "Y";
-}
-
-.portlet-learn-scorm .val-icon-user:before {
-  content: "Z";
-}
-
-.portlet-learn-scorm .val-icon-alert:before {
-  content: "0";
-}
-
-.portlet-learn-scorm .val-icon-math:before {
-  content: "1";
-}
-
-.portlet-learn-scorm .val-icon-share:before {
-  content: "2";
-}
-
-.portlet-learn-scorm .val-icon-3d:before {
-  content: "3";
-}
-
-.portlet-learn-scorm .val-icon-brush:before {
-  content: "4";
-}
-
-.portlet-learn-scorm .val-icon-move-backward:before {
   content: "5";
 }
 
-.portlet-learn-scorm .val-icon-move-forward:before {
+.portlet-learn-scorm .val-icon-settings:before {
+  content: "N";
+}
+
+.portlet-learn-scorm .val-icon-star:before {
+  content: "Q";
+}
+
+.portlet-learn-scorm .val-icon-link:before {
+  content: "C";
+}
+
+.portlet-learn-scorm .val-icon-arrange:before {
+  content: "w";
+}
+
+.portlet-learn-scorm .val-icon-arrow-down:before {
+  content: "x";
+}
+
+.portlet-learn-scorm .val-icon-arrow-left:before {
+  content: "x";
+  -ms-transform: rotate(90deg);
+      transform: rotate(90deg);
+  display: inline-block;
+}
+
+.portlet-learn-scorm .val-icon-arrow-right:before {
+  content: "x";
+  -ms-transform: rotate(270deg);
+      transform: rotate(270deg);
+  display: inline-block;
+}
+
+.portlet-learn-scorm .val-icon-arrow-up:before {
+  content: "x";
+  -ms-transform: rotate(180deg);
+      transform: rotate(180deg);
+  display: inline-block;
+}
+
+.portlet-learn-scorm .val-icon-dropdown:before {
+  content: "A";
+}
+
+.portlet-learn-scorm .val-icon-menu:before {
+  content: "L";
+}
+
+.portlet-learn-scorm .val-icon-upload:before {
+  content: "m";
+}
+
+.portlet-learn-scorm .val-icon-video:before {
+  content: "o";
+}
+
+.portlet-learn-scorm .val-icon-minus:before {
+  content: "1";
+}
+
+.portlet-learn-scorm .val-icon-duplicate:before {
+  content: "z";
+}
+
+.portlet-learn-scorm .val-icon-edit:before {
+  content: "E";
+}
+
+.portlet-learn-scorm .val-icon-pause:before {
+  content: "h";
+}
+
+.portlet-learn-scorm .val-icon-pdf:before {
+  content: "g";
+}
+
+.portlet-learn-scorm .val-icon-plus:before {
+  content: "t";
+}
+
+.portlet-learn-scorm .val-icon-ppt:before {
+  content: "s";
+}
+
+.portlet-learn-scorm .val-icon-book:before {
+  content: "G";
+}
+
+.portlet-learn-scorm .val-icon-checkmark:before {
   content: "6";
 }
 
-.portlet-learn-scorm .val-icon-star-stroke:before {
-  content: "7";
+.portlet-learn-scorm .val-icon-clock:before {
+  content: "3";
+}
+
+.portlet-learn-scorm .val-icon-content:before {
+  content: "Y";
+}
+
+.portlet-learn-scorm .val-icon-dots:before {
+  content: "W";
+}
+
+.portlet-learn-scorm .val-icon-download-import-down:before {
+  content: "d";
+}
+
+.portlet-learn-scorm .val-icon-download-import-right:before {
+  content: "d";
+  -ms-transform: rotate(270deg);
+      transform: rotate(270deg);
+  display: inline-block;
+}
+
+.portlet-learn-scorm .val-icon-drop:before {
+  content: "v";
+}
+
+.portlet-learn-scorm .val-icon-list-view:before {
+  content: "D";
+}
+
+.portlet-learn-scorm .val-icon-image-bg:before {
+  content: "B";
+}
+
+.portlet-learn-scorm .val-icon-image:before {
+  content: "u";
+}
+
+.portlet-learn-scorm .val-icon-iframe:before {
+  content: "f";
+}
+
+.portlet-learn-scorm .val-icon-grid:before {
+  content: "U";
+}
+
+.portlet-learn-scorm .val-icon-grid-view:before {
+  content: "V";
+}
+
+.portlet-learn-scorm .val-icon-globe:before {
+  content: "Z";
+}
+
+.portlet-learn-scorm .val-icon-fullscreen-exit:before {
+  content: "2";
+}
+
+.portlet-learn-scorm .val-icon-fullscreen:before {
+  content: "4";
+}
+
+.portlet-learn-scorm .val-icon-folder:before {
+  content: "I";
+}
+
+.portlet-learn-scorm .val-icon-exit:before {
+  content: "J";
+}
+
+.portlet-learn-scorm .val-icon-presentation:before {
+  content: "r";
+}
+
+.portlet-learn-scorm .val-icon-preview:before {
+  content: "q";
+}
+
+.portlet-learn-scorm .val-icon-question:before {
+  content: "p";
+}
+
+.portlet-learn-scorm .val-icon-search:before {
+  content: "M";
+}
+
+.portlet-learn-scorm .val-icon-sort:before {
+  content: "P";
+}
+
+.portlet-learn-scorm .val-icon-text:before {
+  content: "j";
+}
+
+.portlet-learn-scorm .val-icon-trash:before {
+  content: "k";
+}
+
+.portlet-learn-scorm .val-icon-undo:before {
+  content: "l";
+}
+
+.portlet-learn-scorm .val-icon-redo:before {
+  content: "l";
+  -ms-transform: scaleX(-1);
+      transform: scaleX(-1);
+}
+
+.portlet-learn-scorm .val-icon-display:before {
+  content: "X";
+}
+
+.portlet-learn-scorm .val-icon-user:before {
+  content: "n";
+}
+
+.portlet-learn-scorm .val-icon-alert:before {
+  content: "b";
+}
+
+.portlet-learn-scorm .val-icon-math:before {
+  content: "K";
+}
+
+.portlet-learn-scorm .val-icon-share:before {
+  content: "O";
+}
+
+.portlet-learn-scorm .val-icon-3d:before {
+  content: "a";
+}
+
+.portlet-learn-scorm .val-icon-brush:before {
+  content: "H";
+}
+
+.portlet-learn-scorm .val-icon-move-backward:before {
+  content: "0";
+}
+
+.portlet-learn-scorm .val-icon-move-forward:before {
+  content: "T";
 }
 
 .portlet-learn-scorm .val-icon-star-half:before {
-  content: "8";
+  content: "R";
 }
 
-@font-face {
-  .portlet-learn-scorm {
-    font-family: "device-icons";
-    src: url("fonts/device-icons26.eot");
-    src: url("fonts/device-icons26.eot?#iefix") format("embedded-opentype"), url("fonts/device-icons26.woff") format("woff"), url("fonts/device-icons26.ttf") format("truetype"), url("fonts/device-icons26.svg#device-icons") format("svg");
-    font-weight: normal;
-    font-style: normal;
-  }
+.portlet-learn-scorm .val-icon-navigator-view:before {
+  content: "S";
 }
 
-.portlet-learn-scorm [data-icon]:before {
-  font-family: device-icons !important;
-  content: attr(data-icon);
-  font-style: normal !important;
-  font-weight: normal !important;
-  font-variant: normal !important;
-  text-transform: none !important;
-  speak: none;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.portlet-learn-scorm .val-icon-table-view:before {
+  content: "i";
+}
+
+.portlet-learn-scorm .val-icon-attach:before {
+  content: "7";
 }
 
 .portlet-learn-scorm [class^="val-icon-device"]:before,
@@ -797,12 +797,7 @@ th {
   line-height: 1.4;
 }
 
-.portlet-learn-scorm h1, .portlet-learn-scorm .h1
-h2, .portlet-learn-scorm .h2
-h3, .portlet-learn-scorm .h3
-h4, .portlet-learn-scorm .h4
-h5, .portlet-learn-scorm .h5
-h6, .portlet-learn-scorm .h6 {
+.portlet-learn-scorm h1, .portlet-learn-scorm .h1 h2, .portlet-learn-scorm .h2 h3, .portlet-learn-scorm .h3 h4, .portlet-learn-scorm .h4 h5, .portlet-learn-scorm .h5 h6, .portlet-learn-scorm .h6 {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1;
   margin: 0 0 18.2px 0;
@@ -899,6 +894,7 @@ h6, .portlet-learn-scorm .h6 {
   text-align: center;
   color: #777;
   font-style: italic;
+  font-weight: normal !important;
 }
 
 .portlet-learn-scorm .valamis-info-label.shifted {
@@ -1655,13 +1651,6 @@ h6, .portlet-learn-scorm .h6 {
   vertical-align: bottom;
 }
 
-.portlet-learn-scorm fieldset {
-  background: #e6e6e6;
-  border: 1px solid #CCCCCC;
-  margin: 0 0 9.1px 0;
-  padding: 18.2px;
-}
-
 .portlet-learn-scorm input,
 .portlet-learn-scorm label,
 .portlet-learn-scorm select {
@@ -1691,10 +1680,10 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm .val-search {
   box-sizing: border-box;
   transition: border-color;
-  background: #FAFAFA;
-  border-radius: 0;
+  background: #FFF;
+  border-radius: 1px;
   border: 1px solid #CCCCCC;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 13px;
   margin-bottom: 0;
@@ -1709,16 +1698,16 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm input[type="email"]:hover, .portlet-learn-scorm input[type="number"]:hover, .portlet-learn-scorm input[type="password"]:hover, .portlet-learn-scorm input[type="search"]:hover, .portlet-learn-scorm input[type="tel"]:hover, .portlet-learn-scorm input[type="text"]:hover, .portlet-learn-scorm input[type="url"]:hover, .portlet-learn-scorm input[type="color"]:hover, .portlet-learn-scorm input[type="date"]:hover, .portlet-learn-scorm input[type="datetime"]:hover, .portlet-learn-scorm input[type="datetime-local"]:hover, .portlet-learn-scorm input[type="month"]:hover, .portlet-learn-scorm input[type="time"]:hover, .portlet-learn-scorm input[type="week"]:hover,
 .portlet-learn-scorm select[multiple=multiple]:hover,
 .portlet-learn-scorm .val-search:hover {
-  border-color: #CCCCCC;
+  border-color: 1px solid #CCCCCC;
 }
 
-.portlet-learn-scorm textarea:focus,
-.portlet-learn-scorm textarea.focus,
-.portlet-learn-scorm input[type="email"]:focus, .portlet-learn-scorm input[type="email"].focus, .portlet-learn-scorm input[type="number"]:focus, .portlet-learn-scorm input[type="number"].focus, .portlet-learn-scorm input[type="password"]:focus, .portlet-learn-scorm input[type="password"].focus, .portlet-learn-scorm input[type="search"]:focus, .portlet-learn-scorm input[type="search"].focus, .portlet-learn-scorm input[type="tel"]:focus, .portlet-learn-scorm input[type="tel"].focus, .portlet-learn-scorm input[type="text"]:focus, .portlet-learn-scorm input[type="text"].focus, .portlet-learn-scorm input[type="url"]:focus, .portlet-learn-scorm input[type="url"].focus, .portlet-learn-scorm input[type="color"]:focus, .portlet-learn-scorm input[type="color"].focus, .portlet-learn-scorm input[type="date"]:focus, .portlet-learn-scorm input[type="date"].focus, .portlet-learn-scorm input[type="datetime"]:focus, .portlet-learn-scorm input[type="datetime"].focus, .portlet-learn-scorm input[type="datetime-local"]:focus, .portlet-learn-scorm input[type="datetime-local"].focus, .portlet-learn-scorm input[type="month"]:focus, .portlet-learn-scorm input[type="month"].focus, .portlet-learn-scorm input[type="time"]:focus, .portlet-learn-scorm input[type="time"].focus, .portlet-learn-scorm input[type="week"]:focus,
-.portlet-learn-scorm input[type="week"].focus,
+.portlet-learn-scorm textarea:focus, .portlet-learn-scorm textarea.focus,
+.portlet-learn-scorm input[type="email"]:focus,
+.portlet-learn-scorm input[type="email"].focus, .portlet-learn-scorm input[type="number"]:focus, .portlet-learn-scorm input[type="number"].focus, .portlet-learn-scorm input[type="password"]:focus, .portlet-learn-scorm input[type="password"].focus, .portlet-learn-scorm input[type="search"]:focus, .portlet-learn-scorm input[type="search"].focus, .portlet-learn-scorm input[type="tel"]:focus, .portlet-learn-scorm input[type="tel"].focus, .portlet-learn-scorm input[type="text"]:focus, .portlet-learn-scorm input[type="text"].focus, .portlet-learn-scorm input[type="url"]:focus, .portlet-learn-scorm input[type="url"].focus, .portlet-learn-scorm input[type="color"]:focus, .portlet-learn-scorm input[type="color"].focus, .portlet-learn-scorm input[type="date"]:focus, .portlet-learn-scorm input[type="date"].focus, .portlet-learn-scorm input[type="datetime"]:focus, .portlet-learn-scorm input[type="datetime"].focus, .portlet-learn-scorm input[type="datetime-local"]:focus, .portlet-learn-scorm input[type="datetime-local"].focus, .portlet-learn-scorm input[type="month"]:focus, .portlet-learn-scorm input[type="month"].focus, .portlet-learn-scorm input[type="time"]:focus, .portlet-learn-scorm input[type="time"].focus, .portlet-learn-scorm input[type="week"]:focus, .portlet-learn-scorm input[type="week"].focus,
 .portlet-learn-scorm select[multiple=multiple]:focus,
 .portlet-learn-scorm select[multiple=multiple].focus,
-.portlet-learn-scorm .val-search:focus, .portlet-learn-scorm .val-search.focus {
+.portlet-learn-scorm .val-search:focus,
+.portlet-learn-scorm .val-search.focus {
   border-color: #2974A6;
   box-shadow: none;
   background-color: white;
@@ -1730,7 +1719,6 @@ h6, .portlet-learn-scorm .h6 {
   resize: vertical;
   font-weight: normal;
   color: #555;
-  background: #FFF;
   min-height: 100px;
 }
 
@@ -1742,8 +1730,6 @@ h6, .portlet-learn-scorm .h6 {
   appearance: none;
   font-weight: normal;
   color: #555;
-  background: #FFF;
-  box-shadow: none;
   height: 34px;
 }
 
@@ -1762,7 +1748,7 @@ h6, .portlet-learn-scorm .h6 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 20px;
-  content: 'U';
+  content: 'M';
   top: 6px;
   right: 6px;
   position: absolute;
@@ -1804,6 +1790,11 @@ h6, .portlet-learn-scorm .h6 {
   margin-bottom: 9.1px;
 }
 
+.portlet-learn-scorm input.form-input[disabled=disabled] {
+  background: #EAEAEA;
+  color: #777;
+}
+
 .portlet-learn-scorm input[type=checkbox].val-checkbox {
   display: none;
   vertical-align: middle;
@@ -1820,11 +1811,13 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm input[type=checkbox].val-checkbox + label:before {
   font-family: valamis-icons;
   border: 1px solid #CCCCCC;
-  background: #FAFAFA;
-  content: 'B';
+  background: #FFF;
+  content: '6';
   margin-right: 4.55px;
   color: transparent;
   padding: 1px;
+  font-size: 16px;
+  border-radius: 1px;
 }
 
 .portlet-learn-scorm input[type=checkbox].val-checkbox:checked + label:before {
@@ -1839,12 +1832,21 @@ h6, .portlet-learn-scorm .h6 {
   background: #EAEAEA;
 }
 
+.portlet-learn-scorm input[type=radio].val-radio {
+  margin: 0 4.55px 3.64px 0;
+}
+
+.portlet-learn-scorm .radio-label {
+  display: inline;
+}
+
 .portlet-learn-scorm .val-select {
   box-sizing: border-box;
-  background: #FAFAFA;
+  background: #FFF;
   border: 1px solid #CCCCCC;
   position: relative;
   z-index: 1;
+  border-radius: 1px;
 }
 
 .portlet-learn-scorm .val-select:before {
@@ -1858,7 +1860,7 @@ h6, .portlet-learn-scorm .h6 {
   width: 32px;
   right: 0;
   text-align: center;
-  content: 'k';
+  content: 'y';
   z-index: -1;
   color: #AAA;
 }
@@ -1871,10 +1873,10 @@ h6, .portlet-learn-scorm .h6 {
   appearance: none;
   background-color: transparent;
   border: none;
+  border-radius: 1px;
   display: block;
   padding: 4.55px 25px 4.55px 4.55px;
   width: 100%;
-  font-weight: bold;
   text-align: left;
   color: #555;
   line-height: normal;
@@ -1939,7 +1941,7 @@ h6, .portlet-learn-scorm .h6 {
   padding: 6.06667px;
   padding-right: 18.2px;
   box-shadow: 0 0 0 3px rgba(228, 228, 228, 0.6);
-  margin: 5px 0 0;
+  margin: 5px 0 0 3px;
   z-index: 1000;
   min-width: 0;
 }
@@ -1966,7 +1968,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .dropdown ul.dropdown-menu li:before {
   font-size: 1.5em;
-  content: "A";
+  content: "6";
   font-family: valamis-icons;
   vertical-align: middle;
   height: 100%;
@@ -2006,8 +2008,15 @@ h6, .portlet-learn-scorm .h6 {
   padding: 0 10px;
 }
 
+.portlet-learn-scorm .selectize-input {
+  border: 1px solid #CCCCCC;
+  border-radius: 1px;
+  box-shadow: none;
+}
+
 .portlet-learn-scorm .filters-row {
   padding: 0;
+  line-height: 34px;
 }
 
 .portlet-learn-scorm .filters-row .filter-element {
@@ -2050,10 +2059,6 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .portlet[min-width~="480px"] .filters-row:first-child {
   border: none;
-}
-
-.portlet-learn-scorm .filters-row .filter-element > button {
-  width: 100%;
 }
 
 .portlet-learn-scorm .filters-row .dropdown.filter-element {
@@ -2126,8 +2131,14 @@ h6, .portlet-learn-scorm .h6 {
   width: 140px;
 }
 
+.portlet-learn-scorm .val-during-period .val-select {
+  border-radius: 0 1px 1px 0;
+}
+
 .portlet-learn-scorm .val-during-period input {
   margin: 0 !important;
+  border-right: none;
+  border-radius: 1px 0 0 1px;
 }
 
 .portlet-learn-scorm .gallery-modal-container .image-gallery-icon {
@@ -2190,24 +2201,100 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .status-label.success {
   background: #598000;
+  color: #FFF;
 }
 
 .portlet-learn-scorm .status-label.failed {
-  background: #e77465;
+  background: #CC4233;
+  color: #FFF;
 }
 
-.portlet-learn-scorm .val-checkmark:before {
+.portlet-learn-scorm .val-rounded-icon:before {
   color: #FFF;
   border-radius: 50%;
   background: none 0px 0px repeat #DEDEDE;
 }
 
-.portlet-learn-scorm .val-checkmark.success:before {
+.portlet-learn-scorm .val-rounded-icon.success:before {
   background-color: #598000;
 }
 
-.portlet-learn-scorm .val-checkmark.failed:before {
-  background-color: #e77465;
+.portlet-learn-scorm .val-rounded-icon.failed:before {
+  background-color: #CC4233;
+}
+
+.portlet-learn-scorm .val-rounded-div {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #DEDEDE;
+  background: white;
+  border-radius: 50%;
+  color: #FFF;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.portlet-learn-scorm .val-rounded-div.success {
+  border-color: #598000;
+}
+
+.portlet-learn-scorm .val-rounded-div.failed {
+  border-color: #CC4233;
+}
+
+.portlet-learn-scorm .val-rounded-div.failed.filled {
+  background: #CC4233;
+}
+
+.portlet-learn-scorm .val-rounded-div.inprogress {
+  border-color: #f7ac1d;
+}
+
+.portlet-learn-scorm .val-rounded-div.inprogress.filled {
+  background: #f7ac1d;
+}
+
+.portlet-learn-scorm .val-rounded-div.small {
+  width: 16px;
+  height: 16px;
+}
+
+.portlet-learn-scorm .val-rounded-div span {
+  display: inline-block;
+  cursor: default;
+  vertical-align: middle;
+}
+
+.portlet-learn-scorm .val-link-help {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  color: #FFF;
+  border: 0;
+  background-color: #777;
+  text-align: center;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.portlet-learn-scorm .val-link-help.valamis-tooltip {
+  border: none;
+}
+
+.portlet-learn-scorm .radio-inline {
+  display: inline-block;
+  padding-right: 30px;
+  height: 20px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.portlet-learn-scorm .radio-inline input {
+  margin: 0;
+  height: 100%;
 }
 
 .portlet-learn-scorm .val-table {
@@ -2216,6 +2303,10 @@ h6, .portlet-learn-scorm .h6 {
   width: 100%;
   background: white;
   border: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm .val-table.no-out-margin {
+  margin: 0;
 }
 
 .portlet-learn-scorm .val-table.no-border {
@@ -2230,14 +2321,43 @@ h6, .portlet-learn-scorm .h6 {
   border: none;
 }
 
+.portlet-learn-scorm .val-table.no-top-border {
+  border-top: none;
+}
+
+.portlet-learn-scorm .val-table.no-top-border tr:first-child {
+  border-top: none;
+}
+
+.portlet-learn-scorm .val-table.no-top-border tr:first-child td, .portlet-learn-scorm .val-table.no-top-border tr:first-child th {
+  border-top: none;
+}
+
+.portlet-learn-scorm .val-table.no-bottom-border {
+  border-bottom: none;
+}
+
+.portlet-learn-scorm .val-table.no-bottom-border tr:last-child {
+  border-bottom: none;
+}
+
+.portlet-learn-scorm .val-table.no-bottom-border tr:last-child td, .portlet-learn-scorm .val-table.no-bottom-border tr:last-child th {
+  border-bottom: none;
+}
+
 .portlet-learn-scorm .val-table th {
   background-color: #F2F2F2;
   border-bottom: 1px solid #CCCCCC;
   font-weight: bold;
   padding: 9.1px 18.2px;
   text-align: left;
-  color: #2c2c2c;
+  color: #555;
   line-height: 20px;
+}
+
+.portlet-learn-scorm .val-table th.narrow-col {
+  white-space: nowrap;
+  width: 1%;
 }
 
 .portlet-learn-scorm .val-table td {
@@ -2252,6 +2372,11 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .val-table td.buttons button {
   float: none;
+}
+
+.portlet-learn-scorm .val-table td.narrow-col {
+  white-space: nowrap;
+  width: 1%;
 }
 
 .portlet-learn-scorm .val-table td > p,
@@ -2279,11 +2404,10 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-table tr, .portlet-learn-scorm .val-table li {
-  background-color: #FFF;
+  background-color: white;
 }
 
-.portlet-learn-scorm .val-table tr:nth-child(even),
-.portlet-learn-scorm .val-table li:nth-child(even) {
+.portlet-learn-scorm .val-table tr:nth-child(even) {
   background-color: #FAFAFA;
 }
 
@@ -2307,7 +2431,6 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm .val-table.simple tr td {
   border-left: none;
   border-right: none;
-  padding: 12px 10px 12px;
 }
 
 .portlet-learn-scorm .val-table.simple tr:first-child td {
@@ -2316,68 +2439,6 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .val-table.simple tr:last-child td {
   border-bottom: none;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table {
-  margin-top: 18.2px;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table tr:first-child td {
-  padding: 0px 10px 12px;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table tr:first-child td.progress-col {
-  vertical-align: top;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table tr:last-child td {
-  padding: 12px 10px 0px;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table tr:last-child td.progress-col {
-  vertical-align: bottom;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .progress-col {
-  background: #DEDEDE url("../img/vert-line-bg.png") repeat-y top center;
-  width: 40px;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .progress-col div.checkmark {
-  background-color: #DEDEDE;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  display: inline-block;
-  color: white;
-  text-align: center;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .progress-col.success {
-  background-color: #598000;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .progress-col.success .checkmark {
-  background-color: #598000;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .progress-col.failed {
-  background-color: #CC4233;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .progress-col.failed .checkmark {
-  background-color: #CC4233;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table .info-col {
-  text-align: right;
-  font-weight: normal;
-  min-width: 100px;
-}
-
-.portlet-learn-scorm .val-table.learning-path-table tr:only-child td.progress-col {
-  background: none;
-  vertical-align: middle;
 }
 
 .portlet-learn-scorm .list th {
@@ -2509,26 +2570,6 @@ h6, .portlet-learn-scorm .h6 {
   margin-right: 0;
 }
 
-.portlet-learn-scorm td.single-element-col, .portlet-learn-scorm .div-col.single-element-col {
-  width: 60px;
-}
-
-.portlet-learn-scorm td.single-element-col:first-child, .portlet-learn-scorm .div-col.single-element-col:first-child {
-  width: 70px;
-}
-
-.portlet-learn-scorm td.single-element-col:last-child, .portlet-learn-scorm .div-col.single-element-col:last-child {
-  width: 70px;
-}
-
-.portlet-learn-scorm td.status-col {
-  width: 150px;
-}
-
-.portlet-learn-scorm th.correct-col {
-  width: 85px;
-}
-
 .portlet-learn-scorm td.thin {
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -2556,52 +2597,74 @@ h6, .portlet-learn-scorm .h6 {
   font-weight: bold;
 }
 
-.portlet-learn-scorm .accordion-tabs-minimal {
-  background-image: linear-gradient(to bottom, #f2f2f2 0, #e6e6e6 100%);
-}
-
-.portlet-learn-scorm .accordion-tabs-minimal::after {
-  clear: both;
-  content: "";
-  display: table;
-}
-
-.portlet-learn-scorm .accordion-tabs-minimal li.tab-header-and-content {
-  list-style: none;
-  display: inline;
-  font-size: 0;
-}
-
-.portlet-learn-scorm .accordion-tabs-minimal li.tab-header-and-content a.tab-link {
-  font-size: 16.0px;
-  font-weight: 500 !important;
-  line-height: 3em;
-  color: #2c2c2c;
+.portlet-learn-scorm .val-list-table {
   padding: 0 18.2px;
-  display: inline-block;
 }
 
-.portlet-learn-scorm .accordion-tabs-minimal li.tab-header-and-content a.tab-link:hover {
-  color: #598000;
+.portlet-learn-scorm .val-list-table a {
+  color: inherit;
 }
 
-.portlet-learn-scorm .accordion-tabs-minimal li.tab-header-and-content.is-active a {
-  color: #598000 !important;
-  border-top: 4px solid #507400;
+.portlet-learn-scorm .val-list-table .handle {
+  cursor: move;
+  color: #AAA;
+  padding-right: 16px;
 }
 
-.portlet-learn-scorm .accordion-tabs-minimal li.tab-header-and-content.is-active .tab-content {
-  display: block;
-  border-top: 1px solid #CCCCCC;
+.portlet-learn-scorm .val-list-table .checkbox-label {
+  margin: 0;
 }
 
-.portlet-learn-scorm .accordion-tabs-minimal li.tab-header-and-content .tab-content {
-  font-size: 13px;
-  display: none;
-  padding: 18.2px;
-  width: 100%;
-  float: left;
-  background: white;
+.portlet-learn-scorm .val-list-table .checkbox-label:before {
+  margin: 0;
+}
+
+.portlet-learn-scorm .val-list-table .val-list-table-header {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #777;
+  padding: 9.1px 0;
+  border-bottom: 2px solid #CCCCCC;
+}
+
+.portlet-learn-scorm .val-list-table .list-table-row {
+  line-height: 50px;
+}
+
+.portlet-learn-scorm .val-list-table .list-table-row .val-during-period {
+  padding-top: 8px;
+}
+
+.portlet-learn-scorm .val-list-table .list-table-row .title {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm .val-list-table .goals-group .list-table-row .title {
+  padding-left: 30px;
+  font-weight: normal;
+}
+
+.portlet-learn-scorm .val-list-table > ul > li {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm .val-list-table > ul > li:last-child {
+  border-bottom: none;
+}
+
+.portlet-learn-scorm .val-tabs .tabs-header {
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm .val-tabs .tabs-header .nav-tabs {
+  border-bottom: none;
+}
+
+.portlet-learn-scorm .val-tabs .tabs-header .tab-side {
+  display: table-cell;
+  height: 60px;
+  vertical-align: middle;
 }
 
 .portlet-learn-scorm .val-tabs .nav-tabs {
@@ -2625,7 +2688,8 @@ h6, .portlet-learn-scorm .h6 {
   border: none;
   border-bottom: 4px solid transparent;
   line-height: 52px;
-  outline-offset: 0px;
+  outline-offset: 0;
+  font-weight: normal;
 }
 
 .portlet-learn-scorm .val-tabs .nav-tabs > li > a:hover {
@@ -2635,7 +2699,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-tabs .nav-tabs > li > a:focus {
-  outline-offset: 0px;
+  outline-offset: 0;
 }
 
 .portlet-learn-scorm .val-tabs .nav-tabs > li.active > a {
@@ -2646,6 +2710,15 @@ h6, .portlet-learn-scorm .h6 {
   border-bottom: 4px solid #507400;
   background-color: transparent;
   margin: 4px 0 0 0;
+}
+
+.portlet-learn-scorm .val-tabs .nav-tabs.centered {
+  text-align: center;
+}
+
+.portlet-learn-scorm .val-tabs .nav-tabs.centered > li {
+  display: inline-block;
+  float: none;
 }
 
 .portlet-learn-scorm .val-tabs .tab-content {
@@ -2780,12 +2853,12 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm .val-modal .modal-inner .modal-header .modal-close:before {
   color: #555;
   font-family: valamis-icons;
-  content: 'm';
+  content: 'J';
   display: block;
 }
 
 .portlet-learn-scorm .val-modal .modal-inner .modal-header .modal-close:hover:before {
-  color: #3b3b3b;
+  color: #3c3c3c;
 }
 
 .portlet-learn-scorm .val-modal .modal-inner .modal-footer {
@@ -2989,6 +3062,11 @@ h6, .portlet-learn-scorm .h6 {
   text-align: right;
 }
 
+.portlet-learn-scorm .bbm-modal .bbm-modal__bottombar .button {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
 .portlet-learn-scorm .arrow-modal .modal-content {
   overflow: visible;
 }
@@ -3062,7 +3140,9 @@ h6, .portlet-learn-scorm .h6 {
   background: #FFF;
 }
 
-.portlet-learn-scorm .tile.unpublished .tile-content > .image, .portlet-learn-scorm .tile.unpublished .tile-content > ul {
+.portlet-learn-scorm .tile.unpublished .tile-content > .image,
+.portlet-learn-scorm .tile.unpublished .tile-content > .tile-with-rating,
+.portlet-learn-scorm .tile.unpublished .tile-content > ul {
   opacity: .6;
 }
 
@@ -3086,34 +3166,36 @@ h6, .portlet-learn-scorm .h6 {
   word-break: normal;
 }
 
-.portlet-learn-scorm .tile .tile-content > ul li {
+.portlet-learn-scorm .tile .tile-content > ul > li {
   list-style: none;
   line-height: 1.4;
   margin-bottom: 9.1px;
 }
 
-.portlet-learn-scorm .tile .tile-content > ul li:last-child {
+.portlet-learn-scorm .tile .tile-content > ul > li:last-child {
   margin-bottom: 0;
 }
 
 .portlet-learn-scorm .tile .tile-content .image {
   display: block;
   position: relative;
-  background: #DEDEDE url("../img/imgo.jpg") center no-repeat;
+  background: transparent url("../img/lesson_cover.svg") center no-repeat;
   background-origin: padding-box;
   background-size: cover;
+}
+
+.portlet-learn-scorm .tile .tile-content .image.certificate {
+  background-image: url("../img/certificate_cover.svg");
+}
+
+.portlet-learn-scorm .tile .tile-content .image.course {
+  background-image: url("../img/course_cover.svg");
 }
 
 .portlet-learn-scorm .tile .tile-content .image > a {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.portlet-learn-scorm .tile .tile-content .image.certificate {
-  background: #DEDEDE url("../img/certificate-default.jpg") center no-repeat;
-  background-origin: padding-box;
-  background-size: cover;
 }
 
 .portlet-learn-scorm .tile .tile-content a {
@@ -3170,6 +3252,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .tile .tile-content .status.success .val-label {
+  color: #FFF;
   background-color: #598000;
 }
 
@@ -3181,15 +3264,23 @@ h6, .portlet-learn-scorm .h6 {
   background-color: #CC4233;
 }
 
+.portlet-learn-scorm .tile .val-icon-drag {
+  display: block;
+  position: absolute;
+  margin: 5px 0 0 5px;
+  color: #555;
+  z-index: 1;
+}
+
+.portlet-learn-scorm .portlet[min-width~="1024px"] .tile .val-icon-drag {
+  display: none;
+}
+
 .portlet-learn-scorm .list .tile {
   display: table;
   width: 100% !important;
   border-bottom: 1px solid #CCCCCC;
   padding: 18.2px;
-}
-
-.portlet-learn-scorm .list .tile .tile-content {
-  max-width: 960px;
 }
 
 .portlet-learn-scorm .list .tile .tile-content > .tile-with-rating, .portlet-learn-scorm .list .tile .tile-content > .image {
@@ -3209,6 +3300,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .list .tile .tile-content > ul {
   display: table-cell;
+  max-width: 780px;
 }
 
 .portlet-learn-scorm .list .tile .tile-content > ul .title {
@@ -3224,11 +3316,11 @@ h6, .portlet-learn-scorm .h6 {
   margin-right: 9.1px;
 }
 
-.portlet-learn-scorm .list .tile .tile-content.with-action {
-  max-width: 1080px;
+.portlet-learn-scorm .list .tile .tile-content.with-action > ul {
+  max-width: 900px;
 }
 
-.portlet-learn-scorm .list .tile .tile-content.with-action .title, .portlet-learn-scorm .list .tile .tile-content.with-action .description {
+.portlet-learn-scorm .list .tile .tile-content.with-action > ul .title, .portlet-learn-scorm .list .tile .tile-content.with-action > ul .description {
   padding-right: 120px;
 }
 
@@ -3246,11 +3338,19 @@ h6, .portlet-learn-scorm .h6 {
   border-bottom: none;
 }
 
-.portlet-learn-scorm .list .tile .dropdown {
+.portlet-learn-scorm .list .tile .dropdown.actions, .portlet-learn-scorm .list .tile .action-buttons {
   position: absolute;
   right: 5px;
   top: 50%;
   margin-top: -17px;
+}
+
+.portlet-learn-scorm .simple-list .tile {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm .simple-list .tile:last-child {
+  border-bottom: none;
 }
 
 .portlet-learn-scorm .portlet[min-width~="480px"] .list .tile .tile-content .image {
@@ -3282,7 +3382,7 @@ h6, .portlet-learn-scorm .h6 {
   padding-top: 9.1px;
 }
 
-.portlet-learn-scorm .tiles .tile .dropdown {
+.portlet-learn-scorm .tiles .tile .dropdown.actions, .portlet-learn-scorm .tiles .tile .action-buttons {
   position: absolute;
   right: 10px;
   top: 10px;
@@ -3418,7 +3518,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-portlet .portlet-wrapper {
-  margin-left: 260px;
+  padding-left: 260px;
   transition-duration: 0.1s;
 }
 
@@ -3460,7 +3560,7 @@ h6, .portlet-learn-scorm .h6 {
   position: absolute;
   top: 0px;
   right: 0px;
-  padding: 20px;
+  margin: 17px;
   cursor: pointer;
   color: #555;
 }
@@ -3490,15 +3590,24 @@ h6, .portlet-learn-scorm .h6 {
   margin-bottom: 0px;
 }
 
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .sidebar-row {
-  padding: 9.1px 18.2px;
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content.val-icon-arrow-down::before, .portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content.val-icon-arrow-right::before {
+  cursor: pointer;
+  z-index: 1;
 }
 
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .sidebar-row span {
-  margin-right: 5px;
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content.val-icon-arrow-down::before, .portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content.val-icon-arrow-right::before,
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content .arrow-text {
+  position: absolute;
+  left: 5px;
+  margin-top: 10px;
 }
 
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .lesson-category .lesson-category-title {
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content .arrow-text {
+  width: 20px;
+  height: 20px;
+}
+
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content .lesson-category-title {
   display: block;
   padding: 10px 0px;
   color: #2c2c2c;
@@ -3506,16 +3615,20 @@ h6, .portlet-learn-scorm .h6 {
   font-weight: bold;
 }
 
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .lesson-category.collapsed .lesson-category-title {
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content.collapsed .lesson-category-title {
   font-weight: normal;
 }
 
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .lesson-category.collapsed .lesson-items {
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content.collapsed .lesson-items > div:not(:first-child) .lesson-item {
   display: none;
 }
 
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .lesson-category > [class^="val-icon-"]:before,
-.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .lesson-category > [class*=" val-icon-"]:before {
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content .lesson-items > div:not(:first-child) .lesson-item {
+  padding-left: 50px;
+}
+
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content > [class^="val-icon-"]:before,
+.portlet-learn-scorm .val-portlet .portlet-wrapper .portlet-sidebar .sidebar-content .directory-content > [class*=" val-icon-"]:before {
   width: 30px;
   display: inline-block;
   text-align: center;
@@ -3639,6 +3752,7 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm .val-portlet .portlet-wrapper .content-wrapper .content-header.val-inactive {
   background: #1C1C1C;
   pointer-events: none;
+  border-bottom: none;
 }
 
 .portlet-learn-scorm .val-portlet .portlet-wrapper .content-wrapper .content-header .content-title {
@@ -3665,17 +3779,6 @@ h6, .portlet-learn-scorm .h6 {
   text-align: center;
   padding-top: 20px;
   overflow: hidden;
-}
-
-.portlet-learn-scorm .val-portlet .portlet-wrapper .content-wrapper .content-header .content-controls > div {
-  float: left;
-  padding: 20px;
-  cursor: pointer;
-  color: #555;
-}
-
-.portlet-learn-scorm .val-portlet .portlet-wrapper .content-wrapper .content-header .content-controls > div:hover {
-  color: #2c2c2c;
 }
 
 .portlet-learn-scorm .val-portlet .portlet-wrapper .content-wrapper .content-header .content-controls-buttons {
@@ -3718,12 +3821,45 @@ h6, .portlet-learn-scorm .h6 {
   margin: 9.1px 18.2px;
 }
 
+.portlet-learn-scorm .val-portlet .portlet-wrapper .content-controls > div {
+  float: left;
+  padding: 20px;
+  cursor: pointer;
+  color: #555;
+}
+
+.portlet-learn-scorm .val-portlet .portlet-wrapper .content-controls > div:hover {
+  color: #2c2c2c;
+}
+
 .portlet-learn-scorm .val-portlet .portlet-wrapper.sidebar-hidden {
-  margin-left: 0;
+  padding-left: 0;
 }
 
 .portlet-learn-scorm .val-portlet .portlet-wrapper.sidebar-hidden .portlet-sidebar {
   left: 0;
+}
+
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .content-controls .button,
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .sidebar-header .button {
+  float: left;
+  cursor: pointer;
+  margin: 17px;
+}
+
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .content-controls .button:hover,
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .sidebar-header .button:hover {
+  color: #2c2c2c;
+}
+
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .content-controls .button:hover [class^="val-icon"],
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .sidebar-header .button:hover [class^="val-icon"] {
+  color: #2c2c2c;
+}
+
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .content-controls .button [class^="val-icon"],
+.portlet-learn-scorm .val-portlet .player-region .portlet-wrapper .sidebar-header .button [class^="val-icon"] {
+  color: #555;
 }
 
 .portlet-learn-scorm .portlet-wrapper.hide-s-sidebar {
@@ -3793,7 +3929,6 @@ h6, .portlet-learn-scorm .h6 {
   font-weight: bold;
   line-height: 1;
   padding: 0 14px;
-  text-decoration: none;
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
@@ -3890,7 +4025,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .button.primary [class^="val-icon-"]:before,
 .portlet-learn-scorm .button.primary [class*=" val-icon-"]:before {
-  color: #243400;
+  color: white;
 }
 
 .portlet-learn-scorm .button.neutral {
@@ -3973,7 +4108,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .button > [class^="val-icon-"]:before,
 .portlet-learn-scorm .button > [class*=" val-icon-"]:before {
-  margin: -1px 10px 0 -4px;
+  margin: -2px 10px 0 -4px;
   vertical-align: middle;
   display: inline-block;
   width: 20px;
@@ -4018,18 +4153,16 @@ h6, .portlet-learn-scorm .h6 {
   top: 7px;
   left: -5px;
   margin: 0 5px 0 0;
-  -webkit-transform: translate(-100%, 0);
-      -ms-transform: translate(-100%, 0);
-          transform: translate(-100%, 0);
+  -ms-transform: translate(-100%, 0);
+      transform: translate(-100%, 0);
 }
 
 .portlet-learn-scorm .button.button-tooltip .val-badge.bottom {
   left: 0;
   top: 34px;
   bottom: -16px;
-  -webkit-transform: translate(0, 100%);
-      -ms-transform: translate(0, 100%);
-          transform: translate(0, 100%);
+  -ms-transform: translate(0, 100%);
+      transform: translate(0, 100%);
   margin: 0;
 }
 
@@ -4059,6 +4192,23 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm .button.button-tooltip > [class^="val-icon-"]:before,
 .portlet-learn-scorm .button.button-tooltip > [class*=" val-icon-"]:before {
   margin: 0 auto;
+}
+
+.portlet-learn-scorm .button.google-drive-icon {
+  background: url("../img/icon-drive.png") no-repeat 10px center;
+  background-size: 20px;
+  padding-left: 40px;
+}
+
+.portlet-learn-scorm .button[disabled] {
+  color: #AAA;
+  background: #EAEAEA;
+  border-color: #EAEAEA;
+}
+
+.portlet-learn-scorm .button[disabled]:hover {
+  background: #EAEAEA;
+  border-color: #EAEAEA;
 }
 
 .portlet-learn-scorm .button-group {
@@ -4113,6 +4263,19 @@ h6, .portlet-learn-scorm .h6 {
   padding-right: 0;
 }
 
+.portlet-learn-scorm .button-divider-v {
+  display: inline-block;
+  width: 6px;
+  height: 34px;
+  border-right: 1px solid #000000;
+  margin-right: 5px;
+  vertical-align: top;
+}
+
+.portlet-learn-scorm .button-divider-v.neutral {
+  border-color: #CCCCCC;
+}
+
 .portlet-learn-scorm .text-left {
   text-align: left !important;
 }
@@ -4137,7 +4300,7 @@ h6, .portlet-learn-scorm .h6 {
   float: left !important;
 }
 
-.portlet-learn-scorm .ellipsis, .portlet-learn-scorm #questionBankBody.val-portlet .portlet-wrapper .lesson-items .lesson-item-li .lesson-item-title, .portlet-learn-scorm .ellipsis p, .portlet-learn-scorm #questionBankBody.val-portlet .portlet-wrapper .lesson-items .lesson-item-li .lesson-item-title p {
+.portlet-learn-scorm .ellipsis, .portlet-learn-scorm .ellipsis p {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -4211,6 +4374,10 @@ h6, .portlet-learn-scorm .h6 {
   height: 100%;
 }
 
+.portlet-learn-scorm .invisible-font {
+  font-size: 0 !important;
+}
+
 .portlet-learn-scorm .display-inline {
   display: inline !important;
 }
@@ -4232,7 +4399,11 @@ h6, .portlet-learn-scorm .h6 {
   vertical-align: middle;
 }
 
-.portlet-learn-scorm #SCORMPlayerView {
+.portlet-learn-scorm .arrow-icon-indent {
+  padding-left: 25px;
+}
+
+.portlet-learn-scorm #SCORMPlayerView, .portlet-learn-scorm #playerRegion {
   height: 100%;
   width: 100%;
 }
@@ -4369,7 +4540,6 @@ h6, .portlet-learn-scorm .h6 {
   word-break: break-all;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
@@ -4518,35 +4688,71 @@ h6, .portlet-learn-scorm .h6 {
   max-width: 90px;
   max-height: 60px;
   margin-right: 18.2px;
-  margin-bottom: 18.2px;
   cursor: pointer;
 }
 
-.portlet-learn-scorm .package-image, .portlet-learn-scorm .certificate-image {
+.portlet-learn-scorm .val-img-logo.preview {
+  cursor: auto;
+}
+
+.portlet-learn-scorm .val-img-logo[src=""] {
   width: 90px;
   height: 60px;
-  background: #DEDEDE url("../img/imgo.jpg") center no-repeat;
-  background-origin: padding-box;
-  background-size: cover;
-  margin-right: 18.2px;
-}
-
-.portlet-learn-scorm .certificate-image {
-  background: #DEDEDE url("../img/certificate-default.jpg") center no-repeat;
+  background: transparent url("../img/lesson_cover.svg") center no-repeat;
   background-origin: padding-box;
   background-size: cover;
 }
 
-.portlet-learn-scorm img.img-circle {
-  border-radius: 500px;
+.portlet-learn-scorm .val-img-logo[src=""].certificate {
+  background-image: url("../img/certificate_cover.svg");
+}
+
+.portlet-learn-scorm .val-img-logo[src=""].course {
+  background-image: url("../img/course_cover.svg");
+}
+
+.portlet-learn-scorm .image {
+  background: transparent url("../img/lesson_cover.svg") center no-repeat;
+  background-origin: padding-box;
+  background-size: cover;
+}
+
+.portlet-learn-scorm .image.certificate {
+  background-image: url("../img/certificate_cover.svg");
+}
+
+.portlet-learn-scorm .image.course {
+  background-image: url("../img/course_cover.svg");
+}
+
+.portlet-learn-scorm .img-circle {
+  border-radius: 100%;
   border: 1px solid #CCCCCC;
   width: 40px;
+  min-width: 40px;
   height: 40px;
 }
 
-.portlet-learn-scorm img.img-circle.small {
+.portlet-learn-scorm .img-circle.small {
   width: 30px;
+  min-width: 30px;
   height: 30px;
+}
+
+.portlet-learn-scorm .img-circle.big {
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+}
+
+.portlet-learn-scorm .img-circle.success {
+  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #598000;
+  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #598000;
+}
+
+.portlet-learn-scorm .img-circle.failed {
+  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
+  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
 }
 
 .portlet-learn-scorm .image.img-square {
@@ -4554,9 +4760,50 @@ h6, .portlet-learn-scorm .h6 {
   height: 50px !important;
 }
 
-.portlet-learn-scorm .portlet[min-width~="480px"] .package-image, .portlet-learn-scorm .portlet[min-width~="480px"] .certificate-image {
-  width: 150px;
-  height: 100px;
+.portlet-learn-scorm .image.img-rect {
+  width: 60px !important;
+  height: 40px !important;
+}
+
+.portlet-learn-scorm .image.img-rect.big {
+  width: 75px !important;
+  height: 50px !important;
+}
+
+.portlet-learn-scorm .image.img-rect.small {
+  width: 45px !important;
+  height: 30px !important;
+}
+
+.portlet-learn-scorm .image-selection {
+  padding-bottom: 9.1px;
+  position: relative;
+  cursor: pointer;
+  border-radius: 2px;
+  width: 160px;
+  height: 160px;
+  background: transparent url("../img/orientation-horizontal.png") center no-repeat;
+  background-origin: padding-box;
+  background-size: cover;
+}
+
+.portlet-learn-scorm .image-selection.vertical {
+  background-image: url("../img/orientation-vertical.png");
+}
+
+.portlet-learn-scorm .image-selection .val-rounded-icon {
+  display: none;
+}
+
+.portlet-learn-scorm .image-selection.selected {
+  border: 1px solid #598000;
+}
+
+.portlet-learn-scorm .image-selection.selected .val-rounded-icon {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: block;
 }
 
 .portlet-learn-scorm .portlet[min-width~="480px"] .val-img-logo {
@@ -4564,14 +4811,19 @@ h6, .portlet-learn-scorm .h6 {
   max-height: 100px;
 }
 
-.portlet-learn-scorm .portlet[min-width~="1024px"] .package-image, .portlet-learn-scorm .portlet[min-width~="1024px"] .certificate-image {
-  width: 180px;
-  height: 120px;
+.portlet-learn-scorm .portlet[min-width~="480px"] .val-img-logo[src=""] {
+  width: 150px;
+  height: 100px;
 }
 
 .portlet-learn-scorm .portlet[min-width~="1024px"] .val-img-logo {
   max-width: 180px;
   max-height: 120px;
+}
+
+.portlet-learn-scorm .portlet[min-width~="1024px"] .val-img-logo[src=""] {
+  width: 180px;
+  height: 120px;
 }
 
 .portlet-learn-scorm .valamis-plus-minus {
@@ -4621,36 +4873,53 @@ h6, .portlet-learn-scorm .h6 {
   margin: 36.4px;
 }
 
-.portlet-learn-scorm .dropzone-small .dropzone-wrapper {
-  width: auto;
-  margin: 0;
-}
-
-.portlet-learn-scorm .dropzone-small .dropzone {
-  padding: 36.4px;
-  margin: 0;
-}
-
 .portlet-learn-scorm .dropzone {
   text-align: center;
   font-weight: bold;
-}
-
-.portlet-learn-scorm .progress-bar {
-  height: 100%;
-  background-color: #f0ad4e;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.portlet-learn-scorm .progress-bar-success {
-  background-color: #5cb85c;
-}
-
-.portlet-learn-scorm .val-modal .dropzone {
-  height: 250px;
-  padding-top: 115px;
   font-size: 15.0px;
+  color: #2c2c2c;
+}
+
+.portlet-learn-scorm .dropzone > div {
+  padding: 72.8px 0;
+}
+
+.portlet-learn-scorm .dropzone .upload-image {
+  background: transparent url("../img/icon-import-file.svg") center no-repeat;
+  background-origin: padding-box;
+  background-size: cover;
+  width: 48px;
+  height: 68px;
+  margin: 18.2px auto;
+}
+
+.portlet-learn-scorm .dropzone .upload-browse-label {
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .dropzone .upload-info-label {
+  font-size: smaller;
+  font-weight: normal;
+}
+
+.portlet-learn-scorm .file-uploader-small .dropzone > div {
+  padding: 36.4px 0;
+}
+
+.portlet-learn-scorm .file-uploader-simple .dropzone {
+  font-size: 13px;
+}
+
+.portlet-learn-scorm .file-uploader-simple .dropzone > div {
+  padding: 36.4px 0;
+}
+
+.portlet-learn-scorm .file-uploader-simple .dropzone-wrapper {
+  margin: 0;
+}
+
+.portlet-learn-scorm .file-uploader-simple .upload-image {
+  display: none;
 }
 
 .portlet-learn-scorm .val-lesson-content .list-header {
@@ -4778,7 +5047,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .val-lesson-content .ui-state-error {
   background-color: #FBE3E4;
-  border-color: #e77465;
+  border-color: #CC4233;
 }
 
 .portlet-learn-scorm .val-lesson-content .active-item {
@@ -4883,7 +5152,7 @@ h6, .portlet-learn-scorm .h6 {
   background-color: #F2F2F2;
 }
 
-.portlet-learn-scorm #questionBankBody .content-preview table tr td.ellipsis, .portlet-learn-scorm #questionBankBody.val-portlet .content-preview table tr .portlet-wrapper .lesson-items .lesson-item-li td.lesson-item-title, .portlet-learn-scorm #questionBankBody.val-portlet .portlet-wrapper .lesson-items .lesson-item-li .content-preview table tr td.lesson-item-title {
+.portlet-learn-scorm #questionBankBody .content-preview table tr td.ellipsis {
   max-width: 220px;
 }
 
@@ -4896,7 +5165,23 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm #questionBankBody.val-portlet .portlet-wrapper .lesson-items .lesson-item-li .lesson-item-title {
+  display: inline-block;
+  max-width: 450px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-wrap: normal;
   cursor: move;
+}
+
+.portlet-learn-scorm #questionBankBody.val-portlet .portlet-wrapper .lesson-items .lesson-item-li .lesson-item-type {
+  display: inline-block;
+  max-width: 350px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-wrap: normal;
+  font-weight: normal;
 }
 
 .portlet-learn-scorm #questionBankBody.val-portlet .portlet-wrapper .portlet-sidebar {
@@ -5005,7 +5290,6 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm #questionBankBody #contentManagerTopbarView {
   background-color: #F2F2F2;
-  border-bottom: 1px solid #CCCCCC;
 }
 
 .portlet-learn-scorm #questionBankBody #contentManagerTopbarView input[type="radio"] {
@@ -5014,6 +5298,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm #questionBankBody #contentManagerTopbarView > .div-table {
   vertical-align: middle;
+  border-bottom: 1px solid #CCCCCC;
 }
 
 .portlet-learn-scorm #questionBankBody #contentManagerTopbarView > .div-table > .div-row > .div-col {
@@ -5037,10 +5322,25 @@ h6, .portlet-learn-scorm .h6 {
   font-weight: bold;
 }
 
+.portlet-learn-scorm #questionBankBody .tree-item .val-icon-arrow-right-two:before {
+  display: inline;
+  position: absolute;
+  left: 0;
+}
+
 .portlet-learn-scorm #contentManagerContentView .lesson-item > * {
   line-height: 32px;
   height: 34px;
   vertical-align: baseline;
+}
+
+.portlet-learn-scorm .val-info-table .div-col.selectize-dropdown-style {
+  padding-top: 28.2px;
+  padding-bottom: 28.2px;
+}
+
+.portlet-learn-scorm .val-info-table .div-col.selectize-dropdown-style .selectize-dropdown-content {
+  max-height: 100px;
 }
 
 .portlet-learn-scorm .content-manager-new-category .bbm-modal.bbm-modal--open {
@@ -5059,8 +5359,8 @@ h6, .portlet-learn-scorm .h6 {
 .portlet-learn-scorm .lesson-studio-modal.slide-templates-modal .bbm-modal.bbm-modal--open {
   width: 440px !important;
   max-height: 600px;
-  padding: 20px 20px 40px 20px;
-  left: 80px;
+  padding: 20px 2px 40px 20px;
+  position: absolute;
 }
 
 .portlet-learn-scorm .lesson-studio-modal.slide-templates-modal .bbm-modal.bbm-modal--open .tile {
@@ -5068,7 +5368,8 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .lesson-studio-modal.slide-templates-modal .bbm-modal.bbm-modal--open .bbm-modal__topbar .modal-close {
-  right: -20px;
+  right: 0;
+  top: -20px;
 }
 
 .portlet-learn-scorm .lesson-studio-modal.slide-theme-modal-view .bbm-modal.bbm-modal--open {
@@ -5083,21 +5384,69 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open {
-  padding: 40px;
-  width: 390px !important;
+  width: 480px !important;
 }
 
-.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .bbm-modal__topbar .modal-close {
-  right: -40px;
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content {
+  padding: 36.4px;
 }
 
-.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open button {
-  width: 300px;
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .dropzone-wrapper {
+  margin-right: 0;
+  margin-left: 0;
 }
 
-.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .button-center {
-  width: auto;
-  margin-bottom: 5px;
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .file-uploader-item-wrapper .uploading-file-name {
+  display: none;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content label {
+  color: #2c2c2c;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content label.group-label {
+  font-weight: bold;
+  padding-bottom: 5px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table {
+  padding-bottom: 18.2px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table .div-col {
+  padding: 0 5px;
+  vertical-align: top;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table input, .portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table label {
+  margin: 0;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table .hint-text {
+  font-size: 12px;
+  color: #555;
+  padding-bottom: 10px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .orientation-options-table {
+  padding-bottom: 18.2px;
+  font-size: 13px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .orientation-options-table .div-col {
+  padding-right: 18.2px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .tooltip {
+  max-width: 300px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .tooltip .tooltip-inner {
+  max-width: 300px;
+}
+
+.portlet-learn-scorm .lesson-studio-modal.select-display-format-modal .bbm-modal.bbm-modal--open .modal-content .hint-layout {
+  padding-bottom: 18.2px;
 }
 
 .portlet-learn-scorm .lesson-studio-modal.slide-settings-modal .bbm-modal.bbm-modal--open {
@@ -5175,8 +5524,11 @@ h6, .portlet-learn-scorm .h6 {
   vertical-align: bottom;
 }
 
+.portlet-learn-scorm .lesson-studio-modal.slide-settings-modal .settings-container .val-row .shift-left.no-margin {
+  margin: 0;
+}
+
 .portlet-learn-scorm .lesson-studio-modal.slide-settings-modal .settings-container .val-row #scorepicker {
-  display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
@@ -5193,7 +5545,6 @@ h6, .portlet-learn-scorm .h6 {
   display: inline-block;
   white-space: nowrap;
   font-size: 0;
-  margin: 0px 10px;
   width: 160px;
 }
 
@@ -5269,11 +5620,11 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .portlet[min-width~="1024px"] #questionBankBody.val-portlet .portlet-wrapper {
-  margin-left: 260px;
+  padding-left: 260px;
 }
 
 .portlet-learn-scorm .portlet[min-width~="1024px"] #questionBankBody.val-portlet .portlet-wrapper.sidebar-hidden {
-  margin-left: 0px;
+  padding-left: 0;
 }
 
 .portlet-learn-scorm .portlet[min-width~="1024px"] #questionBankBody.val-portlet .portlet-wrapper .portlet-sidebar {
@@ -5323,38 +5674,6 @@ h6, .portlet-learn-scorm .h6 {
   width: 100%;
 }
 
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet .filter-element .val-icon-menu {
-  line-height: 34px;
-}
-
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet .edit-goals-sidebar .val-row {
-  margin-bottom: 18.2px;
-}
-
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet #certificateItemGoals .val-row {
-  margin-bottom: 18.2px;
-}
-
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet #certificateItemGoals .val-row .val-table {
-  margin: 0px;
-  border-left: 0;
-  border-right: 0;
-}
-
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet #certificateItemGoals .val-row .val-table tr, .portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet #certificateItemGoals .val-row .val-table th {
-  border: none;
-  border-bottom: none;
-}
-
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet #certificateItemGoals .val-row ul {
-  border: none;
-  margin: 0px;
-}
-
-.portlet-learn-scorm #curriculum-modals-layout_Curriculum_WAR_learnportlet .certificate-modals-container table {
-  margin: 0;
-}
-
 .portlet-learn-scorm .gradebookBody .sidebar-wrapper {
   background: #F2F2F2;
 }
@@ -5367,7 +5686,7 @@ h6, .portlet-learn-scorm .h6 {
   margin-top: 0;
 }
 
-.portlet-learn-scorm #SCORMPlayerView {
+.portlet-learn-scorm #SCORMPlayerView, .portlet-learn-scorm #playerRegion {
   border: none;
   width: 100%;
   height: 100%;
@@ -5375,188 +5694,26 @@ h6, .portlet-learn-scorm .h6 {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 400;
+  z-index: 500;
   background-color: #EAEAEA;
 }
 
-.portlet-learn-scorm #SCORMPlayerView .content-container iframe {
+.portlet-learn-scorm #SCORMPlayerView .portlet-wrapper, .portlet-learn-scorm #playerRegion .portlet-wrapper {
+  width: 100%;
+}
+
+.portlet-learn-scorm #SCORMPlayerView .content-container iframe, .portlet-learn-scorm #playerRegion .content-container iframe {
   display: block;
 }
 
-.portlet-learn-scorm .val-competences td.fix-col-width {
-  width: 40%;
+.portlet-learn-scorm .status .button.small {
+  width: 20px;
+  margin-right: 5px;
+  line-height: 26px;
 }
 
-.portlet-learn-scorm .val-competences .portlet-wrapper .content-wrapper {
-  min-height: 200px;
-  border: none;
-}
-
-.portlet-learn-scorm .val-competences #competencesAdminSidebar .val-tree .selected-entity .tree-item-title {
-  font-weight: bold;
-}
-
-.portlet-learn-scorm .val-competences table.competences-list-table {
-  margin: 0;
-}
-
-.portlet-learn-scorm .val-competences .settings-table .name-col label {
-  color: #555;
-  font-weight: bold;
-}
-
-.portlet-learn-scorm .val-competences .competences-list-header button {
-  margin: 10px;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable {
-  border: none;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr td a {
-  color: #2974A6;
-  cursor: pointer;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr td a:hover {
-  color: #1a4969;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr td a:active, .portlet-learn-scorm .val-competences #mySkillsTable tr td a:focus {
-  color: #1a4969;
-  outline: none;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr td:not(:first-child) {
-  text-align: center;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr.competence-category {
-  background-color: #F2F2F2 !important;
-  border-right: 1px solid #CCCCCC;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr.competence-category.depth-3 {
-  background-color: #EAEAEA !important;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr.competence-category.depth-2 {
-  background-color: #DEDEDE !important;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr.competence-category.depth-1 {
-  background-color: #AAA !important;
-}
-
-.portlet-learn-scorm .val-competences #mySkillsTable tr:not(.competence-category) td:first-child {
-  padding-left: 27.3px;
-}
-
-.portlet-learn-scorm .val-competences .new-item-button {
-  width: 140px;
-  margin: 9.1px;
-}
-
-.portlet-learn-scorm .val-competences .block-margin {
-  margin: 0 18.2px;
-}
-
-.portlet-learn-scorm .val-competences .block-margin .groupItem {
-  padding-right: 36.4px;
-}
-
-.portlet-learn-scorm .val-competences .block-margin .groupItem:last-child {
-  padding-right: 0;
-}
-
-.portlet-learn-scorm .val-competences .block-header {
-  background-color: #EAEAEA;
-  padding: 0 9.1px;
-}
-
-.portlet-learn-scorm .val-competences #userInfoRegion .div-table .single-element-col:first-child {
-  width: 90px;
-}
-
-.portlet-learn-scorm .val-competences #userInfoRegion .div-table .single-element-col .img-circle {
-  width: 50px;
-  height: 50px;
-}
-
-.portlet-learn-scorm .val-competences ul.competences-list {
-  list-style-type: disc;
-  margin-bottom: 9.1px;
-  padding-left: 18.2px;
-}
-
-.portlet-learn-scorm .val-competences ul.competences-list li {
-  line-height: 1.4;
-}
-
-.portlet-learn-scorm .val-competences .select-button {
-  width: 100px;
-  position: relative;
-}
-
-.portlet-learn-scorm .val-competences .select-button div {
-  overflow: hidden;
-  width: 80px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-right: 24px;
-}
-
-.portlet-learn-scorm .val-competences .select-button span {
-  position: absolute;
-  top: 0;
-  right: 18.2px;
-}
-
-.portlet-learn-scorm .val-competences .user-experience-table td:first-child {
-  width: 200px;
-  text-align: left;
-}
-
-.portlet-learn-scorm .val-competences .user-experience-table span {
-  font-weight: normal;
-}
-
-.portlet-learn-scorm #competencesUserToolbar #competencesSearchPrompt {
-  background-color: white;
-  top: auto;
-  cursor: pointer;
-  width: 240px;
-  box-shadow: 0px 0px 13px 0px rgba(40, 40, 40, 0.44);
-}
-
-.portlet-learn-scorm #competencesUserToolbar #competencesSearchPrompt li {
-  padding: 3px;
-  font-weight: normal;
-}
-
-.portlet-learn-scorm #competencesUserToolbar #competencesSearchPrompt li .prompt-right {
-  position: absolute;
-  right: 5px;
-}
-
-.portlet-learn-scorm #competencesUserToolbar #competencesSearchPrompt li .prompt-left {
-  display: inline-block;
-  width: 170px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.portlet-learn-scorm .val-learning-paths .learning-path-item .tile {
-  border: none;
-  padding: 30px;
-}
-
-.portlet-learn-scorm .val-learning-paths .learning-path-item .toggle-container {
-  border-bottom: 1px solid #CCCCCC;
-}
-
-.portlet-learn-scorm .val-learning-paths .learning-path-item:last-child .toggle-container {
-  border: none;
+.portlet-learn-scorm .resent-lessons {
+  overflow-x: hidden;
 }
 
 .portlet-learn-scorm .resent-lessons .tile {
@@ -5591,8 +5748,14 @@ h6, .portlet-learn-scorm .h6 {
   margin: 3px 0;
 }
 
-.portlet-learn-scorm .achieved-certificates .tile .tile-content ul > li:not(.title) {
+.portlet-learn-scorm .achieved-certificates .tile .tile-content .tile-content ul > li:not(.title) {
   line-height: 18px;
+}
+
+.portlet-learn-scorm .achieved-certificates .tile .tile-content > .image {
+  float: left;
+  text-align: center;
+  margin-right: 18.2px;
 }
 
 .portlet-learn-scorm .valamis-activities-users-liked .bbm-modal.bbm-modal--open {
@@ -5633,13 +5796,396 @@ h6, .portlet-learn-scorm .h6 {
   min-height: 200px;
 }
 
-.portlet-learn-scorm .valamis-tooltip {
-  border-bottom: 1px dashed #2c2c2c;
-  cursor: help;
+.portlet-learn-scorm .portlet[id*="MyCourses"] table {
+  max-width: none;
 }
 
-.portlet-learn-scorm .valamis-tooltip.button {
+.portlet-learn-scorm .portlet[id*="MyCertificates"] table th.summary:last-child, .portlet-learn-scorm .portlet[id*="MyCertificates"] table td.summary:last-child {
+  padding-right: 20px;
+}
+
+.portlet-learn-scorm .dropdown .edit-members-dropdown,
+.portlet-learn-scorm .dropdown .edit-lesson-dropdown {
+  overflow-y: scroll;
+}
+
+.portlet-learn-scorm .dropdown .edit-members-dropdown {
+  max-height: 185px;
+}
+
+.portlet-learn-scorm .dropdown .edit-lesson-dropdown {
+  max-height: 130px;
+}
+
+.portlet-learn-scorm #membershipSelectionComment {
+  padding-top: 10px;
+  font-style: italic;
+  color: #555;
+}
+
+.portlet-learn-scorm .membership-info {
+  font-weight: bold;
+  font-size: 13px;
+  color: #777;
+}
+
+.portlet-learn-scorm .membership-info.joined {
+  color: #2974A6;
+}
+
+.portlet-learn-scorm .course-type-selector .course-type-name input {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.portlet-learn-scorm .course-type-selector .course-type-description {
+  margin-left: 30px;
+  color: #555;
+  font-size: 12px;
+}
+
+.portlet-learn-scorm #editCourseDetails {
+  margin-left: 44px;
+  margin-right: 44px;
+}
+
+.portlet-learn-scorm #editCourseDetails .div-row .name-col {
+  vertical-align: top;
+  text-align: left;
+  padding-left: 0px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.portlet-learn-scorm #editCourseDetails .div-row .content-col {
+  padding-right: 0px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.portlet-learn-scorm .add-site-members-modal .paging-showing-label .show-items-buttons {
+  font-weight: normal;
+}
+
+.portlet-learn-scorm .add-site-members-modal .bbm-modal {
+  max-width: 480px;
+  margin-top: 20px;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseToolbar .table-header-row {
+  border: none;
+  padding: 0px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseToolbar table {
+  border: none;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseToolbar table tr {
+  border: none;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseToolbar table tr td {
+  color: #555;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-top: none;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList table {
+  border: none;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList table tr {
+  background-color: #FFF;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList table tr .name-col {
+  font-size: 15.0px;
+  word-break: keep-all;
+  line-height: 20px;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList table tr .role-col {
+  font-weight: normal;
+  line-height: 17px;
+  word-break: keep-all;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList table tr:last-child {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm .add-site-members-modal #valamisBaseList table tr:last-child td {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal .checkbox-col {
+  padding-right: 5px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal .bbm-modal {
+  max-width: 640px;
+  margin-top: 20px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseToolbar .table-header-row {
+  padding: 0px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseToolbar .table-header-row .val-table {
+  border: 0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseToolbar .table-header-row tbody tr {
+  border: 0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseToolbar .table-header-row tbody tr .name-col {
+  width: 30%;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseToolbar .table-header-row tbody tr td {
+  border-top: 0px;
+  color: #555;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table {
+  border: 0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table tbody tr {
+  background-color: #FFF;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table tbody tr .name-col {
+  width: 30%;
+  font-size: 15.0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table tbody tr .description-col {
+  font-weight: normal;
+  line-height: 17px;
+  word-break: keep-all;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table tbody tr td {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table tbody tr:last-child {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseList table tbody tr:last-child td {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm .add-site-roles-modal #valamisBaseListPaginator {
+  display: none;
+}
+
+.portlet-learn-scorm #editCourseMembers .paging-showing-label .show-items-buttons {
+  font-weight: normal;
+}
+
+.portlet-learn-scorm #editCourseMembers .js-global-assign-role {
+  margin: 0px;
+}
+
+.portlet-learn-scorm #editCourseMembers .js-assign-role {
+  margin: 0px;
+}
+
+.portlet-learn-scorm #editCourseMembers .picture-placeholder {
+  width: 58px;
+}
+
+.portlet-learn-scorm #editCourseMembers .name-col {
+  width: 25%;
+}
+
+.portlet-learn-scorm #editCourseMembers .button .simple {
+  margin: 0px;
+}
+
+.portlet-learn-scorm #editCourseMembers .display-on-selection {
+  padding-right: 0px;
+  padding-left: 0px;
+  margin-left: 20px;
+  margin-right: 20px;
+  border-top: 0px;
+}
+
+.portlet-learn-scorm #editCourseMembers .display-on-selection .user-selection-count-label {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #editCourseMembers .display-on-selection .deselect-all-label {
   cursor: pointer;
+  color: #268bd2;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseToolbar .table-header-row {
+  border: none;
+  padding: 0px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseToolbar table {
+  border: none;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseToolbar table tr {
+  border: none;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseToolbar table tr td {
+  color: #555;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-top: none;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList table {
+  border: none;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList table tr {
+  background-color: #FFF;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList table tr .name-col {
+  font-size: 15.0px;
+  word-break: keep-all;
+  line-height: 20px;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList table tr .role-col {
+  font-weight: normal;
+  line-height: 17px;
+  word-break: keep-all;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList table tr:last-child {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm #editCourseMembers #valamisBaseList table tr:last-child td {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm #editCourseTabs #editRequestsTab {
+  padding-right: 0px;
+}
+
+.portlet-learn-scorm #editCourseTabs .membership-requests-count {
+  color: #FFF;
+  text-align: center;
+  font-weight: bold;
+  background: #CC4233;
+  border-radius: 100%;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  display: inline-block;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList {
+  margin-left: 20px;
+  margin-right: 20px;
+  border: 0px;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList .val-table {
+  border: 0px;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList .val-table tr {
+  background: #FFF;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList .val-table tr .name-col .name-field {
+  display: block;
+  line-height: 5px;
+  padding-top: 15px;
+  font-size: 15.0px;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList .val-table tr .name-col .email-field {
+  font-weight: normal;
+  color: #555;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList .val-table tr:last-child {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm #editRequests #valamisBaseList .val-table tr:last-child td {
+  border-bottom: 0px;
+}
+
+.portlet-learn-scorm #allCourseCourseList .js-courses-list .tile-content .course-tags {
+  font-size: 13px;
+  color: #2c2c2c;
+  line-height: 18px;
+  text-align: left;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.portlet-learn-scorm #allCourseCourseList .js-courses-list .tile-content .title {
+  padding-right: 20px;
+}
+
+.portlet-learn-scorm #allCourseCourseList .js-courses-list .tile-content .membership-requests-count {
+  color: #FFF;
+  text-align: center;
+  font-weight: bold;
+  background: #cc4233;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  display: inline-block;
+}
+
+.portlet-learn-scorm #allCourseCourseList .js-courses-list .tile-content .membership-requests-label {
+  color: #555555;
+  line-height: 20px;
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #allCourseCourseList .js-courses-list .tile-content .description {
+  line-height: 20px;
+}
+
+.portlet-learn-scorm .valamis-tooltip:not(.button) {
+  border-bottom: 1px dashed #2c2c2c;
+  cursor: help;
 }
 
 .portlet-learn-scorm .tooltip {
@@ -5655,6 +6201,10 @@ h6, .portlet-learn-scorm .h6 {
   font-size: 13px;
   font-weight: bold;
   pointer-events: none;
+  right: initial;
+  top: initial;
+  left: initial;
+  bottom: initial;
 }
 
 .portlet-learn-scorm .tooltip.in {
@@ -5689,8 +6239,9 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .tooltip.bottom:before {
+  bottom: 100%;
   border-color: rgba(227, 227, 227, 0);
-  border-bottom-color: rgba(255, 255, 255, 0.18);
+  border-bottom-color: #3d3d3d;
   border-width: 9px;
   margin-left: -9px;
 }
@@ -5713,8 +6264,9 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .tooltip.top:before {
+  top: 100%;
   border-color: rgba(227, 227, 227, 0);
-  border-top-color: rgba(255, 255, 255, 0.18);
+  border-top-color: #3d3d3d;
   border-width: 8px;
   margin-left: -8px;
 }
@@ -5737,8 +6289,9 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .tooltip.left:before {
+  left: 100%;
   border-color: rgba(227, 227, 227, 0);
-  border-left-color: rgba(255, 255, 255, 0.18);
+  border-left-color: #3d3d3d;
   border-width: 8px;
   margin-top: -8px;
 }
@@ -5761,8 +6314,9 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .tooltip.right:before {
+  right: 100%;
   border-color: rgba(227, 227, 227, 0);
-  border-right-color: rgba(255, 255, 255, 0.18);
+  border-right-color: #3d3d3d;
   border-width: 8px;
   margin-top: -8px;
 }
@@ -5805,16 +6359,32 @@ h6, .portlet-learn-scorm .h6 {
   left: 0;
 }
 
-.portlet-learn-scorm .val-progress-bar .val-progress.red span {
-  background-color: #e77465;
+.portlet-learn-scorm .val-progress-bar .val-progress span.full-progress-bar {
+  border-radius: 2px;
 }
 
-.portlet-learn-scorm .val-progress-bar .val-progress.yellow span {
-  background-color: #f7ac1c;
+.portlet-learn-scorm .val-progress-bar .val-progress span[style^="width: 100%;"], .portlet-learn-scorm .val-progress-bar .val-progress span[style^="width:100%;"] {
+  border-radius: 2px;
 }
 
-.portlet-learn-scorm .val-progress-bar .val-progress.green span {
+.portlet-learn-scorm .val-progress-bar .val-progress.failed span {
+  background-color: #CC4233;
+}
+
+.portlet-learn-scorm .val-progress-bar .val-progress.inprogress span {
+  background-color: #f7ac1d;
+}
+
+.portlet-learn-scorm .val-progress-bar .val-progress.success span {
   background-color: #598000;
+}
+
+.portlet-learn-scorm .val-progress-bar.wide {
+  display: block;
+}
+
+.portlet-learn-scorm .val-progress-bar.wide .val-progress {
+  width: 100%;
 }
 
 .portlet-learn-scorm .val-progress-bar .val-percentage {
@@ -5835,16 +6405,16 @@ h6, .portlet-learn-scorm .h6 {
   margin-left: 0;
 }
 
-.portlet-learn-scorm .val-legend-block.completed {
+.portlet-learn-scorm .val-legend-block.success {
   background: #598000;
 }
 
 .portlet-learn-scorm .val-legend-block.inprogress {
-  background: #f7ac1c;
+  background: #f7ac1d;
 }
 
 .portlet-learn-scorm .val-legend-block.failed {
-  background: #e77465;
+  background: #CC4233;
 }
 
 .portlet-learn-scorm .val-progress-chart {
@@ -5864,16 +6434,16 @@ h6, .portlet-learn-scorm .h6 {
   margin-top: 3px;
 }
 
-.portlet-learn-scorm .val-progress-chart div.progress-completed {
+.portlet-learn-scorm .val-progress-chart div.progress-success {
   background: #598000;
 }
 
 .portlet-learn-scorm .val-progress-chart div.progress-inprogress {
-  background: #f7ac1c;
+  background: #f7ac1d;
 }
 
 .portlet-learn-scorm .val-progress-chart div.progress-failed {
-  background: #e77465;
+  background: #CC4233;
 }
 
 .portlet-learn-scorm .val-activities {
@@ -5944,6 +6514,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .val-activities .activity-item .activity-block .activity-content .activity-content-label {
   font-weight: bold;
+  word-wrap: break-word;
 }
 
 .portlet-learn-scorm .val-activities .activity-item .activity-block .activity-content .activity-content-label a {
@@ -5996,11 +6567,7 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .val-activities .activity-item .activity-block .comment-item .comment-item-cell {
   width: 40px;
-}
-
-.portlet-learn-scorm .val-activities .activity-item .activity-block .comment-item .comment-item-cell .img-circle {
-  height: 30px;
-  width: 30px;
+  padding-right: 10px;
 }
 
 .portlet-learn-scorm .val-activities .activity-item .activity-block .comment-item .comment-item-cell [class*="val-icon-"]:before {
@@ -6016,9 +6583,6 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-activities .activity-item .activity-block .image {
-  background: #DEDEDE url("../img/imgo.jpg") center no-repeat;
-  background-origin: padding-box;
-  background-size: cover;
   width: 90px;
   height: 60px;
 }
@@ -6115,20 +6679,6 @@ h6, .portlet-learn-scorm .h6 {
   white-space: normal;
 }
 
-.portlet-learn-scorm .val-statistic .link-help {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-  line-height: 20px;
-  color: #FFF;
-  border: 0;
-  background-color: #AAA;
-  text-align: center;
-  border-radius: 50%;
-  text-decoration: none;
-}
-
 .portlet-learn-scorm .val-statistic .chart-header {
   margin: 25px 0;
   text-align: center;
@@ -6142,7 +6692,6 @@ h6, .portlet-learn-scorm .h6 {
   position: relative;
   margin: 0 auto;
   width: 100%;
-  overflow: hidden;
 }
 
 .portlet-learn-scorm .portlet[min-width~="480px"] .val-avatar-box {
@@ -6192,7 +6741,6 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-statistic-table {
-  width: 100%;
   border-collapse: collapse;
   /* Canvas */
   /* Users list */
@@ -6246,7 +6794,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-statistic-table th.expand .val-icon-toggle:before, .portlet-learn-scorm .val-statistic-table td.expand .val-icon-toggle:before {
-  content: "x";
+  content: "t";
 }
 
 .portlet-learn-scorm .val-statistic-table tr.open {
@@ -6254,7 +6802,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-statistic-table tr.open td.expand .val-icon-toggle:before {
-  content: "s";
+  content: "1";
 }
 
 .portlet-learn-scorm .val-statistic-table th.status, .portlet-learn-scorm .val-statistic-table td.status {
@@ -6378,8 +6926,8 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .val-statistic-table .details ul.user-list .user-img.user-expired {
-  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #e77465;
-  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #e77465;
+  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
+  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
 }
 
 .portlet-learn-scorm .val-statistic-table .details ul.user-list .user-img img {
@@ -6402,7 +6950,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .rating-star:before {
-  content: 'h';
+  content: 'Q';
   vertical-align: initial;
 }
 
@@ -6424,7 +6972,7 @@ h6, .portlet-learn-scorm .h6 {
   font-size: 20px;
   position: absolute;
   left: 0;
-  content: '8';
+  content: 'R';
 }
 
 .portlet-learn-scorm .valamis-rating {
@@ -6436,7 +6984,7 @@ h6, .portlet-learn-scorm .h6 {
 }
 
 .portlet-learn-scorm .valamis-rating.voted, .portlet-learn-scorm .valamis-rating.hovered {
-  color: #2974A6;
+  color: #f7ac1d;
 }
 
 .portlet-learn-scorm .valamis-rating .rating-star.default:before {
@@ -6445,6 +6993,487 @@ h6, .portlet-learn-scorm .h6 {
 
 .portlet-learn-scorm .valamis-rating .rating-star.half-star:before {
   color: #D1D1D1;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item .val-progress-bar {
+  margin: 18.2px 0;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item .tile {
+  border: none;
+  padding: 30px;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item .image {
+  margin-right: 18.2px;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item .toggle-container {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item:last-child .toggle-container {
+  border: none;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item > table {
+  border: none;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item > table > tbody > tr {
+  border: none;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item > table > tbody > tr > td {
+  border: none;
+  font-weight: normal;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item > table > tbody > tr > td:first-child {
+  vertical-align: top;
+  padding: 18.2px 0 0 36.4px;
+}
+
+.portlet-learn-scorm .val-learning-paths .learning-path-item > table > tbody > tr > td:last-child {
+  padding: 18.2px 36.4px 0 0;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table td {
+  padding: 12px 10px 12px;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr td:first-child {
+  border: none;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr:first-child td {
+  padding: 0px 10px 12px;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr:first-child td.progress-col {
+  vertical-align: top;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr:last-child td {
+  padding: 12px 10px 0px;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr:last-child td.progress-col {
+  vertical-align: bottom;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr:last-child td.progress-col > div {
+  vertical-align: bottom;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table .progress-col {
+  vertical-align: top;
+  text-align: center;
+  background-image: linear-gradient(180deg, #DEDEDE, #DEDEDE);
+  background-position: 50%;
+  background-repeat: repeat-y;
+  background-size: 2px auto;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table .progress-col .val-rounded-icon:before {
+  font-size: 25px;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table .progress-col .val-rounded-div {
+  width: 25px;
+  height: 25px;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table .progress-col.success {
+  background-image: linear-gradient(180deg, #598000, #598000);
+}
+
+.portlet-learn-scorm .val-table.learning-path-table .progress-col.failed {
+  background-image: linear-gradient(180deg, #CC4233, #CC4233);
+}
+
+.portlet-learn-scorm .val-table.learning-path-table tr:only-child td.progress-col {
+  background: none;
+  vertical-align: middle;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table table.learning-path-table tr td {
+  vertical-align: middle !important;
+  padding: 5px 10px 0 5px;
+  font-weight: normal;
+  border: none;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table table.learning-path-table tr td.progress-col {
+  background: none;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table table.learning-path-table tr td a {
+  font-weight: normal;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table table.learning-path-table .progress-col .val-rounded-icon:before {
+  font-size: 20px;
+}
+
+.portlet-learn-scorm .val-table.learning-path-table table.learning-path-table .progress-col .val-rounded-div {
+  vertical-align: middle;
+  width: 20px;
+  height: 20px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion ul.nav-tabs {
+  text-align: center;
+}
+
+.portlet-learn-scorm #gradebookAppRegion ul.nav-tabs li {
+  float: none;
+  display: inline-block;
+}
+
+.portlet-learn-scorm #gradebookAppRegion ul.nav-tabs li.active a {
+  cursor: pointer;
+}
+
+.portlet-learn-scorm #gradebookAppRegion ul.nav-tabs .tab-pane {
+  padding: 18.2px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .tab-content {
+  border-top: 1px solid #CCCCCC;
+  padding: 0 18.2px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .tab-content h3 {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .tab-side {
+  height: 60px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .breadcrumbs-row {
+  line-height: 3;
+  padding: 0 18.2px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .breadcrumbs-row [class^="val-icon"] {
+  font-size: 16px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info {
+  line-height: initial;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info > div:not(.item-title):not(.item-description) {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info img, .portlet-learn-scorm #gradebookAppRegion .item-info .image {
+  margin-right: 10px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info .item-title {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info .item-title:not(:last-child) {
+  padding-bottom: 5px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info .title-separator {
+  font-weight: normal;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info .item-description {
+  color: #555;
+  font-size: 13px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .item-info .item-description:not(:last-child) {
+  padding-bottom: 5px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .items-header {
+  padding: 18.2px 0;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .items-header .button {
+  margin: 0;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .items-header .item-info .item-title {
+  font-size: 18px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .statistic-item {
+  font-size: 13px;
+  display: inline-block;
+  text-align: left;
+  line-height: 1.7;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .statistic-item div {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .expand-icon {
+  color: #777;
+  cursor: pointer;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .collapse-icon {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 12.13333px 18.2px;
+  color: #777;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .collapse-icon:before {
+  font-size: 30px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple {
+  margin: 0;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple th {
+  text-align: left;
+  background-color: white;
+  border-top: 1px solid #CCCCCC;
+  border-bottom: 2px solid #CCCCCC;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #777;
+  padding: 9.1px 18.2px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple th.border-right {
+  border-right: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple td {
+  font-size: 15px;
+  font-weight: normal;
+  padding: 12.13333px 18.2px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region > .button {
+  min-width: 80px;
+  margin: 0;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover {
+  font-size: 13px;
+  width: 210px;
+  height: 190px;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .grade-region {
+  margin: 5px;
+  border: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .grade-region input {
+  border: none;
+  text-align: right;
+  width: 50%;
+  height: 30px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .grade-region.focus {
+  border-color: #2974A6;
+  box-shadow: none;
+  background-color: #FFF;
+  outline: none;
+  color: #2c2c2c;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .grade-region > .limit {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .feedback-region {
+  border-top: 1px solid #CCCCCC;
+  padding: 5px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .feedback-region textarea {
+  border: none;
+  padding-bottom: 5px;
+  resize: none;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .popover-region .grade-popover .feedback-region .button {
+  margin: 0;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .toggle-container {
+  background: none;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td {
+  position: relative;
+  padding: 40px 15%;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table {
+  width: 100%;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table tr td {
+  border-bottom: none;
+  padding: 12.13333px 9.1px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table tr:not(.lesson-header) td {
+  vertical-align: top;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table tr.lesson-header td:not(:first-child):not(:last-child) {
+  padding-right: 18.2px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table tr:not(.attempt) td {
+  border: none;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .item-info .item-title {
+  font-size: 18px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .block-title {
+  font-weight: bold;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .block-footer {
+  font-size: 13px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .button.grade {
+  min-width: 80px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .correct-answer-block {
+  border: 1px solid #598000;
+  padding: 10px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .correct-answer-block .correct-answer-label {
+  color: #598000;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .attempt-comments {
+  font-size: 13px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .attempt-comments.collapsed .item-info:not(:last-child) {
+  display: none;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .attempt-comments .item-info {
+  padding-bottom: 10px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .new-comment {
+  display: table;
+  width: 100%;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .new-comment > div {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .new-comment > div:first-child {
+  width: 1%;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .new-comment > div img {
+  margin-right: 10px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion table.simple .lesson-attempts > td table .new-comment > div .button {
+  margin-top: 5px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview {
+  padding: 40px 15%;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .course-title {
+  font-size: 28px;
+  padding-bottom: 32px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .overview-statistic {
+  padding-bottom: 18.2px;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .overview-feedback {
+  font-size: 15px;
+  padding: 18.2px 0;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .overview-feedback .feedback-label {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .overview-item:not(:last-child) {
+  padding-right: 46px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .last-grading-list {
+  padding-top: 20px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .last-grading-list table th, .portlet-learn-scorm #gradebookAppRegion .course-overview .last-grading-list td {
+  border: none;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .course-overview .last-grading-list .last-list-header {
+  font-size: 18px;
+  color: #2c2c2c;
+  font-weight: normal;
+  text-transform: none;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .overview-item {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .overview-item > div {
+  display: inline-block;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .overview-item .number {
+  color: #2c2c2c;
+  font-size: 34px;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .overview-item .number.success {
+  color: #598000;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .overview-item .number.inprogress {
+  color: #f7ac1d;
+}
+
+.portlet-learn-scorm #gradebookAppRegion .overview-item .number.failed {
+  color: #CC4233;
 }
 
 .portlet-learn-scorm * {
@@ -6460,21 +7489,12 @@ h6, .portlet-learn-scorm .h6 {
   background-color: transparent;
 }
 
-.portlet-transparent .portlet .portlet-topper {
+.js .controls-hidden .portlet-transparent .portlet .portlet-topper {
   display: none;
-}
-
-.is-admin.controls-visible .portlet-transparent .portlet .portlet-topper {
-  display: block;
-  margin-bottom: 10px;
 }
 
 .portlet-boundary.portlet-dockbar {
   width: 100%;
-}
-
-#banner {
-  z-index: 1;
 }
 
 .alert.alert-error {
@@ -6487,6 +7507,14 @@ h6, .portlet-learn-scorm .h6 {
   line-height: 1.4;
 }
 
+body.val-inactive {
+  background: #000000;
+}
+
+body.val-inactive .reveal-scroll-wrapper {
+  opacity: 0.2;
+}
+
 .toast-center-for-viewer {
   margin-top: -100px;
   margin-left: -200px;
@@ -6497,7 +7525,7 @@ h6, .portlet-learn-scorm .h6 {
   width: 380px !important;
   height: 200px;
   padding-left: 15px !important;
-  background: #ffffff;
+  background: white;
   border-radius: 2px !important;
 }
 

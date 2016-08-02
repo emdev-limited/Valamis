@@ -1,16 +1,13 @@
 package com.arcusys.learn.liferay.update.version250.cleaner
 
-import com.arcusys.valamis.exception.EntityNotFoundException
-import com.arcusys.valamis.file.FileTableComponent
-import com.arcusys.valamis.lesson.service.ValamisPackageService
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
+import com.arcusys.valamis.persistence.common.SlickProfile
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 import scala.util.matching.Regex
 
-trait PackageFileCleanerComponent extends FileTableComponent{
-  protected val driver: JdbcProfile
-  protected val valamisPackageService: ValamisPackageService
+trait PackageFileCleanerComponent extends FileTableComponent { self: SlickProfile =>
+  protected val db: JdbcBackend#DatabaseDef
 
   import driver.simple._
 
@@ -23,6 +20,14 @@ trait PackageFileCleanerComponent extends FileTableComponent{
   private val getIdFromLogoFileName = getIdHelper(logoRegexp) _
   private val logoPattern = "files/package_logo_%"
 
+  private lazy val packageIds = {
+    db.withSession { implicit s =>
+      val scormIds = StaticQuery.queryNA[(Long, Option[String])]("select id_ from learn_lfpackage").list
+      val tincanIds = StaticQuery.queryNA[(Long, Option[String])]("select id_ from learn_lftincanpackage").list
+      scormIds ++ tincanIds
+    }
+  }
+
   protected def cleanPackageLogos()(implicit session: JdbcBackend#Session): Unit = {
     val packageLogos =
       files
@@ -32,14 +37,9 @@ trait PackageFileCleanerComponent extends FileTableComponent{
 
     packageLogos.foreach { path =>
       val id = getIdFromLogoFileName(path).get
-      val pack = try {
-        Some(valamisPackageService.getPackage(id))
-      } catch {
-        case e: EntityNotFoundException => None
-        case e => throw e
-      }
+      val hasLesson = packageIds.contains(id)
 
-      if(pack.isEmpty)
+      if (!hasLesson)
         files
           .filter(_.filename === path)
           .delete
@@ -60,14 +60,9 @@ trait PackageFileCleanerComponent extends FileTableComponent{
 
     packageContentFiles.foreach { path =>
       val id = getIdFromContentFileName(path).get
-      val pack = try {
-        Some(valamisPackageService.getPackage(id))
-      } catch {
-        case e: EntityNotFoundException => None
-        case e => throw e
-      }
+      val hasLesson = packageIds.contains(id)
 
-      if(pack.isEmpty)
+      if(!hasLesson)
         files
           .filter(_.filename === path)
           .delete

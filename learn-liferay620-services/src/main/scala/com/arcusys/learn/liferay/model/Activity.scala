@@ -1,5 +1,6 @@
 package com.arcusys.learn.liferay.model
 
+import com.liferay.portlet.social.model.SocialActivityFeedEntry
 import org.joda.time.DateTime
 
 case class Activity(
@@ -11,4 +12,5 @@ case class Activity(
   activityType: Int,
   classPK: Option[Long],
   groupId: Option[Long],
-  extraData: Option[String])
+  extraData: Option[String],
+  liferayFeedEntry: Option[SocialActivityFeedEntry] = None)

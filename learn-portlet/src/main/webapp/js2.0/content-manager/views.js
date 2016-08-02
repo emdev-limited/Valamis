@@ -207,6 +207,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         onRender: function(){
             this.$el.attr('data-id', this.model.get('id'));
+            this.$el.toggleClass('hidden', this.model.get('hidden'));
         },
         selectItem: function(){
             this.model.set('selected', this.$('.js-select-entity').is(':checked'), {silent: true});
@@ -575,6 +576,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                     });
                     that.contents.show(contentsTree);
                     treeNode.updateContentAmount();
+                    contentsTree.selectThis();
                     contentManager.openCategory();
                 });
 
@@ -586,7 +588,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                     model: topbarModel
                 });
 
-                this.topbar.show(topbarView)
+                this.topbar.show(topbarView);
             }
         }
     });

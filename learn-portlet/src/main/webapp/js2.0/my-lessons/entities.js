@@ -9,14 +9,14 @@ myLessons.module('Entities', function(Entities, myLessons, Backbone, Marionette,
     url: path.root,
     sync: {
       'read': {
-        'path': path.api.gradebooks,
+        'path': path.api.lessongrades + 'my/',
         'data': function (model, options) {
           return {
-            action: 'GRADED_PACKAGE',
             completed: options.completed,
             page: options.page,
             count: COUNT,
-            courseId: Utils.getCourseId()
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
           };
         },
         'method': 'get'
@@ -29,7 +29,7 @@ myLessons.module('Entities', function(Entities, myLessons, Backbone, Marionette,
     parse: function (response) {
       this.trigger('lessonCollection:updated', {total: response.total, count: COUNT});
       return _.map(response.records, function(model) {
-        model['url'] = Utils.getPackageUrl(model.id);
+        model['url'] = Utils.getPackageUrl(model.lesson.id);
         return model;
       });
     }

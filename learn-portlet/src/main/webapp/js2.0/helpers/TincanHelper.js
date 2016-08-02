@@ -15,17 +15,18 @@ var TincanHelper = {
     getActor: function() {
         return myTinCan.actor;
     },
-    getLaunchArguments: function() { //jQuery('#tincanActor').val(),
+    getLaunchArguments: function(version) { //jQuery('#tincanActor').val(),
         var lrs = myTinCan.recordStores[0];
 
-        return 'endpoint={0}&auth={1}&actor={2}'
+        return 'endpoint={0}&auth={1}&actor={2}&v={3}'
             .replace('{0}', encodeURIComponent(lrs.endpoint))
             .replace('{1}', encodeURIComponent(lrs.auth))
             .replace('{2}', encodeURIComponent(JSON.stringify({
                 "objectType":myTinCan.actor.objectType,
                 "name":myTinCan.actor.name,
                 "account": myTinCan.actor.account
-            })));
+            })))
+            .replace('{3}', version);
     },
 
     initialize: function(callback) {
@@ -50,17 +51,8 @@ var TincanHelper = {
                 endpoint: data.endpoint,
                 version: "1.0.1"
             });
-            if (data.authType == "Basic") {
-                if (data.auth) {
-                    myLRS.auth = data.auth;
-                }
-                else {
-                    window.playerLayout.modals.show(window.tincanModal);
-                }
-            } else if (data.authType === "OAuth") {
-                if (data.auth) {
-                    myLRS.auth = data.auth;
-                }
+            if (data.auth) {
+                myLRS.auth = data.auth;
             }
         }
         myTinCan.recordStores[0] = myLRS;

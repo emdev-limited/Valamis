@@ -7,7 +7,3 @@ var PptxElementModule = slidesApp.module('PptxElementModule', {
         }
     }
 });
-
-PptxElementModule.on('start', function() {
-    slidesApp.execute('toolbar:item:add', {title: 'PPT', label: 'PPT', slideEntityType: 'pptx'});
-});

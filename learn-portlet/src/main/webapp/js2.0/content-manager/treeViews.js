@@ -179,7 +179,10 @@ contentManager.module("TreeViews", function (TreeViews, ContentManager, Backbone
         selectThis: function () {
             this.triggerMethod('contents:clean:active');
             this.selectNode(this.model);
-            this.$('li.js-root').addClass('selected-entity');
+            this.onNodeSelected();
+        },
+        onNodeSelected: function(){
+           this.$('li.js-root').addClass('selected-entity');
         },
         selectNode: function (model) {
             var that = this;
@@ -193,14 +196,15 @@ contentManager.module("TreeViews", function (TreeViews, ContentManager, Backbone
                     //TODO try to avoid this
                     that.render();
                     that.triggerMethod('contents:activate:category', model);
+                    that.onNodeSelected();
                 }, function () {
                     that.childrenFetched = true;
                     that.triggerMethod('contents:activate:category', model);
+                    that.onNodeSelected();
                 });
             }
             ContentManager.options.currentCategory = '';
             localStorage.setItem('ValamisCMCategory','');
-            that.model.nodes.sort()
         },
         updateSorting: function (movedModel, index, parentId) {
             contentManager.execute('move:content:item', movedModel, index, parentId, 'category');
@@ -278,6 +282,12 @@ contentManager.module("TreeViews", function (TreeViews, ContentManager, Backbone
             contentManager.rootNodes[courseId] = node;
 
             Marionette.CollectionView.prototype.addChild.apply(this, arguments);
+        },
+        onRender: function() {
+            var firstChild = this.children.findByIndex(0);
+            if(firstChild) {
+                firstChild.selectThis();
+            }
         }
     });
 

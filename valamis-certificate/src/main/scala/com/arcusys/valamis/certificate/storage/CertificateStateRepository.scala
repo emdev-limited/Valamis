@@ -1,6 +1,6 @@
 package com.arcusys.valamis.certificate.storage
 
-import com.arcusys.valamis.certificate.model.{CertificateFilter, CertificateState, CertificateStateFilter}
+import com.arcusys.valamis.certificate.model.{CertificateStatuses, CertificateFilter, CertificateState, CertificateStateFilter}
 import com.arcusys.valamis.user.service.UserCertificateRepository
 
 trait CertificateStateRepository extends UserCertificateRepository {
@@ -12,6 +12,8 @@ trait CertificateStateRepository extends UserCertificateRepository {
 
   def getBy(filter: CertificateStateFilter, certificateFilter: CertificateFilter): Seq[CertificateState]
 
+  def getBy(userId: Long, status: CertificateStatuses.Value): Seq[CertificateState]
+
   def getByUserId(userId: Long): Seq[CertificateState]
 
   def getByCertificateId(id: Long): Seq[CertificateState]
@@ -20,6 +22,6 @@ trait CertificateStateRepository extends UserCertificateRepository {
 
   def update(certificateStatusEntity: CertificateState): CertificateState
 
-  def delete(userId: Long, certificateId: Long)
+  def delete(userId: Long, certificateId: Long): Unit
 }
 

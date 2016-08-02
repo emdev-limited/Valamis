@@ -56,7 +56,14 @@
                 var me = this;
                 var uploader = new FileUploader({
                     endpoint: path.root + path.api.files + '?action=ADD&contentType=import-question&courseId=' + Utils.getCourseId(),
-                    message: '{{importMessage}}'
+                    message: '{{importMessage}}',
+                    onFailFunction: function(e, data) {
+                        var errorMessage = (_.contains(data.jqXHR.responseText, 'unsupportedPackageException'))
+                                ? '{{invalidPackageMessage}}'
+                                : '{{failedMessageLabel}}';
+                        toastr.error(errorMessage);
+                        me.triggerCancel();
+                    }
                 });
 
                 uploader.on('fileuploaddone', function (data) {
@@ -76,7 +83,14 @@
                 var me = this;
                 var uploader = new FileUploader({
                     endpoint: path.root + path.api.files + '?action=ADD&contentType=import-question-moodle&courseId=' + Utils.getCourseId(),
-                    message: '{{importMoodleMessage}}'
+                    message: '{{importMoodleMessage}}',
+                    onFailFunction: function(e, data) {
+                        var errorMessage = (_.contains(data.jqXHR.responseText, 'unsupportedPackageException'))
+                                ? '{{invalidPackageMessage}}'
+                                : '{{failedMessageLabel}}';
+                        toastr.error(errorMessage);
+                        me.triggerCancel();
+                    }
                 });
 
                 uploader.on('fileuploaddone', function (data) {
@@ -123,7 +137,7 @@
         });
 
         function saveShowGlobalBaseSetting() {
-            window.LearnAjax.post('{{actionURL}}', {
+            window.LearnAjax.post('{{{actionURL}}}', {
                 showGlobalBase: jQuery("#showGlobalBase").is(':checked')
             }).done(function () {
             });
@@ -151,7 +165,7 @@
 <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
 <div style="padding: 10px;">
-    <button class="button big primary bbm-button val-icon-download" onclick="exportQuestions()">
+    <button class="button big primary bbm-button val-icon-download-import-down" onclick="exportQuestions()">
         {{exportAllLabel}}
     </button>
     <button class="button big primary bbm-button val-icon-upload" onclick="importQuestions()">

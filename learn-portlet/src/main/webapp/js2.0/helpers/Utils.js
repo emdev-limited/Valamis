@@ -43,6 +43,9 @@ VALAMIS = (function(){
 }());
 
 var Utils = {
+  getValamisVersion: function() {
+    return "${valamis.version}";
+  },
   getContextPath: function () {
     var contextPath = "";
     var element = jQuery("#SCORMContextPath");
@@ -58,6 +61,15 @@ var Utils = {
       courseId = element.val();
     }
     return courseId || Liferay.ThemeDisplay.getScopeGroupId();
+  },
+  getPlid: function() {
+    return Liferay.ThemeDisplay.getPlid();
+  },
+  getUserId: function () {
+    return Liferay.ThemeDisplay.getUserId();
+  },
+  getUserLocale: function() {
+    return Liferay.ThemeDisplay.getLanguageId().replace('_', '-');
   },
   getDataFromPlaceholder: function(element){
       return element.val().length === 0 ? element.attr('placeholder') : element.val();
@@ -190,7 +202,7 @@ var Utils = {
     }
 
     var getPackSource = function (language) {
-      return Utils.getContextPath() + 'i18n/' + resourceName + '_' + language + '.properties';
+      return Utils.getContextPath() + 'i18n/' + resourceName + '_' + language + '.properties?v=' + Utils.getValamisVersion();
     };
 
     var defaultURL = getPackSource(defaultLanguage);
@@ -200,14 +212,72 @@ var Utils = {
   getPackageUrl: function(id) {
     return Liferay.ThemeDisplay.getPathMain()
         + "/portal/learn-portlet/open_package"
-        + "?plid=" + Liferay.ThemeDisplay.getPlid()
+        + "?plid=" + this.getPlid()
         + "&oid=" + id
   },
   getCertificateUrl: function(id) {
     return Liferay.ThemeDisplay.getPathMain()
         + "/portal/learn-portlet/open_certificate"
-        + "?plid=" + Liferay.ThemeDisplay.getPlid()
+        + "?plid=" + this.getPlid()
         + "&oid=" + id
+  },
+  mimeToExt: {
+    'image': {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/pjpeg': 'jpeg',
+      'image/svg+xml': 'svg',
+      'image/tiff': 'tiff',
+      'image/x-targa': 'tga',
+      'image/x-tga': 'tga',
+      'image/vnd.microsoft.icon': 'ico',
+      'image/bmp': 'bmp'
+    },
+    'video': {
+      'video/mp4': 'mp4',
+      'video/mpeg': 'mpeg',
+      'video/x-flv': 'flv',
+      'video/3gpp': '3gp',
+      'video/quicktime': 'mov',
+      'video/x-msvideo': 'avi',
+      'video/ogg': 'ogv',
+      'video/webm': 'webm'
+    },
+    'pdf': {
+      'application/pdf': 'pdf'
+    },
+    'pptx': {
+      'application/vnd.ms-powerpoint': 'ppt',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx'
+    },
+    'webgl': {
+      'application/json': 'json',
+      'application/javascript': 'js',
+      'text/javascript': 'js',
+      'text/plain': 'obj'
+    },
+    'imported': {
+      'application/pdf': 'pdf',
+      'application/vnd.ms-powerpoint': 'ppt',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx'
+    }
+  },
+  getExtByMime: function (mime) {
+    for (var i in Utils.mimeToExt)
+      if (Utils.mimeToExt[i].hasOwnProperty(mime))
+        return Utils.mimeToExt[i][mime];
+    return null;
+  },
+  getMimeTypeGroupValues: function (typeGroup) {
+    return _.chain(Utils.mimeToExt[typeGroup])
+      .values()
+      .compact()
+      .uniq()
+      .value();
+  },
+  gradeToPercent: function(grade) {
+    return (grade != undefined) ? parseFloat((grade * 100).toFixed(2)) : NaN
   }
 };
 

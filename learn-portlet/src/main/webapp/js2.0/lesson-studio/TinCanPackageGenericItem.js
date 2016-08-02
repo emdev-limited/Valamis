@@ -1,6 +1,20 @@
 slidesApp.module('TinCanPackageGenericItem', {
-    Model: lessonStudioModels.LessonPageElementModel,
+    Model: baseLessonStudioModels.LessonPageElementModel,
     define: function(TinCanPackageGenericItem, slidesApp, Backbone, Marionette, $, _){
+        // todo duplicate from Utils.js, not included in published lesson
+        var mimeToExt = {
+            'video': {
+                'video/mp4': 'mp4',
+                  'video/mpeg': 'mpeg',
+                  'video/x-flv': 'flv',
+                  'video/3gpp': '3gp',
+                  'video/quicktime': 'mov',
+                  'video/x-msvideo': 'avi',
+                  'video/ogg': 'ogv',
+                  'video/webm': 'webm'
+            }
+        };
+
         TinCanPackageGenericItem.startWithParent = false;
 
         TinCanPackageGenericItem.GenericItemView = Marionette.ItemView.extend({
@@ -8,7 +22,7 @@ slidesApp.module('TinCanPackageGenericItem', {
                 var className = 'rj-element';
                 switch(this.model.get('slideEntityType')) {
                     case 'text':
-                        className += ' rj-text no-select';
+                        className += ' rj-text';
                         break;
                     case 'question':
                         className += ' question-element';
@@ -126,7 +140,7 @@ slidesApp.module('TinCanPackageGenericItem', {
                                 this.videoId = /https?:\/\/(www\.)?youtube\.com\/embed\/([^&]*)/g.exec(url)[2];
                                 this.$('iframe').attr('src', 'https://www.youtube.com/embed/' + this.videoId + '?enablejsapi=1');
                                 this.playerInitAttemptCount = 0;
-                                this.initPlayer();
+                                this.initPlayer(that);
 
                                 this.$('iframe').show();
                             }
@@ -207,25 +221,32 @@ slidesApp.module('TinCanPackageGenericItem', {
                                 }
                             }
                             this.$el.addClass('question-element');
-                            var questionNumber = parseInt(this.model.get('id'));
-                            var questionTypeString = (_.invert(QuestionType))[questionModel.get('questionType')];
+                            var questionNumber = parseInt(this.model.get('id')),
+                                questionType = questionModel.get('questionType'),
+                                questionTypeString = (_.invert(QuestionType))[questionType];
 
                             // TODO: replace 'replace'
                             var questionTemplate = jQuery('#' + questionTypeString + template + questionId + '_' + questionNumber)
                                 .html()
                                 .replace(/placeholder(=")?/g, 'placeholder="' + translations.typeYourAnswerLabel + '"');
                             this.content.html(window.unescape(questionTemplate));
-                            var data_state_prefix = questionTypeString.slice(0, questionTypeString.indexOf('Q')).toLowerCase();
+                            var data_state_prefix = questionType != 8 //plaintext element
+                                ? questionTypeString.slice(0, questionTypeString.indexOf('Question')).toLowerCase()
+                                : questionTypeString.toLowerCase();
                             var prefix = (data_state_prefix === 'shortanswer'
                                 ? 'short'
                                 : data_state_prefix);
                             var data_state = isQuestion
                                 ? prefix + '_' + questionId + '_' + questionNumber
                                 : prefix + '_' + questionId;
-                            jQuery(Reveal.getCurrentSlide()).attr({
-                                'data-state': data_state
-                            });
-                            if (isQuestion) TinCanCourseQuestions[data_state] = TinCanCourseQuestionsAll[data_state];
+
+                            this.dataState = data_state;
+
+                            if (isQuestion)
+                                TinCanCourseQuestions[data_state] = TinCanCourseQuestionsAll[data_state];
+                            if(this.model.get('slideEntityType') === 'plaintext'){
+                                this.$('.SCORMPlayerContentDisplay').addClass('plaintext-element');
+                            }
                             break;
                         case 'math':
                             katex.render(this.model.get('content'), this.content.find('.math-content')[0], {displayMode: true});
@@ -243,24 +264,29 @@ slidesApp.module('TinCanPackageGenericItem', {
                     .css('font-size', Math.min(this.model.get('width') / 2, this.model.get('height') / 2) + 'px');
             },
             updateEl: function() {
-                this.$el.css({
+
+                var elCss = {
                     'top': parseInt(this.model.get('top')),
                     'left': parseInt(this.model.get('left'))
-                });
+                };
+
                 if(this.model.get('slideEntityType') != 'question'){
-                    this.$el.css({
-                        'width': parseInt(this.model.get('width')),
-                        'height': parseInt(this.model.get('height'))
-                    });
+                    elCss['width'] = parseInt(this.model.get('width'));
+                    elCss['height'] = parseInt(this.model.get('height'));
                 }
-                this.$('.item-content').css({
+
+                this.$el.css(elCss);
+
+                var itemContentCss = {
                     fontSize: this.model.get('fontSize') || ''
-                });
-                if( this.model.get('zIndex') ){
-                    this.$('.item-content').css({
-                        zIndex: this.model.get('zIndex')
-                    });
+                };
+
+                if( !!this.model.get('zIndex') ){
+                    itemContentCss['zIndex'] = this.model.get('zIndex');
                 }
+
+                this.$('.item-content').css(itemContentCss);
+
                 this.$el.toggleClass('hidden', !!this.model.get('classHidden'));
             },
             goToSlideActionInit: function() {
@@ -278,24 +304,30 @@ slidesApp.module('TinCanPackageGenericItem', {
                 }
             },
             // YouTube player methods
-            initPlayer: function() {
-                var that = this;
+            initPlayer: function(that) {
                 if (that.playerInitAttemptCount > 10)
                     console.warn('Failed to load YouTube Iframe API in 10 attempts. YouTube videos will not be available this time.');
                 else {
-                    if (window.youtubeIframeAPIReady)
+                    if (window.youtubeIframeApiReady) {
                         that.YTPlayer = new YT.Player(that.$('iframe')[0], {
                             events: {
-                                'onReady': function() { that.onPlayerReady(that); },
-                                'onStateChange': function() { that.onPlayerStateChange(that); }
+                                'onReady': function (evt) {
+                                    that.onPlayerReady(evt);
+                                },
+                                'onStateChange': function (evt) {
+                                    that.onPlayerStateChange(evt);
+                                }
                             }
                         });
+                        clearTimeout(that.initTimeout);
+                    }
                     else {
                         that.playerInitAttemptCount++;
-                        that.initTimeout = setTimeout(that.initPlayer, 500);
+                        that.initTimeout = setTimeout(function() {
+                            that.initPlayer(that)
+                        }, 500);
                     }
                 }
-                clearTimeout(that.initTimeout);
             },
             onPlayerReady: function(event) {
                 var that = this;
@@ -305,7 +337,7 @@ slidesApp.module('TinCanPackageGenericItem', {
                 // Check if the user has skipped part of a video
                 that.playerCheckInterval = setInterval(function () {
                     if (Math.abs(that.lastCheckedPlayerTime - that.YTPlayer.getCurrentTime()) > 1)
-                        that.onVideoSkipped(that.lastCheckedPlayerTime, that.YTPlayer.getCurrentTime());
+                        that.onVideoSkipped(that, that.lastCheckedPlayerTime, that.YTPlayer.getCurrentTime());
                     that.lastCheckedPlayerTime = that.YTPlayer.getCurrentTime();
                 }, 500);
                 slidesApp.playerCheckIntervals.push(that.playerCheckInterval);
@@ -355,7 +387,7 @@ slidesApp.module('TinCanPackageGenericItem', {
             // Methods for WebGL
             bindTrackballControls: function () {
                 var that = this;
-                this.$el.addClass('unactive');
+                this.$el.addClass('inactive');
                 this.undelegateEvents();
                 this.goToSlideActionInit();
                 if(this.model.get('slideEntityType') === 'webgl') {

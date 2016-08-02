@@ -7,33 +7,32 @@
         <input class="playerShortAnswerField" id="scormShortAnswer{{id}}_{{questionNumber}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
     </div>
     <!--{{#autoShowAnswer}} -->
-    <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+    <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
             onclick="TinCanCourseHelpers['shortShowAnswers_{{id}}_{{questionNumber}}']()">
         Check
     </button>
     <!--{{/autoShowAnswer}} -->
 </div>
 <!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
-    <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
+<div class="answers answers{{id}}_{{questionNumber}}">
+    <div class="feedback-block-label">{{{text}}}</div>
+    <div class="feedback-correctness-label" id="answerCorrectness{{id}}_{{questionNumber}}"></div>
 
-    <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
-        <strong>Your answer is <span id="usersAnswers{{id}}_{{questionNumber}}"></span></strong>
-        <div>
-            <!-- {{#isCaseSensitive}} -->
-            <p>But correct answers (case sensitive):</p>
-            <!-- {{/isCaseSensitive}} -->
-            <!-- {{^isCaseSensitive}} -->
-            <p>But correct answers:</p>
-            <!-- {{/isCaseSensitive}} -->
-            <div id="correctAnswers{{id}}_{{questionNumber}}"></div>
-        </div>
-        <br class="clear"/>
-        <br>
+    <div class="feedback-block-label js-localized-label" data-value="yourAnswersLabel"></div>
+    <div id="usersAnswers{{id}}_{{questionNumber}}" class="clearfix"></div>
+
+    <!-- {{#isCaseSensitive}} -->
+    <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersCaseSensitiveLabel"></div>
+    <!-- {{/isCaseSensitive}} -->
+    <!-- {{^isCaseSensitive}} -->
+    <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersLabel"></div>
+    <!-- {{/isCaseSensitive}} -->
+    <div id="correctAnswers{{id}}_{{questionNumber}}" class="clearfix hidden js-correct-answers">
+        <table class="answers-table"></table>
     </div>
-    {{#hasExplanation}}
-    <h4>Explanation:</h4>
 
+    {{#hasExplanation}}
+    <div class="js-localized-label feedback-block-label" data-value="explanationLabel"></div>
     <div id="explanation">{{{explanation}}}</div>
     {{/hasExplanation}}
 </div>
@@ -50,27 +49,31 @@
         jQuery('.content{{id}}_{{questionNumber}}').hide();
 
         var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
-        parent_el.prevAll('.rj-element').hide();
-        parent_el.nextAll('.rj-element').hide();
+        parent_el.siblings('.rj-element').hide();
 
         var correct = answers.isPassed;
         var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
-        if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
+        if (correctness === "")
+            correctness = (correct) ? LESSON_LABELS['yourAnswerIsCorrectLabel'] : LESSON_LABELS['yourAnswerIsIncorrectLabel'];
         jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
-        if (!correct) {
-            jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
 
-            var learnerResponse = answers.learnerResponse;
-
+        var learnerResponse = answers.learnerResponse;
+        if (learnerResponse.length)
             jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(learnerResponse);
+        else
+            jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(LESSON_LABELS['noAnswerLabel']);
 
-            var correctResponse = [];
-            for (var i = 0; i<dataToCompare.length; i++) {
-                correctResponse.push(dataToCompare[i].text);
+        if (!correct) {
+            jQuery('.answers{{id}}_{{questionNumber}} .js-correct-answers').removeClass('hidden');
+
+            for (var i = 0; i < dataToCompare.length; i++) {
+                var elem = jQuery("<td>").append(jQuery('<p>').append(dataToCompare[i].text));
+                jQuery("#correctAnswers{{id}}_{{questionNumber}} table").append(jQuery("<tr>").append(elem));
             }
-            jQuery("#correctAnswers{{id}}_{{questionNumber}}").append(jQuery("<div>").addClass("matchedLine").html(correctResponse.join(', ')));
+
         }
-        doScale();
+
+        moveAnswers({{questionNumber}});
     };
     /*{{/autoShowAnswer}}*/
 

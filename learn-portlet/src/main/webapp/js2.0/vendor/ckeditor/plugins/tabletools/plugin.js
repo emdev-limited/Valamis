@@ -1,5 +1,5 @@
 ﻿/**
- * @license Copyright (c) 2003-2015, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
@@ -537,7 +537,7 @@
 		}
 	}
 
-	function verticalSplitCell( selection, isDetect ) {
+	function horizontalSplitCell( selection, isDetect ) {
 		var cells = getSelectedCells( selection );
 		if ( cells.length > 1 )
 			return false;
@@ -602,7 +602,7 @@
 		return newCell;
 	}
 
-	function horizontalSplitCell( selection, isDetect ) {
+	function verticalSplitCell( selection, isDetect ) {
 		var cells = getSelectedCells( selection );
 		if ( cells.length > 1 )
 			return false;

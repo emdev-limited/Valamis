@@ -25,73 +25,74 @@
         </table>
         <table id="searchBoxTable" class="searchBoxTable" style="display: none;">
             <tr>
-                <td><label>Actor Email</label><input id="actorEmail" type="text" placeholder="Email Address"></td>
-                <td><label>Verb ID</label><input id="verb" type="text" placeholder="Verb"></td>
-                <td><label>Activity ID</label><input id="activityId" type="text" placeholder="Activity ID"></td>
-                <td><label>Use Context Activities</label><input id="context" type="checkbox"></td>
+                <td><label>{{actorEmailLabel}}</label><input id="actorEmail" type="text" placeholder="{{actorEmailPlaceholderLabel}}"></td>
+                <td><label>{{verbIdLabel}}</label><input id="verb" type="text" placeholder="{{verbPlaceholderLabel}}"></td>
+                <td><label>{{activityIdLabel}}</label><input id="activityId" type="text" placeholder="{{activityIdPlaceholderLabel}}"></td>
+                <td><label>{{useContextLabel}}</label><input id="context" type="checkbox"></td>
             </tr>
         </table>
         <table id="advancedSearchTable" class="searchBoxTable" style="display: none;">
             <tr>
-                <td><label>Since</label><input id="since" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></td>
-                <td><label>Until</label><input id="until" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></td>
-                <td><label>Registration</label><input id="registration" type="text"
-                                                      placeholder="TinCan Registration ID"></td>
-                <td><label>Authoritative Only</label><input id="authoritative" type="checkbox"></td>
+                <td><label>{{sinceLabel}}</label><input id="since" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></td>
+                <td><label>{{untilLabel}}</label><input id="until" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></td>
+                <td><label>{{registrationLabel}}</label><input id="registration" type="text"
+                                                      placeholder="{{registrationPlaceholderLabel}}"></td>
+                <td><label>{{authoritativeOnlyLabel}}</label><input id="authoritative" type="checkbox"></td>
             </tr>
             <tr>
-                <td><label>Actor JSON</label><input id="actorJson" type="text" placeholder="Actor JSON"></td>
-                <td><label>Object JSON</label><input id="objectJson" type="text" placeholder="Object JSON"></td>
-                <td><label>Instructor JSON</label><input id="instructorJson" type="text" placeholder="Instructor JSON">
+                <td><label>{{actorJsonLabel}}</label><input id="actorJson" type="text" placeholder="{{actorJsonPlaceholderLabel}}"></td>
+                <td><label>{{objectJsonLabel}}</label><input id="objectJson" type="text" placeholder="{{objectJsonPlaceholderLabel}}"></td>
+                <td><label>{{instructorJsonLabel}}</label><input id="instructorJson" type="text" placeholder="{{instructorJsonPlaceholderLabel}}">
                 </td>
-                <td><label>Sparse</label><input id="sparse" type="checkbox"></td>
+                <td><label>{{sparseLabel}}</label><input id="sparse" type="checkbox"></td>
             </tr>
         </table>
         <div id="searchBoxTable1" class="searchBoxTable">
             <!--<tr>-->
                 <div>
-                    <label>Agent Property</label>
+                    <label>{{agentPropertyLabel}}</label>
                     <select id="agentProperty">
-                        <option value="account">account</option>
-                        <option value="mbox">mbox</option>
+                        <option value="account">{{accountAgentPropertyLabel}}</option>
+                        <option value="mbox">{{mboxAgentPropertyLabel}}</option>
                     </select>
                 </div>
-                <div><label>Agent Value</label><input id="agentValue" type="text" placeholder="Email Address"></div>
-                <div><label>Verb ID</label><input id="verb1" type="text" placeholder="Verb"></div>
-                <div class="lastDiv"><label>Activity ID</label><input id="activityId1" type="text" placeholder="Activity ID"></div>
+                <div><label>{{agentValueLabel}}</label><input id="agentValue" type="text" placeholder="{{agentValuePlaceholderLabel}}"></div>
+                <div><label>{{verbIdLabel}}</label><input id="verb1" type="text" placeholder="{{verbPlaceholderLabel}}"></div>
+                <div class="lastDiv"><label>{{activityIdLabel}}</label><input id="activityId1" type="text" placeholder="{{activityIdPlaceholderLabel}}"></div>
             <!--</tr>-->
         </div>
         <div id="advancedSearchTable1" class="searchBoxTable" style="display: none;">
             <!--<tr>-->
-            <div><label>Format </label><select id="format">
-                    <option value="">default</option>
-                    <option value="exact">exact</option>
-                    <option value="ids">ids</option>
-                    <option value="canonical">canonical</option>
+            <div><label>{{formatLabel}}</label><select id="format">
+                    <option value="">{{defaultFormatLabel}}</option>
+                    <option value="exact">{{exactFormatLabel}}</option>
+                    <option value="ids">{{idsFormatLabel}}</option>
+                    <option value="canonical">{{canonicalFormatLabel}}</option>
             </select></div>
-            <div><label>Since</label><input id="since1" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></div>
-            <div><label>Until</label><input id="until1" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></div>
-            <div class="lastDiv"><label>Registration</label><input id="registration1" type="text" placeholder="TinCan Registration ID"></div>
+            <div><label>{{sinceLabel}}</label><input id="since1" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></div>
+            <div><label>{{untilLabel}}</label><input id="until1" type="text" placeholder="YYYY-MM-ddTHH:mm:ss.SSSZ"></div>
+            <div class="lastDiv"><label>{{registrationLabel}}</label><input id="registration1" type="text" placeholder="{{registrationPlaceholderLabel}}"></div>
             <!--</tr>-->
-            <div class="lastDiv"><label class="labelsRelated">Related Agents</label><input id="relatedAgents" type="checkbox"></div>
-            <div class="lastDiv"><label class="labelsRelated">Related Activities</label><input id="relatedActivities" type="checkbox"></div>
+            <div class="lastDiv"><label class="labelsRelated">{{relatedAgentsLabel}}</label><input id="relatedAgents" type="checkbox"></div>
+            <div class="lastDiv"><label class="labelsRelated">{{relatedActivitiesLabel}}</label><input id="relatedActivities" type="checkbox"></div>
                 <!--<td><label>Attachments</label><input id="attachments" type="checkbox"></td>-->
                 <!--<td></td>-->
                 <!--<td></td>-->
         </div>
 
-        <div id="TCAPIQuery" style="display:none"><label for="TCAPIQueryText">TCAPI Query</label>
+        <div id="TCAPIQuery" style="display:none">
+            <label for="TCAPIQueryText">{{tcapiQueryLabel}}</label>
             <textarea readonly="true" id="TCAPIQueryText"></textarea>
         </div>
 
-        <button id="refreshStatements">Refresh</button>
-        <button id="showAdvancedOptions">Show Advanced Options</button>
-        <button id="showQuery">Show TCAPI Query</button>
+        <button id="refreshStatements">{{refreshLabel}}</button>
+        <button id="showAdvancedOptions">{{showAdvancedOpitons}}</button>
+        <button id="showQuery">{{showTcapiQueryLabel}}</button>
     </div>
     <div id='theStatements'></div>
     <div id='statementsLoading' class="loading-container">
     </div>
-    <button id='showAllStatements'>More...</button>
+    <button id='showAllStatements'>{{moreLabel}}</button>
     <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 </div>
 

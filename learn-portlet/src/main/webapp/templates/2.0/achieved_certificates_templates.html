@@ -1,5 +1,5 @@
 <script type="text/template" id="achievedCertificatesLayoutTemplate">
-    <div class="js-list-view list">
+    <div class="js-list-view simple-list">
         <div class="div-table no-content-table js-no-certificates hidden">
             <div class="div-col div-col-center">{{noAchievedCertificatesLabel}}</div>
         </div>
@@ -9,16 +9,12 @@
 <script type="text/template" id="achievedCertificatesItemViewTemplate">
     <div class="tile-content">
         <div class="image certificate img-square"
-        {{#logo}}
-        style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
-        {{/logo}}
-
-        {{^logo}}
-        style="background-image: url('/learn-portlet/img/certificate-default.jpg')"
-        {{/logo}}>
-        </div>
+            {{#logo}}
+            style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
+            {{/logo}}
+        ></div>
         <ul>
-            <li class="title"><a href="{{url}}"> {{title}} </a></li>
+            <li class="title ellipsis"><a href="{{url}}"> {{title}} </a></li>
             <li class="time-label">
             {{#dateString}}
                 {{validThroughLabel}} {{dateString}}

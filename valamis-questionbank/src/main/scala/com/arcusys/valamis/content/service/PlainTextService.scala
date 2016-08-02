@@ -1,9 +1,13 @@
 package com.arcusys.valamis.content.service
 
 import com.arcusys.valamis.content.exceptions.NoPlainTextException
-import com.arcusys.valamis.content.model.{PlainTextNode, PlainText}
+import com.arcusys.valamis.content.model.{PlainText, PlainTextNode}
 import com.arcusys.valamis.content.storage.{CategoryStorage, PlainTextStorage}
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+import com.arcusys.valamis.persistence.common.DatabaseLayer
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import slick.dbio.DBIO
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait PlainTextService {
 
@@ -15,9 +19,13 @@ trait PlainTextService {
 
   def update(id: Long, title: String, text: String): Unit
 
+  private[content] def copyByCategoryAction(categoryId: Option[Long], newCategoryId: Option[Long], courseId: Long): DBIO[Seq[PlainText]]
+
   def copyByCategory(categoryId: Option[Long], newCategoryId: Option[Long], courseId: Long): Seq[PlainText]
 
   def getByCategory(categoryId: Option[Long], courseId: Long): Seq[PlainText]
+
+  private[content] def moveToCourseAction(id: Long, courseId: Long, moveToRoot: Boolean): DBIO[Int]
 
   def moveToCourse(id: Long, courseId: Long, moveToRoot: Boolean)
 
@@ -29,54 +37,62 @@ trait PlainTextService {
 
 class PlainTextServiceImpl(implicit val bindingModule: BindingModule)
   extends PlainTextService
-  with Injectable {
+    with Injectable {
 
   lazy val plainTexts = inject[PlainTextStorage]
 
   lazy val cats = inject[CategoryStorage]
+  lazy val dbLayer = inject[DatabaseLayer]
 
-  override def getById(id: Long): PlainText = {
-    plainTexts.getById(id).getOrElse(throw new NoPlainTextException(id))
-  }
+  import DatabaseLayer._
 
-  override def getPlainTextNodeById(id: Long): PlainTextNode = {
-    plainTexts.getById(id).fold(throw new NoPlainTextException(id)) { q =>
+  override def getById(id: Long): PlainText =
+    dbLayer.execSync(plainTexts.getById(id)).getOrElse(throw new NoPlainTextException(id))
+
+  override def getPlainTextNodeById(id: Long): PlainTextNode =
+    dbLayer.execSync(plainTexts.getById(id)).fold(throw new NoPlainTextException(id)) { q =>
       new TreeBuilder().getPlainTextNode(q)
+    }
+
+  override def create(plainText: PlainText): PlainText = dbLayer.execSync(plainTexts.create(plainText))
+
+  def copyByCategoryAction(categoryId: Option[Long], newCategoryId: Option[Long], courseId: Long): DBIO[Seq[PlainText]] =
+    for {
+      srcItems <- plainTexts.getByCategory(categoryId, courseId)
+      newItems <- sequence(srcItems.map { pt => plainTexts.create(pt.copy(id = None, categoryId = newCategoryId)) })
+    } yield newItems
+
+  override def copyByCategory(categoryId: Option[Long], newCategoryId: Option[Long], courseId: Long): Seq[PlainText] =
+    dbLayer.execSyncInTransaction(copyByCategoryAction(categoryId, newCategoryId, courseId))
+
+  override def update(id: Long, title: String, text: String): Unit = dbLayer.execSync {
+    plainTexts.getById(id).ifSomeThen { pt =>
+      plainTexts.update(pt.copy(title = title, text = text))
     }
   }
 
-  override def create(plainText: PlainText): PlainText = {
-    plainTexts.create(plainText)
-  }
+  override def delete(id: Long): Unit = dbLayer.execSync(plainTexts.delete(id))
 
-  override def copyByCategory(categoryId: Option[Long], newCategoryId: Option[Long], courseId: Long): Seq[PlainText] = {
-    for (plainText <- plainTexts.getByCategory(categoryId, courseId))
-      yield plainTexts.create(plainText.copy(id = None, categoryId = newCategoryId))
-  }
+  override def moveToCourseAction(id: Long, courseId: Long, moveToRoot: Boolean) =
+    plainTexts.moveToCourse(id, courseId, moveToRoot)
 
-  override def update(id: Long, title: String, text: String): Unit = {
-    val entity = plainTexts.getById(id).get
-    plainTexts.update(entity.copy(title = title, text = text))
-  }
-
-  override def delete(id: Long): Unit = {
-    plainTexts.delete(id)
-  }
-
-  override def moveToCourse(id: Long, courseId: Long, moveToRoot: Boolean) = {
+  override def moveToCourse(id: Long, courseId: Long, moveToRoot: Boolean) = dbLayer.execSync {
     plainTexts.moveToCourse(id, courseId, moveToRoot)
   }
 
-  override def moveToCategory(id: Long, newCategoryId: Option[Long], courseId: Long) = {
-    val newCourseId = if (newCategoryId.isDefined) {
-      cats.getById(newCategoryId.get).map(_.courseId).getOrElse(courseId)
+  override def moveToCategory(id: Long, newCategoryId: Option[Long], courseId: Long): Unit = dbLayer.execSync {
+    if (newCategoryId.isDefined) {
+      for {
+        newCourseId <- cats.getById(newCategoryId.get).map(_.map(_.courseId).getOrElse(courseId))
+        _ <- plainTexts.moveToCategory(id, newCategoryId, newCourseId)
+      } yield ()
     } else {
-      courseId
+      plainTexts.moveToCategory(id, newCategoryId, courseId)
     }
-    plainTexts.moveToCategory(id, newCategoryId, newCourseId)
   }
 
-  override def getByCategory(categoryId: Option[Long], courseId: Long): Seq[PlainText] = {
+
+  override def getByCategory(categoryId: Option[Long], courseId: Long): Seq[PlainText] = dbLayer.execSync {
     plainTexts.getByCategory(categoryId, courseId)
   }
 }

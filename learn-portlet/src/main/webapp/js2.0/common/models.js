@@ -19,8 +19,7 @@ Valamis = (function(){
                 'data': function (collection, options) {
                     var params = {
                         courseId: options.courseId,
-                        pageID: options.pageId,
-                        playerID: options.playerId
+                        playerId: options.playerId
                     };
                     return params;
                 },
@@ -43,9 +42,32 @@ Valamis = (function(){
         model: Tag
     }).extend(tagService);
 
+    // liferay organizations
+    var OrganizationModel = Backbone.Model.extend({
+        defaults: {
+            'id': '',
+            'name': ''
+        }
+    });
+
+    var OrganizationCollectionService = new Backbone.Service({
+        url: path.root,
+        sync: {
+            'read': function () {
+                return  path.api.organizations;
+            }
+        }
+    });
+
+    var OrganizationCollection = Backbone.Collection.extend({
+          model: OrganizationModel
+      })
+      .extend(OrganizationCollectionService);
+
     return {
         Tag: Tag,
-        TagCollection: TagCollection
+        TagCollection: TagCollection,
+        OrganizationCollection: OrganizationCollection
     };
 }());
 

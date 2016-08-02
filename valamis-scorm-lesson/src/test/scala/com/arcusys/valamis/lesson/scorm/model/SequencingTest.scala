@@ -8,10 +8,10 @@ class SequencingTest extends FlatSpec with ShouldMatchers {
   "Sequencing" can "be constructed" in {
     val mainObjective = new Objective(Some("OBJ1"), satisfiedByMeasure = false, minNormalizedMeasure = BigDecimal("1"), globalObjectiveMap = new ObjectiveMap(readSatisfiedStatusFrom = Some("GO1")))
     val otherObjective = new Objective(Some("OBJ2"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO2")))
-    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
-    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
-    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.Always)), ConditionCombination.All))
-    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
+    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
+    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
+    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.Always)), ConditionCombination.All))
+    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
     val sequencing = new Sequencing(sharedId = None, sharedSequencingIdReference = Some("SID"),
       permissions = SequencingPermissions.Default,
       onlyCurrentAttemptObjectiveProgressForChildren = false, onlyCurrentAttemptAttemptProgressForChildren = false,
@@ -76,10 +76,10 @@ class SequencingTest extends FlatSpec with ShouldMatchers {
     val mainObjective = new Objective(Some("OBJ1"), satisfiedByMeasure = false, minNormalizedMeasure = BigDecimal("1"), globalObjectiveMap = new ObjectiveMap(readSatisfiedStatusFrom = Some("GO1")))
     val otherObjective = new Objective(Some("OBJ2"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO2")))
     val yetAnotherObjective = new Objective(None, satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO3")))
-    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
-    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
-    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.Always)), ConditionCombination.All))
-    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
+    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
+    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
+    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.Always)), ConditionCombination.All))
+    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
     intercept[IllegalArgumentException] {
       new Sequencing(sharedId = None, sharedSequencingIdReference = Some("SID"),
         permissions = SequencingPermissions.Default,
@@ -102,10 +102,10 @@ class SequencingTest extends FlatSpec with ShouldMatchers {
     val mainObjective = new Objective(Some("OBJ1"), satisfiedByMeasure = false, minNormalizedMeasure = BigDecimal("1"), globalObjectiveMap = new ObjectiveMap(readSatisfiedStatusFrom = Some("GO1")))
     val otherObjective = new Objective(Some("OBJ2"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO2")))
     val yetAnotherObjective = new Objective(Some("OBJ2"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO3")))
-    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
-    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
-    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.Always)), ConditionCombination.All))
-    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
+    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
+    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
+    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.Always)), ConditionCombination.All))
+    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
     intercept[IllegalArgumentException] {
       new Sequencing(sharedId = None, sharedSequencingIdReference = Some("SID"),
         permissions = SequencingPermissions.Default,
@@ -128,10 +128,10 @@ class SequencingTest extends FlatSpec with ShouldMatchers {
     val mainObjective = new Objective(Some("OBJ1"), satisfiedByMeasure = false, minNormalizedMeasure = BigDecimal("1"), globalObjectiveMap = new ObjectiveMap(readSatisfiedStatusFrom = Some("GO1")))
     val otherObjective = new Objective(Some("OBJ2"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO2")))
     val yetAnotherObjective = new Objective(Some("OBJ1"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO3")))
-    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
-    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
-    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.Always)), ConditionCombination.All))
-    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
+    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
+    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
+    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.Always)), ConditionCombination.All))
+    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
     intercept[IllegalArgumentException] {
       new Sequencing(sharedId = None, sharedSequencingIdReference = Some("SID"),
         permissions = SequencingPermissions.Default,
@@ -154,10 +154,10 @@ class SequencingTest extends FlatSpec with ShouldMatchers {
     val mainObjective = new Objective(Some("OBJ1"), satisfiedByMeasure = false, minNormalizedMeasure = BigDecimal("1"), globalObjectiveMap = new ObjectiveMap(readSatisfiedStatusFrom = Some("GO1")))
     val otherObjective = new Objective(Some("OBJ2"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO2")))
     val yetAnotherObjective = new Objective(Some("OBJ3"), satisfiedByMeasure = true, minNormalizedMeasure = BigDecimal("0.5"), globalObjectiveMap = new ObjectiveMap(writeMaxScoreTo = Some("GO2")))
-    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
-    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
-    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new RuleCondition(ConditionType.Always)), ConditionCombination.All))
-    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new RuleCondition(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
+    val preConditionRule = new PreConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityAttempted)), ConditionCombination.All), PreConditionAction.Disabled)
+    val postConditionRule = new PostConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityProgressKnown)), ConditionCombination.All), PostConditionAction.Continue)
+    val exitConditionRule = new ExitConditionRule(new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.Always)), ConditionCombination.All))
+    val rollupRule = new RollupRule(ChildActivitySet.all, new RuleConditionSet(Seq(new ConditionRuleItem(ConditionType.ActivityCompleted)), ConditionCombination.All), RollupAction.Incomplete)
     intercept[IllegalArgumentException] {
       new Sequencing(sharedId = None, sharedSequencingIdReference = Some("SID"),
         permissions = SequencingPermissions.Default,

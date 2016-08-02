@@ -1,6 +1,6 @@
 package com.arcusys.learn.liferay.update.version250.settings
 
-import com.arcusys.valamis.core.DbNameUtils._
+import com.arcusys.valamis.persistence.common.DbNameUtils._
 
 import scala.slick.driver.JdbcProfile
 

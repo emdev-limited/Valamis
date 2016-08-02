@@ -9,7 +9,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         TILES: 'tiles'
     };
 
-    Views.EditPackageView = Marionette.ItemView.extend({
+    Views.EditPackageDetailsView = Marionette.ItemView.extend({
+        DEFAULT_SCORE: 0.7,
         template: '#packageManagerEditItemView',
         templateHelpers :function () {
             return {
@@ -39,7 +40,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 'fileUploadModalHeader' : function() { return Valamis.language['fileUploadModalHeader']; }
             }
         },
-        onShow: function() {
+        focusTitle: function() {
+            this.$('.js-package-title').val(this.model.get('title')); // for cursor after last character
             this.$('.js-package-title').focus();
         },
         onValamisControlsInit: function () {
@@ -49,7 +51,6 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 numberOfMonths: 1,
                 onClose: function (selectedDate) {
                     that.$('.js-is-able-to').datepicker('option', 'minDate', selectedDate);
-                    localStorage.setItem('listViewDateFrom', that.$('.js-is-able-from').datepicker('getDate').getTime());
                 }
             });
             this.$('.js-is-able-to').datepicker({
@@ -57,26 +58,25 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 numberOfMonths: 1,
                 onClose: function (selectedDate) {
                     that.$('.js-is-able-from').datepicker('option', 'maxDate', selectedDate);
-                    localStorage.setItem('listViewDateTo', that.$('.js-is-able-to').datepicker('getDate').getTime());
                 }
             });
             this.$('.js-is-able-to').datepicker('setDate', null);
             this.$('.js-is-able-from').datepicker('setDate', null);
 
-            var hasAbleToRunTo = !_.isEmpty(this.model.get('beginDate'));
-            var hasAbleToRunFrom = !_.isEmpty(this.model.get('endDate'));
+            var storedFrom = this.model.get('beginDate');
+            var storedTo = this.model.get('endDate');
 
-            var storedFrom = localStorage.getItem('listViewDateFrom') || new Date().getTime();
-            var storedTo = localStorage.getItem('listViewDateTo') || new Date().getTime();
-            if (storedFrom) {
-                this.$('.js-is-able-from').datepicker('setDate', new Date(parseInt(storedFrom)));
-            }
-            if (storedTo) {
-                this.$('.js-is-able-to').datepicker('setDate', new Date(parseInt(storedTo)));
-            }
-
+            var hasAbleToRunTo = !_.isEmpty(storedFrom);
+            var hasAbleToRunFrom = !_.isEmpty(storedTo);
             this.$('.js-able-to-run-enable').attr('checked', hasAbleToRunTo || hasAbleToRunFrom);
             this.updateAbletoRun(hasAbleToRunTo || hasAbleToRunFrom);
+            if (storedFrom) {
+                this.$('.js-is-able-from').datepicker('setDate', new Date(storedFrom));
+            }
+            if (storedTo) {
+                this.$('.js-is-able-to').datepicker('setDate', new Date(storedTo));
+            }
+
 
             var hasPassingLimit = (parseInt(this.model.get('passingLimit')) || 0) > 0;
             this.$('.js-passing-limit-enable').attr('checked', hasPassingLimit);
@@ -86,7 +86,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             this.updatePassingLimit(hasPassingLimit);
 
             var rerunType = this.model.get('rerunIntervalType');
-            var hasRerunType = (rerunType !== 'UNLIMITED');
+            var rerunInterval = this.model.get('rerunInterval');
+            var hasRerunType = (rerunType !== 'UNLIMITED') && rerunInterval > 0;
             this.$('.js-rerun-interval-enable').attr('checked', hasRerunType);
             if(hasRerunType){
                 this.$('.js-rerun-interval-type option[value=' + rerunType + ']').prop('selected', true);
@@ -102,7 +103,14 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 self.populateTagSelect();
             });
 
+            this.$('.js-score-limit').valamisPlusMinus({
+                min: 0, max: 1, step: 0.05
+            });
+            this.$('.js-score-limit').valamisPlusMinus('value', this.model.get('scoreLimit') || this.DEFAULT_SCORE);
+            if (this.$('.js-score-limit').valamisPlusMinus('value').toString().length > 3)
+                this.$('.js-score-limit .text-input').css('width', '46px');
             if (!Valamis.permissions.LM_MODIFY) this.$('.js-plus-minus').valamisPlusMinus('disable');
+            this.$('.js-required-review').attr('checked', this.model.get('requiredReview'));
         },
         updatePassingLimit: function(isEnabled){
             if(isEnabled){
@@ -122,6 +130,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         updateAbletoRun: function(isEnabled){
             this.$('.js-is-able-from').datepicker("option", "disabled", !isEnabled);
             this.$('.js-is-able-to').datepicker("option", "disabled", !isEnabled);
+            this.$('.js-is-able-from').datepicker('setDate', isEnabled?(new Date()):null);
+            this.$('.js-is-able-to').datepicker('setDate', isEnabled?(new Date()):null);
         },
         togglePassingLimit: function () {
             var passLimitisEnabled = this.$('.js-passing-limit-enable').is(':checked');
@@ -181,6 +191,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                     tags.push({id: tagId, text: tagsElem.options[tagId].text});
                 });
             }
+            var isRequiredReview = this.$('.js-required-review').is(':checked');
+            var scoreLimit = this.$('.js-score-limit').valamisPlusMinus('value') || this.DEFAULT_SCORE;
 
             this.model.set({
                 title: title,
@@ -191,7 +203,9 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 beginDate: $.datepicker.formatDate('yy-mm-dd', ableToRunFrom),
                 endDate: $.datepicker.formatDate('yy-mm-dd', ableToRunTo),
                 tags: tags,
-                tagsList: taglist.join(' • ')
+                tagsList: taglist.join(' • '),
+                requiredReview: isRequiredReview,
+                scoreLimit: scoreLimit
             });
         },
         onModelChanged: function () {
@@ -219,6 +233,41 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 create: true
             });
             selectize[0].selectize.setValue(packageTagIDs);
+        }
+    });
+
+    Views.EditPackageView = Marionette.LayoutView.extend({
+        template: '#packageManagerEditPackageViewTemplate',
+        regions:{
+            'editDetails' : '#editDetails',
+            'editVisibility' : '#editVisibility'
+        },
+        onRender: function() {
+            var editDetailsView = new Views.EditPackageDetailsView({ model: this.model });
+            this.editDetails.show(editDetailsView);
+
+            if (this.model.get('isVisible') === undefined) {
+                this.$('#editPackageTabs a[href="#editVisibility"]').removeClass('hidden');
+                var editVisibilityView = new valamisApp.Views.EditVisibility.EditVisibilityView({packageId: this.model.get('id')});
+                this.editVisibility.show(editVisibilityView);
+            }
+        },
+        onShow: function() {
+            var that = this;
+            this.$('#editPackageTabs a[href="#editDetails"]').on('shown.bs.tab', function () {
+                that.editDetails.currentView.focusTitle();
+            });
+
+            var activeTabSelector = '#edit' + (this.options.activeTab || 'Details');
+            this.$('#editPackageTabs a[href="' + activeTabSelector + '"]').tab('show');
+        },
+        saveModel: function() {
+            var that = this;
+            this.editDetails.currentView.saveModelsTextValues();
+
+            this.editDetails.currentView.trigger('view:submit:image', function(){
+                lessonManager.execute('package:save', that.model);
+            });
         }
     });
 
@@ -255,7 +304,14 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             else
                 this.$('.js-list-view').addClass('active');
         },
-        onShow: function(){},
+        onRender: function(){
+            var paginatorShowingView = new ValamisPaginatorShowing({
+                language: Valamis.language,
+                model: this.options.paginatorModel,
+                el: this.$('#lessonManagerToolbarShowing')
+            });
+            paginatorShowingView.render();
+        },
         changePackageType: function(e){
             this.model.set('packageType', $(e.target).attr("data-value"));
         },
@@ -294,9 +350,20 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
     Views.PackageItemView = Marionette.ItemView.extend({
         template: '#packageManagerItemView',
         templateHelpers :function () {
+            var itemVisibilityLabel;
+            switch (this.visibleValue) {
+                case 'some': itemVisibilityLabel = 'visibleForSomeLabel'; break;
+                case 'true': itemVisibilityLabel = 'visibleForAllLabel'; break;
+                case 'false': itemVisibilityLabel = 'hiddenLabel'; break;
+            }
+
             return {
-                'courseId': Utils.getCourseId,
-                'timestamp': Date.now()
+                courseId: Utils.getCourseId,
+                timestamp: Date.now(),
+                canChangeVisibility: Valamis.permissions.LM_MODIFY && Valamis.permissions.LM_SET_VISIBLE,
+                dateString: new Date(this.model.get('creationDate')).toLocaleDateString(),
+                packageAuthor: this.model.get('owner') || Valamis.language['removedUserLabel'],
+                itemVisibilityLabel: Valamis.language[itemVisibilityLabel]
             }
         },
         className: 'tile s-12 m-4 l-2',
@@ -304,21 +371,23 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             'click .dropdown-menu > li.js-package-edit': 'editPackage',
             'click .dropdown-menu > li.js-package-delete': 'deletePackage',
             'click .dropdown-menu > li.js-package-export': 'exportPackage',
-            'change input.js-default': 'changeDefault',
-            'change input.js-visible': 'changeVisibility'
+            'click .dropdown-menu.js-visible > li': 'changeVisibility'
         },
         behaviors: {
             ValamisUIControls: {}
         },
-        //triggers: {
-        //    'click .dropdown-menu > li.js-package-edit': 'package:edit'
-        //},
+        onValamisControlsInit: function() {
+            this.$('.js-visible-dropdown').valamisDropDown('select', this.visibleValue);
+        },
         /* set the template used to display this view */
         modelEvents: {
-          'model:change': 'render'
+            'model:change': 'render',
+            'itemSaved': 'render'
         },
         /* used to show the order in which these method are called */
         initialize: function(options){
+            var isVisible = this.model.get('isVisible');
+            this.visibleValue = ( isVisible === undefined) ? 'some' :  (isVisible + '');
         },
         onRender: function(){
 
@@ -344,25 +413,30 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             '&id=' + this.model.id +
             '&courseId=' + Utils.getCourseId();
         },
-        changeDefault: function(e){
-            var checked = $(e.target).is(':checked');
-            this.model.set('isDefault', checked);
-            lessonManager.execute("package:save", this.model);
+        changeVisibility: function(e) {
+            var visibilityType = $(e.target).attr('data-value');
 
-            this.triggerMethod('package:default:changed', e.target.id, this.model.get('id'));
-        },
-        changeVisibility: function(e){
-            var checked = $(e.target).is(':checked');
-
-            this.model.set('visibility', checked);
-            lessonManager.execute("package:save", this.model);
+            switch (visibilityType) {
+                case 'true':
+                    this.model.updateVisibility({}, { isVisible: true });
+                    this.model.set('isVisible', true);
+                    break;
+                case 'false':
+                    this.model.updateVisibility({}, { isVisible: false });
+                    this.model.set('isVisible', false);
+                    break;
+                case 'some':
+                    this.model.updateVisibility({}, { isVisible: 'null' });
+                    this.model.unset('isVisible', { silent: true });
+                    this.triggerMethod('package:edit', 'Visibility');
+                    break;
+            }
         }
     });
 
     // TODO create PagedCollectionView
     Views.Packages = Marionette.CollectionView.extend({
         className: 'js-package-items val-row',
-        template: "#packageManagerPackageList",
         childView: Views.PackageItemView,
         initialize: function (options) {
             this.paginatorModel = options.paginatorModel;
@@ -373,29 +447,24 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         },
         onShow: function(){},
         childEvents: {
-            "package:default:changed": function(childView, id, modelId){
-                this.$('input.js-default').not("[id='" + id + "']").removeAttr("checked");
-                this.collection.each(function(item) {
-                  if (item.get('id') != modelId)
-                    item.set({isDefault: false, silent:true});
-                })
-            },
-            "package:edit":function(childView){
-                var editView = new Views.EditPackageView({model: childView.model});
+            "package:edit":function(childView, activeTab){
+                var editView = new lessonManager.Views.EditPackageView({
+                    model: childView.model,
+                    activeTab: activeTab
+                });
                 var editModalView = new valamisApp.Views.ModalView({
+                    template: '#packageManagerEditModalTemplate',
                     contentView: editView,
-                    header: Valamis.language['editPackageItemHeader'],
                     submit: function () {
-                        editView.saveModelsTextValues();
-
-                        editView.trigger('view:submit:image', function(){
-                            lessonManager.execute('package:save', childView.model);
-                            childView.render();
-                        });
+                        editView.saveModel();
+                    },
+                    onDestroy: function() {
+                        valamisApp.execute('portlet:unset:onbeforeunload');
                     }
                 });
 
                 valamisApp.execute('modal:show', editModalView);
+                valamisApp.execute('portlet:set:onbeforeunload', Valamis.language['loseUnsavedWorkLabel']);
             }
         }
     });
@@ -426,6 +495,14 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 },
                 'getFileUploaderUrl': function (model) {
                     return path.root + path.api.files + 'package/' + model.get('id') + '/logo';
+                },
+                'getImageUrl': function (model) {
+                    return path.root + path.api.prefix + 'packages/' + model.get('id') + '/logo?courseId=' + Utils.getCourseId();
+                },
+                'fileuploaddoneCallback': function(result, uploader, context) {
+                    context.view.triggerMethod('FileAdded', null, result);
+                    var src = context.options.getImageUrl(context.view.model);
+                    uploader.trigger("fileupload:done", {src: src, name: result.filename});
                 },
                 'uploadLogoMessage' : function() { return Valamis.language['uploadLogoMessage'];},
                 'fileUploadModalHeader' : function() { return Valamis.language['fileUploadModalHeader']; }
@@ -472,13 +549,11 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
     });
 
     Views.AppLayoutView = Marionette.LayoutView.extend({
-        tagName: 'div',
         template: '#lessonManagerLayoutTemplate',
         regions:{
             'toolbar' : '#lessonManagerToolbar',
             'packageList' : '#lessonManagerPackages',
-            'paginator': '#lessonManagerPaginator',
-            'paginatorShowing': '#lessonManagerToolbarShowing'
+            'paginator': '#lessonManagerPaginator'
         },
         childEvents: {
             'toolbar:displaymode:change': function(childView,displayMode ) {
@@ -497,7 +572,18 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 };
 
                 var fileUploaderUrl = path.root + path.api.files + "?" + $.param(endpointparam);
-                var uploader = new FileUploader({ endpoint: fileUploaderUrl, message:  Valamis.language['uploadPackageMessage'] });
+
+                var uploader = new FileUploader({
+                    endpoint: fileUploaderUrl,
+                    message:  Valamis.language['uploadPackageMessage'],
+                    onFailFunction: function(e, data) {
+                        var errorMessage = (_.contains(data.jqXHR.responseText, 'unsupportedPackageException'))
+                            ? Valamis.language['unsupportedPackageMessage']
+                            : Valamis.language['failedMessageLabel'];
+                        toastr.error(errorMessage);
+                        valamisApp.execute('modal:close', uploaderModalView);
+                    }
+                });
                 var uploaderModalView = new valamisApp.Views.ModalView({
                     contentView: uploader,
                     header: Valamis.language['fileUploadModalHeader']
@@ -557,7 +643,8 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         },
         onRender: function() {
             var toolbarView = new Views.ToolbarView({
-                model: lessonManager.filter
+                model: lessonManager.filter,
+                paginatorModel: this.paginatorModel
             });
 
             var packageListView = new Views.Packages({
@@ -575,17 +662,11 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
                 language: Valamis.language,
                 model : this.paginatorModel
             });
-
-            var paginatorShowingView = new ValamisPaginatorShowing({
-                language: Valamis.language,
-                model: this.paginatorModel
-            });
-            this.paginator.show(this.paginatorView);
-            this.paginatorShowing.show(paginatorShowingView);
-
             this.paginatorView.on('pageChanged', function () {
                 lessonManager.execute('packages:reload');
             }, this);
+
+            this.paginator.show(this.paginatorView);
 
             this.packageList.show(packageListView);
             lessonManager.execute('packages:reload');

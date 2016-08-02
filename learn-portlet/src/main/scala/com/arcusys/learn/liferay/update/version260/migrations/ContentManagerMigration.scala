@@ -1,15 +1,16 @@
 package com.arcusys.learn.liferay.update.version260.migrations
 
+import com.arcusys.learn.liferay.LogFactoryHelper
 import com.arcusys.learn.liferay.update.version260.slide.SlideTableComponent
 import com.arcusys.valamis.content.model.QuestionType.QuestionType
 import com.arcusys.valamis.content.model._
-import com.arcusys.valamis.content.schema.ContentTableComponent
-import com.arcusys.valamis.core.SlickProfile
-import com.liferay.portal.kernel.log.LogFactoryUtil
+import com.arcusys.valamis.content.storage.impl.schema.ContentTableComponent
+import com.arcusys.valamis.persistence.common.SlickProfile
+import slick.jdbc.GetResult
 
 import scala.collection.mutable
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{GetResult, JdbcBackend, StaticQuery}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 
 class ContentManagerMigration(val db: JdbcBackend#DatabaseDef,
                               val driver: JdbcProfile)
@@ -17,7 +18,7 @@ class ContentManagerMigration(val db: JdbcBackend#DatabaseDef,
   with SlickProfile
   with SlideTableComponent {
 
-  val log = LogFactoryUtil.getLog(getClass)
+  val log = LogFactoryHelper.getLog(getClass)
 
   val slideEntities: mutable.ListBuffer[(Long, String, String)] = mutable.ListBuffer()
 

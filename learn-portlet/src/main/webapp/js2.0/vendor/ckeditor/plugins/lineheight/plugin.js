@@ -1,7 +1,7 @@
-( function() {
+﻿( function() {
 	function addCombo( editor, comboName, styleType, lang, entries, defaultLabel, styleDefinition, order ) {
-		var config = editor.config,style = new CKEDITOR.style( styleDefinition );		
-		var names = entries.split( ';' ),values = [];		
+		var config = editor.config,style = new CKEDITOR.style( styleDefinition );
+		var names = entries.split( ';' ),values = [];
 		var styles = {};
 		for ( var i = 0; i < names.length; i++ ) {
 			var parts = names[ i ];
@@ -28,7 +28,7 @@
 			init: function() {
 				this.startGroup(editor.lang.lineheight.title);
 				for ( var i = 0; i < names.length; i++ ) {
-					var name = names[ i ];					
+					var name = names[ i ];
 					this.add( name, styles[ name ].buildPreview(), name );
 				}
 			},

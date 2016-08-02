@@ -25,13 +25,13 @@
     function onActivityMapperLanguageLoad(lang) {
         ActivityMapperApp.start({
             language: lang,
-            siteID: JSON.parse('{{siteID}}')
+            siteID: Liferay.ThemeDisplay.getScopeGroupId()
         });
 
         var collection = ActivityMapperApp.request('setting:list');
-        // {{#settings}}
-        collection.add({activityID: '{{activityID}}', mappedVerb: '{{value}}'});
-        // {{/settings}}
+        // {{#activityToVerb}}
+        collection.add({activityID: '{{className}}', mappedVerb: '{{verb}}'});
+        // {{/activityToVerb}}
     }
 </script>
 </body>

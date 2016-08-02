@@ -139,8 +139,20 @@ valamisStudySummary.module('Views', function (Views, valamisStudySummary, Backbo
       }
 
       //legend
+      var wrap = function(d) {
+        var self = d3.select(this),
+            textLength = self.node().getComputedTextLength(),
+            text = self.text();
+        while (( textLength > self.attr('width'))&& text.length > 0) {
+          text = text.slice(0, -1);
+          self.text(text + '...');
+          textLength = self.node().getComputedTextLength();
+        }
+      };
+
       var legendRectSize = 16,
-        legendSpacing  = 10;
+          legendSpacing  = 10,
+          percentSpacing = 160;
 
       var legend = svg.selectAll('.legend')
         .data(data)
@@ -170,11 +182,13 @@ valamisStudySummary.module('Views', function (Views, valamisStudySummary, Backbo
         .attr('font-size','13px')
         .attr('font-weight','bold')
         .attr('fill','#555555')
-        .text(function(d) { return d.label || Valamis.language['otherLabel']; });
+        .text(function(d) { return d.label  || Valamis.language['otherLabel']; })
+          .attr('width', percentSpacing - legendRectSize - legendSpacing - 5)
+          .each(wrap);
 
       if( !isEmpty ){
         legend.append('text')
-          .attr('x', 160)
+          .attr('x', percentSpacing)
           .attr('y', legendRectSize - legendSpacing + 5)
           .attr('dy', '.15em')
           .attr('font-size','13px')
@@ -186,11 +200,13 @@ valamisStudySummary.module('Views', function (Views, valamisStudySummary, Backbo
     getData: function( callback_func ){
 
       var that = this;
-      $.ajax( {
+      $.ajax({
           url: path.root + path.api.dashboard + 'summary',
-          data: { courseId: Utils.getCourseId() }
-        }
-      ).done(function(data){
+          data: {
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
+          }
+      }).done(function(data){
 
           var certificatesReceived = data.certificatesReceived || 0;
           var lessonsCompleted = data.lessonsCompleted || 0;

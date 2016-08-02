@@ -1,8 +1,7 @@
 package com.arcusys.learn.liferay.update
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.liferay.portal.service.CompanyLocalServiceUtil
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 
 import scala.collection.JavaConverters._
 import scala.slick.driver.JdbcDriver
@@ -214,9 +213,5 @@ class DBUpdater230 extends LUpgradeProcess with SQLRunner {
 
     runSQLScript("""alter table Learn_LFLessonLimit alter column "itemtype" TYPE VARCHAR(75);""".stripMargin)
     runSQLScript("""alter table Learn_LFCertificateActivity alter column "activityname" TYPE VARCHAR(75);""".stripMargin)
-
-    // TODO: do not use persistence layer here
-    implicit var bindingModule = Configuration
-    new CreatePackageAssets().run(CompanyLocalServiceUtil.getCompanies.asScala.map(_.getCompanyId))
   }
 }

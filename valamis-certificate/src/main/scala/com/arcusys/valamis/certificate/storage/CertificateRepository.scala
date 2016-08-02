@@ -18,4 +18,6 @@ trait CertificateRepository {
   def getWithStatBy(filter: CertificateFilter, skipTake: Option[SkipTake] = None): Seq[(Certificate, CertificateUsersStatistic)]
   def getWithItemsCountBy(filter: CertificateFilter, skipTake: Option[SkipTake]): Seq[(Certificate, CertificateItemsCount)]
   def getCountBy(filter: CertificateFilter): Int
+
+  def getGoalsMaxArrangementIndex(certificateId: Long): Int
 }

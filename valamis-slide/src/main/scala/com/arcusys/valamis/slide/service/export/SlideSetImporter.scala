@@ -2,17 +2,17 @@ package com.arcusys.valamis.slide.service.export
 
 import java.io.{File, InputStream}
 
+import com.arcusys.valamis.content.model.{Answer, Category, PlainText, Question}
 import com.arcusys.valamis.content.service.{CategoryService, PlainTextService, QuestionService}
-import com.arcusys.valamis.export.ImportProcessor
+import com.arcusys.valamis.util.export.ImportProcessor
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.content.model.{Category, PlainText, Answer, Question}
 import com.arcusys.valamis.slide.model._
 import com.arcusys.valamis.slide.service.{SlideElementServiceContract, SlideServiceContract, SlideSetServiceContract}
 import com.arcusys.valamis.slide.storage.SlideElementPropertyRepository
 import com.arcusys.valamis.util.FileSystemUtil
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-
-import scala.util.Try
+import org.json4s.jackson.JsonMethods._
+import org.json4s.{DefaultFormats, Formats}
 
 trait SlideSetImporterContract {
   def importItems(stream: InputStream, scopeId: Int): Unit
@@ -23,6 +23,7 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
   with SlideSetExportUtils
   with ImportProcessor[ExportFormat]
   with SlideSetImporterContract {
+  implicit val jsonFormats: Formats = DefaultFormats
 
   private lazy val slideSetService = inject[SlideSetServiceContract]
   private val slideService = inject[SlideServiceContract]
@@ -38,9 +39,7 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
                         createdSlideSet: SlideSetModel,
                         slideSetVersion: Option[String],
                         slidesMapper: scala.collection.mutable.Map[Long, Long],
-                        localPath: String,
-                        questions: List[(Question, Seq[Answer])],
-                        plaintexts: List[PlainText]): Unit = {
+                        localPath: String): Unit = {
 
     def addSlide(prevSlideModel: SlideModel,
                  title: String,
@@ -118,117 +117,6 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
             )
           )
       }
-
-      prevSlideModel.slideElements.foreach { element =>
-        val planTextFromQuestions = plaintexts.filter {
-          _.id match {
-            case Some(id) if (id.toString == element.content) => true
-            case _ => false
-          }
-        }
-
-
-        val slideElement = if (planTextFromQuestions.nonEmpty && (element.slideEntityType == SlideEntityType.Question))
-          element.copy(slideEntityType = SlideEntityType.PlainText)
-        else element
-
-        slideElement.slideEntityType match {
-          case SlideEntityType.Image | SlideEntityType.Pdf | SlideEntityType.Video | SlideEntityType.Webgl =>
-
-            val (slideContent, folder) =
-              if (slideElement.content.contains("/delegate/")) {
-                val content = slideElement.content.replaceFirst( """.+file=""", "").replaceAll( """(&date=\d+)?"?\)?(\s+.+)?""", "")
-                val folderId = slideElement.content.replaceFirst( """.+folderId=""", "").replaceAll( """(&file=.+)?"?\)?(\s+.+)?""", "")
-
-                if (folderId.isEmpty)
-                  (content, SlideSetHelper.filePathPrefix(slideElement, slideSetVersion))
-                else
-                  (content, folderId + "/")
-              }
-              else {
-                (slideElement.content, SlideSetHelper.filePathPrefix(slideElement, slideSetVersion))
-              }
-
-            val createdSlideElement = createSlideElement(slideElement, slideContent, createdSlide.id.get)
-
-            getFromPath(slideContent, folder).foreach { case (folderName: String, rawFileName: String) =>
-              val fileName = rawFileName.split(" ").head
-
-              val realFilePath = localPath + File.separator + getPath(folderName, fileName, slideSetVersion)
-              lazy val ext = slideElement.content.replaceFirst( """.+ext=""", "").replaceAll( """\"\)""", "")
-
-              val path = Seq(realFilePath, realFilePath + "." + ext).find(new File(_).exists)
-
-              if (path.isDefined) {
-                val url = addImageToFileService(
-                  createdSlideElement,
-                  slideSetVersion,
-                  fileName,
-                  path.get,
-                  createdSlideSet.id.get
-                )
-
-                val content =
-                  if (slideElement.slideEntityType == SlideEntityType.Pdf)
-                    slideElement.content.replaceFirst("(.+(slide|quiz)Data)\\d+(/.+)", "$1" + createdSlideElement.id.get + "$3")
-                  else
-                    url
-
-                slideElementService.update(
-                  SlideElementModel(
-                    createdSlideElement.id,
-                    slideElement.top,
-                    slideElement.left,
-                    slideElement.width,
-                    slideElement.height,
-                    slideElement.zIndex,
-                    content,
-                    slideElement.slideEntityType,
-                    createdSlide.id.get,
-                    slideElement.correctLinkedSlideId,
-                    slideElement.incorrectLinkedSlideId,
-                    slideElement.notifyCorrectAnswer,
-                    slideElement.properties)
-                )
-              }
-            }
-          case SlideEntityType.Question =>
-            val (question, answers) = questions.find(qt => qt._1.id.contains(slideElement.content.toLong)).getOrElse(throw new IllegalStateException("No question with required id: " + slideElement.content.toLong))
-            val categoryId = question.categoryId
-            val categoryNewId: Option[Long] = categoryId.map { id =>
-              categoryService.getByTitleAndCourseId(id.toString, createdSlideSet.courseId) match {
-                case Some(cat) => cat.id.get
-                case _ => {
-                  val newId = categoryService.create(Category(None, id.toString, "", None, question.courseId)).id.get
-                  categoryService.moveToCourse(newId, createdSlideSet.courseId, true)
-                  newId
-                }
-              }
-            }
-
-            val createdQuestion = questionService.createWithNewCategory(question, answers, categoryNewId)
-            questionService.moveToCourse(createdQuestion.id.get, createdSlideSet.courseId.toInt, moveToRoot = false)
-            //TODO encode/decode questions (and plaintext?) ???
-            //questionServiceOld.decodeQuestion(createdQuestion)
-            createSlideElement(
-              slideElement,
-              createdQuestion.id.get.toString,
-              createdSlide.id.get)
-          case SlideEntityType.PlainText =>
-            val plaintext = plaintexts.find(_.id.contains(slideElement.content.toLong)).getOrElse(throw new IllegalStateException("No plaintext with required id: " + slideElement.content.toLong))
-            val createdPlaintext = plainTextService.create(plaintext)
-            plainTextService.moveToCourse(createdPlaintext.id.get, createdSlideSet.courseId.toInt, moveToRoot = true)
-            createSlideElement(
-              slideElement,
-              createdPlaintext.id.get.toString,
-              createdSlide.id.get)
-          case _ =>
-            createSlideElement(
-              slideElement,
-              slideElement.content,
-              createdSlide.id.get)
-        }
-      }
     }
     val firstSlide =
       slides
@@ -278,14 +166,134 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
     }
   }
 
-  private def createSlideElement(slideElement: SlideElementModel, content: String, slideId: Long): SlideElementModel = {
+  private def addSlideElements(element: SlideElementModel,
+                               questions: List[(Question, Seq[Answer])],
+                               plaintexts: List[PlainText],
+                               newSlideId: Long,
+                               slideSetVersion: Option[String],
+                               courseId: Long,
+                               localPath: String,
+                               data: String): Unit = {
+
+      val planTextFromQuestions = plaintexts.filter {
+        _.id match {
+          case Some(id) if id.toString == element.content => true
+          case _ => false
+        }
+      }
+
+
+      val slideElement = if (planTextFromQuestions.nonEmpty && (element.slideEntityType == SlideEntityType.Question))
+        element.copy(slideEntityType = SlideEntityType.PlainText)
+      else element
+
+      slideElement.slideEntityType match {
+        case SlideEntityType.Image | SlideEntityType.Pdf | SlideEntityType.Video | SlideEntityType.Webgl =>
+
+          val (slideContent, folder) =
+            if (slideElement.content.contains("/delegate/")) {
+              val content = slideElement.content.replaceFirst( """.+file=""", "").replaceAll( """(&date=\d+)?"?\)?(\s+.+)?""", "")
+              val folderId = slideElement.content.replaceFirst( """.+folderId=""", "").replaceAll( """(&file=.+)?"?\)?(\s+.+)?""", "")
+
+              if (folderId.isEmpty)
+                (content, SlideSetHelper.filePathPrefix(slideElement, slideSetVersion))
+              else
+                (content, folderId + "/")
+            }
+            else {
+              (slideElement.content, SlideSetHelper.filePathPrefix(slideElement, slideSetVersion))
+            }
+
+          val createdSlideElement = createSlideElement(slideElement, slideContent, newSlideId, data)
+
+          getFromPath(slideContent, folder).foreach { case (folderName: String, rawFileName: String) =>
+            val fileName = rawFileName.split(" ").head
+
+            val realFilePath = localPath + File.separator + getPath(folderName, fileName, slideSetVersion)
+            lazy val ext = slideElement.content.replaceFirst( """.+ext=""", "").replaceAll( """\"\)""", "")
+
+            val path = Seq(realFilePath, realFilePath + "." + ext).find(new File(_).exists)
+
+            if (path.isDefined) {
+              val url = addImageToFileService(
+                createdSlideElement,
+                slideSetVersion,
+                fileName,
+                path.get,
+                newSlideId
+              )
+
+              val content =
+                if (slideElement.slideEntityType == SlideEntityType.Pdf)
+                  slideElement.content.replaceFirst("(.+(slide|quiz)Data)\\d+(/.+)", "$1" + createdSlideElement.id.get + "$3")
+                else
+                  url
+
+              slideElementService.update(
+                SlideElementModel(
+                  createdSlideElement.id,
+                  slideElement.zIndex,
+                  content,
+                  slideElement.slideEntityType,
+                  newSlideId,
+                  slideElement.correctLinkedSlideId,
+                  slideElement.incorrectLinkedSlideId,
+                  slideElement.notifyCorrectAnswer,
+                  slideElement.properties)
+              )
+            }
+          }
+        case SlideEntityType.Question =>
+          val (question, answers) = questions
+            .find(qt => qt._1.id.contains(slideElement.content.toLong))
+            .getOrElse(throw new IllegalStateException("No question with required id: " + slideElement.content.toLong))
+          val categoryId = question.categoryId
+          val categoryNewId: Option[Long] = categoryId.map { id =>
+            categoryService.getByTitleAndCourseId(id.toString, courseId) match {
+              case Some(cat) => cat.id.get
+              case _ =>
+                val newId = categoryService.create(Category(None, id.toString, "", None, question.courseId)).id.get
+                categoryService.moveToCourse(newId, courseId, true)
+                newId
+            }
+          }
+
+          val createdQuestion = questionService.createWithNewCategory(question, answers, categoryNewId)
+          questionService.moveToCourse(createdQuestion.id.get, courseId.toInt, moveToRoot = false)
+          //TODO encode/decode questions (and plaintext?) ???
+          //questionServiceOld.decodeQuestion(createdQuestion)
+          createSlideElement(
+            slideElement,
+            createdQuestion.id.get.toString,
+            newSlideId,
+            data)
+        case SlideEntityType.PlainText =>
+          val plaintext = plaintexts
+            .find(_.id.contains(slideElement.content.toLong))
+            .getOrElse(throw new IllegalStateException("No plaintext with required id: " + slideElement.content.toLong))
+          val createdPlaintext = plainTextService.create(plaintext)
+          plainTextService.moveToCourse(createdPlaintext.id.get, courseId.toInt, moveToRoot = true)
+          createSlideElement(
+            slideElement,
+            createdPlaintext.id.get.toString,
+            newSlideId,
+            data)
+        case _ =>
+          createSlideElement(
+            slideElement,
+            slideElement.content,
+            newSlideId,
+            data)
+      }
+  }
+
+  private def createSlideElement(slideElement: SlideElementModel,
+                                 content: String,
+                                 slideId: Long,
+                                 data: String): SlideElementModel = {
     val newSlideElement = slideElementService.create(
       SlideElementModel(
         None,
-        slideElement.top,
-        slideElement.left,
-        slideElement.width,
-        slideElement.height,
         slideElement.zIndex,
         content,
         slideElement.slideEntityType,
@@ -296,12 +304,33 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
         slideElement.properties
       )
     )
-    if (slideElement.properties.isEmpty)
-      slideElementPropertyRepository.createFromOldValues(deviceId = 1, newSlideElement.id.get, slideElement)
+    if (slideElement.properties.isEmpty){
+
+      val oldElements = for {
+        slide <- parse(data).\("slideSet").\("slides").children
+        slideElement <- slide.\("slideElements").extract[List[SlideOldElementModel]]
+      } yield slideElement
+
+      oldElements
+        .filter(_.id == slideElement.id.get)
+        .foreach(el =>
+        slideElementPropertyRepository.createFromOldValues(
+          deviceId = 1,
+          newSlideElement.id.get,
+          el.top,
+          el.left,
+          el.width,
+          el.height)
+      )
+    }
     newSlideElement
   }
 
-  override protected def importItems(items: List[ExportFormat], courseId: Long, tempDirectory: File, userId: Long): Unit = {
+  override protected def importItems(items: List[ExportFormat],
+                                     courseId: Long,
+                                     tempDirectory: File,
+                                     userId: Long,
+                                     data: String): Unit = {
     require(items.length == 1)
     val item = items.head
 
@@ -310,7 +339,7 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
     val (questions, plaintexts) = version match {
       case Some("2.1") => (item.questions.map(QuestionExternalFormat.importQuestion),
         item.plaintexts.map(QuestionExternalFormat.importPlainText))
-      case _ =>{
+      case _ =>
         val planText = item.questions.filter(q => (q.tpe == 8)||(q.tpe == 9))
           .map{
             QuestionExternalFormat.importPlainTextLast
@@ -320,10 +349,9 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
         val newQuestions = item.questions.filter(q => (q.tpe != 8)&&(q.tpe != 9))
           .map(QuestionExternalFormat.importQuestionLast)
         (newQuestions, planText)
-      }
     }
 
-
+    val topDownNavigation = slideSet.slides.exists(_.topSlideId.isDefined)
 
     val createdSlideSet = slideSetService.create(
       SlideSetModel(
@@ -335,10 +363,14 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
         List(),
         slideSet.isTemplate,
         slideSet.isSelectedContinuity,
-        slideSet.themeId,
+        None,
         slideSet.duration,
         slideSet.scoreLimit,
-        slideSet.playerTitle)
+        slideSet.playerTitle,
+        None,
+        topDownNavigation,
+        slideSetService.createNewActivityId(courseId)),
+      Seq()
     )
     slideSet.logo.map { logoString =>
       val folderPrefix = version match {
@@ -356,15 +388,33 @@ class SlideSetImporter(implicit val bindingModule: BindingModule)
       addImageToFileService(createdSlideSet, version, logoString, path)
     }
 
+    val slideMapper = scala.collection.mutable.Map[Long, Long]()
+
     addSlides(
       slideSet.slides,
       slideSet,
       createdSlideSet,
       version,
-      scala.collection.mutable.Map[Long, Long](),
-      tempDirectory.getPath,
-      questions,
-      plaintexts)
+      slideMapper,
+      tempDirectory.getPath)
+
+    slideMapper.foreach { case (oldSlideId, newSlideId) =>
+      for {
+        slide <- slideSet.slides.filter(_.id == Some(oldSlideId))
+        slideElement <- slide.slideElements
+      } {
+        val correctLinkedSlideId = slideElement.correctLinkedSlideId.flatMap(oldId => slideMapper.get(oldId))
+        val incorrectLinkedSlideId = slideElement.incorrectLinkedSlideId.flatMap(oldId => slideMapper.get(oldId))
+        addSlideElements(slideElement.copy(correctLinkedSlideId = correctLinkedSlideId, incorrectLinkedSlideId = incorrectLinkedSlideId),
+          questions,
+          plaintexts,
+          newSlideId,
+          version,
+          courseId,
+          tempDirectory.getPath,
+          data)
+      }
+    }
   }
 
   override def importItems(stream: InputStream, scopeId: Int): Unit =

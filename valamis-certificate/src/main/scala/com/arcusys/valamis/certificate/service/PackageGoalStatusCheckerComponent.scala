@@ -2,39 +2,53 @@ package com.arcusys.valamis.certificate.service
 
 import com.arcusys.learn.liferay.services.PermissionHelper
 import com.arcusys.valamis.certificate.model.goal._
-import com.arcusys.valamis.certificate.storage.{CertificateStateRepository, PackageGoalStorage}
-import com.arcusys.valamis.lesson.exception.NoPackageException
-import com.arcusys.valamis.lesson.service.{LessonStatementReader, ValamisPackageService}
-import com.arcusys.valamis.lrs.tincan.Statement
+import com.arcusys.valamis.certificate.storage.{CertificateGoalRepository, CertificateGoalStateRepository, CertificateStateRepository, PackageGoalStorage}
+import com.arcusys.valamis.gradebook.service.LessonGradeService
+import com.arcusys.valamis.lesson.exception.NoLessonException
+import com.arcusys.valamis.lesson.service.{TeacherLessonGradeService, UserLessonResultService, LessonService, LessonStatementReader}
 import com.arcusys.valamis.model.PeriodTypes
-import com.arcusys.valamis.util.Joda._
 import org.joda.time.DateTime
 
 trait PackageGoalStatusCheckerComponent extends PackageGoalStatusChecker {
   protected def certificateStateRepository: CertificateStateRepository
   protected def packageGoalStorage: PackageGoalStorage
   protected def statementReader: LessonStatementReader
-  protected def packageService: ValamisPackageService
+  protected def goalStateRepository: CertificateGoalStateRepository
+  protected def goalRepository: CertificateGoalRepository
+  protected def lessonService:LessonService
+  protected def gradeService: LessonGradeService
+  protected def lessonResultService: UserLessonResultService
+  protected def teacherGradeService: TeacherLessonGradeService
 
   override def getPackageGoalsStatus(certificateId: Long,
                                      userId: Long): Seq[GoalStatus[PackageGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
 
-    val state = certificateStateRepository.getBy(userId, certificateId).get
-    val goals = packageGoalStorage.getByCertificateId(certificateId)
+    packageGoalStorage.getByCertificateId(certificateId).map { goal =>
+      goalStateRepository.getBy(userId, goal.goalId) match {
+        case Some(goalState) =>
+          val date =
+            if (goalState.status == GoalStatuses.Success)
+              Some(goalState.modifiedDate)
+            else None
+          GoalStatus(goal, goalState.status, date)
+        case None =>
+          try {
+            val goalData = goalRepository.getById(goal.goalId)
+            val state = certificateStateRepository.getBy(userId, certificateId).get
+            val isTimeOut = PeriodTypes
+              .getEndDate(goalData.periodType, goalData.periodValue, state.userJoinedDate)
+              .isBefore(new DateTime)
+            val status = createPackageGoalState(userId, isTimeOut)(goal, goalData)
+            val finishDate =
+              if (status == GoalStatuses.Success) lessonResultService.getAttemptedDate(goal.packageId, userId)
+              else None
 
-    goals.map { goal =>
-      try {
-        val statements = statementReader.getCompletedSuccessTincan(userId, goal.packageId, state.userJoinedDate)
-        val status = checkPackageGoal(userId, state.userJoinedDate, statements)(goal)
-        val finishDate =
-          if (status == GoalStatuses.Success) Some(statements.map(_.stored).min)
-          else None
-
-        GoalStatus(goal, status, finishDate)
-      } catch {
-        case e: NoPackageException =>
-          GoalStatus(goal, GoalStatuses.Success, None)
+            GoalStatus(goal, status, finishDate)
+          } catch {
+            case e: NoLessonException =>
+              GoalStatus(goal, GoalStatuses.Success, None)
+          }
       }
     }
   }
@@ -44,7 +58,8 @@ trait PackageGoalStatusCheckerComponent extends PackageGoalStatusChecker {
     val goals = packageGoalStorage.getByCertificateId(certificateId)
 
     goals map { goal =>
-      GoalDeadline(goal, PeriodTypes.getEndDateOption(goal.periodType, goal.periodValue, startDate))
+      val goalData = goalRepository.getById(goal.goalId)
+      GoalDeadline(goal, PeriodTypes.getEndDateOption(goalData.periodType, goalData.periodValue, startDate))
     }
   }
 
@@ -53,32 +68,64 @@ trait PackageGoalStatusCheckerComponent extends PackageGoalStatusChecker {
       .foldLeft(GoalStatistic.empty)(_ add _.status)
   }
 
-  protected def checkPackageGoal(userId: Long, userJoinedDate: DateTime)
-                                (goal: PackageGoal): GoalStatuses.Value = {
-    try {
-      val statements = statementReader.getCompletedSuccessTincan(userId, goal.packageId, userJoinedDate)
-      checkPackageGoal(userId, userJoinedDate, statements)(goal)
-    } catch {
-      case e: NoPackageException =>
-        GoalStatuses.Success
-    }
+  override def updatePackageGoalState(userId: Long,
+                                      lessonId: Long,
+                                      attemptDate: DateTime): Unit = {
 
+    packageGoalStorage.getByPackageId(lessonId) foreach { goal =>
+      certificateStateRepository.getBy(userId, goal.certificateId) foreach { state =>
+        val goalData = goalRepository.getById(goal.goalId)
+        val isTimeOut = PeriodTypes
+          .getEndDate(goalData.periodType, goalData.periodValue, state.userJoinedDate)
+          .isBefore(attemptDate)
+
+        val status = if (isTimeOut) GoalStatuses.Failed else GoalStatuses.Success
+
+        goalStateRepository.getBy(userId, goal.goalId) match {
+          case Some(goalState) =>
+            if (goalState.status == GoalStatuses.InProgress) {
+              goalStateRepository.modify(goalState.goalId, userId, status, attemptDate)
+            }
+          case None => goalStateRepository.create(
+            CertificateGoalState(
+              userId,
+              goal.certificateId,
+              goal.goalId,
+              status,
+              attemptDate,
+              goalData.isOptional))
+        }
+      }
+    }
   }
 
-  protected def checkPackageGoal(userId: Long, userJoinedDate: DateTime, statements: Seq[Statement])
-                                (goal: PackageGoal): GoalStatuses.Value = {
-    val firstStatementOrNow = statements match {
-      case Nil => DateTime.now
-      case v => v.map(_.stored).min
+  protected def createPackageGoalState(userId: Long, isTimeOut: Boolean)
+                                      (goal: PackageGoal, goalData: CertificateGoal): GoalStatuses.Value = {
+
+    val status = if (isTimeOut) {
+      GoalStatuses.Failed
     }
-
-    val isTimeOut = PeriodTypes
-      .getEndDate(goal.periodType, goal.periodValue, userJoinedDate)
-      .isBefore(firstStatementOrNow)
-    lazy val isGoalCompleted = statements.nonEmpty
-
-    if (isTimeOut) GoalStatuses.Failed
-    else if (isGoalCompleted) GoalStatuses.Success
-    else GoalStatuses.InProgress
+    else {
+      lessonService.getLesson(goal.packageId) match {
+        case Some(lesson) =>
+          val grade = teacherGradeService.get(userId, goal.packageId).flatMap(_.grade)
+          if (gradeService.isLessonFinished(grade, userId, lesson)) {
+            GoalStatuses.Success
+          }
+          else GoalStatuses.InProgress
+        case None =>
+          GoalStatuses.Success
+      }
+    }
+    goalStateRepository.create(
+      CertificateGoalState(
+        userId,
+        goal.certificateId,
+        goal.goalId,
+        status,
+        new DateTime,
+        goalData.isOptional)
+    )
+    status
   }
 }

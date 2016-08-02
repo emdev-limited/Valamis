@@ -3,7 +3,7 @@ package com.arcusys.valamis.user.model
 import com.arcusys.valamis.model.{Order, SortBy}
 
 case class UserFilter(companyId: Option[Long] = None,
-                      namePart: String = "",
+                      namePart: Option[String] = None,
                       certificateId: Option[Long] = None,
                       groupId: Option[Long] = None,
                       organizationId: Option[Long] = None,
@@ -12,11 +12,12 @@ case class UserFilter(companyId: Option[Long] = None,
 
 object UserSortBy extends Enumeration {
   type UserSortBy = Value
-  val Name, CreationDate, UserJoined = Value
+  val Name, CreationDate, UserJoined, LastAttempted = Value
   def apply(v: String): UserSortBy = v.toLowerCase match {
     case "name"         => Name
     case "creationdate" => CreationDate
     case "userjoined"   => UserJoined
+    case "lastattempted"   => LastAttempted
     case _              => throw new IllegalArgumentException()
   }
 }

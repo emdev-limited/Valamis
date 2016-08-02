@@ -1,17 +1,23 @@
 package com.arcusys.learn.liferay.update.version250
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
-import com.arcusys.learn.liferay.update.version250.model.{LFSlideSet, LFSlide, LFSlideEntity}
-import com.arcusys.valamis.core.SlickDBInfo
-import com.arcusys.valamis.file.FileTableComponent
+import com.arcusys.learn.liferay.update.version250.model.{LFSlide, LFSlideEntity, LFSlideSet}
+import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 import com.arcusys.valamis.slide.model.SlideEntityType._
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{GetResult, JdbcBackend, StaticQuery}
+import slick.jdbc.GetResult
 
-class DBUpdater2405 extends LUpgradeProcess with FileTableComponent with SlideTableComponent with Injectable {
+import scala.slick.driver.JdbcProfile
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
+
+class DBUpdater2405 extends LUpgradeProcess
+  with FileTableComponent
+  with SlickProfile
+  with SlideTableComponent
+  with Injectable {
 
   implicit val bindingModule = Configuration
 
@@ -134,10 +140,6 @@ class DBUpdater2405 extends LUpgradeProcess with FileTableComponent with SlideTa
   private def insertSlide(slideList: List[LFSlide], oldEntry: LFSlide, newSlideSetId: Long)(implicit session: JdbcBackend#Session): Option[Long] = {
     if(addedSlideIds.get(Some(oldEntry.id)).nonEmpty)
       return addedSlideIds.get(Some(oldEntry.id)).get
-
-    //Result of incorrect studio work? O_O
-    if(oldEntry.leftSlideId.getOrElse(0 toLong) < 0 || oldEntry.topSlideId.getOrElse(0 toLong) < 0)
-      return Some(-1)
 
     val newLeftSlideId =
       if (oldEntry.leftSlideId.isEmpty || !slideList.exists(_.id == oldEntry.leftSlideId.get))

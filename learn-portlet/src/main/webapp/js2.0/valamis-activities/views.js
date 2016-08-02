@@ -95,7 +95,7 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       var commentAmountLabel = (commentAmount > 1) ? Valamis.language['commentsLabel'] : Valamis.language['commentLabel'];
 
       var imageApi = '';
-      switch(this.model.get('obj')['tpe']) {
+      switch (this.model.get('obj')['tpe']) {
         case OBJECT_TYPE.LESSON:
           imageApi = path.api.packages;
           break;
@@ -104,13 +104,14 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
           break;
         case OBJECT_TYPE.COURSE:
           var logo = this.model.get('obj').logoCourse;
-          imageApi = (logo) ? (Liferay.ThemeDisplay.getPathImage()+ logo) : '';
+          imageApi = (logo) ? (Liferay.ThemeDisplay.getPathImage() + logo) : '';
           break;
       }
 
       var activityStmnt = (this.model.get('obj')['tpe'] !== OBJECT_TYPE.USER_STATUS)
-          ? (Valamis.language[this.model.get('verb') + 'VerbLabel']) + ' ' + Valamis.language[this.model.get('obj')['tpe'].toLowerCase() + 'ActivityLabel']
-          : '';
+      ? (Valamis.language[this.model.get('verb') + 'VerbLabel']) + ' ' + Valamis.language[this.model.get('obj')['tpe'].toLowerCase() + 'ActivityLabel']
+      : '';
+
 
       var userLikedList = this.model.get('userLiked');
       var likesAmount = userLikedList.length;
@@ -144,12 +145,13 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       actLike.secondItem = likeItems[0];
 
       var objectType = this.model.get('obj')['tpe'];
+      var withImage = this.model.get('obj')['withImage'];
 
       return {
         currentUser: this.options.currentUserModel.toJSON(),
         activityStmnt: activityStmnt,
-        objectClassName: (objectType === OBJECT_TYPE.CERTIFICATE) ? 'certificate' : '',
-        withImage: objectType !== OBJECT_TYPE.USER_STATUS,
+        objectClassName: objectType.toLowerCase(),
+        withImage: withImage,
         commentText: (commentAmount || '') + ' ' + commentAmountLabel,
         canShare: objectType === OBJECT_TYPE.LESSON,
         canDelete: (objectType === OBJECT_TYPE.USER_STATUS || this.model.get('verb') == 'Shared')
@@ -259,6 +261,8 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
     },
     initialize: function(options) {
       this.isMyActivities = options.isMyActivities;
+      this.activitiesCount = options.activitiesCount;
+      this.resourceURL = options.resourceURL;
       this.page = 1;
       this.activitiesCollection = new valamisActivities.Entities.ActivitiesCollection();
 
@@ -289,8 +293,9 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
     fetchCollection: function() {
       this.activitiesCollection.fetch({
         page: this.page,
-        count: ACTIVITIES_COUNT,
-        getMyActivities: this.isMyActivities
+        count: this.activitiesCount,
+        getMyActivities: this.isMyActivities,
+        resPath: this.resourceURL
       });
     },
     showMore: function() {
@@ -329,6 +334,8 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
     },
     initialize: function(options) {
       this.currentUserModel = options.currentUserModel;
+      this.resourceURL = options.resourceURL;
+      this.activitiesCount = options.activitiesCount;
       this.allActivitiesCollection = new valamisActivities.Entities.ActivitiesCollection();
       this.myActivitiesCollection = new valamisActivities.Entities.ActivitiesCollection();
     },
@@ -337,6 +344,8 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       this.statusRegion.show(statusView);
 
       var allActivitiesView = new Views.ValamisActivitiesCollectionView({
+        resourceURL: this.resourceURL,
+        activitiesCount: this.activitiesCount,
         collection: this.allActivitiesCollection,
         currentUserModel: this.currentUserModel,
         isMyActivities: false
@@ -344,6 +353,8 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       this.activitiesRegion.show(allActivitiesView);
 
       var myActivitiesView = new Views.ValamisActivitiesCollectionView({
+        resourceURL: this.resourceURL,
+        activitiesCount: this.activitiesCount,
         collection: this.myActivitiesCollection,
         currentUserModel: this.currentUserModel,
         isMyActivities: true

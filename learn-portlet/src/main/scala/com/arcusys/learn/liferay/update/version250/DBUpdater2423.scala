@@ -1,15 +1,16 @@
 package com.arcusys.learn.liferay.update.version250
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.valamis.core.SlickDBInfo
+import com.arcusys.learn.liferay.LogFactoryHelper
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.liferay.portal.kernel.log.LogFactoryUtil
 
 class DBUpdater2423(dbInfo: SlickDBInfo) extends LUpgradeProcess with SlideTableComponent {
   def this() = this(Configuration.inject[SlickDBInfo](None))
 
-  val logger = LogFactoryUtil.getLog(getClass)
+  val logger = LogFactoryHelper.getLog(getClass)
   implicit val bindingModule = Configuration
 
   override def getThreshold = 2423

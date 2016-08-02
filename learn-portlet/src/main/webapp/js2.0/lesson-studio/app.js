@@ -21,12 +21,13 @@ var LessonStudio = Marionette.Application.extend({
             BUTTON_MAX_PADDING: 15,
             TOPBAR_HEIGHT: 60,
             SIDEBAR_WIDTH: 140,
+            VERSION_SIDEBAR_WIDTH: 280,
             ELEMENT_CONTROLS_WIDTH: 40,
             TOOLTIP_WINDOW_BOUNDARY_WIDTH: 1500,
             MAX_ELEMENT_WIDTH:800
         };
     },
-    start: function(options){
+    onStart: function(options){
         var previousFilter = this.settings.get('searchParams');
         this.filter = new lessonStudio.Entities.Filter(previousFilter);
 
@@ -54,11 +55,23 @@ var LessonStudio = Marionette.Application.extend({
                 if( slidesApp.activeElement && slidesApp.activeElement.view ){
                     slidesApp.activeElement.view.updateControlsPosition();
                 }
+                slidesApp.vent.trigger('containerResize');
             }
             if(revealModule.view){
                 revealModule.view.placeWorkArea();
             }
         });
+
+        if (Liferay.Session) {
+            var timerId = setTimeout(function tick(state) {
+                var stateCurrent = Liferay.Session.get('sessionState');
+                if (stateCurrent == 'active') {
+                    timerId = setTimeout(tick, 990, stateCurrent);
+                } else {
+                    Liferay.Session.extend();
+                }
+            }, 990, 'active');
+        }
     }
 });
 
@@ -112,10 +125,11 @@ lessonStudio.commands.setHandler('editor-ready', function (slideSetModel) {
     if( slidesApp.slideCollection.size() == 1 && slidesApp.slideElementCollection.size() === 0 ){
         slidesApp.topbar.currentView.showDeviceSelectModal();
     }
-
-    slidesApp.GridSnapModule.start();
+    slidesApp.historyManager.start();
+    slidesApp.gridSnapModule.start();
+    slidesApp.keyboardModule.start();
     slidesApp.switchMode('edit', true);
-    slidesApp.bindKeys();
+    jQueryValamis(document.body).addClass('overflow-hidden');
 });
 
 lessonStudio.commands.setHandler('save-slideset', function () {

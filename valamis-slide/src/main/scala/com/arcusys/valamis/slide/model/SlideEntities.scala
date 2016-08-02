@@ -1,5 +1,9 @@
 package com.arcusys.valamis.slide.model
 
+import org.joda.time.DateTime
+
+
+
 case class SlideSetEntity(id: Option[Long] = None,
                           title: String = "",
                           description: String = "",
@@ -10,7 +14,13 @@ case class SlideSetEntity(id: Option[Long] = None,
                           themeId: Option[Long] = None,
                           duration: Option[Long] = None,
                           scoreLimit: Option[Double] = None,
-                          playerTitle: String = "page")
+                          playerTitle: String = "page",
+                          topDownNavigation:Boolean = false,
+                          activityId: String = "",
+                          status: String = "draft",
+                          version: Double = 1.0,
+                          modifiedDate: DateTime = new DateTime(),
+                          oneAnswerAttempt: Boolean = false)
 
 case class SlideEntity(id: Option[Long] = None,
                        title: String,
@@ -32,10 +42,6 @@ case class SlideEntity(id: Option[Long] = None,
                        playerTitle: Option[String] = None)
 
 case class SlideElementEntity(id: Option[Long] = None,
-                              top: String,
-                              left: String,
-                              width: String,
-                              height: String,
                               zIndex: String,
                               content: String,
                               slideEntityType: String,

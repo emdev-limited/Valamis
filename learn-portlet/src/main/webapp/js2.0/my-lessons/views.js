@@ -11,24 +11,41 @@ myLessons.module('Views', function (Views, myLessons, Backbone, Marionette, $, _
     templateHelpers: function() {
       var colorClass = '';
 
-      var gradeInt = parseInt(this.model.get('sortGrade')) || 0;
+      var requiredReview = this.model.get('lesson').requiredReview;
+      var teacherGradeObject = this.model.get('teacherGrade');
+      var teacherGrade = (teacherGradeObject) ? teacherGradeObject.grade : undefined;
+      var autoGrade = this.model.get('autoGrade');
+      var state = this.model.get('state');
+
+      var grade = (requiredReview)
+        ? teacherGrade
+        : (!!teacherGrade) ? teacherGrade : autoGrade;
+
+      var gradeInt = parseInt(grade * 100) || 0;
 
       if (gradeInt < 25)
-        colorClass = 'red';
+        colorClass = 'failed';
       else if (gradeInt >= 25 && gradeInt < 50)
-        colorClass = 'yellow';
+        colorClass = 'inprogress';
       else
-        colorClass = 'green';
+        colorClass = 'success';
+
+      var isSuccess = (gradeInt === 100);
 
       var lessonGrade = gradeInt + '%';
 
-      var lessonItemStatusLabel = (gradeInt) ? Valamis.language['inProgressLabel'] : Valamis.language['notStartedLabel'];
+      var lessonItemStatusLabel = (state)
+          ? Valamis.language[state.name + 'Label']
+          : Valamis.language['notStartedLabel'];
 
       return {
         lessonItemStatusLabel: lessonItemStatusLabel,
         colorClass: colorClass,
         lessonGrade: lessonGrade,
-        completedLessons: this.options.completedLessons
+        completedLessons: this.options.completedLessons,
+        isSuccess: isSuccess,
+        title: this.model.get('lesson').title,
+        description: this.model.get('lesson').description
       }
     }
   });

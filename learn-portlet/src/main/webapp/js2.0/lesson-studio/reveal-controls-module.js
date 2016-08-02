@@ -41,11 +41,12 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 'selectImageModalHeader': function () { return Valamis.language['selectImageModalHeader']; },
                 'fileuploaddoneCallback': function() {},
                 'fileuploadaddCallback': function(context, file, data) {
+                    slidesApp.activeSlideModel.set('bgImageChange', false, {silent: true});
                     context.view.triggerMethod('FileAdded', file, data);
                 },
                 'acceptFileTypes': function() {
                     return '(' +
-                        _.reduce(getMimeTypeGroupValues('image'), function(a, b) {
+                        _.reduce(Utils.getMimeTypeGroupValues('image'), function(a, b) {
                             return a + ')|(' + b;
                         }) + ')';
                 },
@@ -116,7 +117,7 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             valamisApp.execute('modal:close');
         },
         deleteSlide: function() {
-            slidesApp.execute('reveal:page:delete');
+            slidesApp.activeSlideModel.set('toBeRemoved', true);
         },
         onFileAdded: function (file, data) {
             var fileUrl = (typeof file === 'string')
@@ -130,9 +131,8 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             if(typeof file === 'object')
                 slidesApp.activeSlideModel.set('formData', data);
 
-            var oldBgImage = slidesApp.activeSlideModel.get('bgImage');
             var bgSize = this.$('#background-image-selector').val() || 'cover';
-            this.bgImageUpdate(fileUrl, bgSize, oldBgImage);
+            this.bgImageUpdate(fileUrl, bgSize);
 
             this.$el.find('.js-valamis-popup-panel').hide();
             valamisApp.execute('modal:clear');
@@ -151,12 +151,12 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 this.bgImageUpdate('', '');
             }
         },
-        bgImageUpdate: function(image, size, oldImage) {
+        bgImageUpdate: function(image, size) {
             var src = (image.indexOf('/') == -1)
                 ? slidesApp.getFileUrl(slidesApp.activeSlideModel, image)
                 : image;
 
-            slidesApp.execute('reveal:page:changeBackgroundImage', (image && size) ? (image + ' ' + size) : '', oldImage);
+            slidesApp.activeSlideModel.set('bgImage', (image && size) ? (image + ' ' + size) : '');
 
             this.$('#slide-background-image-thumbnail').css({
                 'display': image ? 'block' : 'none',
@@ -193,16 +193,23 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             slidesApp.selectizeCategory.setValue(slidesApp.activeSlideModel.get('statementCategoryId'));
             slidesApp.pagePlayerTitle.setValue(slidesApp.activeSlideModel.get('playerTitle') || 'lessonSetting');
         },
-        openSlideTemplatesPanel: function(isDirectionDown) {
+        openSlideTemplatesPanel: function (isDirectionDown) {
             var classList = 'lesson-studio-modal slide-templates-modal light-val-modal overflow-visible';
-            var blankSlide =  new lessonStudio.Entities.LessonPageModel({'title': 'Blank page'});
+            var blankSlide = new lessonStudio.Entities.LessonPageTemplateModel({'title': 'Blank page'});
             var templateCollection = new lessonStudio.Entities.LessonPageCollection(blankSlide);
-            var copySlide = new lessonStudio.Entities.LessonPageModel(slidesApp.activeSlideModel.attributes);
-            copySlide
-                .set('bgImage','copy-slide.png')
-                .set('title', 'Copy page')
-                .set('oldBgImage', slidesApp.activeSlideModel.get('bgImage'));
-            templateCollection.add(copySlide);
+            var slideElements = slidesApp.activeSlideModel.getSlideElementsFromCollection();
+            var isRandom = _.find(slideElements, function (el) {
+                    return el.get('slideEntityType') == 'randomquestion'
+                }
+            );
+            if (!isRandom) {
+                var copySlide = new lessonStudio.Entities.LessonPageTemplateModel(slidesApp.activeSlideModel.attributes);
+                copySlide
+                    .set('bgImage', 'copy-slide.png')
+                    .set('title', 'Copy page')
+                    .set('oldBgImage', slidesApp.activeSlideModel.get('bgImage'));
+                templateCollection.add(copySlide);
+            }
             templateCollection.add(slidesApp.slideTemplateCollection.models);
             classList += ' ' + (isDirectionDown ? 'downPosition' : 'rightPosition');
             var templatesView = new RevealControlsModule.SlideTemplatesGridView({
@@ -246,9 +253,8 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             });
 
             themeView.on('theme:select', function (theme) {
-                var skipUndo = slidesApp.slideSetModel.get('themeId') ? true : false;
                 slidesApp.themeModel = theme;
-                slidesApp.execute('reveal:page:applyTheme', null, skipUndo);
+                slidesApp.execute('reveal:page:applyTheme');
                 valamisApp.execute('modal:close', themeView);
             });
 
@@ -271,7 +277,7 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                     slideId : slidesApp.activeSlideModel.get('id')
                 };
                 var formData = slidesApp.activeSlideModel.get('formData');
-                if(formData) theme.set('bgImage', formData.files[0].name +  ' ' + slidesApp.activeSlideModel.getBackgroundSize());
+                if(formData) theme.set('bgImage', formData.itemModel.get('filename') +  ' ' + slidesApp.activeSlideModel.getBackgroundSize());
 
                 theme.save(null, themeOptions).then(
                     function (newThemeModel) {
@@ -313,7 +319,7 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                         .removeClass('loading-container');
 
                     var canCreate = true;
-                    if( collection.mode == 'default' || ( collection.mode == 'public' && !Valamis.permissions.LessonStudio.CAN_EDIT_THEME) ){
+                    if( collection.mode == 'default' || (!Valamis.permissions.LessonStudio.CAN_EDIT_THEME) ){
                         canCreate = false;
                     }
 
@@ -345,6 +351,7 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 );
         },
         savePageSettings: function(e){
+            slidesApp.isEditing = false;
             slidesApp.viewId = this.cid;
             slidesApp.actionType = 'pageSettingsChanged';
             slidesApp.oldValue = {
@@ -419,10 +426,8 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 contentView: settingsModal,
                 className: classList,
                 header: Valamis.language['settingsLabel'],
-                beforeCancel: function(){
-                    slidesApp.devicesCollection.updateSelected();
-                },
                 onDestroy: function(){
+                    slidesApp.isEditing = false;
                     slidesApp.topbar.currentView.ui.button_change_settings
                         .removeClass('highlight');
                 }
@@ -432,12 +437,15 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             settingsModal.on('settings:save', function () {
                 valamisApp.execute('modal:close', view);
             });
+        },
+        updateTopDownNavigation: function(showAddPageButton) {
+            this.ui.button_add_page_down.toggleClass('hidden', !showAddPageButton);
         }
     });
 
     RevealControlsModule.onStart = function() {
         revealControlsModule.view = new revealControlsModule.View({
-            model: new lessonStudio.Entities.LessonPageModel()
+            model: new lessonStudio.Entities.LessonPageTemplateModel()
         });
         slidesApp.revealControls.show(revealControlsModule.view);
         revealControlsModule.view.$('.valamis-tooltip')
@@ -486,12 +494,10 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 slidesApp.isEditing = false;
                 RevealControlsModule.pickerVisible = false;
                 var slide = jQueryValamis(Reveal.getCurrentSlide());
-
                 var value =  slide.attr('data-background-color');
 
                 slide.attr('data-background-color', RevealControlsModule.oldValue);
-                if(value !== RevealControlsModule.oldValue)//To escape unneeded actions in undo history
-                    slidesApp.execute("reveal:page:changeBackground", value);
+                slidesApp.activeSlideModel.set('bgColor', value);
 
                 Reveal.configure({backgroundTransition: RevealControlsModule.oldBackgroundTransition}); //Return transition back
             },
@@ -689,16 +695,15 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
     RevealControlsModule.SlideTemplatesView = Marionette.ItemView.extend({
         template: '#slideTemplatesPreviewItemTemplate',
         className: 'preview s-6 tile',
-        events: {
-            'click': 'selectTemplate',
-            'click .val-icon-exit': 'deleteTemplate'
-        },
-        initialize: function () {
-            var mustacheAccumulator = {};
-            if (this.model) {
-                _.extend(mustacheAccumulator, this.model.toJSON(), Valamis.language);
+        templateHelpers: function() {
+            var bgImage = this.model.get('bgImage');
+            var bgImageType = bgImage.substr(0, bgImage.lastIndexOf('.'));
+            return {
+                bgImageType: bgImageType
             }
-            this.template = _.template(Mustache.to_html(jQueryValamis(this.template).html(), mustacheAccumulator));
+        },
+        events: {
+            'click': 'selectTemplate'
         },
         selectTemplate: function () {
             this.trigger('template:select', this.model);
@@ -788,24 +793,33 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             if(bgImage && bgImage.indexOf('blob:') == -1){
                 newSlideModel.copyBgImage(newSlideModel.get('slideId'), 'oldBgImage');
             }
-
-            if (bgImage)
+            var originalBgImage = newSlideModel.get('originalBgImageName');
+            var fileUrl = newSlideModel.get('fileUrl');
+            if (originalBgImage && fileUrl) {
+                var bgSize = originalBgImage.split(' ')[1];
+                newSlideModel.set('bgImage', fileUrl + ' '+ bgSize);
+            }
+            else if (bgImage) {
                 newSlideModel.set('bgImage', bgImage);
-            else newSlideModel.unset('bgImage');
-
+            }
+            else {
+                newSlideModel.unset('bgImage');
+            }
+            slidesApp.historyManager.groupOpenNext();
             slidesApp.execute('reveal:page:add', (this.isDirectionDown ? 'down' : 'right'), newSlideModel);
 
             if (model.get('isTemplate'))
                 slideElements = newSlideModel.getSlideElements();
             else {
-                slideElements = _.filter (slidesApp.slideElementCollection.models, function(data){
-                    return (data.get('slideId') == model.get('id')
-                        || data.get('slideId') == model.get('tempId'))
-                        && !data.get('toBeRemoved')
-                });
+                slideElements = model.getSlideElementsFromCollection();
             }
             _.each(slideElements, function (slideElement) {
-                var newSlideElement = new lessonStudio.Entities.LessonPageElementModel(slideElement.attributes);
+                //we have to omit id attribute here for correct work of undo/redo mechanism
+                //as history manager will ignore changing of id attribute if we do it after placing model to the
+                //history collection
+                //(because of using skipAttributes: id when call slidesApp.historyManager.pushModelChange
+                // in LessonPageModel's "add change" event handler)
+                var newSlideElement = new lessonStudio.Entities.LessonPageElementModel(_.omit(slideElement.attributes, 'id'));
                 newSlideElement
                     .set('tempId', slidesApp.newSlideElementId--);
                 if (!model.get('isTemplate')
@@ -820,15 +834,24 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 }
 
                 newSlideElement
-                    .set('slideId', newSlideModel.get('tempId'))
-                    .unset('id');
-
-                if( model.get('isTemplate') && newSlideElement.get('slideEntityType') == 'text' ){
-                    newSlideElement.set('fontSize', '16px');
+                    .set('slideId', newSlideModel.get('tempId'));
+                if( model.get('isTemplate') ){
                     var properties = newSlideElement.get('properties');
-                    if( !_.isEmpty(properties[1]) ){
-                        properties[1].fontSize = '16px';
-                        newSlideElement.set('properties', properties);
+                    if(newSlideElement.get('slideEntityType') == 'text'){
+                        newSlideElement.set('fontSize', '16px');
+                        if( !_.isEmpty(properties[1]) ){
+                            properties[1].fontSize = '16px';
+                            newSlideElement.set('properties', properties);
+                        }
+                    }
+                    var deviceLayoutCurrentId = slidesApp.devicesCollection.getCurrentId();
+                    if(!properties[deviceLayoutCurrentId]){
+                        //Set properties for current device
+                        var layoutProperties = newSlideElement.getLayoutProperties(1),
+                            layoutSizeRatio = slidesApp.devicesCollection.getSizeRatio(1, deviceLayoutCurrentId);
+                        newSlideElement.set(layoutProperties, {silent: true});
+                        layoutProperties = newSlideElement.getLayoutProperties(deviceLayoutCurrentId, layoutSizeRatio);
+                        newSlideElement.updateProperties(layoutProperties);
                     }
                 }
                 newSlideElements.push(newSlideElement);
@@ -837,6 +860,7 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 revealModule.forEachSlideElement(newSlideElements);
 
             slidesApp.checkIsTemplate();
+            slidesApp.historyManager.groupClose();
             this.trigger('template:select');
         }
     });
@@ -852,9 +876,15 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
         },
         templateHelpers: function() {
             var hasRandomQuestions = slidesApp.slideSetModel.get('randomQuestionsAmount');
+            var hasVerticalSlides = (slidesApp.slideCollection.filter(function(item) {
+                return item.get('topSlideId') !== undefined && !item.get('toBeRemoved')
+            }).length > 0);
             return {
                 hasRandomQuestions: hasRandomQuestions,
-                isSetDuration: this.model.get('duration') != null
+                isSetDuration: this.model.get('duration') != null,
+                isTopDownEnabled: !!(this.model.get('topDownNavigation')),
+                hasVerticalSlides: hasVerticalSlides,
+                isOneAnswerAttempt: this.model.get('oneAnswerAttempt')
             }
         },
         initialize: function(){
@@ -888,23 +918,31 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             slidesApp.playerTitle.setValue(slidesApp.slideSetModel.get('playerTitle') || 'page');
         },
         saveSetting: function () {
-            var selectedDevices = this.collection.where({selected: true});
-            if( selectedDevices.length == 0 ){
-                return;
-            }
-            slidesApp.slideSetModel.updateDevices();
-            slidesApp.toggleSavedState(false);
+            var selectedDevicesIds = this.$childViewContainer.find('li.active')
+                .map(function(){
+                    return jQueryValamis(this).data('id');
+                });
+            this.collection.updateSelectedModels(selectedDevicesIds);
+
+            var isTopDownEnabled = this.$('.js-topdown-checkbox').is(':checked');
+            revealControlsModule.view.updateTopDownNavigation(isTopDownEnabled);
 
             var isSelectedContinuity = this.$('#canPauseOption').is(':checked');
             var isSetDuration = this.$('#durationOption').is(':checked');
             if (isSetDuration) var duration = this.getDurationInMinutes();
+            var isOneAnswerAttempt = this.$('.js-answerAttempt-checkbox').is(':checked');
             this.model.set({
                 isSelectedContinuity: isSelectedContinuity,
                 duration: duration,
                 scoreLimit: this.$('.js-plus-minus').valamisPlusMinus('value'),
-                playerTitle: this.$('#js-player-title').val()
+                playerTitle: this.$('#js-player-title').val(),
+                topDownNavigation: isTopDownEnabled,
+                oneAnswerAttempt: isOneAnswerAttempt
             });
-            this.model.save();
+            var that = this;
+            slidesApp.clonePublishedSlideSet().then(function () {
+                that.model.save();
+            });
             this.trigger('settings:save');
         },
         showDuration: function (){

@@ -19,7 +19,7 @@
         {{^singleSelect}}
         <div class="filter-element shift-left">
             <button id="selectAllUsers" class="button medium neutral">
-                <span class="val-icon-checkbutton"></span> {{selectAllLabel}}
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
             </button>
         </div>
         {{/singleSelect}}
@@ -35,8 +35,8 @@
         </div>
     </div>
 
-    <label id="noUsersLabel" class="text-center" style="display: none;"> {{noAvailableUsersLabel}}</label>
-    <table class="val-table medium list">
+    <label id="noUsersLabel" class="valamis-info-label shifted" style="display: none;"> {{noAvailableUsersLabel}}</label>
+    <table class="val-table medium list no-out-margin">
         <tbody id="userList"></tbody>
     </table>
 
@@ -54,7 +54,7 @@
 </script>
 
 <script type="text/html" id="liferayUserElementView">
-    <td class="single-element-col"> {{#pageUrl}}
+    <td class="narrow-col"> {{#pageUrl}}
         <a href="{{pageUrl}}" target="_blank">
             {{/pageUrl}}
             <img src="{{picture}}" alt="{{name}}" class="img-circle">
@@ -63,9 +63,9 @@
         {{/pageUrl}}
     </td>
     <td> {{name}}</td>
-    <td class="single-element-col">
+    <td class="narrow-col">
         <button id="toggleUser_{{id}}" class="button big {{^selected}}neutral{{/selected}}{{#selected}}primary{{/selected}} no-text js-toggle-user">
-            <span class="val-icon-checkbutton"></span> Select
+            <span class="val-icon-checkmark"></span> Select
         </button>
     </td>
 </script>

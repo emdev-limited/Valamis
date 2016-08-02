@@ -2,7 +2,7 @@ package com.arcusys.valamis.slide.service.export
 
 import java.io.FileInputStream
 import com.arcusys.valamis.content.service.{PlainTextService, QuestionService}
-import com.arcusys.valamis.export.ExportProcessor
+import com.arcusys.valamis.util.export.ExportProcessor
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.slide.model.SlideSetModel
 import com.arcusys.valamis.slide.service.export.SlideSetHelper._

@@ -1,9 +1,9 @@
 package com.arcusys.learn.liferay.update.version260
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.valamis.core.SlickDBInfo
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 
 class DBUpdater2517(dbInfo: SlickDBInfo) extends LUpgradeProcess with SlideTableComponent {
   override def getThreshold = 2517

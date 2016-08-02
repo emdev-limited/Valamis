@@ -89,37 +89,36 @@
              {{#logo}}
                  style="background-image: url('/delegate/packages/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
              {{/logo}}
-             {{^logo}}
-                 style="background-image: url('/learn-portlet/img/imgo.jpg')"
-             {{/logo}}>
-
-        </div>
+        ></div>
     <ul>
         <li class="title">{{title}}</li>
-        <li class="description">{{description}}</li>
+        <li> {{packageAuthor}} {{dateString}} </li>
         <li class="categories">{{tagsList}}</li>
+        <li class="description">{{description}}</li>
 
-        <li class="list-flags-view">
-            <input type="checkbox" id="lmPackageVisibility{{id}}" name="check" class="js-visible val-checkbox"
-            {{#visibility}}checked{{/visibility}}
-            {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}
-            {{^LM_SET_VISIBLE}} disabled="disabled" {{/LM_SET_VISIBLE}} />
-            <label for="lmPackageVisibility{{id}}" class="checkbox-label">{{packageItemIsVisibleLabel}}</label>
+        {{^canChangeVisibility}}
+        <li class="status">
+            <span class="val-label">{{itemVisibilityLabel}}</span>
         </li>
+        {{/canChangeVisibility}}
 
-
-        <li class="list-flags-view">
-            <input type="checkbox" id="lmPackageDefault{{id}}" name="check" class="js-default val-checkbox"
-            {{#isDefault}}checked{{/isDefault}}
-            {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}
-            {{^LM_SET_DEFAULT}}  disabled="disabled" {{/LM_SET_DEFAULT}}/>
-
-            <label for="lmPackageDefault{{id}}" class="checkbox-label">{{packageItemIsDefaultLabel}}</label>
+        {{#canChangeVisibility}}
+        <li class="dropdown js-visible-dropdown" data-value="">
+            <button class="button small simple">
+                <span class="dropdown-text"> {{hiddenLabel}} </span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu js-visible">
+                <li class="selected" data-value="false"> {{hiddenLabel}} </li>
+                <li class="" data-value="true"> {{visibleForAllLabel}} </li>
+                <li class="" data-value="some"> {{visibleForSomeLabel}} </li>
+            </ul>
         </li>
+        {{/canChangeVisibility}}
     </ul>
     <div class="dropdown actions shift-right">
         <button class="button medium neutral">
-            <span class="dropdown-text">{{actions}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            <span class="dropdown-text">{{actionsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
         </button>
         <ul class="dropdown-menu">
             <li class="js-package-edit" data-value="1">
@@ -137,6 +136,26 @@
 </script>
 
 <script type="text/template" id="packageManagerPackageList">
+</script>
+
+<script type="text/template" id="packageManagerEditPackageViewTemplate">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="editPackageTabs">
+            <li class=""><a href="#editDetails" data-toggle="tab">{{editDetailsLabel}}</a></li>
+            <li class=""><a href="#editVisibility" class="hidden" data-toggle="tab">{{editMembersLabel}}</a></li>
+        </ul>
+
+        <div class="tab-content" style="position: relative">
+            <div id="editDetails" class="tab-pane active"> </div>
+            <div id="editVisibility" class="tab-pane"> </div>
+        </div>
+    </div>
+    <div class="modal-close val-icon-exit"></div>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">{{editPackageCancelButtonLabel}}</button>
+        {{#LM_MODIFY}}<button class="button big primary js-save-package js-submit-button">{{editPackageSubmitButtonLabel}}</button>{{/LM_MODIFY}}
+    </div>
 </script>
 
 <script type="text/template" id="packageManagerEmptyModalTemplate">
@@ -161,15 +180,8 @@
             <div class="div-row">
                 <div class="div-col name-col">{{editPackageItemCoverImage}}</div>
                 <div class="div-col content-col">
-                    <img
-                            {{#logo}}
-                            src="/delegate/packages/{{id}}/logo?courseId={{courseId}}"
-                            {{/logo}}
-
-                    {{^logo}}
-                    src="/learn-portlet/img/imgo.jpg"
-                    {{/logo}}
-                    class='js-logo shift-left val-img-logo {{#LM_MODIFY}} js-upload-image {{/LM_MODIFY}}'>
+                    <img class='js-logo shift-left val-img-logo {{#LM_MODIFY}} js-upload-image {{/LM_MODIFY}}'
+                         src="{{#logo}}/delegate/packages/{{id}}/logo?courseId={{courseId}}{{/logo}}" />
                     <div class="button-block shift-left">
                         {{#LM_MODIFY}}
                         <button class="button big primary js-upload-image">
@@ -199,7 +211,7 @@
                 </div>
             </div>
             <div class="div-row without-bottom-border">
-                <div class="div-col name-col">{{ableToRun}}</div>
+                <div class="div-col name-col">{{ableToRunLabel}}</div>
                 <div class="div-col content-col buttons">
                     <div class="">
                         <input type="checkbox" id="isAbleToRunCheckbox" class="js-able-to-run-enable val-checkbox" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
@@ -210,9 +222,9 @@
             <div class="div-row">
                 <div class="div-col name-col"></div>
                 <div class="div-col content-col able-to-run-container">
-                    <label class="shift-left" for="isAbleToRunFrom">{{from}}</label>
+                    <label class="shift-left" for="isAbleToRunFrom">{{fromLabel}}</label>
                     <input type="text" class="js-is-able-from shift-left" id="isAbleToRunFrom" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}} />
-                    <label class="shift-left" for="isAbleToRunTo">{{to}}</label>
+                    <label class="shift-left" for="isAbleToRunTo">{{toLabel}}</label>
                     <input type="text" class="js-is-able-to shift-left" id="isAbleToRunTo" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}} />
                 </div>
             </div>
@@ -243,10 +255,23 @@
                     <input type="text" id="input-tags" class="val-tags demo-default selectized" title="Valamis package tags" tabindex="-1" style="display: none;" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}>
                 </div>
             </div>
-        </div>
-        <div class="bbm-modal__bottombar">
-            <button class="button big neutral modal-close">{{editPackageCancelButtonLabel}}</button>
-            {{#LM_MODIFY}}<button class="button big primary js-save-package js-submit-button">{{editPackageSubmitButtonLabel}}</button>{{/LM_MODIFY}}
+
+            <div class="div-row without-bottom-border">
+                <div class="div-col name-col">{{editPackageRequiredReviewLabel}}</div>
+                <div class="div-col content-col buttons">
+                    <input type="checkbox" id="requiredReview" class="js-required-review val-checkbox" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
+                    <label class="checkbox-label" for="requiredReview"></label>
+                </div>
+            </div>
+            <div class ="div-row">
+                <div class="div-col name-col">{{editPackageScoreLimitLable}} </div>
+                <div class="div-col content-col buttons">
+                <div id="scorepicker">
+                    <div class="js-plus-minus js-score-limit"></div>
+                </div>
+                </div>
+            </div>
+
         </div>
 </script>
 
@@ -265,16 +290,8 @@
 
 <script type="text/html" id="packageManagerNewPackagesItemView">
         <td>
-            <img
-            {{#logo}}
-            src="/delegate/packages/{{id}}/logo?courseId={{courseId}}"
-            {{/logo}}
-
-            {{^logo}}
-            src="/learn-portlet/img/imgo.jpg"
-            {{/logo}}
-
-            class="val-img-logo js-logo js-upload-image" />
+            <img class="val-img-logo js-logo js-upload-image"
+                 src="{{#logo}}/delegate/packages/{{id}}/logo?courseId={{courseId}}{{/logo}}" />
         </td>
         <td>
             <div class="div-table val-info-table">
@@ -290,6 +307,10 @@
                 </div>
             </div>
         </td>
+</script>
+
+<script type="text/template" id="packageManagerEditModalTemplate">
+    <div class="modal-content"></div>
 </script>
 
 

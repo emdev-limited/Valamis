@@ -46,7 +46,7 @@
         select: function(options){
             if(this.hasClass('actions')) return;
 
-            var item = this.find('.dropdown-menu > li[data-value='+ options +']');
+            var item = this.find('.dropdown-menu > li[data-value="'+ options +'"]');
 
             item.addClass('selected').siblings().removeClass('selected');
             item.parents('.dropdown')
@@ -478,13 +478,17 @@
         methods._setScore.call(this, $(this), methods._round(average));
     },
 
+    disable: function() {
+      this.each(function () {
+        var elem = $(this);
+        elem.find('.js-rating-star').unbind();
+      });
+    },
+
     destroy: function () {
       return this.each(function () {
         var elem = $(this);
-        elem.find('.js-rating-star')
-          .unbind('mouseover')
-          .unbind('mouseleave')
-          .unbind('click');
+        elem.find('.js-rating-star').unbind();
         elem.destroy();
       });
     }

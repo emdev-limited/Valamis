@@ -35,13 +35,13 @@ var mathElementModule = slidesApp.module('MathElementModule', {
                 this.$('.math-edit-panel').show();
                 this.$('.math-expr').val(this.model.get('content'));
                 this.$('.math-expr').focus();
-                slidesApp.isEditing = true;
+                this.trigger('element-modal:open');
             },
             closeMathEditPanel: function() {
                 katex.render(this.model.get('content'), this.$el.find('.math-content')[0], { displayMode: true });
                 this.$('.math-edit-panel').hide();
-                slidesApp.isEditing = false;
                 this.selectEl();
+                this.trigger('element-modal:close');
             },
             updateMathExpr: function () {
                 slidesApp.viewId = this.cid;

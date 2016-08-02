@@ -4,5 +4,5 @@ class AttemptData(
   //val id: Int,
   val dataKey: String,
   val dataValue: Option[String],
-  val attemptID: Int,
+  val attemptID: Long,
   val activityID: String)

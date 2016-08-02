@@ -5,6 +5,7 @@
 
 <resource-action-mapping>
     <!--SCORMApplication-->
+
     <portlet-resource>
         <portlet-name>SCORMApplication</portlet-name>
         <permissions>
@@ -69,7 +70,6 @@
             <supports>
                 <action-key>MODIFY_ACTION</action-key>
                 <action-key>SET_VISIBLE</action-key>
-                <action-key>SET_DEFAULT</action-key>
                 <action-key>UPLOAD</action-key>
                 <action-key>EXPORT</action-key>
             </supports>
@@ -79,7 +79,6 @@
             </guest-defaults>
             <guest-unsupported>
                 <action-key>SET_VISIBLE</action-key>
-                <action-key>SET_DEFAULT</action-key>
                 <action-key>MODIFY_ACTION</action-key>
                 <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
                 <action-key>CONFIGURATION</action-key>
@@ -108,7 +107,6 @@
             </guest-unsupported>
         </permissions>
     </portlet-resource>
-
 
     <!--AdminView-->
     <portlet-resource>
@@ -382,48 +380,6 @@
         </permissions>
     </portlet-resource>
 
-    <!--CompetencesAdmin-->
-    <portlet-resource>
-        <portlet-name>CompetencesAdmin</portlet-name>
-        <permissions>
-            <supports>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>MODIFY_ALL_ACTION</action-key>
-            </supports>
-            <site-member-defaults>
-            </site-member-defaults>
-            <guest-defaults>
-            </guest-defaults>
-            <guest-unsupported>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>MODIFY_ALL_ACTION</action-key>
-                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
-                <action-key>CONFIGURATION</action-key>
-            </guest-unsupported>
-        </permissions>
-    </portlet-resource>
-
-    <!--CompetencesUser-->
-    <portlet-resource>
-        <portlet-name>CompetencesUser</portlet-name>
-        <permissions>
-            <supports>
-                <action-key>MODIFY_ACTION</action-key>
-            </supports>
-            <site-member-defaults>
-                <action-key>VIEW</action-key>
-                <action-key>MODIFY_ACTION</action-key>
-            </site-member-defaults>
-            <guest-defaults>
-            </guest-defaults>
-            <guest-unsupported>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
-                <action-key>CONFIGURATION</action-key>
-            </guest-unsupported>
-        </permissions>
-    </portlet-resource>
-
     <!--AchievedCertificates-->
     <portlet-resource>
         <portlet-name>AchievedCertificates</portlet-name>
@@ -567,48 +523,6 @@
         </permissions>
     </portlet-resource>
 
-    <!--PhenomenizerStudio-->
-    <portlet-resource>
-        <portlet-name>PhenomenizerStudio</portlet-name>
-        <permissions>
-            <supports>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>PUBLISH</action-key>
-            </supports>
-            <site-member-defaults>
-            </site-member-defaults>
-            <guest-defaults>
-            </guest-defaults>
-            <guest-unsupported>
-                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
-                <action-key>CONFIGURATION</action-key>
-                <action-key>MODIFY_ACTION</action-key>
-                <action-key>PUBLISH</action-key>
-            </guest-unsupported>
-        </permissions>
-    </portlet-resource>
-
-    <!--PhenomenizerReport-->
-    <portlet-resource>
-        <portlet-name>PhenomenizerReport</portlet-name>
-        <permissions>
-            <supports>
-                <action-key>VIEW_ALL</action-key>
-            </supports>
-            <site-member-defaults>
-                <action-key>VIEW</action-key>
-            </site-member-defaults>
-            <guest-defaults>
-            </guest-defaults>
-            <guest-unsupported>
-                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
-                <action-key>CONFIGURATION</action-key>
-                <action-key>VIEW_ALL</action-key>
-                <action-key>EDIT</action-key>
-            </guest-unsupported>
-        </permissions>
-    </portlet-resource>
-
     <!--MyCertificates-->
     <portlet-resource>
         <portlet-name>MyCertificates</portlet-name>
@@ -633,6 +547,45 @@
             <supports>
             </supports>
             <site-member-defaults>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <!--AllCourses-->
+    <portlet-resource>
+        <portlet-name>AllCourses</portlet-name>
+        <permissions>
+            <supports>
+                <action-key>CREATE_COURSE</action-key>
+                <action-key>MODIFY_ACTION</action-key>
+            </supports>
+            <site-member-defaults>
+            </site-member-defaults>
+            <guest-defaults>
+            </guest-defaults>
+            <guest-unsupported>
+                <action-key>CREATE_COURSE</action-key>
+                <action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
+                <action-key>CONFIGURATION</action-key>
+                <action-key>MODIFY_ACTION</action-key>
+            </guest-unsupported>
+        </permissions>
+    </portlet-resource>
+
+    <portlet-resource>
+        <portlet-name>AllCoursesStudent</portlet-name>
+        <permissions>
+            <supports>
+            </supports>
+            <site-member-defaults>
+                <action-key>ADD_TO_PAGE</action-key>
+                <action-key>VIEW</action-key>
             </site-member-defaults>
             <guest-defaults>
             </guest-defaults>

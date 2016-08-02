@@ -5,7 +5,7 @@ var MyLessons = Marionette.Application.extend({
       mainRegion: '#myLessonsAppRegion'
     });
   },
-  start: function(){
+  onStart: function(){
     var layoutView = new myLessons.Views.AppLayoutView();
     this.mainRegion.show(layoutView);
   }

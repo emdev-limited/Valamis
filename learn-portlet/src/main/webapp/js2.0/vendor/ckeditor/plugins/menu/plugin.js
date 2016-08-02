@@ -1,5 +1,5 @@
 ﻿/**
- * @license Copyright (c) 2003-2015, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
@@ -312,7 +312,7 @@ CKEDITOR.plugins.add( 'menu', {
 					panel.onShow = function() {
 						// Menu need CSS resets, compensate class name.
 						var holder = panel._.panel.getHolderElement();
-						holder.getParent().addClass( 'cke cke_reset_all' );
+						holder.getParent().addClass( 'cke' ).addClass( 'cke_reset_all' );
 					};
 
 					panel.onHide = CKEDITOR.tools.bind( function() {

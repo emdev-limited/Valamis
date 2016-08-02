@@ -1,24 +1,24 @@
 package com.arcusys.learn.service
 
-import com.arcusys.learn.controllers.api.content.CategoryController
-import com.arcusys.learn.scorm.rte.service._
-import com.arcusys.learn.scorm.manifest.service._
+import com.arcusys.valamis.web.servlet.admin.AdminServlet
+import com.arcusys.valamis.web.servlet.content.CategoryServlet
+import com.arcusys.valamis.web.servlet.file.FileServlet
+import com.arcusys.valamis.web.servlet.grade.GradebookServlet
+import com.arcusys.valamis.web.servlet.scorm.{ActivitiesServlet, OrganizationsServlet, RteServlet, SequencingServlet}
 import org.junit._
-import com.arcusys.learn.controllers.api.{ GradebookApiController, FileApiController, AdminApiController }
-import com.arcusys.learn.facades.GradebookFacade
 
 class GenericServiceTest {
   @Test
   def allServicesHaveNoArgsConstructor() {
-    new AdminApiController
-    new FileApiController
-    new GradebookApiController
-    new CategoryController
+    new AdminServlet
+    new FileServlet
+    new GradebookServlet
+    new CategoryServlet
 
-    new ActivitiesService
-    new OrganizationsService
+    new ActivitiesServlet
+    new OrganizationsServlet
 
-    new RunTimeEnvironment
-    new SequencingService
+    new RteServlet
+    new SequencingServlet
   }
 }

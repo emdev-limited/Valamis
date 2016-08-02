@@ -1,33 +1,24 @@
 package com.arcusys.learn.liferay.update.version270
 
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.learn.liferay.update.SQLRunner
+import com.arcusys.learn.liferay.update.SlickDBContext
+import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.slick.migration.table.TableMigration
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 
-class DBUpdater2702 extends LUpgradeProcess with SQLRunner {
+class DBUpdater2702 extends LUpgradeProcess with SlideTableComponent with SlickDBContext {
+
   override def getThreshold = 2702
+  implicit val bindingModule = Configuration
 
-  override def doUpgrade() {
-    System.out.println("Updating to 2.5")
+  lazy val slideSetsMigration = TableMigration(slideSets)
 
-    // drop old file storage table
-    dropIndex("IX_3FD4D2B")
-    dropTable("learn_lffilestorage")
+  import driver.simple._
 
-
-    dropTable("Learn_LFCertificate")
-    dropTable("Learn_LFCertificateActivity")
-    dropTable("Learn_LFCertificateCourse")
-    dropTable("Learn_LFCertificatePackageGoal")
-    dropTable("Learn_LFCertTCStmnt")
-    dropTable("Learn_LFCertificateUser")
-  }
-
-  def dropIndex(indexName: String): Unit = {
-    runSQL(s"drop index $indexName ;")
-  }
-
-  def dropTable(tableName: String): Unit = {
-    if (hasTable(tableName))
-      runSQL(s"drop table $tableName ;")
+  override def doUpgrade(): Unit = {
+      db.withTransaction { implicit session =>
+        slideSetsMigration.alterColumnTypes(_.column[String]("DESCRIPTION", O.DBType(varCharMax))).apply()
+    }
   }
 }

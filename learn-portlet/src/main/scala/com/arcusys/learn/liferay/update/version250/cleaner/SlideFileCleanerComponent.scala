@@ -1,13 +1,15 @@
 package com.arcusys.learn.liferay.update.version250.cleaner
 
-import com.arcusys.valamis.file.FileTableComponent
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.SlickProfile
+
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.JdbcBackend
 import scala.util.matching.Regex
 
-trait SlideFileCleanerComponent extends FileTableComponent with SlideTableComponent{
-  protected val driver: JdbcProfile
+trait SlideFileCleanerComponent extends FileTableComponent
+  with SlideTableComponent { self: SlickProfile =>
   import driver.simple._
 
   private def getId(regex: Regex, path: String) =

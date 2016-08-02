@@ -8,10 +8,12 @@ valamisApp.module("Views", function (Views, valamisApp, Backbone, Marionette, $,
         className: 'val-modal',
         submitEl: '.js-submit-button',
         cancelEl: '.modal-close',
+        clickOutside: function(){void 0},
         initialize: function(options){
             this.header = options.header;
             this.contentView = options.contentView;
             this.customClassName = options.customClassName;
+            if(options.template) this.template = options.template;
             if(options.submit) this.submit = options.submit;
             if(options.beforeSubmit) this.beforeSubmit = options.beforeSubmit;
             if(options.beforeCancel) this.beforeCancel = options.beforeCancel;

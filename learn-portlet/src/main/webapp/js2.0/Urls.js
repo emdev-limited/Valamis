@@ -21,8 +21,11 @@ path.api.certificates = path.api.prefix + 'certificates/';
 path.api.certificateStates = path.api.prefix + 'certificate-states/';
 path.api.category = path.api.prefix + 'categories/';
 path.api.lesson = path.api.packages = path.api.prefix + 'packages/';
+path.api.lessonResults = path.api.prefix + 'lesson-results/';
 path.api.files = path.api.prefix + 'files/';
 path.api.gradebooks = path.api.prefix + 'gradebooks/';
+path.api.lessongrades = path.api.prefix + 'lesson-grades/';
+path.api.teacherGrades = path.api.prefix + 'teacher-grades/';
 path.api.notifications = path.api.prefix + 'notifications/';
 path.api.courses = path.api.prefix + 'courses/';
 path.api.users = path.api.prefix + 'users/';
@@ -32,9 +35,10 @@ path.api.questions = path.api.prefix + 'questions/';
 path.api.plainText = path.api.prefix + 'plaintext/';
 path.api.print = path.api.prefix + 'print/';
 
-path.api.settingsApi = path.api.prefix + 'settings-api-controller/';
+path.api.activityToStatement = path.api.prefix + 'activityToStatement/';
 path.api.manifestactivities =  path.api.prefix + 'manifestactivities/';
 path.api.report =  path.api.prefix + 'report/';
+path.api.reports =  path.api.prefix + 'reports/';
 path.api.liferay = path.api.prefix  + 'liferay/';
 path.api.lrs2activity = path.api.prefix  + 'lrs2activity-filter-api-controller/';
 path.api.uri = path.api.prefix  + 'uri/';
@@ -46,6 +50,8 @@ path.api.slides = path.api.prefix + 'slides/';
 path.api.slideEntities = path.api.prefix + 'slideentities/';
 path.api.slideThemes = path.api.prefix + 'slidethemes/';
 path.api.slideDevices = path.api.prefix + 'devices/';
+
+path.api.assignment = path.api.prefix + 'assignments/';
 
 path.sequencing = path.api.prefix + 'sequencing/';
 path.rte = path.api.prefix + 'rte/';
@@ -60,5 +66,7 @@ path.api.valamisActivityComment = path.api.prefix + 'activity-comment/';
 path.api.packageExport = function(id) {
 
 };
+
+path.api.urlCheck = path.api.prefix + 'url/check/';
 
 path.api.dashboard = path.api.prefix + 'dashboard/';

@@ -18,7 +18,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           return {
             userId: Valamis.currentUserId,
             activityId: model.get('id'),
-            courseId: Utils.getCourseId()
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
           };
         },
         'method': 'post'
@@ -29,7 +30,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           return {
             userId: Valamis.currentUserId,
             activityId: model.get('id'),
-            courseId: Utils.getCourseId()
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
           };
         },
         'method': 'delete'
@@ -42,7 +44,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
             userId: Valamis.currentUserId,
             activityId: model.get('id'),
             content: options.content,
-            courseId: Utils.getCourseId()
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
           };
           return params;
         },
@@ -54,7 +57,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           var params = {
             action: 'DELETE',
             id: model.get('id'),
-            courseId: Utils.getCourseId()
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
           };
           return params;
         },
@@ -66,7 +70,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           var params =  {
             action: 'SHARELESSON' ,
             packageId: model.get('obj')['id'],
-            courseId: Utils.getCourseId()
+            courseId: Utils.getCourseId(),
+            plid: Utils.getPlid()
           };
           return params;
         },
@@ -88,17 +93,19 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
   }).extend(ActivitiesModelService);
 
   var ActivitiesCollectionService = new Backbone.Service({
-    url: path.root,
+    url: '',
     sync: {
       'read': {
-        'path': path.api.activities,
-        'data':  function (collection, options) {
+        'path': function(collection, options) {
+          return options.resPath
+        },
+        'data':  function (collection, options) {          
           var params = {
             courseId: Utils.getCourseId,
             page: options.page,
             count: options.count,
             getMyActivities: options.getMyActivities,
-            plid: themeDisplay.getPlid()
+            plid: Utils.getPlid()
           };
           return params;
         },
@@ -119,7 +126,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           return path.api.users + options.userId;
         },
         'data': {
-          courseId: Utils.getCourseId()
+          courseId: Utils.getCourseId(),
+          plid: Utils.getPlid()
         },
         'method': 'get'
       }
@@ -131,7 +139,8 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           var params = {
             action: 'CREATEUSERSTATUS',
             courseId: Utils.getCourseId(),
-            content: options.content
+            content: options.content,
+            plid: Utils.getPlid()
           };
           return params;
         },

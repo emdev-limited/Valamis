@@ -2,14 +2,16 @@ package com.arcusys.valamis.certificate.service
 
 import java.security.MessageDigest
 
-import com.arcusys.learn.liferay.services.{SocialActivityLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.learn.liferay.util.CourseUtilHelper
 import com.arcusys.valamis.certificate.model._
 import com.arcusys.valamis.certificate.model.badge._
 import com.arcusys.valamis.certificate.service.util.OpenBadgesHelper
-import com.arcusys.valamis.certificate.storage.{CertificateRepository, CertificateStateRepository}
+import com.arcusys.valamis.certificate.storage.{CertificateGoalStateRepository, CertificateRepository, CertificateStateRepository}
 import com.arcusys.valamis.exception.EntityNotFoundException
-import com.arcusys.valamis.lesson.model.CertificateActivityType
-import com.arcusys.valamis.model.{SkipTake, RangeResult}
+import com.arcusys.valamis.liferay.SocialActivityHelper
+import com.arcusys.valamis.member.model.MemberTypes
+import com.arcusys.valamis.model.{RangeResult, SkipTake}
 import com.arcusys.valamis.settings.model
 import com.arcusys.valamis.settings.model.SettingType
 import com.arcusys.valamis.settings.storage.SettingStorage
@@ -24,46 +26,103 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
   private lazy val userLocalServiceHelper = inject[UserLocalServiceHelper]
   private lazy val certificateRepository = inject[CertificateRepository]
   private lazy val certificateToUserRepository = inject[CertificateStateRepository]
-
   private lazy val userService = inject[UserService]
   private lazy val settingStorage = inject[SettingStorage]
-
+  private lazy val goalStateRepository = inject[CertificateGoalStateRepository]
   private lazy val checker = inject[CertificateStatusChecker]
-  //new CertificateStatusChecker(bindingModule)
+  private lazy val actionSocialActivity = new SocialActivityHelper(CertificateActionType)
+  private lazy val certificateMemberService = inject[CertificateMemberService]
 
-  def addUser(certificateId: Long, userId: Long, addActivity: Boolean = false, courseId:Option[Long] = None) = {
+  def addMembers(certificateId: Long,
+                 memberIds: Seq[Long],
+                 memberType: MemberTypes.Value): Unit = {
+
+    certificateMemberService.addMembers(certificateId, memberIds, memberType)
+
     val (certificate, counts) = certificateRepository.getByIdWithItemsCount(certificateId)
       .getOrElse(throw new EntityNotFoundException(s"no certificate with id: $certificateId"))
 
     val userStatus = counts match {
-      case CertificateItemsCount(_, 0, 0, 0, 0) if certificate.isPublished =>
+      case CertificateItemsCount(_, 0, 0, 0, 0, 0) if certificate.isPublished =>
         CertificateStatuses.Success
       case _ =>
         CertificateStatuses.InProgress
     }
 
-    val user = userService.getById(userId)
-    val now = DateTime.now
-
-    certificateToUserRepository.create(
-      CertificateState(user.getUserId, userStatus, now, now, certificate.id)
-    )
-
-    if (addActivity) {
-      SocialActivityLocalServiceHelper.addWithSet(certificate.companyId, userId,
-        className = CertificateActivityType.getClass.getName,
-        courseId = courseId,
-        classPK = Some(certificateId),
-        `type` = Some(CertificateActivityType.UserJoined.id)
-      )
+    memberType match {
+      case MemberTypes.User =>
+        memberIds.foreach(addUser(_, userStatus, certificate))
+      case MemberTypes.UserGroup =>
+        memberIds.flatMap(UserLocalServiceHelper().getGroupUserIds)
+          .foreach(addUser(_, userStatus, certificate))
+      case MemberTypes.Organization =>
+        memberIds.flatMap(UserLocalServiceHelper().getOrganizationUserIds)
+          .foreach(addUser(_, userStatus, certificate))
+      case MemberTypes.Role =>
+        memberIds.flatMap(UserLocalServiceHelper().getRoleUserIds)
+          .foreach(addUser(_, userStatus, certificate))
     }
   }
 
-  def deleteUser(certificateId: Long, userId: Long) = {
-    val certificate = certificateRepository.getById(certificateId)
-    val user = userService.getById(userId)
+  private def addUser(userId: Long,
+                      userStatus: CertificateStatuses.Value,
+                      certificate: Certificate) = {
+    lazy val now = DateTime.now
 
-    certificateToUserRepository.delete(user.getUserId, certificate.id)
+    if (certificateToUserRepository.getBy(userId, certificate.id).isEmpty) {
+      certificateToUserRepository.create(
+        CertificateState(userId, userStatus, now, now, certificate.id)
+      )
+      if (certificate.isPublished && goalStateRepository.getByCertificate(certificate.id, userId).isEmpty){
+        addPackageGoalState(certificate.id, userId)
+        addAssignmentGoalState(certificate.id, userId)
+      }
+    }
+  }
+
+  def addUserMember(certificateId: Long,
+                    userId: Long,
+                    courseId: Long): Unit = {
+    addMembers(certificateId, Seq(userId), MemberTypes.User)
+    val companyId = CourseUtilHelper.getCompanyId(courseId)
+
+    actionSocialActivity.addWithSet(
+      companyId,
+      userId,
+      courseId = Some(courseId),
+      classPK = Some(certificateId),
+      `type` = Some(CertificateActivityType.UserJoined.id),
+      createDate = DateTime.now
+    )
+  }
+
+  override def isUserJoined(certificateId: Long, userId: Long): Boolean = {
+    certificateToUserRepository.getBy(userId, certificateId).isDefined
+  }
+
+  def deleteMembers(certificateId: Long,
+                    memberIds: Seq[Long],
+                    memberType: MemberTypes.Value): Unit = {
+
+    memberType match {
+      case MemberTypes.User =>
+        memberIds.foreach(deleteUser(_, certificateId))
+      case MemberTypes.UserGroup =>
+        memberIds.flatMap(UserLocalServiceHelper().getGroupUserIds)
+          .foreach(deleteUser(_, certificateId))
+      case MemberTypes.Organization =>
+        memberIds.flatMap(UserLocalServiceHelper().getOrganizationUserIds)
+          .foreach(deleteUser(_, certificateId))
+      case MemberTypes.Role =>
+        memberIds.flatMap(UserLocalServiceHelper().getRoleUserIds)
+          .foreach(deleteUser(_, certificateId))
+    }
+    certificateMemberService.removeMembers(certificateId, memberIds, memberType)
+  }
+
+  private def deleteUser(userId: Long, certificateId: Long): Unit = {
+    certificateToUserRepository.delete(userId, certificateId)
+    goalStateRepository.deleteBy(certificateId, userId)
   }
 
   def getForUser(userId: Long,
@@ -120,6 +179,10 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
 
   def hasUser(certificateId: Long, userId: Long): Boolean = {
     certificateToUserRepository.getBy(userId, certificateId).isDefined
+  }
+
+  def getUserStatus(certificateId: Long, userId: Long) = {
+    checker.checkAndGetStatus(certificateId, userId).toString
   }
 
   def getAvailableForUser(userId:Long,
@@ -182,13 +245,13 @@ trait CertificateUserServiceImpl extends Injectable with CertificateService {
     val issueOn = DateTime.now.toString("yyyy-MM-dd")
 
     val identity = IdentityModel(recipient)
-    val badgeUrl = "%s/delegate/certificates/%s/issue_badge/badge?userID=%s&rootUrl=%s".format(
+    val badgeUrl = "%s/delegate/certificates/%s/issue_badge/badge?userId=%s&rootUrl=%s".format(
       rootUrl,
       certificateId,
       liferayUserId,
       rootUrl)
 
-    val verificationUrl = "%s/delegate/certificates/%s/issue_badge?userID=%s&rootUrl=%s".format(
+    val verificationUrl = "%s/delegate/certificates/%s/issue_badge?userId=%s&rootUrl=%s".format(
       rootUrl,
       certificateId,
       liferayUserId,

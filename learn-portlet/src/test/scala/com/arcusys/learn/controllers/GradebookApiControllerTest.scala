@@ -5,7 +5,7 @@
 //import org.scalamock.scalatest.MockFactory
 //import org.scalamock.proxy.ProxyMockFactory
 //import com.arcusys.learn.test.mocks.MockInjectableFactory
-//import com.arcusys.valamis.util.JsonSupport
+//import com.arcusys.valamis.utils.JsonSupport
 //import org.mockito.Mockito
 //import com.arcusys.learn.mocks.Mocks
 //import com.arcusys.learn.service.util.SessionHandlerContract

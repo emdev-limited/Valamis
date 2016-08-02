@@ -1,6 +1,8 @@
 package com.arcusys.learn.models.request
 
-import com.arcusys.learn.service.util.{AntiSamyHelper, Parameter}
+import com.arcusys.learn.service.AntiSamyHelper
+import com.arcusys.valamis.web.servlet.content.request.QuestionActionType
+import com.arcusys.valamis.web.servlet.request.{BaseRequest, Parameter}
 import org.scalatra.ScalatraBase
 
 /**

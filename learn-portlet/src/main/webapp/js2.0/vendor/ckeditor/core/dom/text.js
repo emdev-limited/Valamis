@@ -1,5 +1,5 @@
-﻿/**
- * @license Copyright (c) 2003-2015, CKSource - Frederico Knabben. All rights reserved.
+/**
+ * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
@@ -12,9 +12,9 @@
  * Represents a DOM text node.
  *
  *		var nativeNode = document.createTextNode( 'Example' );
- *		var text = CKEDITOR.dom.text( nativeNode );
+ *		var text = new CKEDITOR.dom.text( nativeNode );
  *
- *		var text = CKEDITOR.dom.text( 'Example' );
+ *		var text = new CKEDITOR.dom.text( 'Example' );
  *
  * @class
  * @extends CKEDITOR.dom.node

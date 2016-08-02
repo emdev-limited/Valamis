@@ -5,7 +5,9 @@ var LearningPaths = Marionette.Application.extend({
       mainRegion: '#learningPathsAppRegion'
     });
   },
-  start: function(){
+  onStart: function(options){
+    _.extend(this, options);
+
     this.certificates = new learningPaths.Entities.CertificateCollection();
     this.certificates.on('sync', this.showContent, this);
     this.certificates.fetch();

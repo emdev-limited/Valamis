@@ -18,8 +18,8 @@ class ExitConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 5,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       exitConditionRules = Seq(
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded))),
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded))),
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
       )
     )
     activity.exitConditionRuleApplies should equal(true)
@@ -29,8 +29,8 @@ class ExitConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       exitConditionRules = Seq(
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded))),
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded))),
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
       )
     )
     activity.exitConditionRuleApplies should equal(true)
@@ -40,7 +40,7 @@ class ExitConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = Some(0), objectiveMapInfo = ObjectiveMap.Empty)),
       exitConditionRules = Seq(
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
       )
     )
     activity.exitConditionRuleApplies should equal(true)
@@ -50,8 +50,8 @@ class ExitConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       exitConditionRules = Seq(
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ActivityAttemptLimitExceeded))),
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ActivityAttemptLimitExceeded))),
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
       )
     )
     activity.exitConditionRuleApplies should equal(false)
@@ -61,7 +61,7 @@ class ExitConditionRuleTest extends ActivityStateTreeTestBase {
     val activity = activityState(attemptCompleted = Some(false), attemptLimit = Some(4), attemptCount = 3,
       objectiveStates = Map(Some("OBJ1") -> new ObjectiveState(satisfied = Some(true), normalizedMeasure = None, objectiveMapInfo = ObjectiveMap.Empty)),
       exitConditionRules = Seq(
-        new ExitConditionRule(RuleConditionSet(new RuleCondition(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
+        new ExitConditionRule(RuleConditionSet(new ConditionRuleItem(ConditionType.ObjectiveMeasureKnown, objectiveId = Some("OBJ1"))))
       )
     )
     activity.exitConditionRuleApplies should equal(false)

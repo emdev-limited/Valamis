@@ -1,4 +1,4 @@
-var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyApp, Backbone, Marionette, $, _) {
+var revealModule = slidesApp.module('RevealModule', function (RevealModule, App, Backbone, Marionette, $, _) {
     RevealModule.startWithParent = false;
 
     RevealModule.View = Marionette.ItemView.extend({
@@ -7,11 +7,20 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
         ui: {
             'slides': '.slides'
         },
+        initialize: function(options) {
+            options = options || {};
+            this.slideSetModel = options.slideSetModel || slidesApp.slideSetModel;
+        },
         onShow: function(){
             this.bindUIElements();
+            this.ui.main_wrapper = this.$el.closest('.slides-editor-main-wrapper');
             this.ui.work_area = this.$el.closest('.slides-work-area-wrapper');
             this.ui.reveal_wrapper = this.$el.closest('.reveal-wrapper');
-            this.initReveal();
+            this.ui.main_wrapper
+                .unbind('scroll')
+                .bind('scroll', function(){
+                    App.vent.trigger('containerScroll');
+                });
         },
         initReveal: function() {
             var self = this;
@@ -58,28 +67,38 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
                     else
                         jQueryValamis('.js-slide-delete').hide();
 
-                    slidesApp.checkIsTemplate();
+                    if(slidesApp.mode != 'versions')
+                        slidesApp.checkIsTemplate();
 
                     revealControlsModule.view.model.clear({silent: true});
                     revealControlsModule.view.model.set(slidesApp.activeSlideModel.toJSON());
                 }
-                if(jQueryValamis(Reveal.getCurrentSlide()).find('.question-element').length > 0) {
-                    jQueryValamis('.sidebar').find('span.val-icon-question').closest('div').hide();
+
+                var iconQuestionDiv = jQueryValamis('.sidebar').find('span.val-icon-question').closest('div');
+                if (slidesApp.activeSlideModel.hasQuestions()) {
+                    iconQuestionDiv.hide();
                 }
                 else {
-                    jQueryValamis('.sidebar').find('span.val-icon-question').closest('div').show();
+                    iconQuestionDiv.show();
                 }
+
                 if( !slidesApp.initializing ){
                     self.updateSlideHeight();
                     if(revealModule.view){
                         revealModule.view.placeWorkArea();
                     }
                 }
+                if(App.mode == 'edit'){
+                    RevealModule.selectableInit();
+                } else {
+                    RevealModule.selectableDestroy();
+                }
             }.bind(this) );
 
             Reveal.addEventListener( 'ready', function( event ) {
                 revealControlsModule.view.model.clear({silent: true});
                 revealControlsModule.view.model.set(slidesApp.activeSlideModel.toJSON());
+                revealControlsModule.view.updateTopDownNavigation(!!(slidesApp.slideSetModel.get('topDownNavigation')));
                 slidesApp.initializing = true;
                 self.updateSlideHeight();
                 slidesApp.initializing = false;
@@ -92,87 +111,122 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
             Reveal.removeEventListeners();
             this.destroy();
         },
-        addPage: function(direction, slideModel, type) {
-            slidesApp.viewId = this.cid;
-            slidesApp.actionType = 'slideAdded';
-            slidesApp.oldValue = {
-                indices: Reveal.getIndices(),
-                type: type || 'singleSlide'
-            };
-            var currentPage = jQueryValamis(Reveal.getCurrentSlide());
+        restartReveal: function(){
+            if(Reveal.isReady()){
+                Reveal.removeEventListeners();
+                this.ui.slides
+                    .empty()
+                    .append( $('<section/>').append('<section/>') );
+            }
+            RevealModule.view.initReveal();
+        },
+        addPage: function(slideModel) {
+            var isRoot = _.isUndefined(slideModel.get('leftSlideId')) && _.isUndefined(slideModel.get('topSlideId')),
+                leftSlideId = slideModel.get('leftSlideId'),
+                topSlideId = slideModel.get('topSlideId');
+
+            slidesApp.execute('item:blur');
             slidesApp.slideAdd = true;
             slidesApp.activeSlideModel = slideModel;
-            if(direction === 'right') {
-                jQueryValamis('<section><section></section></section>').insertAfter(currentPage.parent());
-                Reveal.right();
+            var currentPage;
+
+            //Insert slide element
+            var previousSlideModel = _.first(slidesApp.slideCollection.filter(function(model){
+                    return topSlideId
+                        ? model.getId() == topSlideId
+                        : model.getId() == leftSlideId;
+                }));
+            var nextSlideModel = slidesApp.slideCollection.findWhere({topSlideId: slideModel.getId(), toBeRemoved: false});
+            if(!nextSlideModel){
+                nextSlideModel = slidesApp.slideCollection.findWhere({leftSlideId: slideModel.getId(), toBeRemoved: false});
             }
-            else if(direction === 'down') {
-                jQueryValamis('<section></section>').insertAfter(currentPage);
-                Reveal.down();
+
+            if( nextSlideModel && jQueryValamis( '#slide_' + nextSlideModel.getId()).size() > 0 ){
+                currentPage = jQueryValamis( '#slide_' + nextSlideModel.getId());
+                //insert top
+                if( nextSlideModel.get('topSlideId') == slideModel.getId() ){
+                    jQueryValamis('<section/>', { id: 'slide_' + slideModel.getId() }).insertBefore(currentPage);
+                } else {
+                    //insert left
+                    jQueryValamis('<section/>').append(
+                            jQueryValamis('<section/>', { id: 'slide_' + slideModel.getId() })
+                        )
+                        .insertBefore(currentPage.parent());
+                }
+            } else {
+                if( previousSlideModel && jQueryValamis( '#slide_' + previousSlideModel.getId()).size() > 0 ){
+                    currentPage = jQueryValamis( '#slide_' + previousSlideModel.getId());
+                } else {
+                    currentPage = jQueryValamis(Reveal.getCurrentSlide());
+                }
+                if( isRoot || leftSlideId ) {
+                    //insert right
+                    jQueryValamis('<section/>').append(
+                            jQueryValamis('<section/>', { id: 'slide_' + slideModel.getId() })
+                        )
+                        .insertAfter(currentPage.parent());
+                }
+                else {
+                    //insert down
+                    jQueryValamis('<section/>', { id: 'slide_' + slideModel.getId() }).insertAfter(currentPage);
+                }
             }
-            else
-                return;
 
             slidesApp.slideAdd = false;
-            currentPage = jQueryValamis(Reveal.getCurrentSlide());
-            currentPage.attr('id', 'slide_' + (slideModel.id || slideModel.get('tempId')));
-            if(slideModel.get('bgColor'))
-                currentPage.attr('data-background-color', unescape(slideModel.get('bgColor')));
+            currentPage = jQueryValamis('#slide_' + slideModel.getId());
+            Reveal.slide.apply(Reveal, _.values(Reveal.getIndices(currentPage.get(0))));
 
-            if(slideModel.get('bgImage')) {
-                var bgImageUrl = slidesApp.getFileUrl(slideModel, slideModel.getBackgroundImageName()),
-                    bgImageSize = slideModel.getBackgroundSize();
-                currentPage.attr('data-background', bgImageUrl);
-                currentPage.attr('data-background-image', bgImageUrl);
-                currentPage.attr('data-background-repeat', 'no-repeat');
-                currentPage.attr('data-background-size', bgImageSize);
-                currentPage.attr('data-background-position', 'center');
-            }
+            slidesApp.execute('reveal:page:changeBackground', slideModel.get('bgColor'), slideModel);
+            slidesApp.execute('reveal:page:changeBackgroundImage', slideModel.get('bgImage'), slideModel);
+
             if(!slideModel.get('title'))
                 slideModel.set('title', '');
 
-            Reveal.sync();
-            slidesApp.newValue = {
-                indices: Reveal.getIndices(),
-                type: type || 'singleSlide'
-            };
-
             if(slideModel.get('font') && slidesApp.initializing) {
-                var isSaved = slidesApp.isSaved;
                 slidesApp.execute('reveal:page:changeFont', slideModel.get('font'));
-                slidesApp.actionStack.pop();
-                if(isSaved != slidesApp.isSaved)
-                    slidesApp.toggleSavedState();
             }
 
             if(!slidesApp.initializing) {
                 slidesApp.execute('reveal:page:updateRefs', currentPage, 'add');
-                slidesApp.execute('action:push');
             }
-            var slideIndices = _.pick( Reveal.getIndices(), ['h','v'] );
+            var slideIndices = _.pick( Reveal.getIndices(Reveal.getCurrentSlide()), ['h','v'] );
             if(slidesApp.initializing)
                 slideIndices.h--;
-            slidesApp.slideRegistry.register(slideModel.id || slideModel.get('tempId'), slideIndices);
-            slidesApp.slideCollection.add(slideModel);
+            slidesApp.slideRegistry.register(slideModel.getId(), slideIndices);
+
             slidesApp.execute('reveal:page:makeActive');
             if ( slidesApp.slideSetModel.get('themeId') && !slidesApp.initializing ){
-                slidesApp.execute('reveal:page:applyTheme', slideModel, true);
+                _.defer(function(){
+                    slidesApp.execute('reveal:page:applyTheme', slideModel);
+                });
             }
         },
-        deleteCurrentPage: function() {
+        onSlideAdd: function(model){
+            if(!slidesApp.initializing) {
+                this.addPage(model);
+            }
+        },
+        onEditorModeChanged: function(){
+            if(App.mode != 'edit' || slidesApp.isEditing){
+                RevealModule.selectableDestroy();
+            } else {
+                RevealModule.selectableInit();
+            }
+        },
+        deletePage: function(slideModel) {
+            slideModel = slideModel || slidesApp.activeSlideModel;
+            if(!slideModel || !slideModel.get('toBeRemoved')){
+                return;
+            }
             jQueryValamis('.sidebar').find('.question-element').first().remove();
-            var currentPage = jQueryValamis(Reveal.getCurrentSlide());
-            var currentPageSiblingsBefore = currentPage.prevAll().length + currentPage.parent().prevAll().length;
-            var isOnlyPageInGroup = (jQueryValamis('section', currentPage.parent()).length == 1);
+            var currentSlideId = slideModel.getId();
+            var currentPage = jQueryValamis('#slide_' + currentSlideId);
 
             if(!slidesApp.initializing) {
-                slidesApp.activeSlideModel.set('toBeRemoved', true);
-                var prevPageLeft = currentPage.parent().prev().children('section[id^="slide_"]').first();
-                var prevPageUp = currentPage.prev('section[id^="slide_"]');
-                var currentPageIndices = Reveal.getIndices();
-                var slideElements = slidesApp.slideElementCollection.where({ slideId: slidesApp.activeSlideModel.id || slidesApp.activeSlideModel.get('tempId') });
-                var correctLinkedSlideElements = slidesApp.slideElementCollection.where({ correctLinkedSlideId: slidesApp.activeSlideModel.id || slidesApp.activeSlideModel.get('tempId') });
-                var incorrectLinkedSlideElements = slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: slidesApp.activeSlideModel.id || slidesApp.activeSlideModel.get('tempId') });
+                slidesApp.historyManager.groupOpenNext();
+
+                var correctLinkedSlideElements = slidesApp.slideElementCollection.where({ correctLinkedSlideId: currentSlideId });
+                var incorrectLinkedSlideElements = slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: currentSlideId });
                 _.each(correctLinkedSlideElements, function(slideElementModel) {
                     slideElementModel.set('correctLinkedSlideId', undefined);
                     Marionette.ItemView.Registry
@@ -186,42 +240,48 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
                         .applyLinkedType('incorrectLinkedSlideId');
                 });
 
-                slidesApp.oldValue = {
-                    indices: { h: currentPageIndices.h, v: currentPageIndices.v - 1, f: currentPageIndices.f },
-                    slideModel: slidesApp.activeSlideModel,
-                    slideEntities: slideElements
-                };
-                if(prevPageUp.length > 0)
-                    slidesApp.oldValue.direction = 'down';
-                else if(prevPageLeft.length > 0)
-                    slidesApp.oldValue.direction = 'right';
-                slidesApp.execute('reveal:page:updateRefs', currentPage, 'delete');
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'slideRemoved';
-                slidesApp.newValue = null;
+                //delete elements
+                var slideElements = slideModel.getElements();
+                _.each(slideElements, function(model){
+                    model.set('toBeRemoved', true);
+                });
 
-                slidesApp.execute('action:push');
-                slidesApp.slideRegistry.remove(slidesApp.activeSlideModel.id || slidesApp.activeSlideModel.get('tempId'));
+                _.defer(function(){
+                    var hasParent = currentPage.prevAll().length > 0  ||
+                        currentPage.parent().prevAll().length > 0;
+                    slidesApp.slideRegistry.remove(currentSlideId);
+                    slidesApp.execute('reveal:page:updateRefs', currentPage, 'delete');
+                    RevealModule.view.deletePageElement(currentSlideId);
+                    RevealModule.view.navigationRefresh(hasParent);
+                    slidesApp.historyManager.groupClose();
+                });
             }
-
-            if (isOnlyPageInGroup) {
-                // can delete the whole group and move to the right/left
-                currentPage.parent().remove();
-            } else {
-                // can delete only section and move to the down/up
-                currentPage.remove();
-            }
-
-            if(currentPageSiblingsBefore > 0)
+        },
+        navigationRefresh: function(hasParent){
+            if(hasParent)
                 Reveal.prev();
             else
                 Reveal.slide(0, 0);
             Reveal.sync();
-            slidesApp.activeSlideModel = slidesApp.getSlideModel(parseInt(jQueryValamis(Reveal.getCurrentSlide()).attr('id').replace('slide_', '')));
+            slidesApp.selectedItemView = null;
             slidesApp.execute('reveal:page:makeActive');
-
-            if(jQueryValamis('.slides > section > section').length == 1)
+            if(Reveal.getTotalSlides() == 1){
                 jQueryValamis('.js-slide-delete').hide();
+            }
+        },
+        deletePageElement: function(slideId){
+            if(Reveal.getTotalSlides() == 1){
+                return;
+            }
+            var $slideElement = jQueryValamis('#slide_' + slideId);
+            if( $slideElement.size() > 0 ){
+                if($slideElement.parent('section').size() > 0
+                    && $slideElement.parent('section').children('section').size() == 1){
+                        $slideElement.parent('section').remove();
+                } else {
+                    $slideElement.remove();
+                }
+            }
         },
         updateSlideRefs: function(currentPage, actionType) {
             var nextPageRight = currentPage.parent().next().children('section[id^="slide_"]').first();
@@ -249,10 +309,10 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
                 case 'delete':
                     if(nextPageRight.length > 0 && prevPageUp.length == 0) {
                         var idToChangeLeft = parseInt(nextPageRight.attr('id').replace('slide_', ''));
-                        var newLeftId = (currentPage.next('section[id^="slide_"]').length > 0)
-                            ? parseInt(currentPage.next('section[id^="slide_"]').attr('id').replace('slide_', ''))
-                            : (currentPage.parent().prev().children('section[id^="slide_"]').first().length > 0)
-                                ? parseInt(currentPage.parent().prev().children('section[id^="slide_"]').first().attr('id').replace('slide_', ''))
+                        var newLeftId = (nextPageDown.length > 0)
+                            ? parseInt(nextPageDown.attr('id').replace('slide_', ''))
+                            : (prevPageLeft.length > 0)
+                                ? parseInt(prevPageLeft.first().attr('id').replace('slide_', ''))
                                 : undefined;
                         slidesApp.getSlideModel(idToChangeLeft).set('leftSlideId', newLeftId);
                     }
@@ -264,92 +324,40 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
 
                         slidesApp.getSlideModel(idToChangeTop).set('topSlideId', newTopId);
                     }
+                    if (prevPageLeft.length > 0  && nextPageDown.length > 0 && prevPageUp.length == 0 ){
+                        var idToAddLeft = parseInt(nextPageDown.attr('id').replace('slide_', ''));
+                        var newLeftId = parseInt(prevPageLeft.attr('id').replace('slide_', ''));
+                        slidesApp.getSlideModel(idToAddLeft).set('leftSlideId', newLeftId);
+                    }
                     break;
             }
         },
-        changeBackground: function(color, slideModel, skipUndo) {
+        changeBackground: function(color, slideModel) {
             if(!slideModel) slideModel = slidesApp.activeSlideModel;
             var slide = jQueryValamis('#slide_' + slideModel.get('id')).length > 0
                 ? jQueryValamis('#slide_' + slideModel.get('id'))
                 : jQueryValamis('#slide_' + slideModel.get('tempId'));
 
-            if( !skipUndo ){
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'slideBackgroundChanged';
-                slidesApp.slideId = slideModel.get('id') || slideModel.get('tempId');
-                slidesApp.oldValue = {
-                    indices: Reveal.getIndices(),
-                    backgroundType: 'color',
-                    background: slide.attr('data-background-color') || ''
-                };
-                slidesApp.newValue = {
-                    indices: Reveal.getIndices(),
-                    backgroundType: 'color',
-                    background: color
-                };
-                slidesApp.execute('action:push');
-            }
-
             slideModel.set('bgColor', color);
             slide.attr('data-background-color', color);
             Reveal.sync();
-
-            // Update slide thumbnails in tooltips
-            var slideId = slideModel.id || slideModel.get('tempId');
-            var slideIsLinkedTo = slidesApp.slideElementCollection.where({ correctLinkedSlideId: slideId }).concat(
-                slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: slideId })
-            );
-            for(var i in slideIsLinkedTo) {
-                var slideElementDOMNode = jQueryValamis('#slideEntity_' + (slideIsLinkedTo[i].id || slideIsLinkedTo[i].get('tempId')));
-                if(slideIsLinkedTo[i].get('correctLinkedSlideId') == slideId)
-                    slideElementDOMNode.find('.linked-slide-thumbnail').css('background-color', color);
-                if(slideIsLinkedTo[i].get('incorrectLinkedSlideId') == slideId)
-                    slideElementDOMNode.find('.linked-slide-thumbnail.incorrect').css('background-color', color);
+            if (slidesApp.mode == 'arrange'){
+                arrangeModule.changeBackgroundColor(slideModel.getId());
             }
         },
-        changeBackgroundImage: function(image, oldImage, slideModel, src, skipUndo) {
+        changeBackgroundImage: function(image, slideModel) {
             if(!slideModel) slideModel = slidesApp.activeSlideModel;
-            if(!oldImage)   oldImage   = slidesApp.activeSlideModel.get('bgImage');
 
             if (image && image.indexOf('$') > -1) image.replace('$', ' ');
-
             var imageParts = image ? image.split(' ') : [];
             if (imageParts.length > 2){
                 imageParts[0] = _.initial(imageParts).join('+');
                 imageParts[1] = imageParts.pop();
             }
-            var oldImageParts = oldImage ? oldImage.split(' ') : [];
-            if (oldImageParts.length > 2){
-                oldImageParts[0] = _.initial(oldImageParts).join('+');
-                oldImageParts[1] = oldImageParts.pop();
-            }
-            var oldColor = slideModel.get('bgColor');
             var slide = jQueryValamis('#slide_' + slideModel.get('id')).length > 0
                 ? jQueryValamis('#slide_' + slideModel.get('id'))
                 : jQueryValamis('#slide_' + slideModel.get('tempId'));
-            if (!src || src == '') src = slidesApp.getFileUrl(slideModel, imageParts[0]);
-
-            slideModel.set('bgImage', imageParts.join(' '));
-
-            if( !skipUndo ){
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'slideBackgroundChanged';
-                slidesApp.slideId = slideModel.get('id') || slideModel.get('tempId');
-                slidesApp.oldValue = {
-                    indices: Reveal.getIndices(),
-                    backgroundType: 'image',
-                    background: oldImageParts[0] || oldColor,
-                    backgroundSize: oldImageParts[1] || 'cover',
-                    amount: 1
-                };
-                slidesApp.newValue = {
-                    indices: Reveal.getIndices(),
-                    backgroundType: 'image',
-                    background: imageParts[0] || '',
-                    backgroundSize: imageParts[1] || 'cover'
-                };
-                slidesApp.execute('action:push');
-            }
+            var src = slidesApp.getFileUrl(slideModel, imageParts[0]);
 
             slide.attr('data-background-repeat', 'no-repeat');
             slide.attr('data-background-position', 'center');
@@ -357,150 +365,25 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
             slide.attr('data-background-image', imageParts[0] || '');
             slide.attr('data-background-size', imageParts[1] || '');
             Reveal.sync();
-
-            // Update slide thumbnails in tooltips
-            var slideIsLinkedTo = slidesApp.slideElementCollection.where({ correctLinkedSlideId: slideModel.id || slideModel.get('tempId') }).concat(
-                slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: slideModel.id || slideModel.get('tempId') })
-            );
-            _.each(slideIsLinkedTo, function (slideElement) {
-                var slideElementDOMNode = jQueryValamis('#slideEntity_' + (slideElement.id || slideElement.get('tempId')));
-                slideElementDOMNode.find('.linked-slide-thumbnail').css({
-                    'background': imageParts[0] + ' no-repeat',
-                    'background-size': imageParts[1],
-                    'background-position': 'center'
-                });
-                slideElementDOMNode.find('.linked-slide-thumbnail.incorrect').css({
-                    'background': imageParts[0] + ' no-repeat',
-                    'background-size': imageParts[1],
-                    'background-position': 'center'
-                });
-            });
+            if (slidesApp.mode == 'arrange'){
+                arrangeModule.changeBackgroundImage(slideModel.getId());
+            }
         },
-        changeQuestionView: function (appearance, questionType, slideModel, skipUndo) {
+        changeFont: function (font, slideModel) {
             if(!slideModel) slideModel = slidesApp.activeSlideModel;
             var slide = jQueryValamis('#slide_' + slideModel.get('id')).length > 0
                 ? jQueryValamis('#slide_' + slideModel.get('id'))
                 : jQueryValamis('#slide_' + slideModel.get('tempId'));
 
-            var questionFont = appearance.question.family + '$' + appearance.question.size + '$' + appearance.question.color;
-            var answerFont = appearance.answer.family + '$' + appearance.answer.size + '$' + appearance.answer.color;
-            var answerBg = appearance.answer.background;
-
-            if( !skipUndo ){
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'questionViewChanged';
-                slidesApp.slideId = slideModel.get('id') || slideModel.get('tempId');
-                slidesApp.oldValue = {
-                    indices: Reveal.getIndices(),
-                    questionFont: slide.attr('data-question-font') || '',
-                    answerFont: slide.attr('data-answer-font') || '',
-                    answerBg: slide.attr('data-answer-bg') || '',
-                    questionType: questionType
-                };
-                slidesApp.newValue = {
-                    indices: Reveal.getIndices(),
-                    questionFont: questionFont,
-                    answerFont: answerFont,
-                    answerBg: answerBg
-                };
-                slidesApp.execute('action:push');
-            }
-
-            slide.attr({
-                'data-question-font': questionFont,
-                'data-answer-font': answerFont,
-                'data-answer-bg': answerBg
-            });
-
-            slideModel.set({
-                questionFont: questionFont,
-                answerFont: answerFont,
-                answerBg: answerBg
-            });
-            if(!questionType && questionType !== 0)
-                return;
-
-            var updateQuestion = function (slide) {
-                //Apply view to slide
-                var question = slide.find('.question-item'),
-                    header = question.find('h2');
-
-                header.css({
-                    'font-family': appearance.question.family,
-                    'font-size': appearance.question.size,
-                    'color': appearance.question.color
-                });
-
-                var answers = getAnswerElement(question, questionType);
-                if( questionType == QuestionType.PlainText ){
-                    appearance.answer.color = appearance.question.color;
-                }
-
-                if (answers) {
-                    answers.text.css({
-                        'font-family': appearance.answer.family,
-                        'font-size': appearance.answer.size,
-                        'color': appearance.answer.color
-                    });
-                    answers.background.css({
-                        background: 'none',
-                        'border': 'none',
-                        'background-color': appearance.answer.background
-                    });
-                    //Some icons
-                    answers.background.find(' > *').css('color', appearance.answer.color);
-                }
-            };
-
-            updateQuestion(slide);
-
-            //Update slides thumbnails
-            var slideIsLinkedTo = slidesApp.slideElementCollection.where({
-                correctLinkedSlideId: slidesApp.activeSlideModel.id || slidesApp.activeSlideModel.get('tempId')
-            })
-                .concat(
-                slidesApp.slideElementCollection.where({
-                    incorrectLinkedSlideId: slidesApp.activeSlideModel.id || slidesApp.activeSlideModel.get('tempId')
-                })
-            );
-            _.each(slideIsLinkedTo, function (slideElement) {
-                var slideElementDOMNode = jQueryValamis('#slideEntity_' + (slideElement.id || slideElement.get('tempId')));
-                updateQuestion(slideElementDOMNode.find('.linked-slide-thumbnail'));
-                updateQuestion(slideElementDOMNode.find('.linked-slide-thumbnail.incorrect'));
-            });
-        },
-        changeFont: function (font, slideModel, skipUndo) {
-            if(!slideModel) slideModel = slidesApp.activeSlideModel;
-            var fontParts = font ? font.split('$') : [];
-            var slide = jQueryValamis('#slide_' + slideModel.get('id')).length > 0
-                ? jQueryValamis('#slide_' + slideModel.get('id'))
-                : jQueryValamis('#slide_' + slideModel.get('tempId'));
-
-            if( !skipUndo ){
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'slideFontChanged';
-                slidesApp.slideId = slideModel.get('id') || slideModel.get('tempId');
-                slidesApp.oldValue = {
-                    indices: Reveal.getIndices(),
-                    font: slide.attr('data-font') || ''
-                };
-                slidesApp.newValue = {
-                    indices: Reveal.getIndices(),
-                    font: font
-                };
-                slidesApp.execute('action:push');
-            }
+            var fontData = slideModel.getFont(font);
 
             slide.attr('data-font', font);
 
-            if(!slideModel) slideModel = slidesApp.getSlideModel(slide.attr('id').replace('slide_', ''));
-            slideModel.set('font', font);
-
             //Apply font to slide
             slide.css({
-                'font-family': fontParts[0] || 'inherit',
-                'font-size': fontParts[1] || 'inherit',
-                'color': fontParts[2] || 'inherit'
+                'font-family': fontData.fontFamily,
+                'font-size': fontData.fontSize,
+                'color': fontData.fontColor
             });
             //Replace style in all text elements
             var slideId = slideModel.get('id') || slideModel.get('tempId');
@@ -510,94 +393,79 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
                 toBeRemoved: false
             });
             _.each(textElements, function (model){
-                //apply font-size
-                model.set('fontSize', fontParts[1] || '16px');
-                var properties = !_.isEmpty(model.get('properties')) ? model.get('properties') : {};
-                _.each(properties, function(props){
-                    props.fontSize = model.get('fontSize');
-                });
-                model.set('properties', properties);
-
                 var modelView = Marionette.ItemView.Registry
                     .getByModelId(model.get('tempId') || model.get('id'));
                 if( modelView ){
-                    var slideElement = modelView.content;
-                    var elements = slideElement.find('span');
+                    var elements = modelView.content.find('span');
                     _.each(elements, function (el) {
-                        //Replace font in inner elems
-                        jQueryValamis(el).css({
-                            'font-family': fontParts[0] || 'inherit',
-                            'color': fontParts[2] || 'inherit'
-                        });
+                        //Replace font in inner elements
+                        if(jQueryValamis(el).css('color')){
+                            jQueryValamis(el).css('color', fontData.fontColor);
+                        }
+                        if(jQueryValamis(el).css('font-family')){
+                            jQueryValamis(el).css('font-family', fontData.fontFamily);
+                        }
                     });
                     if (!slidesApp.initializing) {
-                        model.set('content', slideElement.html());
+                        model.set('content', modelView.content.html());
                     }
                 }
             });
-
-            //Update slides thumbnails
-            var slideIsLinkedTo = slidesApp.slideElementCollection.where({ correctLinkedSlideId: slideModel.id || slideModel.get('tempId') }).concat(
-                slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: slideModel.id || slideModel.get('tempId') })
-            );
-            _.each(slideIsLinkedTo, function (slideElement) {
-                var slideElementDOMNode = jQueryValamis('#slideEntity_' + (slideElement.id || slideElement.get('tempId')));
-                slideElementDOMNode.find('.linked-slide-thumbnail').css({
-                    'font-family': fontParts[0] || 'inherit',
-                    'font-size': fontParts[1] || 'inherit',
-                    'color': fontParts[2] || 'inherit'
-                });
-                slideElementDOMNode.find('.linked-slide-thumbnail.incorrect').css({
-                    'font-family': fontParts[0] || 'inherit',
-                    'font-size': fontParts[1] || 'inherit',
-                    'color': fontParts[2] || 'inherit'
-                });
-            });
+            if (slidesApp.mode == 'arrange'){
+                arrangeModule.changeFont(slideModel.getId());
+            }
         },
 
-        applyTheme: function (slideModel, skipUndo, skipBackgroundChange) {
+        applyTheme: function (slideModel, skipBackgroundChange) {
             var theme = slidesApp.themeModel;
-            var amount = 0;
+            slidesApp.historyManager.groupOpenNext();
             if (slideModel){
-                applyThemeForSlide(slideModel, skipUndo);
+                jQueryValamis.when(applyThemeForSlide(slideModel)).then(function() {
+                    slidesApp.historyManager.groupClose();
+                });
             }
             else {
-                _.each(slidesApp.slideCollection.models, function(slideModel){
-                    applyThemeForSlide(slideModel, skipUndo);
-                });
-                slidesApp.oldValue = { amount: amount, themeId: slidesApp.slideSetModel.get('themeId') };
-                slidesApp.newValue = { themeId: theme.get('id')};
                 slidesApp.slideSetModel.set('themeId', theme.get('id'));
-                slidesApp.actionType = 'slideThemeChanged';
-            }
-            slidesApp.execute('action:push');
-
-            function applyThemeForSlide(slideModel, skipUndo) {
-                slidesApp.execute('reveal:page:changeFont', theme.get('font'), slideModel, skipUndo);
-
-                var question = _.find(slideModel.get('slideElements'), function (el) {
-                    return _.contains(['question', 'content'], el.slideEntityType);
+                jQueryValamis.when.apply(jQueryValamis, _.map(slidesApp.slideCollection.models, function(slideModel) {
+                    return applyThemeForSlide(slideModel);
+                })).then(function(){
+                    slidesApp.historyManager.groupClose();
                 });
-                if (question) {
-                    var elementModel = slidesApp.getSlideElementModel(question.id || question.tempId);
-                    var questionId = elementModel.get('content') || question.content;
-                    var questionModel = slidesApp.questionCollection.get(questionId);
-                    var questionType = questionModel.get('questionType');
-                }
-                slidesApp.execute('reveal:page:changeQuestionView', getQuestionAppearance(theme), questionType, slideModel, skipUndo);
+            }
 
-                slidesApp.execute('reveal:page:changeBackground', theme.get('bgColor') || '', slideModel, skipUndo);
-                amount += 3;
+            function applyThemeForSlide(slideModel) {
+                var deferred = jQueryValamis.Deferred();
+                slideModel.set({
+                    bgColor: theme.get('bgColor') || '',
+                    font: theme.get('font') || ''
+                });
+
+                slideModel.changeElementsFont();
 
                 if (theme.get('bgImage') && !skipBackgroundChange) {
-                    var image = theme.get('bgImage');
-                    var oldImage = slideModel.get('bgImage');
-                    slideModel.set('bgImageChange', true);
                     var src = slidesApp.getFileUrl(theme, theme.getBackgroundImageName());
-                    slidesApp.execute('reveal:page:changeBackgroundImage', image, oldImage, slideModel, src, skipUndo);
-                    amount ++
+                    var imageName = theme.getBackgroundImageName();
+                    var imageSize = theme.getBackgroundSize();
+                    imgSrcToBlob(src).then(function(blob){
+                        var formData = new FormData();
+                        formData.append('p_auth', Liferay.authToken);
+                        formData.append('files[]', blob, imageName);
+                        formData.itemModel = new FileUploaderItemModel({
+                            filename: imageName
+                        });
+                        slideModel
+                            .set('formData', formData)
+                            .set('bgImage', createObjectURL(blob)+ ' ' + imageSize)
+                            .set('bgImageChange', true, {silent: true})
+                            .unset('fileModel');
+                        deferred.resolve()
+                    });
                 }
-
+                else {
+                    slideModel.set({bgImage: ''});
+                    deferred.resolve();
+                }
+                return deferred.promise();
             }
         },
         updateSlidesContainer: function(){
@@ -621,8 +489,11 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
                         .closest('.slides-editor-main-wrapper').scrollTop(0);
                     RevealModule.view.placeWorkArea();
                 }
-                if(slidesApp.GridSnapModule){
-                    slidesApp.GridSnapModule.generateGrid();
+                if(slidesApp.gridSnapModule){
+                    slidesApp.gridSnapModule.generateGrid();
+                }
+                if(slidesApp.activeElement && slidesApp.activeElement.view){
+                    slidesApp.activeElement.view.updateControlsPosition();
                 }
                 window.placeSlideControls();
                 slidesApp.RevealModule.configure({ height: layoutHeight });
@@ -638,72 +509,89 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
         }
     });
 
-    RevealModule.onStart = function() {
+    RevealModule.slideBindActions = function(slideModel){
+        slideModel
+            .on('remove', function(){
+                RevealModule.view.deletePageElement(this.getId());
+                App.vent.trigger('elementsUpdated');
+            })
+            .on('change:bgColor', function(model, value){
+                slidesApp.execute('reveal:page:changeBackground', value, model);
+            })
+            .on('change:bgImage', function(model, value){
+                slidesApp.execute('reveal:page:changeBackgroundImage', value, model);
+            })
+            .on('change:font', function(model, value){
+                slidesApp.execute('reveal:page:changeFont', value, model);
+            })
+            .on('change:toBeRemoved', function(model, value){
+                if(!value){
+                    RevealModule.view.addPage(model);
+                } else {
+                    slidesApp.activeSlideModel = model;
+                    slidesApp.execute('reveal:page:delete', model);
+                }
+            });
+    };
+
+    RevealModule.onStart = function(options) {
+        options = options || {};
+        this.slideSetModel = options.slideSetModel || slidesApp.slideSetModel;
         if( jQueryValamis('#arrangeContainer').size() == 0 ) {
             jQueryValamis('#revealEditor').append('<div id="arrangeContainer"></div>');
         }
-        jQueryValamis(document.body).addClass('overflow-hidden');
+        if( jQueryValamis('#versionContainer').size() == 0 ) {
+            jQueryValamis('#revealEditor').append('<div id="versionContainer"></div>');
+        }
         slidesApp.editorArea.$el.closest('.slides-editor-main-wrapper').show();
-        revealModule.view = new RevealModule.View();
+        revealModule.view = new RevealModule.View({ slideSetModel: options.slideSetModel });
+        var that = this;
 
-        slidesApp.commands.setHandler('reveal:page:add', function(direction, model, type) {
-            var slideModel = model
-                ? model
-                : new lessonStudio.Entities.LessonPageModel({
-                    tempId: slidesApp.newSlideId--,
-                    slideSetId: slidesApp.slideSetModel.id
-                });
-            revealModule.view.addPage(direction, slideModel, type);
+        slidesApp.slideCollection.each(function(model){
+            RevealModule.slideBindActions(model);
         });
-        slidesApp.commands.setHandler('reveal:page:delete', revealModule.view.deleteCurrentPage);
-        slidesApp.commands.setHandler('reveal:page:changeBackground', function(color,slideModel, skipUndo) {revealModule.view.changeBackground(color, slideModel, skipUndo)});
-        slidesApp.commands.setHandler('reveal:page:changeBackgroundImage', function(image, oldImage, slideModel, src, skipUndo) {revealModule.view.changeBackgroundImage(image, oldImage, slideModel, src, skipUndo)});
-        slidesApp.commands.setHandler('reveal:page:changeQuestionView', function (appearance, questionType, slideModel, skipUndo) {revealModule.view.changeQuestionView(appearance, questionType, slideModel, skipUndo)});
-        slidesApp.commands.setHandler('reveal:page:changeFont', function (font, slideModel, skipUndo) {revealModule.view.changeFont(font, slideModel, skipUndo)});
-        slidesApp.commands.setHandler('reveal:page:applyTheme', function(slideModel, skipUndo, skipBackgroundChange) {
+        slidesApp.vent.on('slideAdd', this.slideBindActions, this);
+
+        slidesApp.commands.setHandler('reveal:page:add', function(direction, slideModel) {
+            if(!slideModel){
+                slideModel = new lessonStudio.Entities.LessonPageModel({
+                        tempId: slidesApp.newSlideId--,
+                        slideSetId: that.slideSetModel.id
+                    }, {silent: true});
+            }
+            if( direction ){
+                if(direction == 'right'){
+                    slideModel.set('leftSlideId', slidesApp.activeSlideModel.getId());
+                } else {
+                    slideModel.set('topSlideId', slidesApp.activeSlideModel.getId());
+                }
+            }
+            slidesApp.slideCollection.add(slideModel);
+        });
+        slidesApp.commands.setHandler('reveal:page:delete', function(slideModel){revealModule.view.deletePage(slideModel);});
+        slidesApp.commands.setHandler('reveal:page:changeBackground', function(color,slideModel) {revealModule.view.changeBackground(color, slideModel);});
+        slidesApp.commands.setHandler('reveal:page:changeBackgroundImage', function(image, slideModel, src) {revealModule.view.changeBackgroundImage(image, slideModel, src);});
+        slidesApp.commands.setHandler('reveal:page:changeFont', function (font, slideModel) {revealModule.view.changeFont(font, slideModel);});
+        slidesApp.commands.setHandler('reveal:page:applyTheme', function(slideModel, skipBackgroundChange) {
             skipBackgroundChange = skipBackgroundChange || false;
-            revealModule.view.applyTheme(slideModel, skipUndo, skipBackgroundChange)
+            revealModule.view.applyTheme(slideModel, skipBackgroundChange)
         });
         slidesApp.commands.setHandler('reveal:page:updateRefs', function(currentPage, actionType) {revealModule.view.updateSlideRefs(currentPage, actionType)});
         slidesApp.commands.setHandler('reveal:page:makeActive', function() {
             if(!slidesApp.initializing) {
-                var activeSlide = slidesApp.slideCollection.where({tempId: parseInt(jQueryValamis(Reveal.getCurrentSlide()).attr('id').replace('slide_', ''))});
-                for(var i in activeSlide) {
-                    slidesApp.activeSlideModel = activeSlide[i];
-                }
+                var currentSlideId = parseInt(jQueryValamis(Reveal.getCurrentSlide()).attr('id').replace('slide_', ''));
+                slidesApp.activeSlideModel = _.first(slidesApp.slideCollection.filter(function(model){
+                    return model.getId() == currentSlideId;
+                }));
             }
         });
-        return revealModule.renderSlideset();
-    };
 
-    //TODO: remove this later (deprecated)
-    RevealModule.fitContent = function(event){
-        var windowHeight = window.parent ? jQueryValamis(window.parent).height() : jQueryValamis(window).height(),
-            currentSlide = event && event.currentSlide ? jQueryValamis(event.currentSlide) : jQueryValamis(Reveal.getCurrentSlide()),
-            slidesWrapper = jQueryValamis('.reveal-wrapper:first'),
-            contentHeight = 0;
-        var revealControlsPosY = windowHeight - jQueryValamis('.controls', slidesWrapper).outerHeight() - 60;
-        if( windowHeight > 860 ){ revealControlsPosY += 10; }
-        slidesWrapper
-            .removeClass('scroll-y')
-            .unbind('scroll');
-        if( event && event.currentSlide ){
-            slidesWrapper.scrollTop(0);
-        }
-        jQueryValamis('.backgrounds', slidesWrapper).css('top','auto');
-        jQueryValamis('.item-content', currentSlide).each(function(i){
-            if( !jQueryValamis(this).parent().hasClass('rj-video') && jQueryValamis.trim(jQueryValamis(this).text()).length > 10 ){
-                var realHeight = jQueryValamis(this).css('height','auto').outerHeight(true);
-                jQueryValamis(this).css('height',''); //remove height style (return to default)
-                realHeight += jQueryValamis(this).closest('.rj-element').position().top;
-                if( realHeight > contentHeight ){
-                    contentHeight = realHeight;
-                }
-            }
-        });
-        if( contentHeight > slidesWrapper.height() ){
-            RevealModule.fitContentScrollInit();
-        }
+        App.vent
+            .on('elementsUpdated containerScroll containerResize', this.selectableRefresh, this)
+            .on('editorModeChanged', this.view.onEditorModeChanged, this.view)
+            .on('slideAdd', this.view.onSlideAdd, this.view);
+
+        return revealModule.renderSlideset(options);
     };
 
     RevealModule.fitContentScrollInit = function(){
@@ -717,7 +605,11 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
             });
     };
 
-    RevealModule.renderSlideset = function() {
+    RevealModule.renderSlideset = function(options) {
+        options = options || {};
+        RevealModule.slideSetModel = options.slideSetModel || slidesApp.slideSetModel;
+        RevealModule.slideCollection = options.slideCollection || slidesApp.slideCollection;
+        RevealModule.slideElementCollection = options.slideElementCollection || slidesApp.slideElementCollection;
         var deferred = jQueryValamis.Deferred();
         slidesApp.editorArea.show(revealModule.view);
 
@@ -727,96 +619,72 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
         Marionette.ItemView.Registry.items = {};
         slidesApp.initializing = true;
 
-        jQueryValamis('.slides').find('> section:gt(0)').remove();
-        jQueryValamis('.slides').find('> section > section:gt(0)').remove();
-        jQueryValamis('.slides').find('> section > section').empty();
-        var rootSlide = slidesApp.slideCollection.findWhere({ leftSlideId: undefined, topSlideId: undefined });
-        if(slidesApp.addedSlides.indexOf(rootSlide.get('tempId')) != -1)
+        RevealModule.view.restartReveal();
+
+        var rootSlide = RevealModule.slideCollection.findWhere({ leftSlideId: undefined, topSlideId: undefined, toBeRemoved: false });
+        if (slidesApp.addedSlides.indexOf(rootSlide.get('tempId')) != -1)
             delete slidesApp.addedSlides[rootSlide.get('tempId')];
 
         if (slidesApp.addedSlides.indexOf(rootSlide.id) == -1) {
-            revealModule.view.addPage('right', rootSlide);
-            slidesApp.addedSlideIndices[rootSlide.id || rootSlide.get('tempId')] = Reveal.getIndices();
-            if(!slidesApp.isRunning)
+            RevealModule.view.addPage(rootSlide);
+            slidesApp.addedSlideIndices[rootSlide.getId()] = Reveal.getIndices();
+
+            if (!slidesApp.isRunning)
                 var slideElements = rootSlide.getSlideElements();
             else
-                var slideElements = slidesApp.slideElementCollection.where({slideId: (rootSlide.id || rootSlide.get('tempId'))});
+                var slideElements = RevealModule.slideElementCollection.where({slideId: (rootSlide.getId())});
+
             if (slideElements.length > 0)
                 RevealModule.forEachSlideElement(slideElements);
-            slidesApp.addedSlides.push(rootSlide.id || rootSlide.get('tempId'));
-            RevealModule.forEachSlide(rootSlide.id || rootSlide.get('tempId'));
+            slidesApp.addedSlides.push(rootSlide.getId());
+            RevealModule.forEachSlide(rootSlide.getId());
         }
 
         jQueryValamis('.slides > section:first').remove();
+        jQueryValamis('.backgrounds > .slide-background').remove();
         Reveal.slide(0, 0);
-
         Reveal.sync();
-        if(jQueryValamis(Reveal.getCurrentSlide()).find('.question-element').length > 0)
-            jQueryValamis('.sidebar').find('span.val-icon-question').closest('div').hide();
 
         slidesApp.maxZIndex = _.max(_.map(jQueryValamis(Reveal.getCurrentSlide()).find('div[id^="slideEntity_"]'),
             function (item) { return $(item).find('.item-content').css('z-index'); }
         ));
         slidesApp.maxZIndex = _.isFinite(slidesApp.maxZIndex) ? slidesApp.maxZIndex : 0;
 
-        var slideElementControls = jQueryValamis('.item-controls').find('button');
-        _.each(slideElementControls, function(btn) {
-            if(jQueryValamis(btn).is('.js-item-link') || jQueryValamis(btn).is('.js-item-link-incorrect')) {
-                var slideElementModel = slidesApp.getSlideElementModel(jQueryValamis(btn).closest('div[id^="slideEntity_"]').attr('id').replace('slideEntity_', ''));
-                if(slideElementModel && !slideElementModel.get('toBeRemoved')) {
-                    var linkTypeName = jQueryValamis(btn).is('.js-item-link') ? 'correct' : 'incorrect';
-                    var slideModel = slideElementModel.get(linkTypeName + 'LinkedSlideId') ? slidesApp.getSlideModel(slideElementModel.get(linkTypeName + 'LinkedSlideId')) : undefined;
-                    if (slideModel) {
-                        var slideBackgroundImageParts = slideModel.get('bgImage') ? slideModel.get('bgImage').split(' ') : ['', ''];
-                        var slideThumbnail = jQueryValamis(btn).find('.linked-slide-thumbnail').css({
-                            'background': slideBackgroundImageParts[0] + ' no-repeat',
-                            'background-size': slideBackgroundImageParts[1],
-                            'background-position': 'center',
-                            'background-color': decodeURIComponent(slideModel.get('bgColor')) || ''
-                        });
-                        var slide_clone = jQueryValamis('#slide_' + slideElementModel.get(linkTypeName + 'LinkedSlideId')).clone();
-                        slide_clone
-                            .removeAttr('id')
-                            .find('.rj-element').removeAttr('id')
-                            .find('.item-controls').remove();
-                        slideThumbnail.html(slide_clone.html());
-                        slideThumbnail.addClass('slide-thumbnail-bordered');
-                        slideThumbnail.find('.item-border, .item-controls, .ui-resizable-handle').hide();
-                    } else {
-                        var slideThumbnail = jQueryValamis(btn).find('.linked-slide-thumbnail').css({
-                            'background-color': 'transparent',
-                            'background-image': ''
-                        });
-                        slideThumbnail.html('');
-                        slideThumbnail.removeClass('slide-thumbnail-bordered');
-                    }
-                }
-            }
-        });
-        Reveal.sync();
-
-        slidesApp.activeSlideModel = slidesApp.slideCollection.get(parseInt(jQueryValamis(Reveal.getCurrentSlide()).attr('id').replace('slide_', '')));
+        slidesApp.activeSlideModel = this.slideCollection.get(parseInt(jQueryValamis(Reveal.getCurrentSlide()).attr('id').replace('slide_', '')));
         slidesApp.checkIsTemplate();
+
+        if (slidesApp.activeSlideModel.hasQuestions()) {
+            jQueryValamis('.sidebar').find('span.val-icon-question').closest('div').hide();
+        }
 
         slidesApp.module('RevealControlsModule').start();
         slidesApp.initDnD();
-        if (slidesApp.slideCollection.models.length > 1)
+        if (this.slideCollection.models.length > 1)
            jQueryValamis('.js-slide-delete').show();
         else
            jQueryValamis('.js-slide-delete').hide();
 
-//        slidesApp.saveInterval = setInterval(saveSlideset, 60000, {close: false});
         slidesApp.execute('controls:place');
         slidesApp.execute('item:blur');
         if(!slidesApp.isRunning)
-            lessonStudio.execute('editor-ready', slidesApp.slideSetModel);
+            lessonStudio.execute('editor-ready', this.slideSetModel);
         else
             slidesApp.execute('editor-reloaded');
         slidesApp.isRunning = true;
         jQueryValamis('#js-slide-title').attr('placeholder', Valamis.language['pageDefaultTitleLabel']);
         jQueryValamis('#js-slide-statement-object').attr('placeholder', Valamis.language['pageDefaultTitleLabel']);
 
-        slidesApp.initializing = false;
+        slidesApp.slideSetModel.off('change:themeId').on('change:themeId', function (model) {
+            var themeId = model.get('themeId');
+            if (themeId) {
+                slidesApp.themeModel.id = themeId;
+                slidesApp.themeModel.fetch();
+            }
+        });
+
+        _.defer(function(){
+            slidesApp.initializing = false;
+        });
 
         deferred.resolve();
 
@@ -824,24 +692,19 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
     };
 
     RevealModule.forEachSlide = function(id) {
-        slidesApp.slideCollection.each(function(slide) {
+        var that = this;
+        that.slideCollection.each(function(slide) {
             if(!slide.get('toBeRemoved')) {
                 if (slide.get('leftSlideId') == id || slide.get('topSlideId') == id) {
-                    if (slide.id != id || slide.get('tempId') != id) {
-                        var slideId = slide.id || slide.get('tempId');
-
+                    var slideId = slide.getId();
+                    if (slideId != id) {
                         Reveal.slide(slidesApp.addedSlideIndices[id].h, slidesApp.addedSlideIndices[id].v);
-                        if (slide.get('leftSlideId') == id) {
-                            revealModule.view.addPage('right', slide);
-                        }
-                        else if (slide.get('topSlideId') == id) {
-                            revealModule.view.addPage('down', slide);
-                        }
+                        RevealModule.view.addPage(slide);
                         slidesApp.addedSlideIndices[slideId] = Reveal.getIndices();
                         if(!slidesApp.isRunning)
                             var slideElements = slide.getSlideElements();
                         else
-                            var slideElements = slidesApp.slideElementCollection.where({slideId: slideId});
+                            var slideElements = RevealModule.slideElementCollection.where({slideId: slideId});
                         if (slideElements.length > 0)
                             RevealModule.forEachSlideElement(slideElements);
 
@@ -859,18 +722,84 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
     };
 
     RevealModule.forEachSlideElement = function(slideElements) {
-        var deviceLayoutCurrent = slidesApp.devicesCollection.getCurrent(),
-            layoutSizeRatio = slidesApp.devicesCollection.getSizeRatio();
-
         _.each(slideElements, function(slideElementModel){
             if(!slideElementModel.get('toBeRemoved')) {
-                slidesApp.execute('drag:prepare:new', slideElementModel, 0, 0);
-                slidesApp.execute('item:create', false, slideElementModel);
+                slidesApp.execute('prepare:new', slideElementModel);
+                slidesApp.execute('item:create', slideElementModel);
                 slidesApp.activeElement.isMoving = false;
-                slideElementModel.applyLayoutProperties(deviceLayoutCurrent.get('id'), layoutSizeRatio);
                 slideElementModel.trigger('change:classHidden');
             }
         });
+    };
+
+    RevealModule.selectableInit = function() {
+        var $currentSlide = jQueryValamis(Reveal.getCurrentSlide());
+        if(!$currentSlide.data('uiSelectable')){
+            $currentSlide
+                .css({height: '100%'})
+                .selectable({
+                    appendTo: 'body',
+                    filter: '.rj-element',
+                    autoRefresh: false,
+                    stop: function() {
+                        var selectedIds = [];
+                        jQueryValamis('.ui-selected', this).each(function() {
+                            selectedIds.push(parseInt(this.id.replace('slideEntity_',''), 10));
+                        });
+                        if(!selectedIds.length) {
+                            return;
+                        }
+                        if( selectedIds.length == 1 ){
+                            App.activeSlideModel.updateAllElements({selected: false});
+                            var slideElement = _.first(slidesApp.slideElementCollection.filter(function(model){
+                                return model.getId() == selectedIds[0];
+                            }));
+                            if(slideElement){
+                                var view = Marionette.ItemView.Registry.getByModelId(slideElement.getId());
+                                if(view){
+                                    slidesApp.execute('item:focus', view);
+                                }
+                            }
+                        } else {
+                            var slideElements = App.activeSlideModel.getElements();
+                            slideElements.forEach(function(slideElement){
+                                slideElement.set('selected', _.contains(selectedIds, slideElement.getId()));
+                            });
+                        }
+                    }
+                })
+                .parent('section')
+                .css({height: '100%'});
+        } else {
+            $currentSlide.selectable('refresh');
+        }
+    };
+
+    RevealModule.selectableRefresh = function(){
+        var $currentSlide = jQueryValamis(Reveal.getCurrentSlide());
+        if( slidesApp.activeElement && slidesApp.activeElement.view){
+            slidesApp.activeElement.view.updateControlsPosition();
+        }
+        else if (this.isOpenSettingPanel()) {
+            slidesApp.execute('item:blur');
+        }
+        if($currentSlide.data('uiSelectable')){
+            $currentSlide.selectable('refresh');
+        }
+    };
+
+    RevealModule.isOpenSettingPanel = function() {
+        var isVisibleSetting = jQueryValamis('.slide-popup-panel.js-valamis-popup-panel').is(':visible');
+        var isVisibleColor = jQueryValamis('.colpick').is(':visible');
+
+        return  isVisibleSetting || isVisibleColor;
+    };
+
+    RevealModule.selectableDestroy = function(){
+        var $currentSlide = jQueryValamis(Reveal.getCurrentSlide());
+        if($currentSlide.data('uiSelectable')){
+            $currentSlide.selectable('destroy');
+        }
     };
 
     RevealModule.configure = function( options ){
@@ -879,11 +808,18 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, MyAp
         }
     };
 
-});
+    RevealModule.onStop = function() {
 
-revealModule.on('stop', function() {
-    slidesApp.isRunning = false;
-    revealModule.view.destroyReveal();
-    revealModule.view = null;
-    jQueryValamis(document.body).removeClass('overflow-hidden');
+        App.vent
+            .off('elementsUpdated containerScroll containerResize', this.selectableRefresh)
+            .off('editorModeChanged', this.view.onEditorModeChanged)
+            .off('slideAdd', this.view.onSlideAdd);
+
+        slidesApp.vent.off('slideAdd', this.slideBindActions);
+
+        App.isRunning = false;
+        this.view.destroyReveal();
+        this.view = null;
+    };
+
 });

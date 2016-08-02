@@ -3,17 +3,27 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
     ArrangeModule.subAction = 'default';
     ArrangeModule.sortableEnabled = true;
     ArrangeModule.dragStarted = false;
+    ArrangeModule.isChanged = false;
+    ArrangeModule.slideOrder =[];
+
+
+    var getSlideId = function($el){
+        return parseInt($el.attr('id').slice($el.attr('id').indexOf('_') + 1));
+    };
 
     ArrangeModule.View = Marionette.ItemView.extend({
         template: '#arrangeTemplate',
         id: 'arrangeSlides'
     });
 
+    var arrangeView = new ArrangeModule.View();
+
     ArrangeModule.tileListView = Marionette.ItemView.extend({
         tagName: 'td',
         template: '#arrangeListTemplate',
         className: 'tileListTemp js-sortable-slide-list'
     });
+
     ArrangeModule.tileView = Marionette.ItemView.extend({
         template: '#arrangeTileTemplate',
         className: 'slides-arrange-tile js-slides-arrange-tile text-center',
@@ -26,9 +36,6 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
             'click .js-arrange-tile-delete': 'deleteSlide',
             'click .js-arrange-tile-select': 'selectSlide'
         },
-        initialize: function () {
-            this.template = _.template(Mustache.to_html(jQueryValamis(this.template).html(), Valamis.language));
-        },
         onRender: function(){
             this.$('.valamis-tooltip')
                 .tooltip({
@@ -36,8 +43,8 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
                     trigger: 'manual'
                 })
                 .bind('mouseenter', function(){
-                    jQueryValamis(this).tooltip('show');
-                    var tooltip = jQueryValamis(this).data('bs.tooltip').$tip;
+                    $(this).tooltip('show');
+                    var tooltip = $(this).data('bs.tooltip').$tip;
                     tooltip
                         .css({
                             whiteSpace: 'nowrap',
@@ -45,7 +52,7 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
                         });
                 })
                 .bind('mouseleave', function(){
-                    jQueryValamis(this).tooltip('hide');
+                    $(this).tooltip('hide');
                 })
                 .parent().css('position','relative');
         },
@@ -54,7 +61,7 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
                 this.$('.js-arrange-tile-controls > div').addClass('hidden');
                 this.$('.js-arrange-tile-controls').find('.js-arrange-tile-select').parent().removeClass('hidden');
                 this.$('.js-arrange-tile-controls').show();
-                jQueryValamis('#arrangeContainer .js-slides-arrange-tile').removeClass('arrange-tile-active');
+                $('#arrangeContainer .js-slides-arrange-tile').removeClass('arrange-tile-active');
                 this.$el.addClass('arrange-tile-active');
             }
             else{
@@ -66,65 +73,36 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
         },
         onClick: function (e) {
             if( !ArrangeModule.dragStarted ){
-                if( jQueryValamis(e.target).is('.arrange-tile-cover') && _.indexOf(['select','select-incorrect'], arrangeModule.subAction) > -1 ){
+                if( $(e.target).is('.arrange-tile-cover') && _.indexOf(['select','select-incorrect'], arrangeModule.subAction) > -1 ){
                     this.selectSlide();
                 } else {
                     this.goToSlide();
                 }
             }
         },
+
         goToSlide: function (e) {
             if(e) e.preventDefault();
-            var slideId = parseInt(this.$el.attr('id').slice(this.$el.attr('id').indexOf('_') + 1));
+            var slideId = getSlideId(this.$el);
             slidesApp.switchMode('preview', false, slideId);
         },
         editSlide: function (e) {
             if(e) e.preventDefault();
-            var slideId = parseInt(this.$el.attr('id').slice(this.$el.attr('id').indexOf('_') + 1));
+            var slideId = getSlideId(this.$el);
             slidesApp.switchMode('edit', false, slideId);
         },
         deleteSlide: function (e) {
             if(e) e.preventDefault();
-            var slideId = parseInt(this.$el.attr('id').slice(this.$el.attr('id').indexOf('_') + 1));
-            var slideModel = slidesApp.getSlideModel(slideId);
-            slideModel.set('toBeRemoved', true);
-            var listElement = jQueryValamis(e.target).closest('.js-slides-arrange-tile'),
-                topListElement = listElement.prev(),
-                leftListElement = listElement.parent().prevAll('.js-sortable-slide-list:has(>div)').first().children().first();
-            var slideIndices = slidesApp.slideRegistry.getBySlideId(slideId);
-            var slideEntities = slidesApp.slideElementCollection.where({slideId: slideId});
-            var slideThumbnail = jQueryValamis('#slidesArrangeTile_' + slideId).clone();
-            var rightSlideModel = slidesApp.slideCollection.where({leftSlideId: slideId || slideModel.get('tempId')})[0];
-            var bottomSlideModel = slidesApp.slideCollection.where({topSlideId: slideId || slideModel.get('tempId')})[0];
-
-            slidesApp.oldValue = {
-                indices: { h: slideIndices.h, v: slideIndices.v },
-                slideModel: slideModel,
-                slideEntities: slideEntities,
-                slideThumbnail: slideThumbnail,
-                rightSlideId: rightSlideModel ? (rightSlideModel.id || rightSlideModel.get('tempId')) : undefined,
-                bottomSlideId: bottomSlideModel ? (bottomSlideModel.id || bottomSlideModel.get('tempId')) : undefined
-            };
-            if(topListElement.length > 0)
-                slidesApp.oldValue.direction = 'down';
-            else if(leftListElement.length > 0)
-                slidesApp.oldValue.direction = 'right';
-            slidesApp.viewId = this.cid;
-            slidesApp.actionType = 'slideRemoved';
-            slidesApp.newValue = null;
-            slidesApp.execute('action:push');
-
-            if (listElement.siblings().length === 0) {
-                listElement.parent().prev().remove();
-                listElement.parent().remove();
+            var slides = slidesApp.slideCollection.where({toBeRemoved: false});
+            if(slides.length > 1) {
+                var slideId = getSlideId(this.$el);
+                var slideModel = slidesApp.getSlideModel(slideId);
+                slideModel.set('toBeRemoved', true);
             }
-            listElement.remove();
-
-            ArrangeModule.updateSlideRefs();
         },
         selectSlide: function(e){
             if(e) e.preventDefault();
-            var slideId = parseInt(this.$el.attr('id').replace('slidesArrangeTile_','')),
+            var slideId = getSlideId(this.$el),
                 selectedEntityId = slidesApp.selectedItemView.model.id || slidesApp.selectedItemView.model.get('tempId'),
                 linkTypeName = window.editorMode == 'arrange:select' ? 'correctLinkedSlideId' : 'incorrectLinkedSlideId';
             slidesApp.getSlideElementModel(selectedEntityId).set(linkTypeName, slideId);
@@ -133,10 +111,12 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
             slidesApp.switchMode('edit');
         }
     });
+
     ArrangeModule.slideThumbnailView = Marionette.ItemView.extend({
         template: '#slideThumbnailTemplate',
         className: 'slides-thumbnail js-slides-thumbnail'
     });
+
 
     ArrangeModule.initSortable = function(elem) {
         if( !ArrangeModule.sortableEnabled ){
@@ -146,55 +126,38 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
             placeholder: 'slides-arrange-placeholder',
             revert: true,
             delay: 50,
-            connectWith: '.js-sortable-slide-list',
             sort: function(e, ui) {
-                var placeholderBackground = jQueryValamis('<div></div>').css({
+                var placeholderBackground = $('<div></div>').css({
                     'width': '196px',
                     'height': '146px'
                 });
-                jQueryValamis(ui.placeholder).html('');
-                jQueryValamis(ui.placeholder).append(placeholderBackground);
-                jQueryValamis(ui.placeholder).addClass('slides-arrange-placeholder');
+                $(ui.placeholder).html('');
+                $(ui.placeholder).append(placeholderBackground);
+                $(ui.placeholder).addClass('slides-arrange-placeholder');
             },
             start: function(e, ui) {
-                var slideId = parseInt(jQueryValamis(ui.item).attr('id').slice(jQueryValamis(ui.item).attr('id').indexOf('_') + 1));
-                var slideModel = slidesApp.getSlideModel(slideId);
-                ArrangeModule.slideSourceList = jQueryValamis(e.currentTarget);
-                var rightSlideModel = slidesApp.slideCollection.where({leftSlideId: slideId || slideModel.get('tempId')})[0];
-                var bottomSlideModel = slidesApp.slideCollection.where({topSlideId: slideId || slideModel.get('tempId')})[0];
-                slidesApp.oldValue = {
-                    slideAttrs: {
-                        slideId: slideModel.id || slideModel.get('tempId'),
-                        leftSlideId: slideModel.get('leftSlideId'),
-                        topSlideId: slideModel.get('topSlideId')
-                    },
-                    rightSlideId: rightSlideModel ? (rightSlideModel.id || rightSlideModel.get('tempId')) : undefined,
-                    bottomSlideId: bottomSlideModel ? (bottomSlideModel.id || bottomSlideModel.get('tempId')) : undefined
-                };
+                ArrangeModule.slideSourceList = $(e.currentTarget);
                 ArrangeModule.dragStarted = true;
             },
             stop: function(e, ui) {
-                jQueryValamis(ui.placeholder).html('');
-                jQueryValamis(ui.placeholder).removeClass('slides-arrange-placeholder');
+                $(ui.placeholder).html('');
+                $(ui.placeholder).removeClass('slides-arrange-placeholder');
                 ArrangeModule.dragStarted = false;
-            },
-            receive: function(e, ui) {
-                ArrangeModule.slideTargetList = jQueryValamis(e.target);
-                ArrangeModule.manageSortableLists();
             },
             update: function(e, ui) {
                 if(ui.sender === null) {
                     ArrangeModule.updateSlideRefs();
-                    var slideId = parseInt(jQueryValamis(ui.item).attr('id').slice(jQueryValamis(ui.item).attr('id').replace('slidesArrangeTile_', '')));
-                    var slideModel = slidesApp.getSlideModel(slideId);
-                    slidesApp.viewId = undefined;
-                    slidesApp.actionType = 'slideOrderChanged';
-                    slidesApp.newValue = { slideModel: slideModel };
-                    slidesApp.execute('action:push');
                     ArrangeModule.initDraggable();
+                    slidesApp.slideSetModel.set('slideOrder', ArrangeModule.slideOrder);
                 }
+                ArrangeModule.isChanged = true;
             }
         }).disableSelection();
+
+        var connectWithClass = (slidesApp.slideSetModel.get('topDownNavigation'))
+          ? '.js-sortable-slide-list'
+          : '.js-sortable-slide-list.empty-arrange-list';
+        elem.sortable('option', 'connectWith', connectWithClass);
     };
 
     ArrangeModule.manageSortableLists = function() {
@@ -206,122 +169,178 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
         // If the target list was empty before current item appeared in it
         if(ArrangeModule.slideTargetList.children().length === 1) {
             ArrangeModule.slideTargetList.removeClass('empty-arrange-list');
-            if (ArrangeModule.slideTargetList.prev().length === 0 || ArrangeModule.slideTargetList.prev().children().length > 0) {
-                var arrangeList = jQueryValamis((new ArrangeModule.tileListView()).render().el);
+            var $prevElements = ArrangeModule.slideTargetList.prev();
+            if ($prevElements.length === 0 || $prevElements.children().length > 0) {
+                var arrangeList = new ArrangeModule.tileListView().render().$el;
                 arrangeList.addClass('empty-arrange-list');
                 arrangeList.insertBefore(ArrangeModule.slideTargetList);
                 ArrangeModule.initSortable(arrangeList);
             }
-            if (ArrangeModule.slideTargetList.next().length === 0 || ArrangeModule.slideTargetList.next().children().length > 0) {
-                var arrangeList = jQueryValamis((new ArrangeModule.tileListView()).render().el);
+            var $nextElements = ArrangeModule.slideTargetList.next();
+            if ($nextElements.length === 0 || $nextElements.children().length > 0) {
+                var arrangeList = new ArrangeModule.tileListView().render().$el;
                 arrangeList.addClass('empty-arrange-list');
                 arrangeList.insertAfter(ArrangeModule.slideTargetList);
                 ArrangeModule.initSortable(arrangeList);
             }
         }
     };
+
     ArrangeModule.createSortableLists = function() {
         // Create  a sortable list for each stack of slides
-        jQueryValamis('.slides > section').each(function() {
-            var arrangeList = jQueryValamis((new ArrangeModule.tileListView()).render().el);
-            jQueryValamis('#arrangeSlides tr:first').append(arrangeList);
-            jQueryValamis(this).find('> section').each(function() {
-                if(!jQueryValamis(this).attr('id')) return;
-                var slideId = parseInt(jQueryValamis(this).attr('id').slice(6));
-                var arrangeTile = jQueryValamis((new ArrangeModule.tileView({ id: 'slidesArrangeTile_' + slideId })).render().el);
-                arrangeList.append(arrangeTile);
-                // Create a thumbnail for the slide
-                var slideThumbnail = jQueryValamis((new ArrangeModule.slideThumbnailView()).render().el);
-                var originalSection = jQueryValamis('#slide_' + slideId);
-                originalSection.clone().attr('id', 'slideThumbnail_' + slideId).appendTo(slideThumbnail);
-                slideThumbnail.find('section').show().removeAttr('aria-hidden');//show if hidden
-
-                var bgImage = originalSection.attr('data-background-image');
-                var bgSize = originalSection.attr('data-background-size');
-                var bgColor = originalSection.attr('data-background-color');
-                slideThumbnail.css({'background-color': bgColor});
-                if(bgImage)
-                    slideThumbnail.css({
-                        'background-image': 'url("' + bgImage + '")',
-                        'background-size': bgSize,
-                        'background-repeat': 'no-repeat',
-                        'background-position': 'center'
-                    });
-
-                slideThumbnail.insertBefore(arrangeTile.find('.js-arrange-tile-controls'));
-
+        $('.slides > section').each(function() {
+            var arrangeList = new ArrangeModule.tileListView().render().$el;
+            $('#arrangeSlides tr:first').append(arrangeList);
+            $(this).find('> section').each(function() {
+                if(!$(this).attr('id')) return;
+                ArrangeModule.renderSlide(parseInt($(this).attr('id').slice(6)), arrangeList)
             });
-
             ArrangeModule.initSortable(arrangeList);
             // Create an empty sortable list after each list
-            arrangeList = jQueryValamis((new ArrangeModule.tileListView()).render().el);
-            arrangeList.addClass('empty-arrange-list');
-            jQueryValamis('#arrangeSlides tr:first').append(arrangeList);
-            ArrangeModule.initSortable(arrangeList);
+            ArrangeModule.createEmptyList(arrangeList);
         });
-        // Add an additional sortable list at the beginning
-        var firstList = jQueryValamis(new ArrangeModule.tileListView().render().el);
+        ArrangeModule.createFirstEmptyList();
+
+        if($('.js-slides-arrange-tile').length == 1)
+            $('.js-arrange-tile-delete').hide();
+
+        slidesApp.vent.trigger('arrange-module-ready');
+    };
+
+    ArrangeModule.renderSortableLists = function (slideOrder) {
+        var $firstTr = $('#arrangeSlides tr:first');
+        $firstTr.empty();
+        _.each(slideOrder, function (ids) {
+            var arrangeList = new ArrangeModule.tileListView().render().$el;
+            $firstTr.append(arrangeList);
+            _.each(ids, function (id) {
+                ArrangeModule.renderSlide(id, arrangeList)
+            });
+            ArrangeModule.initSortable(arrangeList);
+            ArrangeModule.createEmptyList(arrangeList);
+        });
+        ArrangeModule.createFirstEmptyList();
+
+        if ($('.js-slides-arrange-tile').length == 1)
+            $('.js-arrange-tile-delete').hide();
+
+        slidesApp.vent.trigger('arrange-module-ready');
+    };
+
+
+    ArrangeModule.renderSlide = function(slideId, arrangeList){
+        var arrangeTile = new ArrangeModule.tileView({ id: 'slidesArrangeTile_' + slideId }).render().$el;
+        arrangeList.append(arrangeTile);
+        // Create a thumbnail for the slide
+        var slideThumbnail = new ArrangeModule.slideThumbnailView().render().$el;
+        ArrangeModule.changeFont(slideId, slideThumbnail);
+        slideThumbnail.find('section').show().removeAttr('aria-hidden');//show if hidden
+        ArrangeModule.changeBackgroundColor(slideId, slideThumbnail);
+        ArrangeModule.changeBackgroundImage(slideId, slideThumbnail);
+        slideThumbnail.insertBefore(arrangeTile.find('.js-arrange-tile-controls'));
+    };
+
+    ArrangeModule.createEmptyList = function(arrangeList) {
+        arrangeList = new ArrangeModule.tileListView().render().$el;
+        arrangeList.addClass('empty-arrange-list');
+        $('#arrangeSlides tr:first').append(arrangeList);
+        ArrangeModule.initSortable(arrangeList);
+    };
+
+    ArrangeModule.createFirstEmptyList = function() {
+        var firstList = new ArrangeModule.tileListView().render().$el;
         firstList.addClass('empty-arrange-list');
-        firstList.insertBefore(jQueryValamis('.js-sortable-slide-list').first());
+        firstList.insertBefore($('.js-sortable-slide-list').first());
         ArrangeModule.initSortable(firstList);
+    };
 
-        if(jQueryValamis('.js-slides-arrange-tile').length == 1)
-            jQueryValamis('.js-arrange-tile-delete').hide();
+    ArrangeModule.changeBackgroundColor = function (slideId, slideThumbnail) {
+        var thumbnail = slideThumbnail || $('#arrangeContainer #slidesArrangeTile_' + slideId + ' .slides-thumbnail');
+        var slide = $('#slide_' + slideId);
+        var bgColor = slide.attr('data-background-color');
+        thumbnail.css({
+            'background-color': bgColor
+        });
+    };
 
-        jQueryValamis(document).trigger('arrange-module-ready');
+    ArrangeModule.changeBackgroundImage = function (slideId, slideThumbnail) {
+        var thumbnail = slideThumbnail || $('#arrangeContainer #slidesArrangeTile_' + slideId + ' .slides-thumbnail');
+        var slide = $('#slide_' + slideId);
+        var bgImage = slide.attr('data-background-image');
+        var bgSize = slide.attr('data-background-size');
+        thumbnail.css({
+            'background-image': (bgImage) ? 'url("' + bgImage + '")' : '',
+            'background-size': (bgImage) ? bgSize : '',
+            'background-repeat': (bgImage) ? 'no-repeat' : '',
+            'background-position': (bgImage) ? 'center' : ''
+        });
+    };
+
+    ArrangeModule.changeFont = function (slideId, slideThumbnail) {
+        var thumbnail = slideThumbnail || $('#arrangeContainer #slidesArrangeTile_' + slideId + ' .slides-thumbnail');
+        var slide = $('#slide_' + slideId);
+        thumbnail.find('section').remove();
+        slide.clone().attr('id', 'slideThumbnail_' + slideId).appendTo(thumbnail);
     };
 
     ArrangeModule.updateSlideRefs = function() {
-        var lists = jQueryValamis('.js-sortable-slide-list:has(>div)'), i = 0, j = 0;
+        var lists = $('.js-sortable-slide-list:has(>div)'), i = 0, j = 0;
+        ArrangeModule.slideOrder = [];
         lists.each(function() {
             j = 0;
-            var list = jQueryValamis(this);
+            var list = $(this);
+            var listOrder = [];
             list.find('.js-slides-arrange-tile').each(function() {
-                var listElement = jQueryValamis(this),
+                var listElement = $(this),
                     listElementId = parseInt(listElement.attr('id').slice(listElement.attr('id').indexOf('_') + 1)),
                     slideModel = slidesApp.getSlideModel(listElementId),
                     topListElement = listElement.prev(),
                     leftListElement = listElement.parent().prevAll('.js-sortable-slide-list:has(>div)').first().children().first(),
                     topListElementId = topListElement.length > 0
-                        ? parseInt(topListElement.attr('id').slice(topListElement.attr('id').indexOf('_') + 1))
+                        ? getSlideId(topListElement)
                         : undefined,
                     leftListElementId = leftListElement.length > 0
-                        ? parseInt(leftListElement.attr('id').slice(leftListElement.attr('id').indexOf('_') + 1))
+                        ? getSlideId(leftListElement)
                         : undefined;
+                listOrder.push(listElementId);
                 if(slideModel){
                     //Only top row slides can have left one and we set them later
-                    slideModel.unset('leftSlideId');
-                    slideModel.unset('topSlideId');
+                    slideModel.unset('leftSlideId', { silent: true });
+                    slideModel.unset('topSlideId', { silent: true });
                     if(topListElementId)
-                        slideModel.set('topSlideId', topListElementId);
+                        slideModel.set('topSlideId', topListElementId, {silent: true});
                     if(j === 0) {
                         // If it is a slide from the top row (where slides CAN refer to the left)
                         if(leftListElementId) {
-                            slideModel.set('leftSlideId', leftListElementId);
+                            slideModel.set('leftSlideId', leftListElementId, {silent: true});
                         }
                     }
                 }
                 j++;
             });
             i++;
+            ArrangeModule.slideOrder.push(listOrder)
         });
-        if(jQueryValamis('.js-slides-arrange-tile').length == 1)
-            jQueryValamis('.js-arrange-tile-delete').hide();
+        if($('.js-slides-arrange-tile').length == 1)
+            $('.js-arrange-tile-delete').hide();
         else
-            jQueryValamis('.js-arrange-tile-delete').show();
+            $('.js-arrange-tile-delete').show();
     };
 
     ArrangeModule.initDraggable = function() {
-        jQueryValamis('#arrangeSlides table').css('width', 'auto');
-        var sortableListContainerWidth = jQueryValamis('#arrangeContainer').width(),
-            sortableListContainerHeight = jQueryValamis('#arrangeContainer').height();
-        var sortableListTableWidth = Math.max(jQueryValamis('#arrangeSlides table').width(), jQueryValamis('#arrangeContainer').width()),
-            sortableListTableHeight = jQueryValamis('#arrangeSlides table').height();
+        var $arrangeContainer = $('#arrangeContainer');
+        var $arrangeSlides= $('#arrangeSlides');
+        var $arrangeSlideTable = $arrangeSlides.find('table');
+        $arrangeContainer.find('table').css('width', 'auto');
+        var sortableListContainerWidth = $arrangeContainer.width(),
+            sortableListContainerHeight = $arrangeContainer.height();
+        var sortableListTableWidth = Math.max($arrangeSlideTable.width(), $arrangeContainer.width()),
+            sortableListTableHeight = $arrangeSlideTable.height();
         var containmentStartX = 0 - Math.abs(sortableListContainerWidth - sortableListTableWidth),
             containmentStartY = 0 - Math.abs(sortableListContainerHeight - sortableListTableHeight),
             containmentEndX = 0,
             containmentEndY = 0,
-            scrollTop = jQueryValamis( document ).scrollTop();
+            scrollTop = $( document ).scrollTop();
         if(sortableListTableWidth < sortableListContainerWidth) {
             containmentStartX = Math.abs(sortableListContainerWidth - sortableListTableWidth) / 2;
             containmentEndX = containmentStartX;
@@ -329,50 +348,102 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
         if(sortableListTableHeight < sortableListContainerHeight) {
             containmentStartY = containmentEndY = 0;
         }
-        containmentEndY += jQueryValamis('.js-slides-editor-topbar').outerHeight();
+        containmentEndY += $('.js-slides-editor-topbar').outerHeight();
         containmentStartY += scrollTop + lessonStudio.fixedSizes.TOPBAR_HEIGHT;
         containmentEndY += scrollTop;
         if(sortableListTableWidth > sortableListContainerWidth || sortableListTableHeight > sortableListContainerHeight) {
-            if(!jQueryValamis('#arrangeSlides').data('uiDraggable')){
-                jQueryValamis('#arrangeSlides').draggable();
+            if(!$arrangeSlides.data('uiDraggable')){
+                $arrangeSlides.draggable();
             }
-            jQueryValamis('#arrangeSlides')
+            $arrangeSlides
                 .draggable("option", "containment", [ containmentStartX, containmentStartY, containmentEndX, containmentEndY ]);
         }
     };
-});
 
-var arrangeView = new arrangeModule.View();
-
-arrangeModule.on('start', function() {
-    setTimeout(function() {
-        valamisApp.execute('notify', 'info', Valamis.language['lessonModeSwitchingLabel'], { 'timeOut': '0', 'extendedTimeOut': '0' });
-    }, 0);
-    setTimeout(function() {
-        jQueryValamis(document).on('arrange-module-ready', function(){
-            setTimeout(function () {
-                jQueryValamis('#arrangeContainer').show();
-                jQueryValamis('#arrangeContainer').prevAll().hide();
-                valamisApp.execute('notify', 'clear');
-                arrangeModule.initDraggable();
-            }, 0);
+    ArrangeModule.onSlidesUpdated = function(){
+        _.defer(function(){
+            $('#arrangeSlides tr:first').empty();
+            ArrangeModule.createSortableLists();
         });
-        jQueryValamis('#arrangeContainer').append(arrangeView.render().el);
-        jQueryValamis('#arrangeContainer').height(jQueryValamis(window.parent).height() - jQueryValamis('.js-slides-editor-topbar').outerHeight());
-        jQueryValamis('#arrangeContainer').width(jQueryValamis(window.parent).width());
-        jQueryValamis('body').css('background-color', '#f2f2f2');
-        arrangeModule.subAction = window.editorMode && window.editorMode.indexOf(':') > -1
-            ? _.last(window.editorMode.split(':'))
-            : 'default';
-        arrangeModule.sortableEnabled = _.indexOf(['select', 'select-incorrect'], arrangeModule.subAction) == -1;
-        arrangeModule.createSortableLists();
-    }, 500);
-});
+    };
 
-arrangeModule.on('stop', function() {
-    jQueryValamis(document).off('arrange-module-ready');
-    this.updateSlideRefs();
-    window.editorMode = null;
-    jQueryValamis('#arrangeContainer').hide();
-    jQueryValamis('body').css('background-color', '');
+    ArrangeModule.onSlidesOrderUpdated = function() {
+        if (slidesApp.slideSetModel.get('slideOrder')) {
+            ArrangeModule.renderSortableLists(slidesApp.slideSetModel.get('slideOrder'));
+        } else {
+            $('#arrangeSlides tr:first').empty();
+            ArrangeModule.createSortableLists();
+        }
+    };
+
+    ArrangeModule.onSlideRemove = function(model, toBeRemoved){
+        if( toBeRemoved ) {
+            var listElement = jQueryValamis('#slidesArrangeTile_' + model.getId());
+            if (listElement.siblings().length === 0) {
+                listElement.parent().prev().remove();
+                listElement.parent().remove();
+            }
+            listElement.remove();
+        } else {
+            //When undo action complete
+            slidesApp.historyManager
+                .once('undo:after', arrangeModule.onSlidesUpdated, arrangeModule);
+        }
+    };
+
+
+    ArrangeModule.onStart = function(){
+        var arrangeModule = this;
+        setTimeout(function() {
+            valamisApp.execute('notify', 'info', Valamis.language['lessonModeSwitchingLabel'], { 'timeOut': '0', 'extendedTimeOut': '0' });
+        }, 0);
+        setTimeout(function() {
+            $arrangeContainer = $('#arrangeContainer');
+            slidesApp.vent.on('arrange-module-ready', function(){
+                setTimeout(function () {
+                    $arrangeContainer.show();
+                    $arrangeContainer.prevAll().hide();
+                    valamisApp.execute('notify', 'clear');
+                    arrangeModule.initDraggable();
+                }, 0);
+            });
+            $arrangeContainer.append(arrangeView.render().el);
+            var $parent = $(window.parent);
+            $arrangeContainer.height($parent.height() - $('.js-slides-editor-topbar').outerHeight());
+            $arrangeContainer.width($parent.width());
+
+            //TODO remove it
+            //$('body').css('background-color', '#f2f2f2');
+
+            arrangeModule.subAction = window.editorMode && window.editorMode.indexOf(':') > -1
+                ? _.last(window.editorMode.split(':'))
+                : 'default';
+            arrangeModule.sortableEnabled = _.indexOf(['select', 'select-incorrect'], arrangeModule.subAction) == -1;
+            arrangeModule.createSortableLists();
+        }, 500);
+
+        slidesApp.slideSetModel
+            .on('change:slideOrder', arrangeModule.onSlidesOrderUpdated, arrangeModule);
+        slidesApp.slideCollection
+            .on('change:toBeRemoved', arrangeModule.onSlideRemove, arrangeModule);
+
+        arrangeModule.isChanged = false;
+    };
+
+    ArrangeModule.onStop = function(){
+        var arrangeModule = this;
+
+        slidesApp.vent.off('arrange-module-ready');
+        arrangeModule.updateSlideRefs();
+        window.editorMode = null;
+        arrangeModule.isChanged = false;
+        $('#arrangeContainer').hide();
+        slidesApp.slideSetModel
+            .off('change:slideOrder', arrangeModule.onSlidesOrderUpdated);
+        slidesApp.slideCollection
+            .off('change:toBeRemoved', arrangeModule.onSlideRemove);
+        if(slidesApp.historyManager){
+            slidesApp.historyManager.off('undo:after', arrangeModule.onSlidesUpdated);
+        }
+    }
 });

@@ -1,48 +1,23 @@
 package com.arcusys.valamis.lesson.generator.tincan.file.html
 
 import com.arcusys.valamis.lesson.generator.tincan.TinCanPackageGeneratorProperties
-import com.arcusys.valamis.lesson.generator.util.ResourceHelpers
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.util.mustache.Mustache
 import com.arcusys.valamis.util.serialization.JsonHelper._
 import scala.util.Random
 
 
-class TinCanQuestionViewGenerator(isPreview: Boolean) {
+class TinCanQuestionViewGenerator {
   private def removeLineBreak(source: String) = if (source != null) source.replaceAll("\n", "").replaceAll("\r", "") else null
 
-  private def getResourceStream(name: String) = Thread.currentThread.getContextClassLoader.getResourceAsStream(name)
+  private def getResourceStream(name: String) = this.getClass.getClassLoader.getResourceAsStream(name)
 
-  private def prepareString(source: String) = (if (isPreview) removeLineBreak(source) else ResourceHelpers.skipContextPathURL(removeLineBreak(source))).replaceAll("\n", "").replaceAll("\r", "")
-  private def prepareStringKeepNewlines(source: String) = if (isPreview) source else ResourceHelpers.skipContextPathURL(source)
+  private def prepareString(source: String) = (skipContextPathURL(removeLineBreak(source))).replaceAll("\n", "").replaceAll("\r", "")
+  private def prepareStringKeepNewlines(source: String) = skipContextPathURL(source).trim
 
-  def getHTMLForStaticPage(pageData: String) = {
-    val string = prepareString(pageData)
-    generateHTMLByQuestionType("static", Map("data" -> string))
-  }
-
-  def getHTMLForRevealPage(pageData: String) = {
-    val string = prepareString(pageData)
-    generateHTMLByQuestionType("reveal", Map("data" -> string))
-  }
-
-  def getHTMLForPDFPage(id: Int, title: String, filename: String) = {
-    generateHTMLByQuestionType("pdf", Map("id" -> id, "title" -> title, "filename" -> filename))
-  }
-
-  def getHTMLForIframePage(id: Int, title: String, src: String) = {
-    val newsrc = src match {
-      case s if s contains "youtube.com/embed" => s match {
-        case x if x contains "?" => src + "&enablejsapi=1"
-        case _                   => src + "?enablejsapi=1"
-      }
-      case s if s contains "player.vimeo.com/" => s match {
-        case x if x contains "?" => src + "&api=1"
-        case _                   => src + "?api=1"
-      }
-      case _ => src
-    }
-    generateHTMLByQuestionType("iframe", Map("id" -> id, "title" -> title, "src" -> newsrc))
+  private def skipContextPathURL(source: String) = {
+    // skip context-path
+    """(?i)(?<=")([^"]*?)SCORMData/""".r replaceAllIn (source, "")
   }
 
   def getViewModelFromQuestion(question: Question,
@@ -200,34 +175,6 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "explanation" -> essayQuestion.explanationText
         )
       viewModel
-//    case embeddedAnswerQuestion: EmbeddedAnswerQuestion =>
-//      val viewModel = Map(
-//        "id" -> embeddedAnswerQuestion.id,
-//        "questionNumber" -> questionNumber,
-//        "title" -> removeLineBreak(embeddedAnswerQuestion.title),
-//        "text" -> embeddedAnswerQuestion.text,
-//        "autoShowAnswer" -> autoShowAnswer,
-//        "explanation" -> embeddedAnswerQuestion.explanationText,
-//        "rightAnswerText" -> embeddedAnswerQuestion.rightAnswerText,
-//        "wrongAnswerText" -> embeddedAnswerQuestion.wrongAnswerText
-//        )
-//      viewModel
-//    case videoDLQuestion: DLVideo =>
-//      val viewModel = Map(
-//        "id" -> videoDLQuestion.id,
-//        "questionNumber" -> questionNumber,
-//        "title" -> removeLineBreak(videoDLQuestion.title),
-//        "uuid" -> prepareString(videoDLQuestion.uuid),
-//        "autoShowAnswer" -> autoShowAnswer,
-//        "groupId" -> videoDLQuestion.groupId,
-//        "hasExplanation" -> videoDLQuestion.explanationText.nonEmpty,
-//        "explanation" -> removeLineBreak(videoDLQuestion.explanationText)
-//        )
-//      viewModel
-//    case purePlainText: PurePlainText =>
-//      val viewModel = Map("data" -> purePlainText.text
-//        )
-//      viewModel
     case _ => throw new Exception("Service: Oops! Can't recognize question type")
   }
 
@@ -258,37 +205,8 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
       case matchingQuestion: MatchingQuestion => generateHTMLByQuestionType("MatchingQuestion", viewModel)
       case categorizationQuestion: CategorizationQuestion => generateHTMLByQuestionType("CategorizationQuestion", viewModel)
       case essayQuestion: EssayQuestion => generateHTMLByQuestionType("EssayQuestion", viewModel)
-//      case embeddedAnswerQuestion: EmbeddedAnswerQuestion => generateHTMLByQuestionType("EmbeddedAnswerQuestion", viewModel)
-      //case videoDLQuestion: DLVideo => generateHTMLByQuestionType("DLVideo", viewModel)
-      //case purePlainText: PurePlainText => generateHTMLByQuestionType("PurePlainText", viewModel)
       case _ => throw new Exception("Service: Oops! Can't recognize question type")
     }
-  }
-
-  def generateRevealJSQuiz(id: Int,
-                           rootActivityId: String,
-                           title: String,
-                           description: String,
-                           serializedQuestionData: String,
-                           sections: String,
-                           maxDuration: Option[Int],
-                           properties: TinCanPackageGeneratorProperties) = {
-    val viewModel = Map(
-      "id" -> id,
-      "rootActivityId" -> rootActivityId,
-      "title" -> title,
-      "description" -> description,
-      "serializedQuestionData" -> serializedQuestionData,
-      "sections" -> sections,
-      "isPreview" -> isPreview,
-      "initProperties" -> toJson(Map("randomOrdering" -> properties.randomOrdering, "questionsCount" -> properties.questionsPerUser)),
-      "isRandomized" -> properties.randomOrdering,
-      "theme" -> properties.theme,
-      "duration" -> maxDuration.getOrElse(0),
-      "scoreLimit" -> properties.scoreLimit,
-      "canPause" -> false
-    )
-    new Mustache(scala.io.Source.fromInputStream(getResourceStream("tincan/revealjs.html")).mkString).render(viewModel)
   }
 
   def generateExternalIndex(endpoint: String) = {
@@ -296,11 +214,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
   }
 
   private def generateHTMLByQuestionType(questionTypeName: String, viewModel: Map[String, Any]) = {
-    val renderedQuestion = new Mustache(scala.io.Source.fromInputStream(getResourceStream("tincan/" + questionTypeName + ".html")).mkString).render(viewModel + ("isPreview" -> isPreview))
-    if (isPreview) {
-      generateRevealJSQuiz(0, "", "Preview", "Preview", renderedQuestion, "", None, new TinCanPackageGeneratorProperties())
-    } else {
-      renderedQuestion
-    }
+    new Mustache(scala.io.Source.fromInputStream(getResourceStream("tincan/" + questionTypeName + ".html")).mkString)
+      .render(viewModel)
   }
 }

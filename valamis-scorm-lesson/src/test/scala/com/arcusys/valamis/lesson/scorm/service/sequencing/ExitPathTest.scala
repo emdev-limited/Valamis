@@ -43,7 +43,7 @@ class ExitPathTest extends ActivityStateTreeTestBase {
       val path = tree.currentActivity.get pathToCommonAncestorWith tree
       path.head should equal(tree.currentActivity.get)
       path.last.parent.get should equal(tree)
-      for (i <- 0 until path.size - 1) path(i).item.activity.parentID.get should equal(path(i + 1).item.activity.id)
+      for (i <- 0 until path.size - 1) path(i).item.activity.parentId.get should equal(path(i + 1).item.activity.id)
     }
 
     forTree(twoLevelTree(currentLevel = Some(1)))

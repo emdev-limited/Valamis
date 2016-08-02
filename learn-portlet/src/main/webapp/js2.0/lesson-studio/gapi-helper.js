@@ -47,7 +47,7 @@ function createPicker() {
     if (GAPISettings.pickerApiLoaded && GAPISettings.oauthToken) {
         var docsView = new google.picker.View(google.picker.ViewId.DOCS);
         var photosView = new google.picker.View(google.picker.ViewId.PHOTOS);
-        if(lessonStudio.youtubeIframeAPIReady) {
+        if(lessonStudio.youtubeIframeApiReady) {
             var youtubeView = new google.picker.View(google.picker.ViewId.YOUTUBE);
             var videoSearchView = new google.picker.View(google.picker.ViewId.VIDEO_SEARCH);
         }
@@ -57,11 +57,11 @@ function createPicker() {
         var documentsView = new google.picker.View(google.picker.ViewId.DOCUMENTS);
 
         var fileTypes = '';
-        var fileTypeGroup = slidesApp.activeElement.view ? slidesApp.activeElement.view.model.get('slideEntityType') : slidesApp.fileTypeGroup;
+        var fileTypeGroup = slidesApp.fileTypeGroup || slidesApp.activeElement.view.model.get('slideEntityType');
 
-        if(mimeToExt[fileTypeGroup]) {
-            for(var i in Object.keys(mimeToExt[fileTypeGroup]))
-                fileTypes += Object.keys(mimeToExt[fileTypeGroup])[i] + ',';
+        if(Utils.mimeToExt[fileTypeGroup]) {
+            for(var i in Object.keys(Utils.mimeToExt[fileTypeGroup]))
+                fileTypes += Object.keys(Utils.mimeToExt[fileTypeGroup])[i] + ',';
             fileTypes = fileTypes.slice(0,-1);
             // Set Picker file type filter depending on slide element type
             docsView.setMimeTypes(fileTypes);
@@ -73,7 +73,7 @@ function createPicker() {
             .addView(docsView);
         switch(fileTypeGroup) {
             case 'video':
-                if(lessonStudio.youtubeIframeAPIReady)
+                if(lessonStudio.youtubeIframeApiReady)
                     picker
                         .addView(videoSearchView)
                         .addView(youtubeView);
@@ -83,13 +83,13 @@ function createPicker() {
                     .addView(photosView)
                     .addView(imageSearchView);
                 break;
-            case 'pdf':
-                picker.addView(pdfView);
-                break;
 
-            case 'pptx':
-                picker.addView(pptxView);
-                break;
+            // use one picker for pdf and ppt
+            case 'imported':
+                picker
+                  .addView(pdfView)
+                  .addView(pptxView);
+
         }
         picker = picker
             .setDeveloperKey(GAPISettings.apiKey)
@@ -114,10 +114,10 @@ function pickerCallback(data) {
             var model = new Backbone.Model();
             model.set({
                 title: slidesApp.fileTypeGroup.toUpperCase(),
-                slideEntityType: (slidesApp.fileTypeGroup === 'pptx') ? 'iframe' : slidesApp.fileTypeGroup
+                slideEntityType: (_.contains('imported', slidesApp.fileTypeGroup)) ? 'iframe' : slidesApp.fileTypeGroup
             });
-            slidesApp.execute('drag:prepare:new', model, 0, 0);
-            slidesApp.execute('item:create', true);
+            slidesApp.execute('prepare:new', model);
+            slidesApp.execute('item:create');
             slidesApp.activeElement.isMoving = false;
         }
         switch (slidesApp.activeElement.view.model.get('slideEntityType')) {
@@ -162,8 +162,8 @@ function pickerCallback(data) {
                     slidesApp.activeElement.view.updateUrl(previewUrl, oldContent);
                 }
                 break;
-            case 'pdf':
             case 'iframe':
+            case 'imported':
                 slidesApp.activeElement.view.updateUrl(doc.embedUrl);
                 break;
         }

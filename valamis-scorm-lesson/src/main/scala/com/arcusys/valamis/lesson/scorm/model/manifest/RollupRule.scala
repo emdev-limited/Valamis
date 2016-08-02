@@ -13,6 +13,6 @@ class RollupRule(
     val conditions: RuleConditionSet,
     val action: RollupAction.Value) {
   import ConditionType._
-  def validConditionType(condition: RuleCondition) = condition.conditionType noneOf (ObjectiveMeasureGreaterThan, ObjectiveMeasureLessThan, Always)
+  def validConditionType(condition: ConditionRuleItem) = condition.conditionType noneOf (ObjectiveMeasureGreaterThan, ObjectiveMeasureLessThan, Always)
   require(conditions.conditions forall validConditionType)
 }

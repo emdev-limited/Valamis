@@ -1,7 +1,7 @@
 package com.arcusys.learn.liferay.update.version260.lrs
 
-import com.arcusys.valamis.core.DbNameUtils._
-import com.arcusys.valamis.core.{LongKeyTableComponent, SlickProfile}
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.persistence.common.{LongKeyTableComponent, SlickProfile}
 
 trait AccountsSchema extends LongKeyTableComponent with SlickProfile {
 

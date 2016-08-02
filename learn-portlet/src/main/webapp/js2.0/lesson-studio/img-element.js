@@ -8,22 +8,25 @@ var imageElementModule = slidesApp.module('ImageElementModule', {
             events: _.extend({}, this.BaseView.prototype.events, {
                 'click .js-select-google-image': 'selectGoogleImage'
             }),
-            updateUrl: function(url, oldUrl, width, height) {
-                slidesApp.viewId = this.cid;
-                slidesApp.actionType = 'itemContentChanged';
-                slidesApp.oldValue = {
-                    contentType: 'image',
-                    content: oldUrl,
-                    width: this.model.get('width'),
-                    height: this.model.get('height')
-                };
+            onChangeFromHistory: function(model){
+                this.updateUrl(
+                    model.get('content'),
+                    model._previousAttributes.content,
+                    model.get('width'),
+                    model.get('height'),
+                    true);
+            },
+            updateUrl: function(url, oldUrl, width, height, isOld, closeHistoryGroup) {
+                var historyGroupToBeClosedOnLoad = !isOld;
                 if(url) {
                     if (url.indexOf('docs.google.com/file/d/') != -1) {
                         this.content.css('background-color', 'transparent');
                         this.$('.content-icon-image').first().hide();
                         this.$('iframe').attr('src', url);
                         this.$('iframe').show();
-                        slidesApp.execute('item:resize', 640, 480);
+                        if (!isOld){
+                            slidesApp.execute('item:resize', this.model.get('width') || 640, this.model.get('height') || 480);
+                        }
                     }
                     else {
                         this.$('iframe').attr('src', '');
@@ -33,9 +36,16 @@ var imageElementModule = slidesApp.module('ImageElementModule', {
                             : url;
 
                         var image = new Image();
+                        var view = this;
                         image.onload = function () {
-                            var newSize = ImageElementModule.resizeImage(width || image.width, height || image.height, 800, 800);
-                            slidesApp.execute('item:resize', newSize.width, newSize.height);
+                            if (!isOld) {
+                                var newSize = ImageElementModule.resizeImage(width || image.width, height || image.height, 800, 800);
+                                var updateMode = url != oldUrl ? 'reset' : null;
+                                slidesApp.execute('item:resize', newSize.width, newSize.height, view, updateMode);
+                                if (closeHistoryGroup) {
+                                    slidesApp.historyManager.groupClose(); 
+                                }
+                            }
                         };
                         image.src = src;
 
@@ -44,15 +54,12 @@ var imageElementModule = slidesApp.module('ImageElementModule', {
                         this.$('.content-icon-image').first().hide();
                     }
                 }
-                slidesApp.newValue = {
-                    contentType: 'image',
-                    content: this.model.get('content'),
-                    width: this.model.get('width'),
-                    height: this.model.get('height')
-                };
-                slidesApp.execute('action:push');
+                if (closeHistoryGroup && !historyGroupToBeClosedOnLoad) {
+                    slidesApp.historyManager.groupClose();
+                }
             },
             selectGoogleImage: function() {
+                slidesApp.fileTypeGroup = null;
                 this.selectEl();
                 loadPicker();
             }

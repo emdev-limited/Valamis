@@ -1,6 +1,6 @@
 package com.arcusys.valamis.file.service
 
-import com.liferay.portlet.documentlibrary.model.DLFileEntry
+import com.arcusys.learn.liferay.LiferayClasses.LDLFileEntry
 
 trait FileService {
 
@@ -21,16 +21,13 @@ trait FileService {
 
   def getFileContent(fileEntryId: Long, version: String): Array[Byte]
 
-  def getFileEntry(uuid: String, groupId: Long): DLFileEntry
+  def getFileEntry(uuid: String, groupId: Long): LDLFileEntry
 
   def copyFile(sourceFolder: String,
                sourceName: String,
                destFolder: String,
                destName: String,
                deleteFolder: Boolean = true): Unit
-
-  @deprecated("""Shouldn't require "files/" in path. see deleteFile""")
-  def deleteFileStoryTree(name: String): Unit
 
   def deleteFile(name: String): Unit
 

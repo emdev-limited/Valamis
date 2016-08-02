@@ -28,9 +28,8 @@
 
         function initAdminView() {
 
-            jQueryValamis(window).trigger('portlet-ready');
             tincanLrsTypeChanged();
-            updateTabs();
+            updateTabs()
         }
 
         var tincanLrsTypeChanged = function () {
@@ -158,22 +157,26 @@
             }
         }
 
-        function saveGoogleAPISettings() {
-            window.LearnAjax.post(path.root + path.api.administrering,
-                    {
+        function saveGoogleApiSettings() {
+            if(validateGoogleClientId() && validateGoogleAppId()) {
+                jQueryValamis('#googleClientIdError,#googleAppIdError').hide();
+                window.LearnAjax.post(path.root + path.api.administrering, {
                         'courseId': Utils.getCourseId(),
                         'action': 'UPDATEGOOGLEAPISETTINGS',
                         'googleApiKey': jQueryValamis('#googleApiKey').val(),
                         'googleAppId': jQueryValamis('#googleAppId').val(),
                         'googleClientId': jQueryValamis('#googleClientId').val()
-                    },
-                    jQueryValamis.proxy(function () {
-                    }, this)
-            ).done(function () {
-                        toastr.success('{{overlayCompleteMessageLabel}}');
-                    }).fail(function () {
-                        toastr.error('{{overlayFailedMessageLabel}}');
-                    });
+                    }, jQueryValamis.proxy(function () {}, this)
+                ).done(function () {
+                    toastr.success('{{overlayCompleteMessageLabel}}');
+                }).fail(function () {
+                    toastr.error('{{overlayFailedMessageLabel}}');
+                });
+            }
+            else {
+                if(!validateGoogleClientId()) jQueryValamis('#googleClientIdError').show();
+                if(!validateGoogleAppId()) jQueryValamis('#googleAppIdError').show();
+            }
         }
 
         function validateURL(textval) {
@@ -182,15 +185,35 @@
             return urlregex.test(textval);
         }
 
+        function validateGoogleClientId() {
+            var regex = new RegExp('^(\\d{12}(-[a-zA-Z0-9]{32})?\\.apps\\.googleusercontent\\.com)?$');
+            return regex.test(jQueryValamis('#googleClientId').val());
+        }
+
+        function validateGoogleAppId() {
+            var regex = new RegExp('^(\\d{12})?$');
+            return regex.test(jQueryValamis('#googleAppId').val());
+        }
+
         function onUrlChanged() {
             if (validateURL(jQueryValamis('#issuerUrl').val())) jQueryValamis('#issuerUrlError').hide();
             else jQueryValamis('#issuerUrlError').show();
         }
 
-        var updateTabs = function() {
+        function onGoogleClientIdChanged() {
+            if (validateGoogleClientId()) jQueryValamis('#googleClientIdError').hide();
+            else jQueryValamis('#googleClientIdError').show();
+        }
 
-            jQueryValamis('.nav-tabs > li').show();
+        function onGoogleAppIdChanged() {
+            if (validateGoogleAppId()) jQueryValamis('#googleAppIdError').hide();
+            else jQueryValamis('#googleAppIdError').show();
+        }
+
+        var updateTabs = function() {
+                jQueryValamis('.nav-tabs > li').show();
         };
+
     </script>
 
 </head>
@@ -203,7 +226,6 @@
             <li><a href="#tincanTabMenu" data-toggle="tab">{{tincanTooltipLabel}}</a></li>
             <li><a href="#googleAPITabMenu" data-toggle="tab">{{googleAPITooltipLabel}}</a></li>
             <li><a href="#settingsTabMenu" data-toggle="tab">{{optionalTooltipLabel}}</a></li>
-            <li><a href="#licenseTabMenu" data-toggle="tab">{{licenseToolLabel}}</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="badgesTabMenu">
@@ -228,7 +250,7 @@
                         <div class="div-col content-col">
                             <input class="fixed-width" type="text" id="issuerUrl" value="{{{issuerURL}}}"
                                    onblur="onUrlChanged()"/>
-                            <label id="issuerUrlError" style="display: none; color: red;">!{{invalidUrl}}</label>
+                            <label id="issuerUrlError" style="display: none; color: red;">{{invalidUrl}}</label>
                         </div>
                     </div>
 
@@ -380,8 +402,10 @@
                             <label for="googleClientId">{{googleClientIdLabel}}</label>
                         </div>
                         <div class="div-col content-col">
-                            <input class="fixed-width" type="text" id="googleClientId" value="{{{googleClientId}}}"/>
-                            <label id="clientIdNote">{{googleClientIdNote}}</label>
+                            <input class="fixed-width" type="text" id="googleClientId" value="{{{googleClientId}}}"
+                                onblur="onGoogleClientIdChanged()"/>
+                            <label id="googleClientIdNote">{{googleClientIdNote}}</label>
+                            <label id="googleClientIdError" style="display: none; color: red;">{{invalidGoogleClientId}}</label>
                         </div>
                     </div>
 
@@ -390,8 +414,10 @@
                             <label for="googleAppId">{{googleAppIdLabel}}</label>
                         </div>
                         <div class="div-col content-col">
-                            <input class="fixed-width" type="text" id="googleAppId" value="{{googleAppId}}"/>
-                            <label id="clientIdNote">{{googleAppIdNote}}</label>
+                            <input class="fixed-width" type="text" id="googleAppId" value="{{googleAppId}}"
+                                onblur="onGoogleAppIdChanged()"/>
+                            <label id="googleAppIdNote">{{googleAppIdNote}}</label>
+                            <label id="googleAppIdError" style="display: none; color: red;">{{invalidGoogleAppId}}</label>
                         </div>
                     </div>
 
@@ -401,13 +427,13 @@
                         </div>
                         <div class="div-col content-col">
                             <input class="fixed-width" type="text" id="googleApiKey" value="{{googleApiKey}}"/>
-                            <label id="clientIdNote">{{googleApiKeyNote}}</label>
+                            <label id="googleApiKeyNote">{{googleApiKeyNote}}</label>
                         </div>
                     </div>
 
                     <div class="div-row">
                         <div class="div-col name-col">
-                            <button onclick="saveGoogleAPISettings()" class="button big primary">
+                            <button onclick="saveGoogleApiSettings()" class="button big primary">
                                 {{adminDialogSaveButtonLabel}}
                             </button>
                         </div>
@@ -432,7 +458,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
             <input type="hidden" id="companyID" value="{{companyID}}">
         </div>

@@ -1,9 +1,9 @@
-
 function placeSlideControls(windowWidth, windowHeight) {
     windowWidth = windowWidth || jQueryValamis(window).width();
     windowHeight = windowHeight || jQueryValamis(window).height();
 
-    var sidebarWidth = !jQueryValamis('.sidebar').is(':hidden') ? lessonStudio.fixedSizes.SIDEBAR_WIDTH : 0,
+    var versionSidebarWidth = !jQueryValamis('.version-sidebar').is(':hidden') ? lessonStudio.fixedSizes.VERSION_SIDEBAR_WIDTH : 0,
+        sidebarWidth = !jQueryValamis('.sidebar').is(':hidden') ? lessonStudio.fixedSizes.SIDEBAR_WIDTH : 0,
         container = jQueryValamis('#revealEditor'),
         revealWrapper = container.find('.reveal-wrapper'),
         mainWrapper = container.find('.slides-editor-main-wrapper'),
@@ -12,6 +12,8 @@ function placeSlideControls(windowWidth, windowHeight) {
         revealControls = container.find('.reveal-controls'),
         slideControls = jQueryValamis('#slide-controls'),
         isPositionOnTop = windowHeight < workArea.height() + lessonStudio.fixedSizes.TOPBAR_HEIGHT + 60;
+
+    sidebarWidth = versionSidebarWidth == 0 ? sidebarWidth : versionSidebarWidth;
 
     mainWrapper.find('.layout-resizable-handle').toggleClass('hidden', false);
     if( slidesApp.RevealControlsModule && slidesApp.RevealControlsModule.view ){
@@ -37,6 +39,8 @@ function placeSlideControls(windowWidth, windowHeight) {
             jQueryValamis('#arrangeContainer').width(windowWidth);
             arrangeModule.initDraggable();
         }
+        if (versionSidebarWidth != 0)
+            $('.slides-editor-main-wrapper').css('margin-left', 0);
     }
 }
 
@@ -126,59 +130,6 @@ function placeTemplateModal(windowWidth, windowHeight, isDirectionDown) {
     }
 })();
 
-var mimeToExt = {
-    'image': {
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'image/gif': 'gif',
-        'image/pjpeg': 'jpeg',
-        'image/svg+xml': 'svg',
-        'image/tiff': 'tiff',
-        'image/x-targa': 'tga',
-        'image/x-tga': 'tga',
-        'image/vnd.microsoft.icon': 'ico',
-        'image/bmp': 'bmp'
-    },
-    'video': {
-        'video/mp4': 'mp4',
-        'video/mpeg': 'mpeg',
-        'video/x-flv': 'flv',
-        'video/3gpp': '3gp',
-        'video/quicktime': 'mov',
-        'video/x-msvideo': 'avi',
-        'video/ogg': 'ogv',
-        'video/webm': 'webm'
-    },
-    'pdf': {
-        'application/pdf': 'pdf'
-    },
-    'pptx': {
-        'application/vnd.ms-powerpoint': 'ppt',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx'
-    },
-    'webgl': {
-        'application/json': 'json',
-        'application/javascript': 'js',
-        'text/javascript': 'js',
-        'text/plain': 'obj'
-    }
-};
-
-function getExtByMime(mime) {
-    for(var i in mimeToExt)
-        if (mimeToExt[i].hasOwnProperty(mime))
-            return mimeToExt[i][mime];
-    return null;
-}
-
-function getMimeTypeGroupValues(typeGroup) {
-    return _.chain(mimeToExt[typeGroup])
-        .values()
-        .compact()
-        .uniq()
-        .value();
-}
-
 var getQuestionAppearance = function (model) {
     var questionFontParts = [],
         answerFontParts = [],
@@ -257,6 +208,14 @@ navigator.sayswho = (function(){
     return M;
 })();
 
+function revokeBlobURL (url) {
+    if (window.URL && window.URL.createObjectURL) {
+        window.URL.revokeObjectURL(url);
+    } else if (window.webkitURL) {
+        window.webkitURL.revokeObjectURL(url);
+    }
+}
+
 function createObjectURL (file) {
     if (window.URL && window.URL.createObjectURL) {
         return window.URL.createObjectURL(file);
@@ -267,7 +226,34 @@ function createObjectURL (file) {
     }
 }
 
-function imgSrcToBlob(image_src, callback_func){
+function dataUriToBlobUrl(dataURI, results) {
+    if(typeof dataURI !== 'string'){
+        throw new Error('Invalid argument: dataURI must be a string');
+    }
+    dataURI = dataURI.split(',');
+    var type = dataURI[0].split(':')[1].split(';')[0],
+      byteString = atob(dataURI[1]),
+      byteStringLength = byteString.length,
+      arrayBuffer = new ArrayBuffer(byteStringLength),
+      intArray = new Uint8Array(arrayBuffer);
+    for (var i = 0; i < byteStringLength; i++) {
+        intArray[i] = byteString.charCodeAt(i);
+    }
+    var blob = new Blob([intArray], {
+        type: type
+    });
+    var blobUrl = createObjectURL(blob);
+    slidesApp.tempBlobUrls.push(blobUrl);
+    results.push({
+        blob: blob,
+        blobUrl: blobUrl,
+        fileName: generateUUID()
+    });
+    return blobUrl;
+}
+
+function imgSrcToBlob(image_src){
+    var deferred = jQueryValamis.Deferred();
     var xhr = new XMLHttpRequest();
     xhr.open( 'GET', image_src, true );
     xhr.responseType = 'arraybuffer';
@@ -276,12 +262,23 @@ function imgSrcToBlob(image_src, callback_func){
             var contentType = this.getResponseHeader('Content-Type'),
                 arrayBufferView = new Uint8Array( this.response );
             var blob = new Blob( [ arrayBufferView ], { type: contentType } );
-            if ( typeof callback_func == 'function' ) {
-                callback_func(blob);
-            }
+            deferred.resolve(blob);
         }
     };
     xhr.send();
+    return deferred.promise();
+}
+
+function generateUUID() {
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now(); //use high-precision timer if available
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
 }
 
 /**

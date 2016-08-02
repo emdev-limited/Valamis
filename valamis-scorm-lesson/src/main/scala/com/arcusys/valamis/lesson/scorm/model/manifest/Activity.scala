@@ -4,8 +4,8 @@ package com.arcusys.valamis.lesson.scorm.model.manifest
  * An activity from the activity tree. Can be a content organization, container activity or leaf activity
  * @param id                        Manifest-wide unique identifier of activity
  * @param title                     Title of the activity
- * @param parentID                  ID of activity's parent. Empty for organizations since they're on the root of the tree. Defined for all other activities
- * @param organizationID            ID of the organization this activity belongs to. For organizations equals ID. For activities directly under organization equals Parent ID
+ * @param parentId                  ID of activity's parent. Empty for organizations since they're on the root of the tree. Defined for all other activities
+ * @param organizationId            ID of the organization this activity belongs to. For organizations equals ID. For activities directly under organization equals Parent ID
  * @param sequencing                Sequencing information about activity
  * @param completionThreshold       Information about completion threshold and progress weight
  * @param hiddenNavigationControls  Information on hidden navigation controls
@@ -13,15 +13,15 @@ package com.arcusys.valamis.lesson.scorm.model.manifest
  * @param metadata                  Activity metadata
  */
 sealed abstract class Activity(
-    val id: String,
-    val title: String,
-    val parentID: Option[String],
-    val organizationID: String,
-    val sequencing: Sequencing,
-    val completionThreshold: CompletionThreshold,
-    val hiddenNavigationControls: Set[NavigationControlType.Value],
-    val visible: Boolean,
-    val metadata: Option[Metadata]) {
+                                val id: String,
+                                val title: String,
+                                val parentId: Option[String],
+                                val organizationId: String,
+                                val sequencing: Sequencing,
+                                val completionThreshold: CompletionThreshold,
+                                val hiddenNavigationControls: Set[NavigationControlType.Value],
+                                val visible: Boolean,
+                                val metadata: Option[Metadata]) {
   val isTracked = sequencing.tracking.isDefined
   val isCompletionSetByContent = sequencing.tracking.isDefined && sequencing.tracking.get.completionSetByContent
   val isObjectiveSetByContent = sequencing.tracking.isDefined && sequencing.tracking.get.objectiveSetByContent
@@ -48,8 +48,8 @@ class Organization(
     extends Activity(
       id = id,
       title = title,
-      parentID = None,
-      organizationID = id,
+      parentId = None,
+      organizationId = id,
       sequencing = sequencing,
       completionThreshold = completionThreshold,
       hiddenNavigationControls = Set(),

@@ -1,14 +1,11 @@
 package com.arcusys.learn.liferay.update.version240.certificate
 
-import com.arcusys.valamis.core.DbNameUtils._
-import com.arcusys.valamis.core.SlickProfile
-import com.arcusys.valamis.joda.JodaDateTimeMapper
 import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.persistence.common.{SlickProfile, TypeMapper}
 import org.joda.time.DateTime
 
-import scala.slick.driver.JdbcDriver
-
-trait CertificateTableComponent { self: SlickProfile =>
+trait CertificateTableComponent extends TypeMapper { self: SlickProfile =>
   import driver.simple._
 
   type Certificate = (Long, String, String, String, Boolean, Boolean, String, Long, PeriodTypes.Value, Int, DateTime, Boolean, Option[Long])
@@ -17,8 +14,6 @@ trait CertificateTableComponent { self: SlickProfile =>
       s => s.toString,
       s => PeriodTypes.withName(s)
     )
-
-    implicit val jodaMapper = new JodaDateTimeMapper(driver.asInstanceOf[JdbcDriver]).typeMapper
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def title = column[String]("TITLE")
     def description = column[String]("DESCRIPTION")

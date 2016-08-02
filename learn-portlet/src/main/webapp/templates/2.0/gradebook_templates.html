@@ -1,563 +1,865 @@
-<script type="text/html" id="gradebookRow">
-                <td class="user-img user-name student-click">
-                    <img src="{{avatarUrl}}" class="user-img img-circle shift-left" />
 
-                    <div class="shift-left" style="margin-left: 10px;">
-                        <div> {{fullname}} </div>
-                        <div style="font-size: 10px; line-height: 10px;">{{lastModifiedDate}}</div>
-                    </div>
-                </td>
-                <td class="organization"> {{organizationNames}} </td>
-                <td class="center-text"> {{completedPackagesCount}}/{{packagesCount}} </td>
-                <td class="grade center-text"> {{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}
-                </td> 
-                <td class="edit-button-td">
-                    <button class="js-action-edit button medium neutral no-text">
-                        <span class="val-icon-edit"></span>
-                        {{{grade}}}
-                    </button>
-                </td>
+<script type="text/html" id="gradebookCoursesCollectionViewTemplate">
+    <div class="dropdown js-courses-list">
+        <button class="button medium neutral">
+            <span class="dropdown-text"></span><span class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+        {{#courses}}
+            <li data-value="{{id}}">{{title}}</li>
+        {{/courses}}
+        </ul>
+    </div>
 </script>
 
-<script type="text/mustache" id="gradebookPackageRow">
-      <input type="checkbox" class="checkbox-group" id={{id}}> {{packageName}}</input> <br />
+<script type="text/html" id="gradebookBreadcrumbsViewTemplate">
+    <span class="hidden"></span>
+    <span class="val-icon-arrow-right-two hidden js-separator"></span>
+    <span class="hidden"></span>
+    <span class="val-icon-arrow-right-two hidden js-separator"></span>
+    <span class="hidden"></span>
 </script>
 
-<script type="text/html" id="studentViewTemplateOld">
-    <div class="clearfix content-wrapper">
-        <!-- Page content -->
-        <div class="page-content-wrapper" style="padding-top: 0px;">
-            <div class="content-header clearfix hidden-xl-desktop border-bottom">
-                <div class="pull-left">
-                    <div class="student-name-label menu-toggle">
-                            <img src="{{avatarUrl}}" class="img-circle" style="width:64px;height:64px;"/>
-                            <h3 style="padding-left: 10px;">{{fullname}}</h3>
-                    </div>
-                </div>
-                <div class="menu-toggle student-info-label pull-right">
-                       <span>{{totalGradeLabel}}: <b>{{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}</b>
-                       {{#isAdmin}}<button class="button valamis medium grey edit-total-grade"> {{{editLabel}}} </button>{{/isAdmin}}
-                       {{^isAdmin}}<button class="button valamis medium grey edit-total-grade"> {{{viewLabel}}} </button>{{/isAdmin}}</span>
-                </div>
-            </div>
+<script type="text/html" id="gradebookMainLayoutViewTemplate">
+    <div class="clearfix tabs-header">
+        <div class="s-2 js-courses-dropdown">
+            &nbsp;
+        </div>
+        <div class="s-8">
+            <ul class="nav nav-tabs" id="gradebookTabs">
+                <li class="active"> <a href="#courseOverview" data-toggle="tab"> {{overviewLabel}} </a> </li>
+                <li> <a href="#courseUsers" data-toggle="tab"> {{usersLabel}} </a> </li>
+                <li> <a href="#courseLessons" data-toggle="tab"> {{lessonsLabel}} </a> </li>
+                {{#assignmentDeployed}}
+                <li> <a href="#courseAssignments" data-toggle="tab"> {{assignmentsLabel}} </a> </li>
+                {{/assignmentDeployed}}
+                <li> <a href="#courseGrading" data-toggle="tab"> {{gradingQueueLabel}} </a> </li>
+            </ul>
+        </div>
+    </div>
+    <div class="clearfix breadcrumbs-row js-breadcrumbs"></div>
+    <div class="tab-content">
+        <div id="courseOverview" data-toggle="tab" class="tab-pane active"></div>
+        <div id="courseUsers" data-toggle="tab" class="tab-pane"></div>
+        <div id="courseLessons" data-toggle="tab" class="tab-pane"></div>
+        {{#assignmentDeployed}}
+        <div id="courseAssignments" data-toggle="tab" class="tab-pane"></div>
+        {{/assignmentDeployed}}
+        <div id="courseGrading" data-toggle="tab" class="tab-pane"></div>
+    </div>
+</script>
 
-            <!-- Sidebar -->
-            <div class="sidebar-wrapper">
-                <div class="menu-toggle hidden-xs modal-close-div val-icon-exit">
-                </div>
-                <div class="pull-right">
-                </div>
-                <div class="student-info">
-                    <div class="student-name-label clearfix">
-                        <img src="{{avatarUrl}}" class="img-circle" style="width:64px;height:64px;float:left;margin-right:10px;"/>
-                        <h3 style="padding-left: 10px;">{{fullname}}</h3>
-                    </div>
-                    {{#address.length}}
-                    <div class="student-info-label">
-                        <span class="address-icon" /><span>{{address}}</span>
-                    </div>
-                    {{/address.length}}
-                    {{#organizationNames.length}}
-                    <div class="student-info-label">
-                        <span class="org-icon" /><span>{{organizationNames}}</span>
-                    </div>
-                    {{/organizationNames.length}}
-                    <div class="student-info-label">
-                        <span>{{totalGradeLabel}}: <b>{{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}</b>
-                            <button class="button valamis medium grey edit-total-grade">
-                                {{#isAdmin}}{{{editLabel}}}{{/isAdmin}}
-                                {{^isAdmin}}{{{viewLabel}}}{{/isAdmin}}
-                            </button>
-                        </span>
-                    </div>
-                </div>
-            </div>
+<script type="text/html" id="gradebookOverviewViewTemplate">
+    {{#id}} <div class="course-title">{{title}}</div> {{/id}}
+    <div class="js-statistic overview-statistic"></div>
+    <div class="js-courses-list"></div>
+    <div class="js-last-grading last-grading-list"></div>
+</script>
 
-            <div class="page-content">
-                <div class="page-content-div">
-                    <table class="valamis medium-table grade-table no-top-border">
-                        <thead>
-                            <tr>
-                                <th style="width:50%;">{{packageColumnName}}</th>
-                                <th>{{gradeAutoColumnName}}</th>
-                                <th colspan="2">{{gradeColumnName}}</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentGradeGrid">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<script type="text/html" id="gradebookOverviewStatisticViewTemplate">
+    <div class="overview-item">
+        <div class="number">{{statistic.total}}</div>
+        <div class="clearfix">
+            <div>{{usersLabel}}</div>
+            <div>{{assignedLabel}}</div>
+        </div>
+    </div>
+    <div class="overview-item">
+        <div class="number success">{{statistic.success}}</div>
+        <div >
+            <div>{{usersLabel}}</div>
+            <div>{{completedLabel}}</div>
+        </div>
+    </div>
+    <div class="overview-item">
+        <div class="number inprogress">{{statistic.inProgress}}</div>
+        <div>
+            <div>{{usersLabel}}</div>
+            <div>{{inProgressLabel}}</div>
+        </div>
+    </div>
+    <div class="overview-item">
+        <div class="number failed">{{statistic.notStarted}}</div>
+        <div>
+            <div>{{usersLabel}}</div>
+            <div>{{notStartedLabel}}</div>
         </div>
     </div>
 </script>
 
-<script type="text/html" id="studentViewTemplate">
-    <tbody>
-        <tr>
-            <td style="width:1%;">
-                <img src="{{avatarUrl}}" class="img-circle" style="max-width:64px;max-height:64px;width:64px;height:64px;"/>
-            </td>
-            <td>
-                <h3>{{fullname}}</h3>
-                {{#address.length}}
-                <div class="student-info-label">
-                    <span class="address-icon"/>
-                    <span>{{address}}</span>
-                </div>
-                {{/address.length}}
-                {{#organizationNames.length}}
-                <div class="student-info-label">
-                    <span class="org-icon"/>
-                    <span>{{organizationNames}}</span>
-                </div>
-                {{/organizationNames.length}}
-            </td>
-            <td class="text-right" id="studentTotalGrade">
-                <div>{{totalGradeLabel}}: <b>{{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}</b></div>
-                <button class="button medium neutral edit-total-grade">
-
-                    {{#isAdmin}}{{{editLabel}}}{{/isAdmin}}
-                    {{^isAdmin}}{{{viewLabel}}}{{/isAdmin}}
-                </button>
-            </td>
-        </tr>
-    </tbody>
+<script type="text/html" id="gradebookUsersCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{usersListHeaderLabel}} {{courseName}}</h3>
+    <table class="val-table medium list js-items-list-table simple">
+        <thead>
+            <tr>
+                <th>{{nameLabel}}</th>
+                <th class="narrow-col">{{lastActivityLabel}}</th>
+                <th class="narrow-col">{{lessonsCompleteLabel}}</th>
+                <th class="narrow-col">{{notStartedLabel}}</th>
+                <th class="narrow-col">{{inProgressLabel}}</th>
+                <th class="narrow-col">{{courseCompleteLabel}}</th>
+                <th class="narrow-col">{{totalGradeLabel}}</th>
+            </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
 </script>
 
-<script type="text/html" id="studentViewLayoutTemplate">
-    <table class="val-table medium no-border js-student-view-table"></table>
+<script type="text/html" id="gradebookUserItemViewTemplate">
+    <td class="cursor-pointer item-info js-user-name">
+        <div>
+            <img class="img-circle {{#isCourseCompleted}} success {{/isCourseCompleted}}" src="{{user.picture}}" alt="{{user.name}}">
+        </div>
+        <div>
+            <div class="item-title">{{user.name}}</div>
+            <div class="item-description">{{organizationList}}</div>
+        </div>
+    </td>
+    <td class="narrow-col">{{dateFormatted}}</td>
+    <td>{{lessons.success}} / {{lessons.total}}</td>
+    <td>{{#lessons.notStarted}} {{lessons.notStarted}} {{/lessons.notStarted}}</td>
+    <td>{{#lessons.inProgress}} {{lessons.inProgress}} {{/lessons.inProgress}}</td>
+    <td>{{courseStatus}}</td>
+    <td class="js-grade-button"></td>
+</script>
 
-    <div class="shift-left filter-element paging-showing-label" id="packageGradesPagingShowing"></div>
-
-    <table class="val-table medium grade-table">
+<script type="text/html" id="gradebookAllCoursesUsersCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{usersListHeaderLabel}} {{courseName}}</h3>
+    <table class="val-table medium list simple js-items-list-table">
         <thead>
         <tr>
-            <th style="width:50%;">{{packageColumnName}}</th>
-            <th>{{gradeAutoColumnName}}</th>
-            <th colspan="2">{{gradeColumnName}}</th>
+            <th>{{nameLabel}}</th>
+            <th class="narrow-col">{{lastActivityLabel}}</th>
+            <th class="narrow-col">{{lessonsCompleteLabel}}</th>
+            <th class="narrow-col">{{coursesCompleteLabel}}</th>
         </tr>
         </thead>
-        <tbody id="studentGradeGrid">
-        </tbody>
+        <tbody class="js-items-list"></tbody>
     </table>
-
-    <div id="loading-packages"> </div>
-    <div class="val-paginator text-center" id="packageGradesListPaginator"></div>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
 </script>
 
-<script type="text/html" id="studentViewPackageContentTableTemplate">
-    <tr class="statementTable">
-        <td colspan="4"  style="background-color: #f2f2f2!important;">
-            <div class="GridTimeline">
-                <div id="statementsGrid" class="GridTimeline-items"></div>
-            </div>
-        </td>
-    </tr>
-    <tr></tr>
+<script type="text/html" id="gradebookAllCoursesUserItemViewTemplate">
+    <td class="cursor-pointer item-info js-user-name">
+        <div>
+            <img class="img-circle {{#isCourseCompleted}} success {{/isCourseCompleted}}" src="{{user.picture}}" alt="{{user.name}}">
+        </div>
+        <div>
+            <div class="item-title">{{user.name}}</div>
+            <div class="item-description">{{organizationList}}</div>
+        </div>
+    </td>
+    <td class="narrow-col">{{dateFormatted}}</td>
+    <td>{{lessons.success}} / {{lessons.total}}</td>
+    <td>{{courses.success}} / {{courses.total}}</td>
 </script>
 
-<script type="text/html" id="studentViewPackageContentRowTemplate">
-    <div class="Grid">
-        <div class="Grid-cell u-mb10 StreamItem ProfileTweet u-textBreak ProfileTweet--high ProfileTweet-header u-textMute">
-            <span>
-                  <span>{{timestamp}} {{actorName}}</span>
-            </span>
-            {{#more}}
-            <button class="button medium neutral more-button pull-right">{{moreLabel}}</button>
-            {{/more}}
+<script type="text/html" id="gradebookLessonsCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{lessonsListHeaderLabel}} {{courseName}}</h3>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{nameLabel}}</th>
+            <th class="narrow-col">{{usersLabel}}</th>
+            <th class="narrow-col">{{notStartedLabel}}</th>
+            <th class="narrow-col">{{inProgressLabel}}</th>
+            <th class="narrow-col">{{completedLabel}}</th>
+            <th class="narrow-col">{{averageLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
+</script>
 
-            <p class="ProfileTweet-text u-dir">
-                <span class="verb">{{verbName}}</span>
-                <span class="obj">{{objStr}}</span>
-                {{#answer}}
-                <span class="obj">, {{responseLabel}} '{{{answer}}}'</span>
-                {{/answer}}
-                {{#resultGrade}}
-                <span class="obj">, {{gradeLabel}} {{{resultGrade}}}</span>
-                {{/resultGrade}}
-                {{#score}}
-                <span class="obj">, {{scoreLabel}} {{{score}}}</span>
-                {{/score}}
-            </p>
+<script type="text/html" id="gradebookLessonItemViewTemplate">
+    <td class="cursor-pointer item-info js-lesson-name">
+        <div>
+            <div class="image img-rect"
+                 {{#lesson.logo}}
+                 style="background-image: url('/{{imageApi}}{{lesson.id}}/logo?courseId={{courseId}}')"
+                 {{/lesson.logo}}
+            ></div>
+        </div>
+        <div>
+            <div class="item-title">{{lesson.title}}</div>
+            {{#isAllCourses}}<div class="item-description">{{inLabel}} {{course.title}}</div>{{/isAllCourses}}
+        </div>
+    </td>
+    <td>{{userCount}}</td>
+    <td>{{#statistic.notStarted}} {{statistic.notStarted}} {{/statistic.notStarted}}</td>
+    <td>{{#statistic.inProgress}} {{statistic.inProgress}} {{/statistic.inProgress}}</td>
+    <td>{{#statistic.success}} {{statistic.success}} {{/statistic.success}}</td>
+    <td>{{averageGradePercent}}</td>
+</script>
 
-            <div id="more-info-section">
-                {{#correctResponse}}
-                <div id="correctResponsePlaceholder">
-                    <span>{{correctResponseLabel}}</span>
-                    <textarea rows="3" style="width: 100%;" id="correctResponse" readonly="readonly">{{{correctResponse}}}</textarea>
-                </div>
-                {{/correctResponse}}
-                {{#userResponse}}
-                <div id="userResponsePlaceholder">
-                    <span>{{userResponseLabel}}</span>
-                    <textarea rows="3" style="width: 100%;" id="userResponse" readonly="readonly">{{{userResponse}}}</textarea>
-                </div>
-                {{/userResponse}}
-                <label>
-                    {{#resultGrade}}{{gradeLabel}}: <b>{{resultGrade}}</b>{{/resultGrade}}
-                    {{#score}}{{scoreLabel}}: <b>{{score}}</b>{{/score}}
-                </label>
+<script type="text/html" id="gradebookUserLessonsCollectionViewTemplate">
+    <div class="items-header clearfix js-items-header">
+        <div class="s-6 item-info">
+            <div>
+                <img class="img-circle big" src="{{user.picture}}" alt="{{user.name}}">
             </div>
             <div>
-                <a href="#" class="comment-link">{{commentLabel}}</a>
-                <span class="link-separator" style="display: none;">|</span>
-                <a href="#" class="show-comments" style="display: none;">{{showCommentsLabel}}</a>
-                <a href="#" class="hide-comments" style="display: none;">{{hideCommentsLabel}}</a>
-                <span class="count-comments" style="display: none;"></span>
+                <div class="item-title">{{user.name}}</div>
+                <div class="item-description">{{organizationList}}</div>
             </div>
         </div>
-        <div class="comment-list" style="display: none;">
+        <div class="s-6 text-right js-grade-button">
         </div>
     </div>
-</script>
-
-<script type="text/html" id="commentRowTemplate">
-    <div class="comment Grid-cell u-mb10 StreamItem ProfileTweet u-textBreak ProfileTweet--high ProfileTweet-header u-textMute">
-        <span>
-              <span>{{timestamp}} {{actorName}} {{commentedLabel}}</span>
-        </span>
-
-        {{^isNew}}
-        <p class="ProfileTweet-text u-dir">
-            <span class="verb">{{userComment}}</span>
-        </p>
-
-        <div>
-            <a href="#" class="comment-link">{{commentLabel}}</a>
-        </div>
-        {{/isNew}}
-
-        {{#isNew}}
-        <textarea rows="3" id="comment" style="margin-bottom: 10px;"></textarea>
-        <div class="text-right">
-            <button class="button medium neutral cancel-comment">{{cancelButtonLabel}}</button>
-            <button class="button medium neutral save-comment">{{saveButtonLabel}}</button>
-        </div>
-        {{/isNew}}
-    </div>
-    <div class="comment-list">
-
-    </div>
-</script>
-
-<script type="text/html" id="studentViewTablePackageRowTemplate">
-    <td class="expand-col">
-        <div class="expand-icon" />
-        <div class="expand-text">{{packageName}}</div>
-    </td>
-    <td class="autograde center-text">
-        {{#gradeAuto}}{{gradeAutoShowing}}%{{/gradeAuto}}
-    </td>
-    <td class="grade center-text">
-        {{#grade}}{{gradeShowing}}%{{/grade}}
-    </td>
-    <td class="edit-button-td">
-        <button class="button medium neutral no-text edit-button">
-        {{#isAdmin}}<span class="val-icon-edit"></span>{{/isAdmin}}
-        {{^isAdmin}}<span class="val-icon-preview"></span>{{/isAdmin}}
-        </button>
-    </td>
-</script>
-
-<script type="text/html" id="editTotalGradeTemplateOld">
-<div class="content-wrapper clearfix">
-    <!-- Page content -->
-    <div class="page-content-wrapper padded">
-        <div class="val-row clearfix hidden-xl-desktop">
-            <div class="pull-left">
-                <div class="student-name-label menu-toggle">
-                    <div class="student-img pull-left">
-                        <img src="{{avatarUrl}}" class="img-circle avatar-medium"/>
-                    </div>
-                    <div class="student-name pull-left">
-                        <h3 class="student-name-title">{{fullname}}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-            <!-- Sidebar -->
-            <div class="sidebar-wrapper">
-                <div class="menu-toggle hidden-xs modal-close-div val-icon-exit">
-                </div>
-                <div class="pull-right">
-                </div>
-                <div class="student-info">
-                    <div class="student-name-label clearfix">
-                        <img src="{{avatarUrl}}" class="img-circle avatar-large"/>
-
-                        <h3 class="student-name-title">{{fullname}}</h3>
-                    </div>
-                    {{#address.length}}
-                    <div class="student-info-label">
-                        <span class="address-icon"/><span>{{address}}</span>
-                    </div>
-                    {{/address.length}}
-                    {{#organizationNames.length}}
-                    <div class="student-info-label">
-                        <span class="org-icon"/><span>{{organizationNames}}</span>
-                    </div>
-                    {{/organizationNames.length}}
-                </div>
-            </div>
-        <div class="page-content clearfix" style="margin-bottom: 20px;">
-            <div class="val-row" id="courseCommentPlaceholder">
-                <span>{{courseWholeCommentLabel}}</span>
-                <textarea class="valamis" rows="10" style="width: 100%;" id="courseComment" {{^isAdmin}}disabled=disabled{{/isAdmin}}>{{commentTotal}}</textarea>
-            </div>
-
-            <div class="val-row position-relative pull-right" style="display:table;">
-            <label>{{gradeLabel}}</label>
-                <div id="courseGradePlaceholder" class="val-select">
-                    <select id="totalGradeChoice" {{^isAdmin}}disabled=disabled{{/isAdmin}}></select>
-                </div>
-                {{#isAdmin}}
-                    <input type="button" class="save-total-grade-button button valamis medium green pull-right"value="{{saveButtonLabel}}"/>
-                {{/isAdmin}}
-            </div>
-        </div>
-    </div>
-</div>
-</script>
-
-<script type="text/html" id="editTotalGradeTemplate">
-    <table class="val-table medium no-border">
-        <tbody>
-        <tr>
-            <td style="width:1%;">
-                <img src="{{avatarUrl}}" class="img-circle" style="max-width:64px;max-height:64px;width:64px;height:64px;"/>
-            </td>
-            <td>
-                <h3>{{fullname}}</h3>
-                {{#address.length}}
-                <div class="student-info-label">
-                    <span class="address-icon"/>
-                    <span>{{address}}</span>
-                </div>
-                {{/address.length}}
-                {{#organizationNames.length}}
-                <div class="student-info-label">
-                    <span class="org-icon"/>
-                    <span>{{organizationNames}}</span>
-                </div>
-                {{/organizationNames.length}}
-            </td>
-            <td class="text-right" style="width:12%;">
-                <label>{{gradeLabel}}</label>
-                <div id="courseGradePlaceholder" class="val-select">
-                    <select id="totalGradeChoice" {{^isAdmin}}disabled=disabled{{/isAdmin}}></select>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-
-    </table>
-
-    <div class="val-row" id="courseCommentPlaceholder" style="margin:20px;">
-        <span>{{courseWholeCommentLabel}}</span>
-        <textarea rows="5" style="width: 100%;" id="courseComment" {{^isAdmin}}disabled=disabled{{/isAdmin}}>{{commentTotal}}</textarea>
-    </div>
-
-
-    <div class="bbm-modal__bottombar">
-        <a href="#" class="modal-close button big neutral">{{cancelButtonLabel}}</a>
-        {{#isAdmin}}
-        <button class="save-total-grade-button button big primary">
-            {{saveButtonLabel}}
-        </button>
-        {{/isAdmin}}
-    </div>
-</script>
-
-<script type="text/html" id="editPackageGradeTemplateOld">
-<div class="content-wrapper clearfix">
-    <!-- Page content -->
-    <div class="page-content-wrapper padded">
-        <div class="val-row clearfix hidden-xl-desktop">
-            <div class="pull-left">
-                <div class="package-name-label menu-toggle" style="padding-bottom: 10px;">
-                    <img
-                    {{#packageLogo}}
-                     src="/delegate/files/images?folderId=package_logo_{{id}}&file={{{packageLogo}}}"
-                    {{/packageLogo}}
-
-                    {{^packageLogo}}
-                    src="{{contextPath}}img/imgo.jpg"
-                    {{/packageLogo}}
-
-                    class="package-logo-medium"/>
-
-                    <h3 class="package-name-title">{{packageName}}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="sidebar-wrapper">
-            <div class="menu-toggle hidden-xs modal-close-div val-icon-exit"></div>
-            <div class="pull-right"></div>
-            <div class="package-info">
-                <div class="package-name-label clearfix">
-                    <img {{#packageLogo}}
-                         src="/delegate/files/images?folderId=package_logo_{{id}}&file={{{packageLogo}}}"
-                        {{/packageLogo}}
-
-                        {{^packageLogo}}
-                        src="{{contextPath}}img/imgo.jpg"
-                        {{/packageLogo}}
-
-                        class="package-logo-large"/>
-
-                    <h3 class="no-margin">{{packageName}}</h3>
-                    <div class="package-info-label">
-                        <span>{{description}}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="page-content clearfix" style="margin-bottom: 20px;">
-            <div class="val-row" id="courseCommentPlaceholder">
-                <span>{{coursePackageCommentLabel}}</span>
-                <textarea rows="10" style="width: 100%;" id="courseComment"
-                {{^isAdmin}}disabled=disabled{{/isAdmin}}>{{comment}}</textarea>
-            </div>
-
-            <div class="val-row position-relative pull-right" style="display:table;">
-                <label>{{gradeLabel}}</label>
-                <div id="courseGradePlaceholder" class="val-select">
-                    <select id="totalGradeChoice" {{^isAdmin}}disabled=disabled{{/isAdmin}}>
-                    </select>
-                </div>
-                {{#isAdmin}}<input type="button" class="save-package-grade-button button valamis medium green pull-right"
-                               value="{{saveButtonLabel}}"/>{{/isAdmin}}
-            </div>
-        </div>
-    </div>
-</div>
-</script>
-
-<script type="text/html" id="editPackageGradeTemplate">
-    <table class="val-table medium no-border">
-        <tbody>
-        <tr>
-            <td style="width:1%;">
-                <img
-                {{#packageLogo}}
-                src="/delegate/files/images?folderId=package_logo_{{id}}&file={{{packageLogo}}}"
-                {{/packageLogo}}
-
-                {{^packageLogo}}
-                src="{{contextPath}}img/imgo.jpg"
-                {{/packageLogo}}
-
-                style="max-width:64px;max-height:64px;width:64px;height:64px;" />
-            </td>
-            <td>
-                <h3 class="package-name-title">{{packageName}}</h3>
-                <div class="package-info-label">
-                    <span>{{description}}</span>
-                </div>
-            </td>
-            <td class="text-right" style="width:12%;">
-                <label>{{gradeLabel}}</label>
-                <div id="courseGradePlaceholder" class="val-select">
-                    <select id="totalGradeChoice" {{^isAdmin}}disabled=disabled{{/isAdmin}}>
-                    </select>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-
-    </table>
-
-    <div class="val-row" id="courseCommentPlaceholder" style="margin:20px;">
-        <span>{{coursePackageCommentLabel}}</span>
-        <textarea rows="5" style="width: 100%;" id="courseComment"
-        {{^isAdmin}}disabled=disabled{{/isAdmin}}>{{comment}}</textarea>
-    </div>
-
-
-    <div class="bbm-modal__bottombar">
-        <a href="#" class="modal-close button big neutral">{{cancelButtonLabel}}</a>
-        {{#isAdmin}}
-        <button class="save-package-grade-button button big primary">
-            {{saveButtonLabel}}
-        </button>
-        {{/isAdmin}}
-    </div>
-</script>
-
-<script type="text/html" id="simpleTableTemplate">
-    <table id="GradeTable" class="val-table medium grade-table">
+    <table class="val-table medium list simple js-items-list-table">
         <thead>
-            <tr>
-                <th scope="col" ref="name" style="width:35%;" class="sortable">{{userNameLabel}}</th>
-                <th scope="col" style="width:25%;" class="sortable">{{userOrgLabel}}</th>
-                <th scope="col" style="width:15%;" class="center-text">{{coursesDoneLabel}}</th>
-                <th scope="col" style="width:25%; word-break: initial;" colspan="2">{{totalGradeLabel}}</th>
-            </tr>
+        <tr>
+            <th>{{nameLabel}}</th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{autoGradeLabel}}</th>
+            <th class="narrow-col">{{manualGradeLabel}}</th>
+            <th class="narrow-col"></th>
+        </tr>
         </thead>
-        <tbody id="gradeGrid">
-        </tbody>
+        <tbody class="js-items-list"></tbody>
     </table>
-</script>
-
-<script type="text/html" id="detailedTableStudentHeaderTemplate">
-    <tr id="{{id}}" class="package-row">
-        <td class="detailed-row-header user-img user-name student-click">
-            <img src="{{avatarUrl}}" class="user-img img-circle avatar-small" />
-            {{fullname}} <br/>
-            <small style="font-size: 10px;">{{lastModifiedDate}}</small>
-        </td>
-        <td class="detailed-row-header center-text detailed-column-total-grade-header">
-            {{gradeTotal}}{{#gradeTotal}}%{{/gradeTotal}}
-        </td>
-    </tr>
-</script>
-
-<script type="text/html" id="detailedTablePackageHeaderTemplate">
-    <th scope="col" class="detailed-column-header center-text" id="{{id}}">{{packageName}} </th>
-</script>
-
-<script type="text/html" id="detailedTableCellTemplate">
-    <td class="detailed-cell center-text"> {{grade}}{{#grade}}%{{/grade}}</td>
-</script>
-
-<script type="text/html" id="detailedTableTemplate">
-    <div id="detailedTableWrapper">
-        <table style="width: 100%; padding: 0px; margin: 0px;">
-            <tr>
-                <td id="tdHeader" style="width: 30%; padding: 0px; margin: 0px;vertical-align: top;">
-                    <div style="border-right: 2px solid #d3d4d5">
-                        <table id="GradeDetailedTableFixed" class="valamis table" style="width: 100%; padding: 0px; margin: 0px;">
-                            <thead>
-                                <tr>
-                                    <th scope="col">{{studentPackageColumnName}}</th>
-                                    <th scope="col" class="center-text">{{totalGradeLabel}}</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentGrid">
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-                <td id="tdContent" style="width: 70%; padding: 0px; margin: 0px;vertical-align: top;">
-                    <div class="scrollBody" style="overflow-x: scroll; width: 650px;">
-                        <table id="GradeDetailedTable" class="valamis table"  style="width: 100%; padding: 0px; margin: 0px;">
-                            <thead>
-                                <tr id="packageNames">
-                                </tr>
-                            </thead>
-                            <tbody id="detailedGradeGrid">
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
     </div>
 </script>
 
-<script type="text/html" id="loadingGradebookTableTemplate">
-    <p style="padding-left: 10px">{{loadingLabel}}...</p>
+<script type="text/html" id="gradebookUserLessonItemViewTemplate">
+    <td class="cursor-pointer item-info js-expand-results">
+        <div>
+            <div class="image img-rect"
+                 {{#lesson.logo}}
+                 style="background-image: url('/{{imageApi}}{{lesson.id}}/logo?courseId={{courseId}}')"
+                 {{/lesson.logo}}
+            ></div>
+        </div>
+        <div>
+            <div class="item-title">{{lesson.title}}</div>
+            {{#isAllCourses}}<div class="item-description">{{inLabel}} {{course.title}}</div>{{/isAllCourses}}
+        </div>
+    </td>
+    <td class="narrow-col">{{lessonStatus}}</td>
+    <td>{{autoGradePercent}}</td>
+    <td class="js-grade-button"></td>
+    <td class="text-center"> <span class="expand-icon val-icon-arrow-down js-expand-results"></span> </td>
+</script>
+
+<script type="text/html" id="gradebookLessonUsersCollectionViewTemplate">
+    <div class="items-header clearfix">
+        <div class="s-6 item-info">
+            <div>
+                <div class="image img-rect big"
+                     {{#lesson.logo}}
+                     style="background-image: url('/{{imageApi}}{{lesson.id}}/logo?courseId={{courseId}}')"
+                     {{/lesson.logo}}
+                ></div>
+            </div>
+            <div>
+                <div class="item-title">{{lesson.title}}</div>
+                {{#isAllCourses}}<div class="item-description">{{inLabel}} {{course.title}}</div>{{/isAllCourses}}
+            </div>
+        </div>
+        <div class="s-6 text-right">
+            <div class="statistic-item">
+                <div>{{averageGradePercent}}</div>
+                {{averageGradeLabel}}
+            </div>
+        </div>
+    </div>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{usersLabel}}</th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{autoGradeLabel}}</th>
+            <th class="narrow-col">{{manualGradeLabel}}</th>
+            <th class="narrow-col"></th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
+</script>
+
+<script type="text/html" id="gradebookLessonUserItemViewTemplate">
+    <td class="cursor-pointer item-info js-expand-results">
+        <div>
+            <img class="img-circle" src="{{user.picture}}" alt="{{user.name}}">
+        </div>
+        <div>
+            <div class="item-title">{{user.name}}</div>
+            <div class="item-description">{{organizationList}}</div>
+        </div>
+    </td>
+    <td class="narrow-col">{{lessonStatus}}</td>
+    <td>{{autoGradePercent}}</td>
+    <td class="js-grade-button"></td>
+    <td class="text-center"> <span class="expand-icon val-icon-arrow-down js-expand-results"></span> </td>
+</script>
+
+<script type="text/html" id="gradebookAttemptsCollectionViewTemplate">
+    <td colspan="5">
+        <span class="collapse-icon val-icon-arrow-up js-collapse-results"></span>
+        <table class="js-attempts-list">
+            <tr class="lesson-header">
+                <td class="narrow-col item-info">
+                    {{#isUser}}
+                    <div>
+                        <img class="img-circle" src="{{user.picture}}" alt="{{user.name}}">
+                    </div>
+                    {{/isUser}}
+                    {{#isLesson}}
+                    <div>
+                        <div class="image img-rect big"
+                         {{#lesson.logo}}
+                         style="background-image: url('/{{imageApi}}{{lesson.id}}/logo?courseId={{courseId}}')"
+                         {{/lesson.logo}}
+                        ></div>
+                    </div>
+                    {{/isLesson}}
+                </td>
+                <td class="item-info">
+                    {{#isUser}}
+                    <div class="item-title">{{user.name}}</div>
+                    <div class="item-description">{{lesson.title}}</div>
+                    {{/isUser}}
+                    {{#isLesson}}
+                    <div class="item-description">{{user.name}}</div>
+                    <div class="item-title">{{lesson.title}}</div>
+                    {{/isLesson}}
+                </td>
+                <td class="narrow-col">
+                    {{lessonStatus}}
+                </td>
+                <td class="narrow-col">
+                    <div class="statistic-item">
+                        <div class="js-items-total">0</div>
+                        {{attemptsLabel}}
+                    </div>
+                </td>
+                {{#autoGradePercent}}
+                <td class="narrow-col">
+                    <div class="statistic-item">
+                        <div>{{autoGradePercent}}</div>
+                        {{autoGradeLabel}}
+                    </div>
+                </td>
+                {{/autoGradePercent}}
+                <td class="narrow-col">
+                {{#viewAll}}
+                    <!--<div class="js-grade-button"></div>-->
+                {{/viewAll}}
+
+                {{#teacherGradePercentForUser}}
+                <div class="statistic-item">
+                    <div>{{teacherGradePercentForUser}}</div>
+                    {{manualGradeLabel}}
+                </div>
+                {{/teacherGradePercentForUser}}
+
+                </td>
+            </tr>
+            {{#lessonFeedbackFouUser}}
+            <tr class="attempt">
+                <td></td>
+                <td colspan="5">
+                    <div class="block-title block-footer">{{lessonFeedbackLabel}}</div>
+                    <div>&#8220;{{lessonFeedbackFouUser}}&#8221;</div>
+                </td>
+            </tr>
+            {{/lessonFeedbackFouUser}}
+        </table>
+
+        <div class="loading-container js-loading-container"></div>
+        <div class="toggle-container hidden js-show-more">
+            <span class="val-icon-arrow-down val-icon-right"></span>
+            <span> {{showMoreLabel}}</span>
+        </div>
+    </td>
+</script>
+
+<script type="text/html" id="gradebookStatementItemViewTemplate">
+    <td class="text-center checkmark-col">
+    {{#isAttempt}} <div class="block-title"> #{{attemptIndex}} </div> {{/isAttempt}}
+    {{^isAttempt}}
+        {{#isEssay}}<div class="val-rounded-div inprogress filled">!</div>{{/isEssay}}
+        {{^isEssay}}
+            {{#success}}<span class="val-rounded-icon val-icon-checkmark success"></span>{{/success}}
+            {{^success}}<span class="val-rounded-icon val-icon-exit failed"></span>{{/success}}
+        {{/isEssay}}
+    {{/isAttempt}}
+    </td>
+    <td colspan="4">
+        <div>
+            <span class="block-title">{{{statementTitle}}}</span>
+            {{#attemptDuration}}
+            <span class="block-footer"> {{takenTimeLabel}} {{attemptDuration}} {{secondsLabel}} </span>
+            {{/attemptDuration}}
+        </div>
+
+        {{#isAnswer}}
+        {{#success}}
+        <div>{{correctlyAnsweredLabel}}: {{{userResponse}}}</div>
+        {{/success}}
+        {{^success}}
+        <div>{{answeredLabel}}: {{{userResponse}}}</div>
+            {{^isEssay}}
+            <div class="correct-answer-block">
+                <div class="correct-answer-label">{{correctAnswerLabel}}</div>
+                {{{correctAnswer}}}
+            </div>
+            {{/isEssay}}
+        {{/success}}
+        {{/isAnswer}}
+
+        <div class="attempt-comments collapsed js-statement-comments"></div>
+        <div class="hidden js-new-comment new-comment">
+            <div>
+                <img class="img-circle small" src="{{currentUser.picture}}" alt="{{currentUser.name}}">
+            </div>
+            <div>
+                <input class="js-my-comment-field shift-left" type="text" placeholder="{{writeCommentLabel}}">
+                <div class="text-right">
+                    <button class="button medium primary js-send-comment" style="display: none;"> {{sendLabel}} </button>
+                </div>
+            </div>
+        </div>
+        <div class="block-footer"> {{formattedDate}}, {{formattedTime}} •
+            <span class="cursor-pointer js-show-comments">
+                {{#commentsCount}}
+                {{commentsCount}} {{commentsLabel}}
+                {{/commentsCount}}
+                {{^commentsCount}}
+                {{addCommentLabel}}
+                {{/commentsCount}}
+            </span>
+            <span class="cursor-pointer hidden js-hide-comments">{{hideCommentsLabel}}</span>
+        </div>
+    </td>
+    <td class="text-right narrow-col">
+        {{#attemptScore}}
+        <button class="button medium neutral grade" disabled> {{attemptScore}} </button>
+        {{/attemptScore}}
+    </td>
+</script>
+
+<script type="text/html" id="gradebookCommentsItemViewTemplate">
+        <div>
+            <img class="img-circle small" src="{{user.picture}}" alt="{{user.name}}">
+        </div>
+        <div>
+            <div>
+                <span class="block-title">{{user.name}}</span>
+                <span class="item-description">{{formattedDate}}, {{formattedTime}}</span>
+            </div>
+            <div>{{userResponse}}</div>
+        </div>
+</script>
+
+<script type="text/html" id="gradebookSetGradePopoverButtonTemplate">
+    <button class="button medium neutral js-popover-button">
+      {{buttonText}}
+    </button>
+</script>
+
+<script type="text/html" id="gradebookSetGradePopoverTemplate">
+    <div class="popover grade-popover"><div class="arrow"></div><div class="js-popover-content">
+        <div class="grade-region clearfix">
+            <input type="text" class="js-grade-input shift-left">
+            {{#scoreLimit}}
+            <div class="limit"> / {{scoreLimit}} </div>
+            {{/scoreLimit}}
+        </div>
+        <div class="feedback-region">
+            <textarea class="js-grade-comment" rows="3" placeholder="{{placeholderText}}">{{comment}}</textarea>
+            <div>
+                <button class="button medium primary js-submit-button" disabled="disabled">{{submitButtonText}}</button>
+                <button class="button medium simple js-cancel-button">{{cancelButtonText}}</button>
+            </div>
+        </div>
+    </div>
+    </div>
+</script>
+
+<script type="text/html" id="gradebookGradingCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{inGradingQueueLabel}}</h3>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{usersLabel}}</th>
+            <th class="narrow-col">{{autoGradeLabel}}</th>
+            <th class="narrow-col">{{manualGradeLabel}}</th>
+            <th class="narrow-col"></th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
+</script>
+
+<script type="text/html" id="gradebookGradingItemViewTemplate">
+    <td class="cursor-pointer item-info js-expand-results">
+        <div>
+            <img class="img-circle" src="{{user.picture}}" alt="{{user.name}}">
+        </div>
+        <div>
+            <div class="item-title">
+                {{user.name}}
+                <span class="title-separator">{{completedLessonLabel}}</span>
+                {{lesson.title}}
+            </div>
+            <div class="item-description">
+                {{formattedDate}}, {{formattedTime}}
+                {{#isAllCourses}} • {{inLabel}} {{course.title}} {{/isAllCourses}}
+            </div>
+        </div>
+    </td>
+    <td>{{autoGradePercent}}%</td>
+    <td class="js-grade-button"></td>
+    <td class="text-center"> <span class="expand-icon val-icon-arrow-down js-expand-results"></span> </td>
+</script>
+
+<script type="text/html" id="gradebookLastGradingCollectionViewTemplate">
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th class="last-list-header">{{lastInGradingLabel}} <span class="val-icon val-icon-arrow-right"></span></th>
+            <th class="narrow-col">{{autoGradeLabel}}</th>
+            <th class="narrow-col">{{manualGradeLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+</script>
+
+<script type="text/html" id="gradebookLastGradingItemViewTemplate">
+    <td class="item-info">
+        <div>
+            <img class="img-circle small" src="{{user.picture}}" alt="{{user.name}}">
+        </div>
+        <div>
+            <div class="item-title">
+                {{user.name}}
+                <span class="title-separator">{{completedLessonLabel}}</span>
+                {{lesson.title}}
+            </div>
+        </div>
+    </td>
+    <td>{{autoGradePercent}}%</td>
+    <td class="js-grade-button"></td>
+</script>
+
+<script type="text/html" id="gradebookCourseStatisticViewTemplate">
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{coursesLabel}}</th>
+            <th class="narrow-col">{{usersCompleteLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+</script>
+
+<script type="text/html" id="gradebookCourseStatisticItemViewViewTemplate">
+    <td>
+        <div class="item-title">{{course.title}}</div>
+    </td>
+    <td>{{statistic.success}} / {{statistic.total}}</td>
+</script>
+
+<script type="text/html" id="gradebookAssignmentCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{assignmentsListHeaderLabel}} {{courseName}}</h3>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{nameLabel}}</th>
+            <th class="narrow-col">{{deadlineLabel}}</th>
+            <th class="narrow-col">{{usersCompleteLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
+</script>
+
+<script type="text/html" id="gradebookAssignmentItemViewTemplate">
+    <td class="cursor-pointer item-info js-assignment-name">
+        <div>
+            <div class="item-title">{{title}}</div>
+            {{#isAllCourses}}<div class="item-description">{{inLabel}} {{course.title}}</div>{{/isAllCourses}}
+        </div>
+    </td>
+    <td class="narrow-col">{{deadlineFormatted}}</td>
+    <td>{{completedCount}} / {{submittedCount}}</td>
+</script>
+
+<script type="text/html" id="gradebookAssignmentUsersCollectionViewTemplate">
+    <div class="items-header clearfix">
+        <div class="item-info">
+            <div class="item-title">{{title}}</div>
+            <div class="item-description">
+                {{#isAllCourses}}{{inLabel}} {{course.title}}.{{/isAllCourses}}
+                {{#deadlineFormatted}} {{deadlineLabel}} {{deadlineFormatted}} {{/deadlineFormatted}}
+            </div>
+        </div>
+    </div>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{usersLabel}}</th>
+            <th class="narrow-col">{{submissionDateLabel}}</th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{gradeLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+</script>
+
+<script type="text/html" id="gradebookAssignmentUserItemViewTemplate">
+    <td class="item-info">
+        <div>
+            <img class="img-circle" src="{{userInfo.picture}}" alt="{{userInfo.name}}">
+        </div>
+        <div>
+            <div class="item-title">{{userInfo.name}}</div>
+            <div class="item-description">{{organizationList}}</div>
+        </div>
+    </td>
+    <td class="narrow-col">{{dateFormatted}}</td>
+    <td class="narrow-col">{{statusText}}</td>
+    <td>{{#submission.grade}}{{submission.grade}}%{{/submission.grade}}</td>
+</script>
+
+<!-- gradebook for user without view all permission -->
+
+<script type="text/html" id="gradebookUserLayoutViewTemplate">
+    <div class="clearfix tabs-header">
+        <div class="s-2 js-courses-dropdown">
+            &nbsp;
+        </div>
+        <div class="s-8">
+            <ul class="nav nav-tabs" id="gradebookTabs">
+                <li class="active"> <a href="#courseOverview" data-toggle="tab"> {{overviewLabel}} </a> </li>
+                <li> <a href="#courseLessons" data-toggle="tab"> {{lessonsLabel}} </a> </li>
+                {{#assignmentDeployed}}
+                <li> <a href="#courseAssignments" data-toggle="tab"> {{assignmentsLabel}} </a> </li>
+                {{/assignmentDeployed}}
+            </ul>
+        </div>
+    </div>
+    <div class="clearfix breadcrumbs-row js-breadcrumbs"></div>
+    <div class="tab-content">
+        <div id="courseOverview" data-toggle="tab" class="tab-pane active"></div>
+        <div id="courseLessons" data-toggle="tab" class="tab-pane"></div>
+        {{#assignmentDeployed}}
+        <div id="courseAssignments" data-toggle="tab" class="tab-pane"></div>
+        {{/assignmentDeployed}}
+    </div>
+</script>
+
+<script type="text/html" id="gradebookUserOverviewViewTemplate">
+    {{#id}} <div class="course-title">{{title}}</div> {{/id}}
+    <div class="js-statistic"></div>
+    <div class="js-courses-list"></div>
+    <div class="js-last-activity last-grading-list"></div>
+</script>
+
+<script type="text/html" id="gradebookUserCourseStatisticViewTemplate">
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{coursesLabel}}</th>
+            <th class="narrow-col">{{lessonsCompleteLabel}}</th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{totalGradeLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+</script>
+
+<script type="text/html" id="gradebookUserCourseStatisticItemViewViewTemplate">
+    <td>
+        <div class="item-title">{{course.title}}</div>
+    </td>
+    <td>{{lessons.success}} / {{lessons.total}}</td>
+    <td class="narrow-col">{{courseStatus}}</td>
+    <td>{{teacherGradePercent}}</td>
+</script>
+
+<script type="text/html" id="gradebookOverviewUserStatisticViewTemplate">
+    <div class="overview-statistic">
+        <div class="overview-item">
+            <div class="number success">{{lessons.success}}</div>
+            <div >
+                <div>{{lessonsLabel}}</div>
+                <div>{{completedLabel}}</div>
+            </div>
+        </div>
+        <div class="overview-item">
+            <div class="number inprogress">{{lessons.inProgress}}</div>
+            <div>
+                <div>{{lessonsLabel}}</div>
+                <div>{{inProgressLabel}}</div>
+            </div>
+        </div>
+        <div class="overview-item">
+            <div class="number failed">{{lessons.notStarted}}</div>
+            <div>
+                <div>{{lessonsLabel}}</div>
+                <div>{{notStartedLabel}}</div>
+            </div>
+        </div>
+        {{#teacherGradePercent}}
+        <div class="overview-item shift-right">
+            <div class="number">{{teacherGradePercent}}</div>
+            <div>
+                <div>{{totalLabel}}</div>
+                <div>{{gradeLabel}}</div>
+            </div>
+        </div>
+        {{/teacherGradePercent}}
+    </div>
+    {{#courseFeedback}}
+    <div class="overview-feedback">
+        <div class="feedback-label">{{courseFeedbackLabel}}</div>
+        <div>&#8220;{{courseFeedback}}&#8221;</div>
+    </div>
+    {{/courseFeedback}}
+</script>
+
+<script type="text/html" id="gradebookLastActivityCollectionViewTemplate">
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th class="last-list-header">{{lastActivityLabel}} <span class="val-icon val-icon-arrow-right"></span></th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{autoGradeLabel}}</th>
+            <th class="narrow-col">{{manualGradeLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+</script>
+
+<script type="text/html" id="gradebookLastActivityItemViewTemplate">
+    <td class="item-info">
+        <div>
+            <div class="image img-rect small"
+                 {{#lesson.logo}}
+                 style="background-image: url('/{{imageApi}}{{lesson.id}}/logo?courseId={{courseId}}')"
+                 {{/lesson.logo}}
+            ></div>
+        </div>
+        <div>
+            <div class="item-title">{{lesson.title}}</div>
+        </div>
+    </td>
+    <td class="narrow-col">{{lessonStatus}}</td>
+    <td>{{autoGradePercent}}</td>
+    <td>{{teacherGradePercent}}</td>
+</script>
+
+<script type="text/html" id="gradebookCurrentUserLessonsCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{lessonsListHeaderLabel}} {{title}}</h3>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{nameLabel}}</th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{autoGradeLabel}}</th>
+            <th class="narrow-col">{{manualGradeLabel}}</th>
+            <th class="narrow-col"></th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
+</script>
+
+<script type="text/html" id="gradebookCurrentUserLessonItemViewTemplate">
+    <td class="cursor-pointer item-info js-expand-results">
+        <div>
+            <div class="image img-rect"
+                 {{#lesson.logo}}
+                 style="background-image: url('/{{imageApi}}{{lesson.id}}/logo?courseId={{courseId}}')"
+                 {{/lesson.logo}}
+            ></div>
+        </div>
+        <div>
+            <div class="item-title">{{lesson.title}}</div>
+            {{#isAllCourses}}<div class="item-description">{{inLabel}} {{course.title}}</div>{{/isAllCourses}}
+        </div>
+    </td>
+    <td class="narrow-col">{{lessonStatus}}</td>
+    <td>{{autoGradePercent}}</td>
+    <td>{{teacherGradePercent}}</td>
+    <td class="text-center"> <span class="expand-icon val-icon-arrow-down js-expand-results"></span> </td>
+</script>
+
+<script type="text/html" id="gradebookCurrentUserAssignmentsCollectionViewTemplate">
+    <h3> <span class="js-items-total"> 0 </span> {{assignmentsListHeaderLabel}} {{courseName}}</h3>
+    <table class="val-table medium list simple js-items-list-table">
+        <thead>
+        <tr>
+            <th>{{nameLabel}}</th>
+            <th class="narrow-col">{{deadlineLabel}}</th>
+            <th class="narrow-col">{{submissionDateLabel}}</th>
+            <th class="narrow-col">{{statusLabel}}</th>
+            <th class="narrow-col">{{gradeLabel}}</th>
+        </tr>
+        </thead>
+        <tbody class="js-items-list"></tbody>
+    </table>
+    <div class="loading-container js-loading-container"></div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}}</span>
+    </div>
+</script>
+
+<script type="text/html" id="gradebookCurrentUserAssignmentItemViewTemplate">
+    <td class="item-info">
+        <div>
+            <div class="item-title">{{title}}</div>
+            {{#isAllCourses}}<div class="item-description">{{inLabel}} {{course.title}}</div>{{/isAllCourses}}
+        </div>
+    </td>
+    <td class="narrow-col">{{deadlineFormatted}}</td>
+    <td class="narrow-col">{{dateFormatted}}</td>
+    <td class="narrow-col">{{statusText}}</td>
+    <td>{{#submission.grade}}{{submission.grade}}%{{/submission.grade}}</td>
 </script>

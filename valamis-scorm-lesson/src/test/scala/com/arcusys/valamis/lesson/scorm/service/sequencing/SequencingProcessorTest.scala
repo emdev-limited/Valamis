@@ -1,13 +1,13 @@
 package com.arcusys.valamis.lesson.scorm.service.sequencing
 
-import com.arcusys.valamis.lesson.scorm.model.manifest.{ Activity, Organization }
-import com.arcusys.valamis.lesson.scorm.model.sequencing.{ NavigationRequestType, NavigationResponseInvalid }
-import com.arcusys.valamis.lesson.scorm.model.tracking.{ ActivityStateTree, Attempt }
-import com.arcusys.valamis.user.model.{ScormUser, User}
+import com.arcusys.valamis.lesson.scorm.model.ScormUser
+import com.arcusys.valamis.lesson.scorm.model.manifest.{Activity, Organization}
+import com.arcusys.valamis.lesson.scorm.model.sequencing.{NavigationRequestType, NavigationResponseInvalid}
+import com.arcusys.valamis.lesson.scorm.model.tracking.{ActivityStateTree, Attempt}
 import com.arcusys.valamis.util.TreeNode
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{FlatSpec, Matchers}
 
 class SequencingProcessorTest extends FlatSpec with Matchers with MockFactory {
   val navigationRequestService = mock[NavigationRequestServiceContract]

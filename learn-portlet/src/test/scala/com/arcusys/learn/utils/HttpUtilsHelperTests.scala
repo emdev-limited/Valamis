@@ -1,5 +1,6 @@
 package com.arcusys.learn.utils
 
+import com.arcusys.valamis.web.servlet.base.HttpUtilsHelper
 import org.scalatest.FunSuite
 
 class HttpUtilsHelperTests extends FunSuite {

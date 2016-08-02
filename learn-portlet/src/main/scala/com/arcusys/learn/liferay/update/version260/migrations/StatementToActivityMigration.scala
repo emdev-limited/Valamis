@@ -1,19 +1,20 @@
 package com.arcusys.learn.liferay.update.version260.migrations
 
-import com.arcusys.valamis.core.SlickProfile
-import com.arcusys.valamis.settings.StatementToActivityTableComponent
+import com.arcusys.learn.liferay.LogFactoryHelper
+import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.impl.settings.StatementToActivityTableComponent
 import com.arcusys.valamis.settings.model.StatementToActivity
-import com.liferay.portal.kernel.log.LogFactoryUtil
+import slick.jdbc.GetResult
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{GetResult, JdbcBackend, StaticQuery}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 
 class StatementToActivityMigration(val db: JdbcBackend#DatabaseDef,
                                    val driver: JdbcProfile)
   extends StatementToActivityTableComponent
   with SlickProfile {
 
-  val log = LogFactoryUtil.getLog(getClass)
+  val log = LogFactoryHelper.getLog(getClass)
 
   import driver.simple._
 

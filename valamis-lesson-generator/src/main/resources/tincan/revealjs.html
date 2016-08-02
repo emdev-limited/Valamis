@@ -5,6 +5,8 @@
 
     <title>{{title}}</title>
 
+    <meta http-equiv="last-modified" content='{{modifiedDate}}' />
+
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 
@@ -12,14 +14,11 @@
 
     <script>
         function onYouTubeIframeAPIReady() {
-            window.youtubeIframeAPIReady = true;
+            window.youtubeIframeApiReady = true;
         }
     </script>
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://www.youtube.com/iframe_api?onload=onYouTubeIframeAPIReady"></script>
 
-    <link rel="stylesheet" href="jquery-ui-1.8.20.custom.css">
-    <link rel="stylesheet" href="skins/polaris/polaris.css">
-    <link rel="stylesheet" href="buttons.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Ubuntu:400,300,500' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300italic,400,400italic,700,700italic' rel='stylesheet' type='text/css'>
@@ -38,13 +37,6 @@
 
         .answerContainer li {
             background: inherit;
-        }
-
-        .reveal h2 {
-            font-size: 1.11em !important;
-        }
-        .reveal span {
-            vertical-align: middle !important;
         }
         .icheckbox_polaris, .icheckbox_polaris.checked {
             vertical-align: middle !important;
@@ -65,6 +57,15 @@
     </script>
     <script type="text/html" id="genericElementTemplate">
         <div class="item-content shift-left"></div>
+    </script>
+    <script type="text/html" id="startConfirmationView">
+        <div id="start-package-confirmation">
+            <div class="confirmation-question js-localized-label" data-value="confirmationQuestionLabel"></div>
+            <div id="button-toolbar">
+                <button class="js-confirmation btn-confirmation js-localized-label" data-value="confirmButtonLabel"></button>
+                <button class="js-decline btn-decline js-localized-label" data-value="declineButtonLabel"></button>
+            </div>
+        </div>
     </script>
 
 {{#isSlideJsonAvailable}}
@@ -95,19 +96,7 @@
     {{#includeCSS}}
     <link rel="stylesheet" href="{{{.}}}">
     {{/includeCSS}}
-    <link rel="stylesheet" href="player_tincan_content.css">
-    <link rel="stylesheet" href="toastr.css">
 
-    <script src="head.min.js"></script>
-    <script src="tincan-min.js"></script>
-    <script src="toastr.min.js"></script>
-
-    {{^includeFiles}}
-    <script src="jquery-1.7.2.min.js"></script>
-    <script src="jquery-ui-1.8.20.custom.min.js"></script>
-    <script src="lodash.min.js"></script>
-    <script src="base.js"></script>
-    {{/includeFiles}}
 </head>
 
 <body onunload="onUnload()" style="overflow-y: auto;">
@@ -170,46 +159,17 @@
 {{/isRandomized}}
 
 <script>
-    if (!('Reveal' in window)) {
-        document.write('<link rel="stylesheet" href="css/reveal.css"\x2f>');
-        document.write('<link rel="stylesheet" href="css/zenburn.css"\x2f>');
-        document.write('<link rel="stylesheet" href="css/theme/{{theme}}.css" id="theme"\x2f>');
-        document.write('<script src="reveal.min.js"><\x2fscript>');
-    }
 
     ROOT_ACTIVITY_ID = '{{rootActivityId}}';
     ROOT_ACTIVITY_TITLE = unescapeElement('{{title}}');
     ROOT_ACTIVITY_DESCRIPTION = unescapeElement('{{description}}');
+    VERSION = '{{version}}';
     SCORE_LIMIT = {{scoreLimit}};
     CAN_PAUSE = {{canPause}};
     DURATION = {{duration}};
     PLAYER_TITLE = '{{playerTitle}}';
+    ONE_ANSWER_ATTEMPT = {{oneAnswerAttempt}};
     var currentTinCanState = undefined;
-
-    // Full list of configuration options available here:
-    // https://github.com/hakimel/reveal.js#configuration
-    defaultParams = {
-        controls: true,
-        progress: true,
-        history: true,
-        center: true,
-        viewDistance: 2,
-        minScale: 0.2,
-        maxScale: 1.0,
-        postMessage: false,
-        postMessageEvents: false,
-
-        //theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-        transition: 'slide', // default/cube/page/concave/zoom/linear/fade/none
-        transitionSpeed: 'default',
-        backgroundTransition: 'none',
-//        embedded: true,
-        dependencies: [
-            // Syntax highlight for <code> elements
-            { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-        ],
-        help: false
-    };
 
     var slidesViews = [];
 
@@ -334,18 +294,22 @@
 
                     toggleNavigation(event.indexh, event.indexv);
                     checkIsLessonSummary();
+
+                    setTranslations(jQuery('.slides'));
                 });
             break;
             case "slidechanged":
 
                 Reveal.addEventListener( 'slidechanged', function( event ) {
-
-                    var prevStateID = $(event.previousSlide).data('state'),
-                        currentSlideId = $(event.currentSlide).attr('id');
+                    var $currentSlide = $(event.currentSlide);
+                    var $previousSlide = $(event.previousSlide);
+                    if (ONE_ANSWER_ATTEMPT) disableQuestion(event.currentSlide);
+                    var prevStateID = $previousSlide.data('state'),
+                        currentSlideId = $currentSlide.attr('id');
                     if (prevStateID) {
                         ProcessTinCan(prevStateID);
                     }
-                    currentTinCanState = $(event.currentSlide).data('state');
+                    currentTinCanState = $currentSlide.data('state');
                     checkIsLessonSummary();
 
                     // event.previousSlide, event.currentSlide, event.indexh, event.indexv
@@ -377,9 +341,9 @@
 
                     {{#isSlideJsonAvailable}}
                     if(slidesApp && !slidesApp.initializing) {
-                        slidesApp.activeSlideModel = slidesApp.getSlideModel(parseInt($(Reveal.getCurrentSlide()).attr('id').replace('slide_', '')));
-                        var slideId = $(event.previousSlide).attr('id');
-                        var slideTitle = $(event.previousSlide).attr('title');
+                        slidesApp.activeSlideModel = slidesApp.getSlideModel(parseInt(currentSlideId.replace('slide_', '')));
+                        var slideId = $previousSlide.attr('id');
+                        var slideTitle = $previousSlide.attr('title');
 
                         onPackageSlideEnd(slideId, slideTitle);
                     }
@@ -416,7 +380,7 @@
             jQuery('#show-package-duration').hide();
         }
 
-        $(".js-toggle-timer").click(function(){
+        jQuery('.js-toggle-timer').click(function(){
             timer.toggle();
             var isVisible = timer.is(":visible");
             jQuery('#show-package-duration').toggleClass('active', isVisible);
@@ -469,7 +433,7 @@
 <script>
     {{#isSlideJsonAvailable}}
         if(top.navigationProxy != null){
-            top.navigationProxy.display2DNavigation(slidesJson);
+            top.navigationProxy.display2DNavigation({{{slidesJson}}});
         }
     {{/isSlideJsonAvailable}}
     {{^isSlideJsonAvailable}}

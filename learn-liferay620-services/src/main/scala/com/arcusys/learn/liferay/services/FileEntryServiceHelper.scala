@@ -1,12 +1,12 @@
 package com.arcusys.learn.liferay.services
 
-import com.arcusys.valamis.util.StreamUtil
+import java.io.InputStream
 import com.liferay.portal.kernel.util.MimeTypesUtil
 import com.liferay.portal.kernel.workflow.WorkflowConstants
 import com.liferay.portal.service.ServiceContext
-import com.liferay.portlet.documentlibrary.model.{ DLFileEntry, DLFolderConstants }
-import com.liferay.portlet.documentlibrary.service.{ DLAppServiceUtil, DLFileEntryServiceUtil }
-import com.liferay.portlet.documentlibrary.util.{ ImageProcessorUtil, VideoProcessorUtil }
+import com.liferay.portlet.documentlibrary.model.{DLFileEntry, DLFolderConstants}
+import com.liferay.portlet.documentlibrary.service.{DLAppServiceUtil, DLFileEntryServiceUtil}
+import com.liferay.portlet.documentlibrary.util.{ImageProcessorUtil, VideoProcessorUtil}
 
 import scala.util.Try
 
@@ -63,13 +63,17 @@ object FileEntryServiceHelper {
   def getFile(fileEntryID: Long, version: String) = {
     val stream = DLFileEntryServiceUtil.getFileAsStream(fileEntryID, version)
 
-    StreamUtil.toByteArray(stream)
+    toByteArray(stream)
   }
 
   def getFile(uuid: String, groupId: Long) = {
     val stream = getFileEntry(uuid, groupId).getContentStream
 
-    StreamUtil.toByteArray(stream)
+    toByteArray(stream)
+  }
+
+  private def toByteArray(inputStream: InputStream): Array[Byte] = {
+    Stream.continually(inputStream.read).takeWhile(_ != -1).map(_.toByte).toArray
   }
 
   def getFileEntry(uuid: String, groupId: Long): DLFileEntry = {

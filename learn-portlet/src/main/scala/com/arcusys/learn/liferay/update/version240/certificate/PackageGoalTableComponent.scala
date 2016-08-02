@@ -1,8 +1,8 @@
 package com.arcusys.learn.liferay.update.version240.certificate
 
-import com.arcusys.valamis.core.DbNameUtils._
-import com.arcusys.valamis.core.SlickProfile
 import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.persistence.common.SlickProfile
 
 trait PackageGoalTableComponent extends CertificateTableComponent { self: SlickProfile =>
   import driver.simple._

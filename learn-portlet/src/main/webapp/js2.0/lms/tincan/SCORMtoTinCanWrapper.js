@@ -7,6 +7,7 @@ var valueStorage = {}, //stores values.
     initialized = false, // session initialized
     interactionIndex = -1, // interaction index
     questionCount = 0,      // counter for question in one activity
+    prevInteractionIndex = -1,      // variable for avoid sending intercation statement twice
     initialDuration = "PT0S", // initial duration at the start session
     offsetDuration = "PT0S"; // offset duration between sessions
 
@@ -29,9 +30,26 @@ var packageActivity = null; // package activity for start and finish statements
 var stateIds = null; // State document identifier
 /*============END GLOBAL VARIABLES==============*/
 
+var urlPortal = themeDisplay.getPortalURL() + "/question/score";
+
 // Create actor object
-function SetActor() {
-    TincanHelper.SetActor(JSON.parse(jQuery("#tincanActor").val()));
+function SetActor(tincanActor) {
+    TincanHelper.SetActor(JSON.parse(tincanActor));
+}
+
+// we need to store attempt statement id
+// all next statements will be linked to it
+// we can't use 'valueStorage' because it broken
+var attemptedStatementRef;
+function GetAttemptedStatementRef() {
+    return attemptedStatementRef;
+}
+
+function SetAttemptedStatementId(statementId) {
+    attemptedStatementRef = new TinCan.StatementRef({
+        "objectType": "StatementRef",
+        "id": statementId
+    });
 }
 
 // Clear and init global vars
@@ -39,22 +57,22 @@ function InitVars() {
     valueStorage = {},
     interactionIndex = -1,
     questionCount = 0,
+    prevInteractionIndex = -1,
     attemptCompleted = false,
     resultChanged = false,
     initialDuration = "PT0S",
     offsetDuration = "PT0S",
-    scoreAdded = false,
-    scoredCount = scormPlayer.navigationNodeCollection.length; //TODO: Is there other way to get page count?
+    scoreAdded = false;
 
     registrationId = null;
 
-    currentPage = scormPlayer.navigationNodeCollection.indexOf (
-        scormPlayer.navigationNodeCollection.find (function(el) {
+    currentPage = lessonViewer.playerLayoutView.navigationNodeCollection.indexOf (
+        lessonViewer.playerLayoutView.navigationNodeCollection.find (function(el) {
                 return el.get('active')
             }
         )
     );
-    scoredCount = scormPlayer.navigationNodeCollection.length; //TODO: Is there other way to get page count?
+    scoredCount = lessonViewer.playerLayoutView.navigationNodeCollection.length; //TODO: Is there other way to get page count?
     //Filling in empty scores
     if (scores.length < scoredCount)
         while(scores.length < scoredCount)
@@ -66,7 +84,6 @@ function StartPackageAttempt(packageID, packageName, packageDesc) {
     scoredCount = 0;
 
     // set actor from user view
-    SetActor();
     var activityDefinition = new TinCan.ActivityDefinition({
         type: "http://adlnet.gov/expapi/activities/course",
         name: {
@@ -99,6 +116,8 @@ function StartPackageAttempt(packageID, packageName, packageDesc) {
             //Send the statement, no callback
             myTinCan.sendStatement(stmtToSend, function () {
             });
+
+            SetAttemptedStatementId(stmtToSend.id);
         }
     });
 
@@ -117,7 +136,8 @@ function FinishPackageAttempt(sendCompleteStatement) {
                     grouping: [
                         {id: currentPackageURI, objectType: "Activity"}
                     ]
-                }
+                },
+                statement: GetAttemptedStatementRef()
             }
         });
         stmtToSend.verb = createVerb("completed", "http://adlnet.gov/expapi/verbs/");
@@ -125,22 +145,36 @@ function FinishPackageAttempt(sendCompleteStatement) {
         stmtToSend.target = packageActivity;
 
         var result = new TinCan.Result();
-        if(scoredCount>0) {
-            var scoredSum = _.reduce(scores, function (memo, el) {
-                return memo + ((el == -1) ? 0 : el);
-            }, 0);
-            var grade = scoredSum / scoredCount;
+
+        if(!!valueStorage["cmi.score.scaled"] || !!valueStorage["cmi.score.raw"]) {
             result.score = new TinCan.Score;
-            result.score.scaled = grade;
-            result.success = grade>0.7; // TODO: 0.7??? refactor success limit
+            result.score.scaled = valueStorage["cmi.score.scaled"];
+            result.score.raw = valueStorage["cmi.score.raw"];
+            result.score.min = valueStorage["cmi.score.min"];
+            result.score.max = valueStorage["cmi.score.max"];
+            result.score = removeEmptyProperties(result.score);
+
+            // Calculate scaled if not present
+            if (!result.score.scaled && result.score.raw) {
+                if (result.score.min && result.score.max) {
+                    result.score.scaled = (result.score.raw - result.score.min) / (result.score.max - result.score.min);
+                }
+                else {
+                    result.score.scaled = result.score.raw;
+                }
+            }
         }
-        else
-            result.success = true;
+        if(!!valueStorage["cmi.success_status"]) {
+            result.success = valueStorage["cmi.success_status"] == "passed";
+        }
+        if(!!valueStorage["cmi.completion_status"]) {
+            result.completion = valueStorage["cmi.completion_status"] == "passed" || valueStorage["cmi.completion_status"] == "completed";
+        }
+
         stmtToSend.result = result;
 
         //Send the statement, no callback
-        myTinCan.sendStatement(stmtToSend, function () {
-        });
+        myTinCan.sendStatement(stmtToSend, function () {});
     }
 
     // clear current package id, package completed
@@ -252,7 +286,7 @@ function InitStateDocument() {
         //registration: registrationId
     };
 
-    GetStateDocument();
+    // GetStateDocument();
 }
 
 var SCORMDataCache = function (property, value) {
@@ -287,7 +321,7 @@ function createResult(completion, success) {
         return new TinCan.Result({
             completion: completion,
             extensions: {
-                "http://valamislearning.com/question/score": null
+                urlPortal: null
             }
         });
     }
@@ -296,7 +330,7 @@ function createResult(completion, success) {
             completion: completion,
             success: success,
             extensions: {
-                "http://valamislearning.com/question/score": null
+                urlPortal: null
             }
         });
     }
@@ -395,6 +429,7 @@ function resetAttemptDuration() {
 
 function SetInteractionIndex(index) {
     interactionIndex = index;
+    resultChanged = true;
 }
 
 function GetInteractionIndex() {
@@ -417,19 +452,18 @@ function removeEmptyProperties(objectToTest) {
 
 // Send Attempt data to LRS by TinCan
 function SendAttemptData() {
-    if (!(attemptCompleted)) {
-        // determ that attempt is the interaction or not
-        var index = GetInteractionIndex();
-        if (index >= 0) {
-            SendInteractionData(index);
-        }
-        else
+    // determ that attempt is the interaction or not
+    var index = GetInteractionIndex();
+    if (index >= 0) {
+        SendInteractionData(index);
+    }
+    else
+        if (!(attemptCompleted)) {
             SendAttemptDataImpl();
 
-        attemptCompleted = true;
-        resetAttemptDuration();
-    }
-
+            attemptCompleted = true;
+            resetAttemptDuration();
+        }
 }
 
 // Sends statement independly of success_status and complete_status
@@ -461,7 +495,7 @@ function SendAttemptDataImpl() {
     stmtToSend.result.score.min = valueStorage["cmi.score.min"];
     stmtToSend.result.score.max = valueStorage["cmi.score.max"];
     stmtToSend.result.score = removeEmptyProperties(stmtToSend.result.score);
-    stmtToSend.result.extensions['http://valamislearning.com/question/score'] = valueStorage["cmi.interactions.0.weighting"] || null;
+    stmtToSend.result.extensions[urlPortal] = valueStorage["cmi.interactions.0.weighting"] || null;
 
     // Calculate scaled if not present
     if (!stmtToSend.result.score.scaled && stmtToSend.result.score.raw) {
@@ -474,9 +508,14 @@ function SendAttemptDataImpl() {
     //Set the duration
     stmtToSend.result.duration = valueStorage["cmi.total_time"];
 
+    stmtToSend.context = stmtToSend.context || {};
+    stmtToSend.context.statement = GetAttemptedStatementRef();
+
     //Send the statement, no callback
     myTinCan.sendStatement(stmtToSend, function () {
     });
+    questionCount = 0;
+    prevInteractionIndex = -1;
 }
 
 
@@ -489,18 +528,24 @@ function SendInteractionData(interactionIndex) {
         else result = interactionType;
         return result
     }
-    var activityId = currentActivityID;
-
+    if(prevInteractionIndex == interactionIndex) {
+        return;
+    }
+    prevInteractionIndex = interactionIndex;
     questionCount++;
-    var interationDescription = "Question #" + questionCount;
+    var interactionDescription = "Question #" + questionCount;
     var interactionName = "Question #" + questionCount;
+    if (valueStorage["cmi.interactions." + interactionIndex + ".id"])
+        interactionName = valueStorage["cmi.interactions." + interactionIndex + ".id"];
+    if (valueStorage["cmi.interactions." + interactionIndex + ".title"])
+        interactionName = valueStorage["cmi.interactions." + interactionIndex + ".title"];
     if (valueStorage["cmi.interactions." + interactionIndex + ".description"])
-        interationDescription = valueStorage["cmi.interactions." + interactionIndex + ".description"];
+        interactionDescription = valueStorage["cmi.interactions." + interactionIndex + ".description"];
 
     //verb
     var interactionVerb = createVerb("answered", "http://adlnet.gov/expapi/verbs/");
 
-    var correctResponsesPattern = new Array();
+    var correctResponsesPattern = [];
     var correctResponsesIndex = 0;
 
     while (typeof valueStorage["cmi.interactions." + interactionIndex + ".correct_responses." + correctResponsesIndex + ".pattern"] !== "undefined") {
@@ -508,66 +553,44 @@ function SendInteractionData(interactionIndex) {
         correctResponsesIndex++;
     }
 
-    var context;
-    var interactionActivity;
-    if (valueStorage["cmi.interactions._count"] && valueStorage["cmi.interactions._count"] > 1) // if currentActivity is interaction
-    { // if need to create interaction activity with parent = current activity
+    //Create the activity definition
+    var interactionDefinition = new TinCan.ActivityDefinition({
+        type: "http://adlnet.gov/expapi/activities/cmi.interaction",
+        name: {
+            "en-US": interactionName
+        },
+        description: {
+            "en-US": interactionDescription
+        },
+        correctResponsesPattern: correctResponsesPattern
 
-        //Create the activity definition
-        var interactionDefinition = new TinCan.ActivityDefinition({
-            type: "http://adlnet.gov/expapi/activities/cmi.interaction",
-            name: {
-                "en-US": interactionName
-            },
-            description: {
-                "en-US": interationDescription
-            },
-            interactionType: convertInteractionType(valueStorage["cmi.interactions." + interactionIndex + ".type"]),
-            correctResponsesPattern: correctResponsesPattern
+    });
+    if (valueStorage["cmi.interactions." + interactionIndex + ".type"])
+        interactionDefinition.interactionType = convertInteractionType(valueStorage["cmi.interactions." + interactionIndex + ".type"]);
 
-        });
-        var interaction_id = valueStorage["cmi.interactions." + interactionIndex + ".id"];
-        if (!interaction_id)
-            interaction_id = interactionIndex;
-        //Create the activity
-        interactionActivity = new TinCan.Activity({
-            id: myTinCan.activity.id + ':interactions#' + interaction_id,
-            definition: interactionDefinition
-        });
+    var interaction_id = valueStorage["cmi.interactions." + interactionIndex + ".id"];
+    if (!interaction_id)
+        interaction_id = interactionIndex;
 
-        context = new TinCan.Context({
-            parent: [
-                {
-                    id: myTinCan.activity.id
-                }
-            ],
-            registration: registrationId,
-            contextActivities: {
-                grouping: [
-                    {id: currentPackageURI, objectType: "Activity"}
-                ]
+    //Create the activity
+    var interactionActivity = new TinCan.Activity({
+        id: myTinCan.activity.id + ':interactions#' + interaction_id,
+        definition: interactionDefinition
+    });
+
+    var context = new TinCan.Context({
+        parent: [
+            {
+                id: myTinCan.activity.id
             }
-        })
-    }
-    else {
-        interactionActivity = myTinCan.activity;
-        if (valueStorage["cmi.interactions." + interactionIndex + ".description"])
-            interactionActivity.definition.description = {
-                "en-US": valueStorage["cmi.interactions." + interactionIndex + ".description"]
-            };
-        interactionActivity.definition.type = "http://adlnet.gov/expapi/activities/cmi.interaction";
-        if (valueStorage["cmi.interactions." + interactionIndex + ".type"])
-            interactionActivity.definition.interactionType = convertInteractionType(valueStorage["cmi.interactions." + interactionIndex + ".type"]);
-        interactionActivity.definition.correctResponsesPattern = correctResponsesPattern
-        context = new TinCan.Context({
-            registration: registrationId,
-            contextActivities: {
-                grouping: [
-                    {id: currentPackageURI, objectType: "Activity"}
-                ]
-            }
-        })
-    }
+        ],
+        registration: registrationId,
+        contextActivities: {
+            grouping: [
+                {id: currentPackageURI, objectType: "Activity"}
+            ]
+        }
+    });
 
     //Result
     var interactionResult = createResult(true);
@@ -599,6 +622,7 @@ function SendInteractionData(interactionIndex) {
                 interactionResult.score.raw = interactionResult.score.max;
                 break;
             case "incorrect":
+            case "wrong":
                 interactionResult.success = false;
                 interactionResult.score.scaled = 0;
                 interactionResult.score.raw = interactionResult.score.min;
@@ -607,7 +631,7 @@ function SendInteractionData(interactionIndex) {
                 break;
         }
     }
-    interactionResult.extensions['http://valamislearning.com/question/score'] = valueStorage["cmi.interactions.0.weighting"] || null;
+    interactionResult.extensions[urlPortal] = valueStorage["cmi.interactions.0.weighting"] || null;
     //TODO: add context, particularly parent. Parent pointed. Anything else?
 
     //Statement
@@ -618,6 +642,9 @@ function SendInteractionData(interactionIndex) {
         result: interactionResult,
         context: context
     });
+
+    interactionStmt.context.statement = GetAttemptedStatementRef();
+
     myTinCan.sendStatement(interactionStmt, function () {
     });
 

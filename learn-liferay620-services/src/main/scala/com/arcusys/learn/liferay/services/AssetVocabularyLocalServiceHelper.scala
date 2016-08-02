@@ -1,13 +1,17 @@
 package com.arcusys.learn.liferay.services
 
 import com.liferay.counter.service.CounterLocalServiceUtil
-import com.liferay.portal.service.{ GroupLocalServiceUtil, UserLocalServiceUtil }
+import com.liferay.portal.service.{GroupLocalServiceUtil, UserLocalServiceUtil}
 import com.liferay.portal.util.PortalUtil
 import com.liferay.portlet.asset.NoSuchVocabularyException
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil
-import java.util.{ Date, Locale }
+import java.util.{Date, Locale}
 
 object AssetVocabularyLocalServiceHelper {
+  def getGroupVocabulary(globalGroupId: Long, vocabularyName: String) = {
+    AssetVocabularyLocalServiceUtil.getGroupVocabulary(globalGroupId, vocabularyName)
+  }
+
   def addAssetVocabulary(companyId: Long, vocabularyName: String) = {
     val globalGroupId = GroupLocalServiceUtil.getCompanyGroup(companyId).getGroupId
     val defaultUserId = UserLocalServiceUtil.getDefaultUserId(companyId.toLong)

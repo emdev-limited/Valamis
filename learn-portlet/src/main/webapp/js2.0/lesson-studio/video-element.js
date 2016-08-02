@@ -24,19 +24,34 @@ var videoElementModule = slidesApp.module('VideoElementModule', {
                     height: this.model.get('height')
                 };
                 slidesApp.execute('action:push');
-                var self = this;
+                var that = this;
+
+                this.$('.warning').hide();
                 if(url) {
                     if (url.indexOf('docs.google.com/file/d/') != -1) {
                         this.$('iframe').attr('src', url);
                         this.$('iframe').show();
-                        slidesApp.execute('item:resize', 640, 360);
+                        slidesApp.execute('item:resize', this.model.get('width') || 640, this.model.get('height') || 360, this);
                         this.$('.video-js').hide();
+
+                        jQueryValamis.ajax(path.root + path.api.urlCheck, {
+                            method: 'POST',
+                            headers: { 'X-CSRF-Token': Liferay.authToken },
+                            data: {
+                                url: this.model.get('content'),
+                                courseId: Liferay.ThemeDisplay.getScopeGroupId()
+                            },
+                            complete: function (data) {
+                                if(data.responseText === 'false')
+                                    that.$('.warning').show()
+                            }
+                        });
                     }
                     else if (url.indexOf('youtube.com/') != -1) {
                         var videoId = /https?:\/\/(www\.)?youtube\.com\/embed\/([^&]*)/g.exec(url)[2];
                         this.$('iframe').attr('src', 'https://www.youtube.com/embed/' + videoId + '?enablejsapi=1');
                         try {
-                            this.player = new YT.Player(self.$('iframe')[0], {});
+                            this.player = new YT.Player(that.$('iframe')[0], {});
                         } catch (e) {
                             console.log(e);
                         }
@@ -48,24 +63,24 @@ var videoElementModule = slidesApp.module('VideoElementModule', {
                         this.$('.video-js').show();
                         this.$('video').attr('src', /(.*)&ext=/g.exec(url)[1]);
                         this.$('video > source').attr('src', /(.*)&ext=/g.exec(url)[1]);
-                        this.$('video > source').attr('type', (_.invert(mimeToExt.video))[/&ext=([^&]*)/g.exec(url)[1]]);
+                        this.$('video > source').attr('type', (_.invert(Utils.mimeToExt.video))[/&ext=([^&]*)/g.exec(url)[1]]);
                         this.$('video').load();
                         if (navigator.sayswho[0].toLowerCase() !== 'firefox') {
                             this.$('video').on('loadeddata', function () {
-                                slidesApp.execute('item:focus', self);
+                                slidesApp.execute('item:focus', that);
                                 if (slidesApp.isEditorReady)
                                     slidesApp.execute('item:blur');
-                                self.player = videojs(self.$('video')[0], {
+                                that.player = videojs(that.$('video')[0], {
                                     "controls": true,
                                     "autoplay": false,
                                     "preload": "auto"
                                 }, function () {
                                     // Player (this) is initialized and ready.
                                 });
-                                self.player.on('loadeddata', function () {
-                                    self.player.currentTime(self.player.duration() / 2);
-                                    self.player.play();
-                                    self.player.pause();
+                                that.player.on('loadeddata', function () {
+                                    that.player.currentTime(that.player.duration() / 2);
+                                    that.player.play();
+                                    that.player.pause();
                                 });
                             });
                         }
@@ -75,6 +90,7 @@ var videoElementModule = slidesApp.module('VideoElementModule', {
                 }
             },
             selectGoogleVideo: function() {
+                slidesApp.fileTypeGroup = null;
                 this.selectEl();
                 loadPicker();
             }

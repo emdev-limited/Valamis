@@ -1,12 +1,7 @@
 package com.arcusys.valamis.slide.service
 
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import java.util.UUID
-import javax.imageio.ImageIO
-
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.lrs.util.{TinCanVerb, TinCanVerbs}
+import com.arcusys.valamis.lrs.service.util.{TinCanVerb, TinCanVerbs}
 import com.arcusys.valamis.slide.convert.{PDFProcessor, PresentationProcessor}
 import com.arcusys.valamis.slide.model._
 import com.arcusys.valamis.slide.service.SlideModelConverters._
@@ -14,7 +9,7 @@ import com.arcusys.valamis.slide.service.export.SlideSetHelper._
 import com.arcusys.valamis.slide.storage.{SlidePropertyRepository, SlideRepository, SlideSetRepository}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class SlideService(implicit val bindingModule: BindingModule)
+abstract class SlideService(implicit val bindingModule: BindingModule)
   extends Injectable
   with SlideServiceContract {
 
@@ -22,8 +17,8 @@ class SlideService(implicit val bindingModule: BindingModule)
   private val slideSetRepository = inject[SlideSetRepository]
   private val slideElementService = inject[SlideElementServiceContract]
   private lazy val fileService = inject[FileService]
-  private lazy val presentationProcessor = inject[PresentationProcessor]
-  private lazy val pdfProcessor = inject[PDFProcessor]
+  def presentationProcessor: PresentationProcessor
+  def pdfProcessor: PDFProcessor
   private lazy val slideThemeService = inject[SlideThemeServiceContract]
   private val slidePropertyRepository = inject[SlidePropertyRepository]
 
@@ -33,14 +28,14 @@ class SlideService(implicit val bindingModule: BindingModule)
   private implicit def convertToModelList(from: List[SlideEntity]) = from.map(convertToModel)
   private implicit def convertToModelOption(from: Option[SlideEntity]) = from.map(convertToModel)
 
-  override def getAll(isTemplate: Option[Boolean]) = slideRepository.getAll(isTemplate)
+  override def getAll(isTemplate: Option[Boolean]): List[SlideModel] = slideRepository.getAll(isTemplate)
 
-  override def getById(id: Long) = slideRepository.getById(id)
+  override def getById(id: Long): Option[SlideModel] = slideRepository.getById(id)
 
-  override def getBySlideSetId(slideSetId: Long, isTemplate: Option[Boolean]) =
+  override def getBySlideSetId(slideSetId: Long, isTemplate: Option[Boolean] = None): List[SlideModel] =
     slideRepository.getBySlideSetId(slideSetId, isTemplate)
 
-  override def getLogo(slideSetId: Long) = {
+  override def getLogo(slideSetId: Long): Option[Array[Byte]] = {
     def getLogo(slide: SlideModel) = {
       slide.bgImage
         .map(bgImage => logoPath(slide, bgImage))
@@ -52,7 +47,7 @@ class SlideService(implicit val bindingModule: BindingModule)
       .map(getLogo)
   }
 
-  override def setLogo(slideId: Long, name: String, content: Array[Byte]) = {
+  override def setLogo(slideId: Long, name: String, content: Array[Byte]): Unit = {
     getById(slideId).map { slide =>
       fileService.setFileContent(
         folder = filePathPrefix(slide),
@@ -67,9 +62,12 @@ class SlideService(implicit val bindingModule: BindingModule)
     }
   }
 
-  override def getTinCanVerbs() = TinCanVerbs.all.map(x => TinCanVerb(TinCanVerbs.getVerbURI(x), x))
+  override def getTinCanVerbs: List[TinCanVerb] = TinCanVerbs.all.map(x => TinCanVerb(TinCanVerbs.getVerbURI(x), x))
 
-  override def delete(id: Long) = {
+  override def countBySlideSet(slideSetId: Long, isTemplate: Option[Boolean]): Long =
+    slideRepository.countBySlideSetId(slideSetId, isTemplate)
+
+  override def delete(id: Long): Unit = {
     getById(id)
       .flatMap(entity => Some(filePathPrefix(entity)))
       .foreach(fileService.deleteByPrefix)
@@ -77,32 +75,17 @@ class SlideService(implicit val bindingModule: BindingModule)
     slideRepository.delete(id)
   }
 
-  override def create(slideModel: SlideModel) = {
+  override def create(slideModel: SlideModel): SlideModel = {
     val createdSlide = slideRepository.create(slideModel)
-    slideModel.properties.foreach(createProperties(createdSlide.id.get, _))
+    slidePropertyRepository.create(slideModel, createdSlide.id.get)
     createdSlide
   }
 
-  override def update(slideModel: SlideModel) = {
+  override def update(slideModel: SlideModel): SlideModel = {
     val updatedSlide = slideRepository.update(slideModel)
-    slidePropertyRepository.delete(updatedSlide.id.get)
-    slideModel.properties.foreach(createProperties(updatedSlide.id.get, _))
+    slidePropertyRepository.replace(slideModel, updatedSlide.id.get)
     updatedSlide
   }
-
-  private def createProperties(slideId: Long, slideProperties: SlideProperties) = {
-    val deviceId = slideProperties.deviceId
-    slideProperties.properties.foreach(property =>
-      slidePropertyRepository.create(
-        SlidePropertyEntity(
-          slideId,
-          deviceId,
-          property.key,
-          property.value)
-      )
-    )
-  }
-
 
   override def clone(slideId: Long,
                      leftSlideId: Option[Long],
@@ -111,13 +94,16 @@ class SlideService(implicit val bindingModule: BindingModule)
                      slideSetId: Long,
                      isTemplate: Boolean,
                      isLessonSummary: Boolean,
-                     fromTemplate: Boolean,
-                     cloneElements: Boolean): Option[SlideModel] = {
+                     fromTemplate: Boolean): Option[SlideModel] = {
     val newSlideSetId =
       if(slideSetId > 0)
         slideSetId
-      else
-        slideSetRepository.getSlideSets("", false, -1, -1, Some(0L), Some(true)).head.id.get
+      else {
+        //Now it returns with count
+        val set = slideSetRepository.getTemplatesWithCount(0L).head._1
+        set.id.get
+      }
+
     val newLeftSlideId = if(slideSetId > 0) leftSlideId else None
     val newTopSlideId  = if(slideSetId > 0) topSlideId  else None
     getById(slideId).map { slide =>
@@ -159,76 +145,16 @@ class SlideService(implicit val bindingModule: BindingModule)
             )
           }
         }
-
-        if(cloneElements){
-          slideElementService.getBySlideId(slide.id.get).foreach { slideElement =>
-            slideElementService.clone(
-              slideElement.id.get,
-              clonedSlide.id.get,
-              slideElement.correctLinkedSlideId,
-              slideElement.incorrectLinkedSlideId,
-              slideElement.width,
-              slideElement.height,
-              slideElement.content,
-              isTemplate,
-              slideElement.properties
-            )
-          }
-        }
       }
       clonedSlide
     }
   }
 
-  override def parsePDF(content: Array[Byte], slideId: Long, slideSetId: Long): List[(Long, String)] =
-    pdfProcessor.parsePDF(content, slideId, slideSetId)
+  override def parsePDF(content: Array[Byte]):  List[String] =
+    pdfProcessor.parsePDF(content)
 
-  override def parsePPTX(content: Array[Byte], slideId: Long, slideSetId: Long, fileName: String): List[(Long, String)] =
-    presentationProcessor.parsePPTX(content, slideId, slideSetId, fileName)
-
-  override def addSlidesToSlideSet(slideId: Long, slideSetId: Long, pages: List[BufferedImage]): List[(Long, String)] = {
-    var lastSlideId = slideId
-
-    val resultHead = (slideId,
-      uploadImage(pages.head,
-        getById(slideId)
-          .getOrElse(throw new NoSuchElementException("No slide found with id $slideId"))))
-
-    val resultTail = for (p <- pages.tail) yield {
-      val currentSlide = create(
-        SlideModel(
-          slideSetId = slideSetId
-        )
-      )
-      lastSlideId = currentSlide.id.get
-      (lastSlideId, uploadImage(p, currentSlide))
-    }
-
-    resultHead :: resultTail
-  }
-
-  private def uploadImage(image: BufferedImage, slide: SlideModel): String = {
-    val ImageFormat = "png"
-
-    val outputStream = new ByteArrayOutputStream
-    val fileName = UUID.randomUUID() + "." + ImageFormat
-    val folderId = "slide_" + slide.id.get
-
-    try {
-      ImageIO.write( image, ImageFormat, outputStream )
-
-      fileService.replaceFileContent(
-        folderId,
-        fileName,
-        outputStream.toByteArray
-      )
-    }
-    finally {
-      if (outputStream != null) outputStream.close()
-    }
-
-    fileName
-  }
+  override def parsePPTX(content: Array[Byte], fileName: String):  List[String]=
+    presentationProcessor.parsePPTX(content, fileName)
 
   override def copyFileFromTheme(slideId: Long, themeId: Long): Option[SlideModel] = {
     val themeModel = slideThemeService.getById(themeId)
@@ -258,7 +184,7 @@ class SlideService(implicit val bindingModule: BindingModule)
     ).toSeq
   }
 
-  implicit def slideModelConversion(entity: SlideEntity, slideElements: List[SlideElementModel]) = {
+  implicit def slideModelConversion(entity: SlideEntity, slideElements: List[SlideElementModel]): SlideModel = {
     val properties = getProperties(entity.id.get)
     SlideModel(
       entity.id,

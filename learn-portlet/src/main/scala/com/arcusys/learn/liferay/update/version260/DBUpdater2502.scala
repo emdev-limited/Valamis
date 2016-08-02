@@ -1,16 +1,18 @@
 package com.arcusys.learn.liferay.update.version260
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
+import com.arcusys.learn.liferay.LogFactoryHelper
 import com.arcusys.learn.liferay.services.FileEntryServiceHelper
-import com.arcusys.learn.liferay.update.version260.model.{LFQuizQuestion, LFQuiz}
-import com.arcusys.valamis.core.SlickDBInfo
+import com.arcusys.learn.liferay.update.version260.model.{LFQuiz, LFQuizQuestion}
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.learn.liferay.update.version260.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
-import com.liferay.portal.kernel.log.LogFactoryUtil
+import slick.jdbc.GetResult
+
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{GetResult, StaticQuery, JdbcBackend}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 
 class DBUpdater2502 extends LUpgradeProcess with Injectable {
 
@@ -34,7 +36,7 @@ class QuizMigration(db: JdbcBackend#DatabaseDef,
                     fileService: FileService
                      ) extends SlideTableComponent {
 
-  val logger = LogFactoryUtil.getLog(getClass)
+  val logger = LogFactoryHelper.getLog(getClass)
 
   import driver.simple._
 

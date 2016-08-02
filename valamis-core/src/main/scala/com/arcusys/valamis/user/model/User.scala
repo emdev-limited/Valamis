@@ -1,10 +1,11 @@
 package com.arcusys.valamis.user.model
 
-case class User(id: Long, name: String)
+import com.arcusys.learn.liferay.LiferayClasses.LUser
 
-case class ScormUser(id: Long,
-  name: String = "",
-  preferredAudioLevel: Float = 1,
-  preferredLanguage: String = "",
-  preferredDeliverySpeed: Float = 1,
-  preferredAudioCaptioning: Int = 0)
+case class User(id: Long, name: String) {
+  def this(user: LUser) = {
+    this(user.getUserId, user.getFullName)
+  }
+}
+
+

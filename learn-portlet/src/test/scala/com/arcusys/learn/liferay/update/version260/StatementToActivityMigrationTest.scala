@@ -1,9 +1,12 @@
 package com.arcusys.learn.liferay.update.version260
 
 import java.sql.Connection
+
 import com.arcusys.learn.liferay.update.version260.migrations.StatementToActivityMigration
-import com.arcusys.valamis.settings.StatementToActivityTableComponent
+import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.impl.settings.StatementToActivityTableComponent
 import org.scalatest.{BeforeAndAfter, FunSuite}
+
 import scala.slick.driver.H2Driver
 import scala.slick.driver.H2Driver.simple._
 import scala.slick.jdbc.JdbcBackend
@@ -15,15 +18,15 @@ class StatementToActivityMigrationTest extends FunSuite with BeforeAndAfter {
   var connection: Connection = _
 
   before {
-    connection = db.createConnection()
+    connection = db.source.createConnection()
     tables.createSchema()
   }
   after {
     connection.close()
   }
 
-  val tables = new StatementToActivityTableComponent {
-    override protected val driver = H2Driver
+  val tables = new StatementToActivityTableComponent with SlickProfile {
+    override val driver = H2Driver
 
     def createSchema() {
       db.withSession { implicit s => statementToActivity.ddl.create }

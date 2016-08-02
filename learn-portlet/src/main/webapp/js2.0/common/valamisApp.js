@@ -130,15 +130,12 @@ valamisApp.commands.setHandler('subapp:start', function(options){
     var app = options.app;
     var appOptions = options.appOptions;
     var permissions = options.permissions;
-    var additionalOptions = options.options;
 
     Valamis = Valamis || {};
     Valamis.permissions = Valamis.permissions || {};
     _.extend(Valamis.permissions, permissions);
 
     Valamis.language = Valamis.language || {};
-    Valamis.additionalOptions = Valamis.additionalOptions || {};
-    _.extend(Valamis.additionalOptions, additionalOptions);
 
     var onBankLanguageLoad  = function(properties) {
         _.extend(Valamis.language , properties);
@@ -151,7 +148,7 @@ valamisApp.commands.setHandler('subapp:start', function(options){
     };
 
     var getPackSource = function(language){
-        return Utils.getContextPath() + 'i18n/'+ resourceName +'_' + language + '.properties';
+        return Utils.getContextPath() + 'i18n/'+ resourceName +'_' + language + '.properties?v=' + Utils.getValamisVersion();
     };
 
     var getLanguageBank = function (options) {
@@ -165,4 +162,22 @@ valamisApp.commands.setHandler('subapp:start', function(options){
     getLanguageBank({language : Utils.getLanguage()});
 });
 
+valamisApp.commands.setHandler('portlet:set:onbeforeunload', function(message, callback) {
+    window.onbeforeunload = function (evt) {
+        if(typeof callback == 'function' && !callback()){
+            return null;
+        }
+        var warningMessage = message;
+        if (typeof evt == "undefined") {
+            evt = window.event;
+        }
+        if (evt) {
+            evt.returnValue = warningMessage;
+        }
+        return warningMessage;
+    }
+});
 
+valamisApp.commands.setHandler('portlet:unset:onbeforeunload', function(model) {
+    window.onbeforeunload = null;
+});

@@ -1,19 +1,15 @@
 package com.arcusys.learn.liferay.update.version240.social
 
-import com.arcusys.valamis.core.DbNameUtils._
-import com.arcusys.valamis.joda.JodaDateTimeMapper
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.persistence.common.{SlickProfile, TypeMapper}
 import org.joda.time.DateTime
 
-import scala.slick.driver.{JdbcDriver, JdbcProfile}
+trait CommentTableComponent extends TypeMapper { self: SlickProfile =>
 
-trait CommentTableComponent {
-  protected val driver: JdbcProfile
   import driver.simple._
 
   type Comment = (Long, Long, String, Long, Option[Long], DateTime, Option[DateTime])
   class CommentTable(tag: Tag) extends Table[Comment](tag, tblName("COMMENT")) {
-    implicit val jodaMapper = new JodaDateTimeMapper(driver.asInstanceOf[JdbcDriver]).typeMapper
-
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def companyId = column[Long]("COMPANY_ID")
     def userId = column[Long]("USER_ID")

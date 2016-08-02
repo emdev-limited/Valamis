@@ -13,6 +13,8 @@ import scala.util.parsing.json.JSON
 
 object OpenBadgesHelper {
 
+  private val openBadgesUrl = "https://backpack.openbadges.org/displayer/"
+
   def getOpenBadges(email: String): List[Map[String, Any]] = {
     val userId = getOpenBadgesUserId(email)
     val group = if (userId != null) getOpenBadgesValamisGroup(userId) else null
@@ -22,7 +24,7 @@ object OpenBadgesHelper {
 
   private def getOpenBadgesUserId(email: String): String = {
     try {
-      val url = "http://beta.openbadges.org/displayer/convert/email"
+      val url = openBadgesUrl + "convert/email"
       val client = new DefaultHttpClient
       val post = new HttpPost(url)
 
@@ -53,7 +55,7 @@ object OpenBadgesHelper {
 
   private def getOpenBadgesValamisGroup(userId: String): String = {
     try {
-      val url = "http://beta.openbadges.org/displayer/" + userId + "/groups.json"
+      val url = openBadgesUrl + userId + "/groups.json"
       val client = new DefaultHttpClient
       val request = new HttpGet(url)
       val resp = client.execute(request)
@@ -82,7 +84,7 @@ object OpenBadgesHelper {
 
   private def getOpenBadges(userId: String, groupId: String): List[Map[String, Any]] = {
     try {
-      val url = "http://beta.openbadges.org/displayer/" + userId + "/group/" + groupId + ".json"
+      val url = openBadgesUrl + userId + "/group/" + groupId + ".json"
       val client = new DefaultHttpClient
       val request = new HttpGet(url)
       val resp = client.execute(request)

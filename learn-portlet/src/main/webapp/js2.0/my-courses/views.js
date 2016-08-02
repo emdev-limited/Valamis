@@ -11,10 +11,11 @@ myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _
     tagName: 'li',
     template: '#myCoursesUsersItemViewTemplate',
     templateHelpers: function () {
-      var totalLessons = this.model.get('statistic').total;
-      var successProgress = (totalLessons) ? Math.floor(this.model.get('statistic').success * 100 / totalLessons) : 0;
-      var inProgress = (totalLessons) ? Math.floor(this.model.get('statistic').inProgress * 100 / totalLessons) : 0;
-      var notStarted = (totalLessons) ? Math.floor(this.model.get('statistic').notStarted * 100 / totalLessons) : 0;
+      var lessons = this.model.get('lessons');
+      var totalLessons = lessons.total;
+      var successProgress = (totalLessons) ? Math.floor(lessons.success * 100 / totalLessons) : 0;
+      var inProgress = (totalLessons) ? Math.floor(lessons.inProgress * 100 / totalLessons) : 0;
+      var notStarted = (totalLessons) ? Math.floor(lessons.notStarted * 100 / totalLessons) : 0;
 
       return {
         isCompleted: (successProgress === 100),
@@ -38,11 +39,11 @@ myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _
 
         var colorClass;
         if (progress < 25)
-          colorClass = 'red';
+          colorClass = 'failed';
         else if (progress >= 25 && progress < 50)
-          colorClass = 'yellow';
+          colorClass = 'inprogress';
         else
-          colorClass = 'green';
+          colorClass = 'success';
 
         _.extend(templateData, {
           progress: progress + '%',
@@ -110,12 +111,8 @@ myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _
 
       var progressColWidth = this.$('.js-courses-table .js-progress-col').width();
 
-      if (diff > 0) {
-        if (diff < progressColWidth)
-          this.$('.js-courses-table').addClass('hide-progress');
-        else
-          this.$('.js-courses-table').addClass('hide-status');
-      }
+      if (diff > 0)
+        this.$('.js-courses-table').addClass((diff < progressColWidth) ? 'hide-progress' : 'hide-status');
     },
     takeCourses: function() {
       this.page++;

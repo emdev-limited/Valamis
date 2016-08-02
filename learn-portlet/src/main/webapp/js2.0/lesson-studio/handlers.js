@@ -1,41 +1,45 @@
 /**
  * Created by aklimov on 24.04.15.
  */
-slidesApp.commands.setHandler('drag:prepare:new', function (model, mx, my) {
-    slidesApp.activeElement.isMoving = true;
-    slidesApp.actionType = 'itemCreated';
-    slidesApp.oldValue = null;
-    slidesApp.activeElement.model = model;
+slidesApp.commands.setHandler('prepare:new', function (model, mx, my) {
+    slidesApp.activeElement.isMoving = false;
     slidesApp.activeElement.view = null;
-
-    var moduleNamePrefix = _.contains(['question','plaintext','randomquestion'], model.get('slideEntityType'))
-        ? 'content'
-        : model.get('slideEntityType');
-
-    slidesApp.activeElement.moduleName = moduleNamePrefix.charAt(0).toUpperCase() + moduleNamePrefix.slice(1) + 'ElementModule';
-
-    slidesApp.activeElement.startX = mx;
-    slidesApp.activeElement.startY = my;
+    slidesApp.activeElement.moduleName = slidesApp.getModuleName(model.get('slideEntityType'));
+    slidesApp.activeElement.startX = mx || 0;
+    slidesApp.activeElement.startY = my || 0;
 });
 
-slidesApp.commands.setHandler('item:create', function (isNew, slideElementModel) {
-    var activeModule = slidesApp.module(slidesApp.activeElement.moduleName);
-    var ViewModel = activeModule.View;
-    var model;
-    if (isNew) {
-        var slideId = slidesApp.activeSlideModel.get('id') || slidesApp.activeSlideModel.get('tempId');
+slidesApp.commands.setHandler('item:create', function (slideElementModel, select) {
+    if(typeof select == 'undefined'){
+        select = false;
+    }
+    var model, ViewModel, isNew;
+    var moduleName = slideElementModel
+        ? slidesApp.getModuleName(slideElementModel.get('slideEntityType'))
+        : slidesApp.activeElement.moduleName;
+    var activeModule = slidesApp.module(moduleName);
+    if (slideElementModel) {
+        isNew = false;
+        model = slideElementModel;
+        if(_.contains(['image','video','iframe','webgl'], model.get('slideEntityType'))){
+            model.set('content', decodeURIComponent(model.get('content')));
+        }
+    } else {
+        isNew = true;
+        var slideId = slidesApp.activeSlideModel.getId();
         model = activeModule.CreateModel();
         model
-            .set('zIndex', ++slidesApp.maxZIndex)
-            .set('tempId', slidesApp.newSlideElementId--)
-            .set('slideId', slideId);
+            .set({
+                zIndex: slidesApp.activeSlideModel.getMaxZIndex() + 1,
+                tempId: slidesApp.newSlideElementId--,
+                slideId: slideId
+            });
+        slidesApp.maxZIndex++;//TODO: Remove this variable and code refactoring
+        model.setLayoutProperties();
     }
-    else {
-        model = slideElementModel;
-        model.set('content', unescape(model.get('content')));
-    }
+    ViewModel = activeModule.View;
 
-    if (!slidesApp.getSlideElementModel(model.get('id') || model.get('tempId')))
+    if (!slidesApp.getSlideElementModel(model.getId()))
         slidesApp.slideElementCollection.add(model);
 
     var slideEntities = [];
@@ -53,7 +57,7 @@ slidesApp.commands.setHandler('item:create', function (isNew, slideElementModel)
         view.content.css('background-color', 'transparent');
     }
 
-    switch (slidesApp.activeElement.moduleName) {
+    switch (moduleName) {
         case slidesApp.IframeElementModule.moduleName:
         case slidesApp.PdfElementModule.moduleName:
             if (!isNew && view.model.get('content') !== '')
@@ -64,7 +68,8 @@ slidesApp.commands.setHandler('item:create', function (isNew, slideElementModel)
                 model.get('content'),
                 model._previousAttributes.content,
                 model.get('width'),
-                model.get('height'));
+                model.get('height'),
+                !isNew);
             break;
         case slidesApp.ContentElementModule.moduleName:
             var iconQuestionDiv = jQueryValamis('.sidebar').find('span.val-icon-question').closest('div');
@@ -78,11 +83,14 @@ slidesApp.commands.setHandler('item:create', function (isNew, slideElementModel)
                     iconQuestionDiv.show();
                 }
             });
+            model.on('destroy', function() {
+               //this is needed for iconQuestion to show in case
+               //when we create question and then undo the creation
+               iconQuestionDiv.show();
+            });
 
             if (!isNew && view.model.get('content') !== '') {
-                slidesApp.execute('question:update', model)
-                slidesApp.actionStack.pop();
-                slidesApp.toggleSavedState();
+                slidesApp.selectedItemView.updateQuestion(model);
             }
             break;
         case slidesApp.VideoElementModule.moduleName:
@@ -94,83 +102,65 @@ slidesApp.commands.setHandler('item:create', function (isNew, slideElementModel)
             }
             break;
         case slidesApp.MathElementModule.moduleName:
-            view.$('.ui-resizable-handle').hide();
+            view.$('.ui-resizable-handle').toggleClass('hidden', true);
             break;
         case slidesApp.WebglElementModule.moduleName:
             view.updateUrl(model.get('content'));
             break;
     }
     elem.attr('id', 'slideEntity_' + (model.id || model.get('tempId')));
-    jQueryValamis(Reveal.getCurrentSlide()).append(elem);
+    jQueryValamis('#slide_' + model.get('slideId')).append(elem);
 
-    slidesApp.activeElement.offsetX = elem.width() / 2;
-    slidesApp.activeElement.offsetY = elem.height() / 2;
-
-    slidesApp.activeElement.view.selectEl();
-
-    if (slidesApp.activeElement.moduleName === slidesApp.MathElementModule.moduleName)
+    if (moduleName === slidesApp.MathElementModule.moduleName)
         view.content.find('.math-content').fitTextToContainer(view.$el, true);
 
-    if (!slidesApp.initializing) {
-        slidesApp.viewId = view.cid;
-        slidesApp.actionType = 'itemCreated';
-        slidesApp.oldValue = null;
-        slidesApp.newValue = {indices: Reveal.getIndices(), view: view.cid};
-        slidesApp.execute('action:push');
+    if( select ){
+        view.selectEl();
+    }
 
-        if (slidesApp.activeElement.isMoving) {//new element moving from sidebar
-            slidesApp.getRegion('editorArea').$el
-                .css('overflow', 'visible');
-        }
+    //New element moving from sidebar
+    if (slidesApp.activeElement.isMoving && !slidesApp.initializing) {
+        var offset = slidesApp.RevealModule.view.ui.work_area.offset(),
+            scrollTop = jQueryValamis( document ).scrollTop();
+
+        elem.css({
+            left: slidesApp.activeElement.startX
+                ? (slidesApp.activeElement.startX - offset.left) - elem.width() / 2
+                : 0,
+            top: slidesApp.activeElement.startY
+                ? slidesApp.activeElement.startY
+                    - (offset.top - scrollTop)
+                    - (elem.height() / 2)
+                : 0
+        });
+        slidesApp.activeElement.isMoving = false;
+
+        slidesApp.RevealModule.view.$el
+            .add(slidesApp.RevealModule.view.ui.reveal_wrapper)
+            .css('overflow', 'visible');
     }
     Marionette.ItemView.Registry.register(view.model.get('id') || view.model.get('tempId'), view);
-});
-
-slidesApp.commands.setHandler('drag:prepare:existing', function (view, mx, my, offsetX, offsetY) {
-    if (isEditorEnabled()) return;
-
-    slidesApp.activeElement.isMoving = true;
-    slidesApp.actionType = 'itemMoved';
-    slidesApp.oldValue = {'top': view.model.get('top'), 'left': view.model.get('left')};
-    slidesApp.activeElement.startX = mx;
-    slidesApp.activeElement.startY = my;
-    slidesApp.activeElement.offsetX = offsetX;
-    slidesApp.activeElement.offsetY = offsetY;
-    slidesApp.execute('item:focus', view);
-    if(!view.model.get('classHidden')){
-        slidesApp.GridSnapModule.prepareItemsSnap();
-    }
 });
 
 slidesApp.commands.setHandler('resize:prepare', function (view) {
     slidesApp.activeElement.isResizing = true;
     slidesApp.execute('item:focus', view);
-    slidesApp.actionType = 'itemResized';
-    slidesApp.viewId = view.cid;
-    slidesApp.oldValue = {
-        'top': view.model.get('top'), 'left': view.model.get('left'),
-        'width': view.model.get('width'), 'height': view.model.get('height')
-    };
 });
 
-slidesApp.commands.setHandler('item:delete', function (isUndoAction) {
-    if (!isUndoAction) {
-        slidesApp.viewId = slidesApp.selectedItemView.model.get('id') || slidesApp.selectedItemView.model.get('tempId');
-        slidesApp.actionType = 'itemRemoved';
-        slidesApp.oldValue = {indices: Reveal.getIndices(), view: slidesApp.selectedItemView};
-        slidesApp.newValue = null;
-        slidesApp.execute('action:push');
+slidesApp.commands.setHandler('item:delete', function (view) {
+    view = view || slidesApp.selectedItemView;
+    if(!view.model.get('toBeRemoved') && jQueryValamis('#slideEntity_' + view.model.getId()).size() == 0){
+        slidesApp.execute('item:create', view.model);
     }
-    slidesApp.selectedItemView.model.set('toBeRemoved', true);
-    slidesApp.selectedItemView.$el.hide();
+
+    view.$el.toggle(!view.model.get('toBeRemoved'));
     slidesApp.execute('item:blur');
-    --slidesApp.maxZIndex;
+    slidesApp.maxZIndex += view.model.get('toBeRemoved') ? -1 : 1;//TODO: Remove this variable and code refactoring
+    var maxZIndex = slidesApp.activeSlideModel.getMaxZIndex();
 
     //sort models by z-index
-    if (slidesApp.selectedItemView.model.get('zIndex') <= slidesApp.maxZIndex) {
-        var slideIdCurrent = slidesApp.activeSlideModel.get('id') || slidesApp.activeSlideModel.get('tempId'),
-            slideElements = slidesApp.slideElementCollection.where({slideId: slideIdCurrent, toBeRemoved: false});
-
+    if (slidesApp.selectedItemView && slidesApp.selectedItemView.model.get('zIndex') < maxZIndex) {
+        var slideElements = slidesApp.activeSlideModel.getElements();
         if (slideElements.length > 0) {
             slideElements.sort(function (a, b) {
                 return a.get('zIndex') - b.get('zIndex');
@@ -183,62 +173,74 @@ slidesApp.commands.setHandler('item:delete', function (isUndoAction) {
 });
 
 slidesApp.commands.setHandler('item:focus', function (view) {
-    jQueryValamis('.ui-resizable-handle').hide();
-    jQueryValamis('.item-controls').hide();
-    jQueryValamis('.item-border').hide();
-
-    //To prevent item resize
-    slidesApp.activeElement.view = null;
-    slidesApp.activeElement.moduleName = null;
-    slidesApp.activeElement.model = null;
-
-    slidesApp.activeElement.view = view;
-    slidesApp.activeElement.moduleName = view.model.get('slideEntityType').charAt(0).toUpperCase() + view.model.get('slideEntityType').slice(1) + 'ElementModule';
-    view.controls.show();
-    view.resizeControls.show();
-    if (view.model.get('slideEntityType') != 'question' && view.model.get('slideEntityType') != 'plaintext') {
-        view.$el.find('> .ui-resizable-handle').show();
+    if(slidesApp.initializing || view.model.get('active')){
+        return;
     }
-    jQueryValamis('.rj-element').removeClass('active');
-    view.resizeControls.addClass('active');
+    if(!view.model.get('selected')) {
+        slidesApp.execute('item:blur');
+    }
+    jQueryValamis('.ui-resizable-handle').toggleClass('hidden', true);
+    slidesApp.activeElement.view = view;
+    slidesApp.activeElement.view.model.set('active', true);
+    slidesApp.activeElement.moduleName = slidesApp.getModuleName(view.model.get('slideEntityType'));
+    view.$el.find('> .ui-resizable-handle').toggleClass('hidden', false);
     jQueryValamis('#slide-controls').hide();
+    view.updateControlsPosition();
 });
 
 slidesApp.commands.setHandler('item:blur', function (slideId) {
+    if(slidesApp.initializing){
+        return;
+    }
+    slideId = slideId || slidesApp.activeSlideModel.getId();
     var slideModel = slidesApp.getSlideModel(slideId);
     if (slideId && slideModel && slideModel.get('isLessonSummary')) {
         jQueryValamis('.js-hide-if-summary').hide();
-        jQueryValamis('#slide_' + slideId + ' .rj-element #lesson-summary-table').parents(':eq(2)').unbind();
+        jQueryValamis('#slide_' + slideId + ' .rj-element .lesson-summary-text').nextAll('.item-controls').hide();
     }
     else
         jQueryValamis('#slide-controls').show();
-    jQueryValamis('.item-controls').hide();
-    jQueryValamis('.item-border').show();
-    jQueryValamis('.ui-resizable-handle').hide();
+    jQueryValamis('.ui-resizable-handle').toggleClass('hidden', true);
     jQueryValamis('.iframe-edit-panel').hide();
-    jQueryValamis('.slide-popup-panel').hide();
     jQueryValamis('.rj-element .item-border').removeClass('active');
+
+    if(slidesApp.activeElement.view && slidesApp.activeElement.view.isAttached()){
+        slidesApp.activeElement.view.closeItemSettings();
+    }
 
     //To prevent item resize
     slidesApp.activeElement.view = null;
     slidesApp.activeElement.moduleName = null;
-    slidesApp.activeElement.model = null;
-    slidesApp.activeElement.isMoving = false;
-
     slidesApp.isEditing = false;
+    slidesApp.trigger('editorModeChanged');
+
+    if(slideModel){
+        slideModel.updateAllElements({selected: false, active: false});
+    }
     placeSlideControls();
 });
 
-slidesApp.commands.setHandler('item:duplicate', function (view) {
-    var offset = view.model.getNewPosition(),
-        newModel = new lessonStudio.Entities.LessonPageElementModel(_.omit(view.model.attributes, ['id','properties'])),
+slidesApp.commands.setHandler('item:duplicate', function (view, placeModel) {
+    view = view || slidesApp.activeElement.view;
+    placeModel = placeModel || view.model;//model for copy location
+    if(!view){
+        return;
+    }
+    var currentSlideId = slidesApp.activeSlideModel.getId(),
+        newModel = new lessonStudio.Entities.LessonPageElementModel(_.omit(view.model.attributes, ['id','properties','active','selected'])),
         properties = view.model.copyProperties();
+
+    if(view.model.getId() != placeModel.getId()){
+        var position;
+        properties = _.mapValues(properties, function(props, deviceId){
+            position = placeModel.getLayoutProperties(deviceId);
+            return _.extend({}, props, { left: position.left, top: position.top });
+        });
+    }
 
     slidesApp.copyImageFromGallery(newModel);
     newModel.set({
         slideEntityType: view.model.get('slideEntityType'),
-        left: offset.left,
-        top: offset.top,
         tempId: slidesApp.newSlideElementId--,
         zIndex: ++slidesApp.maxZIndex
     });
@@ -252,34 +254,30 @@ slidesApp.commands.setHandler('item:duplicate', function (view) {
         props.left = currOffset.left;
         props.top = currOffset.top;
     });
-    newModel.set('properties', properties);
+    newModel.set({
+        properties: properties,
+        slideId: currentSlideId
+    });
 
-    if (_.indexOf(['image', 'webgl', 'pdf'], newModel.get('slideEntityType')) > -1
+    if (_.contains(['image', 'webgl', 'pdf'], newModel.get('slideEntityType'))
         && newModel.get('content')
         && newModel.get('content').indexOf('/') == -1) {
-        view.model.clone().then(function (clonedModel) {
-            newModel.set(_.extend(
-                clonedModel,
-                {
-                    left: offset.left,
-                    top: offset.top,
-                    zIndex: ++slidesApp.maxZIndex
-                }
-            ));
-            createElement(newModel);
-        });
+
+        newModel
+            .set('clonedId', (view.model.get('id') || view.model.get('clonedId')));
+
     }
-    else createElement(newModel);
+
+    createElement(newModel);
 
     function createElement(model) {
-        slidesApp.execute('drag:prepare:new', model, 0, 0);
-        slidesApp.execute('item:create', false, model);
+        slidesApp.execute('prepare:new', model);
         slidesApp.activeElement.isMoving = false;
-        slidesApp.execute('item:focus', view);
+        slidesApp.execute('item:create', model, true);
     }
 });
 
-slidesApp.commands.setHandler('item:resize', function (width, height, view) {
+slidesApp.commands.setHandler('item:resize', function (width, height, view, updateMode) {
     var moduleName;
     if (!view) {
         view = slidesApp.activeElement.view;
@@ -291,12 +289,15 @@ slidesApp.commands.setHandler('item:resize', function (width, height, view) {
     if (view) {
         if (moduleName == slidesApp.MathElementModule.moduleName)
             view.content.find('.math-content').fitTextToContainer(view.$el, true);
-        view.model.set({
-            width: width,
-            height: height
-        });
+        if( updateMode == 'reset' ){
+            view.model.resetProperties({width: width, height: height});
+        } else if( updateMode == 'update'){
+            view.model.updateProperties({width: width, height: height});
+        } else if( !_.contains(['question','plaintext'], view.model.get('slideEntityType')) ) {
+            view.$el.css({width: width, height: height});
+        }
         view.content.find('div[class*="content-icon-"]').first()
-            .css('font-size', Math.min(view.model.get('width') / 2, view.model.get('height') / 2) + 'px');
+            .css('font-size', Math.min(width / 2, height / 2) + 'px');
     }
 });
 
@@ -309,7 +310,13 @@ slidesApp.commands.setHandler('action:push', function () {
     function stringifyObject(obj) {
         var json = _.chain(obj)
             .map(function (value, key) {
-                var val = (key === 'view' && _.isObject(value)) ? value.model.toJSON() : value;
+                var val = value;
+                if(key === 'view' && _.isObject(val)){
+                    val = val.model.toJSON();
+                }
+                if(val instanceof jQueryValamis){
+                    val = val.attr('class');
+                }
                 return [key, val];
             })
             .object()
@@ -337,15 +344,20 @@ slidesApp.commands.setHandler('action:undo', function() {
 slidesApp.commands.setHandler('app:stop', function () {
     revealModule.stop();
     arrangeModule.stop();
+    versionModule.stop();
+    slidesApp.historyManager.stop();
+    slidesApp.keyboardModule.stop();
     jQueryValamis('#arrangeContainer').prevAll().show();
     jQueryValamis('#arrangeContainer').empty();
     slidesApp.slideSetModel = null;
     jQueryValamis('.slide-popup-panel').hide();
-    slidesApp.toggleSavedState();
+    slidesApp.toggleSavedState(true);
     slidesApp.switchMode('edit', true);
     slidesApp.isEditorReady = false;
     slidesApp.isRunning = false;
-    slidesApp.unBindKeys();
+    _.defer(function(){
+        jQueryValamis(document.body).removeClass('overflow-hidden');
+    });
 });
 
 slidesApp.commands.setHandler('editor-reloaded', function () {
@@ -354,16 +366,9 @@ slidesApp.commands.setHandler('editor-reloaded', function () {
     valamisApp.execute('notify', 'clear');
     slidesApp.execute('controls:place');
     if (slidesApp.mode === 'preview') {
-        slidesApp.togglePreviewMode('preview');
-        slidesApp.switchMode('preview', true);
+        slidesApp.togglePreviewMode(slidesApp.mode);
+        slidesApp.switchMode(slidesApp.mode, true);
     }
-});
-
-slidesApp.commands.setHandler('question:update', function(model) {
-    if (model.get('slideEntityType') !== 'randomquestion')
-        slidesApp.activeElement.view.updateQuestion(model.get('content'), model.get('slideEntityType'));
-    else
-        slidesApp.activeElement.view.renderRandomQuestion(model.get('content'), model);
 });
 
 slidesApp.commands.setHandler('random:question:render', function (selectedQuestions, sidebarModel) {
@@ -384,15 +389,21 @@ slidesApp.commands.setHandler('random:question:render', function (selectedQuesti
     var content = ids.join(',');
 
     for (var i = 0; i < sidebarModel.get('randomQuestions'); i++) {
-        if (!isFirstNode)
+        if (!isFirstNode){
             slidesApp.execute('reveal:page:add', 'right');
-        else
-            isFirstNode = false;
+        }
 
-        slidesApp.execute('drag:prepare:new', sidebarModel, 0, 0);
+        slidesApp.execute('prepare:new', sidebarModel);
         slidesApp.activeElement.isMoving = false;
-        slidesApp.execute('item:create', true);
+        slidesApp.execute('item:create');
         slidesApp.activeElement.view.renderRandomQuestion(content);
+
+        if (isFirstNode){
+            isFirstNode = false;
+            if (slidesApp.slideSetModel.get('themeId')) {
+                slidesApp.execute('reveal:page:applyTheme', slidesApp.activeSlideModel);
+            }
+        }
     }
 });
 
@@ -406,16 +417,21 @@ slidesApp.commands.setHandler('question:render', function (selectedQuestions, si
             if(node.contentType === 'category') {
                 addQuestions(node.children);
             } else {
-                if (!isFirstNode)
+                if (!isFirstNode){
                     slidesApp.execute('reveal:page:add', 'right');
-                else
-                    isFirstNode = false;
+                }
 
-                slidesApp.execute('drag:prepare:new', sidebarModel, 0, 0);
+                slidesApp.execute('prepare:new', sidebarModel);
                 slidesApp.activeElement.isMoving = false;
-                slidesApp.execute('item:create', true);
+                slidesApp.execute('item:create');
                 slidesApp.activeElement.view.renderQuestion(new QuestionModel(node));
 
+                if (isFirstNode){
+                    isFirstNode = false;
+                    if (slidesApp.slideSetModel.get('themeId')) {
+                        slidesApp.execute('reveal:page:applyTheme', slidesApp.activeSlideModel);
+                    }
+                }
             }
         });
 
@@ -458,10 +474,14 @@ slidesApp.commands.setHandler("contentmanager:show:modal", function (model) {
             return false;
         },
         submit: function () {
-            if (sidebarModel.get('isRandom'))
+            slidesApp.historyManager.groupOpenNext();
+            if (sidebarModel.get('isRandom')) {
                 slidesApp.execute('random:question:render', this.selectedQuestions, sidebarModel);
-            else
+            }
+            else {
                 slidesApp.execute('question:render', this.selectedQuestions, sidebarModel);
+            }
+            slidesApp.historyManager.groupClose();
 
             valamisApp.execute('notify', 'clear');
         },
@@ -476,7 +496,11 @@ slidesApp.commands.setHandler("contentmanager:show:modal", function (model) {
             }
             contentManager.onStop();
             contentManager.mainRegion.reset();
+            slidesApp.isEditing = false;
         }
+    });
+    view.on('before:show', function(){
+        slidesApp.isEditing = true;
     });
     valamisApp.execute('modal:show', view);
 
@@ -488,8 +512,6 @@ slidesApp.commands.setHandler('linkUpdate', function (linkTypeName) {
 });
 
 slidesApp.commands.setHandler('temp:delete', function () {
-    _.each(slidesApp.tempSlideIds, function (id) {
-        var model = slidesApp.slideCollection.findWhere({id: id});
-        if (model) model.destroy()
-    });
+    _.each(slidesApp.tempBlobUrls, revokeBlobURL);
+    slidesApp.tempBlobUrls = []
 });

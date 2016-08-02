@@ -110,6 +110,9 @@ var VideoModal = Backbone.Modal.extend({
     submitEl: '.bbm-button',
     cancelEl: '.modal-close',
     className: 'val-modal',
+    initialize: function(options){
+        if(options.onDestroy) this.onDestroy = options.onDestroy;
+    },
     onRender: function () {
         this.view = new VideoView({
             model: this.model,

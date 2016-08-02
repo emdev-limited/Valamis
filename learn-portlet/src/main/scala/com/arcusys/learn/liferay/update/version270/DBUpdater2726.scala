@@ -1,0 +1,60 @@
+package com.arcusys.learn.liferay.update.version270
+
+import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
+import com.arcusys.learn.liferay.update.SlickDBContext
+import com.arcusys.slick.drivers.OracleDriver
+import com.arcusys.valamis.web.configuration.ioc.Configuration
+import com.escalatesoft.subcut.inject.BindingModule
+
+import scala.slick.jdbc.StaticQuery
+
+class DBUpdater2726(val bindingModule: BindingModule)
+  extends LUpgradeProcess
+    with SlickDBContext {
+
+  override def getThreshold = 2726
+
+  def this() = this(Configuration)
+
+  val sqlQueries: Seq[String] = Seq(
+    "UPDATE LEARN_LESSON SET LOGO = ' ' WHERE LOGO IS NULL",
+    "UPDATE LEARN_SCORM_MANIFEST SET VERSION=' ' WHERE VERSION IS NULL",
+    "UPDATE LEARN_SCORM_MANIFEST SET BASE=' ' WHERE BASE IS NULL",
+    "UPDATE LEARN_SCORM_MANIFEST SET DEFAULT_ORGANISATION_ID=' ' WHERE DEFAULT_ORGANISATION_ID IS NULL",
+    "UPDATE LEARN_SCORM_MANIFEST SET RESOURCES_BASE=' ' WHERE RESOURCES_BASE IS NULL",
+    "UPDATE LEARN_CONTENT_ANSWERS SET ITEM=' ' WHERE ITEM IS NULL",
+    "UPDATE LEARN_LRS_ENDPOINT SET CUSTOM_HOST=' ' WHERE CUSTOM_HOST IS NULL",
+    "UPDATE LEARN_STATEMENT_TO_ACTIVITY SET ACTIVITY_FILTER=' ' WHERE ACTIVITY_FILTER IS NULL",
+    "UPDATE LEARN_STATEMENT_TO_ACTIVITY SET VERB_FILTER=' ' WHERE VERB_FILTER IS NULL",
+    "UPDATE LEARN_SLIDE_SET SET LOGO=' ' WHERE LOGO IS NULL",
+    "UPDATE LEARN_SLIDE SET BG_COLOR=' ' WHERE BG_COLOR IS NULL",
+    "UPDATE LEARN_SLIDE SET BG_IMAGE=' ' WHERE BG_IMAGE IS NULL",
+    "UPDATE LEARN_SLIDE SET FONT=' ' WHERE FONT IS NULL",
+    "UPDATE LEARN_SLIDE SET QUESTION_FONT=' ' WHERE QUESTION_FONT IS NULL",
+    "UPDATE LEARN_SLIDE SET ANSWER_FONT=' ' WHERE ANSWER_FONT IS NULL",
+    "UPDATE LEARN_SLIDE SET ANSWER_BG=' ' WHERE ANSWER_BG IS NULL",
+    "UPDATE LEARN_SLIDE SET DURATION=' ' WHERE DURATION IS NULL",
+    "UPDATE LEARN_SLIDE SET STATEMENT_VERB=' ' WHERE STATEMENT_VERB IS NULL",
+    "UPDATE LEARN_SLIDE SET STATEMENT_OBJECT=' ' WHERE STATEMENT_OBJECT IS NULL",
+    "UPDATE LEARN_SLIDE SET STATEMENT_CATEGORY_ID=' ' WHERE STATEMENT_CATEGORY_ID IS NULL",
+    "UPDATE LEARN_SLIDE SET PLAYER_TITLE=' ' WHERE PLAYER_TITLE IS NULL",
+    "UPDATE LEARN_SLIDE_THEME SET BGCOLOR=' ' WHERE BGCOLOR IS NULL",
+    "UPDATE LEARN_SLIDE_THEME SET BGIMAGE=' ' WHERE BGIMAGE IS NULL",
+    "UPDATE LEARN_SLIDE_THEME SET FONT=' ' WHERE FONT IS NULL",
+    "UPDATE LEARN_SLIDE_THEME SET QUESTIONFONT=' ' WHERE QUESTIONFONT IS NULL",
+    "UPDATE LEARN_SLIDE_THEME SET ANSWERFONT=' ' WHERE ANSWERFONT IS NULL",
+    "UPDATE LEARN_SLIDE_THEME SET ANSWERBG=' ' WHERE ANSWERBG IS NULL",
+    "UPDATE LEARN_TINCAN_ACTIVITY SET LAUNCH=' ' WHERE LAUNCH IS NULL",
+    "UPDATE LEARN_TINCAN_ACTIVITY SET \"RESOURCE\"=' ' WHERE \"RESOURCE\" IS NULL"
+  )
+
+  override def doUpgrade(): Unit = {
+    //replace all NULL values in Option[String] columns by ' '
+    //accordingly with OracleDriver behavior (it never saves null or empty string as NULL, but as ' ' instead)
+    if (dbInfo.slickDriver.isInstanceOf[OracleDriver]) {
+      db.withTransaction { implicit session =>
+        sqlQueries.foreach(StaticQuery.updateNA(_).execute)
+      }
+    }
+  }
+}

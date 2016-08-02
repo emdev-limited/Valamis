@@ -1,20 +1,23 @@
 package com.arcusys.learn.liferay.update.version250
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.learn.liferay.services.{PermissionHelper, UserLocalServiceHelper}
+import com.arcusys.learn.liferay.services.{DLFileEntryServiceHelper, PermissionHelper, UserLocalServiceHelper}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.valamis.core.SlickDBInfo
-import com.arcusys.valamis.file.FileTableComponent
+import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 import com.arcusys.valamis.file.model.FileRecord
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.util.StreamUtil
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
-import com.liferay.portlet.documentlibrary.service.DLFileEntryServiceUtil
 
 import scala.slick.driver.JdbcProfile
 
-class DBUpdater2424 extends LUpgradeProcess with SlideTableComponent with FileTableComponent with Injectable {
+class DBUpdater2424 extends LUpgradeProcess
+  with SlideTableComponent
+  with FileTableComponent
+  with SlickProfile
+  with Injectable {
 
   implicit val bindingModule = Configuration
 
@@ -84,7 +87,7 @@ class DBUpdater2424 extends LUpgradeProcess with SlideTableComponent with FileTa
             .map(x => s"${x.group(2)}.${x.group(6)}")
 
         if(version.isDefined && fileEntryId.isDefined && fileName.isDefined) {
-          val stream = DLFileEntryServiceUtil.getFileAsStream(fileEntryId.get.toLong, version.get)
+          val stream = DLFileEntryServiceHelper.getFileAsStream(fileEntryId.get.toLong, version.get)
           val bytes = StreamUtil.toByteArray(stream)
           if(!bytes.isEmpty) {
             val newFileName = filePath(s"slide_item_${slideElement.id.get}", fileName.get)
@@ -138,7 +141,7 @@ class DBUpdater2424 extends LUpgradeProcess with SlideTableComponent with FileTa
               .map(x => s"${x.group(2)}.${x.group(6)}")
 
           if(version.isDefined && fileEntryId.isDefined) {
-            val stream = DLFileEntryServiceUtil.getFileAsStream(fileEntryId.get.toLong, version.get)
+            val stream = DLFileEntryServiceHelper.getFileAsStream(fileEntryId.get.toLong, version.get)
             val bytes = StreamUtil.toByteArray(stream)
             if(!bytes.isEmpty) {
               val newFileName = filePath(s"slide_${slide.id.get}", fileName.get)

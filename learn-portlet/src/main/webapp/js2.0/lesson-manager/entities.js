@@ -21,7 +21,7 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                             tagIds.push( tag.id || tag )
                         }
 
-                        var params = {
+                        var params = {  // todo: replace visibility by isVisible
                             action : 'UPDATE',
                             id: model.get('id'),
                             ableToRunFrom: model.get('ableToRunFrom'),
@@ -30,16 +30,15 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                             beginDate: model.get('beginDate'),
                             endDate: model.get('endDate'),
                             description: model.get('description') || "",
-                            isDefault: model.get('isDefault'),
-                            packageType: model.get('packageType'),
                             passingLimit: model.get('passingLimit'),
                             rerunInterval: model.get('rerunInterval'),
                             rerunIntervalType: model.get('rerunIntervalType'),
                             tags: tagIds,
-                            visibility: model.get('visibility'),
+                            isVisible: model.get('isVisible'),
                             title: model.get('title'),
-                            scope:	 options.scope,
-                            courseId: Utils.getCourseId()
+                            courseId: Utils.getCourseId(),
+                            requiredReview: model.get('requiredReview'),
+                            scoreLimit: model.get('scoreLimit')
                         };
 
                         return params;
@@ -47,28 +46,40 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                 'method': "post"
             },
             'delete': {
-                'path': function(model){ return apiUrl + model.get('packageType') + "/" + model.get('id')},
+                'path': function(model){ return apiUrl + model.get('id')},
                 'data': {courseId: Utils.getCourseId()},
                 'method': 'delete'
             }
 
         },
-      targets: {
-        updateLogo: {
-            'path': apiUrl,
-            'data': function(model){
-                var params =  {
-                    action: 'UPDATELOGO',
-                    id: model.get('id'),
-                    logo: model.get('logo'),
-                    packageType: model.get('packageType'),
-                    courseId : Utils.getCourseId()
-                };
-                return params;
+        targets: {
+            updateLogo: {  //TODO: is it needed, it call file service
+                'path': apiUrl,
+                'data': function (model) {
+                    var params = {
+                        action: 'UPDATELOGO',
+                        id: model.get('id'),
+                        logo: model.get('logo'),
+                        packageType: model.get('packageType'),
+                        courseId: Utils.getCourseId()
+                    };
+                    return params;
+                },
+                'method': 'post'
             },
-            'method': 'post'
+            'updateVisibility': {
+                'path': apiUrl,
+                'data': function (model, options) {
+                    return {
+                        action: 'UPDATE_VISIBLE',
+                        id: model.get('id'),
+                        isVisible: options.isVisible,
+                        courseId: Utils.getCourseId()
+                    }
+                },
+                'method': 'post'
+            }
         }
-      }
     });
 
     Entities.Package = Backbone.Model.extend({
@@ -77,7 +88,6 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
             title: '',
             description: '',
             packageType: '',
-            visibility: true,
             isDefault: false,
             logo:'',
             type:'',
@@ -105,18 +115,16 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
                             selectedCategories: []
                         };
 
-                    var sortBy =  (filter.sort == 'nameAsc' || filter.sort == 'nameDesc' )? 'name' : '';
-
                     var tagId = '';
                     if(filter.selectedCategories && filter.selectedCategories.length >0) {
                         tagId = filter.selectedCategories[0];
                     }
 
-                    var params = {
+                    var params = {   //TODO: extra parameters (M)
                         action: 'ALL',
                         courseId: Utils.getCourseId(),
                         scope: filter.scope || 'site',
-                        sortBy: sortBy,
+                        //sortBy: sortBy,
                         sortAscDirection: filter.sort == 'nameAsc',
                         filter: filter.searchtext || '',
                         packageType: filter.packageType || '',
@@ -131,63 +139,93 @@ lessonManager.module("Entities", function(Entities, lessonManager, Backbone, Mar
             }
         },
         targets: {
-        'removePackages': {
-            'path': apiUrl,
-            'data': function (collection, options) {
-                var packageIds = collection.map(function (item) {
-                    return item.get('id');
-                });
-                var params = {
-                    action :'REMOVEPACKAGES',
-                    packageIds: packageIds,
-                    courseId : Utils.getCourseId()
-                };
-                return params;
-            },
-            'method': 'post'
-        },
-        'updatePackages': {
-            'path': apiUrl,
-            'data': function (collection, options) {
-                var packages =JSON.stringify( collection.map(function (item) {
-                    return {
-                    id: item.get('id'),
-                    title: item.get('title') || "New lesson",
-                    description: item.get('description') || "",
-                    packageType: item.get('packageType'),
-                    logo: item.get('logo')
+            'removePackages': {
+                'path': apiUrl,
+                'data': function (collection, options) {
+                    var packageIds = collection.map(function (item) {
+                        return item.get('id');
+                    });
+                    var params = {
+                        action: 'REMOVEPACKAGES',
+                        packageIds: packageIds,
+                        courseId: Utils.getCourseId()
                     };
-                } ));
-
-                var scope = options.scope || 'site';
-                
-                var params = {
-                    action: 'UPDATEPACKAGES',
-                    packages: packages,
-                    scope: scope,
-                    courseId: Utils.getCourseId()
-                };
-
-                return params;
+                    return params;
+                },
+                'method': 'post'
             },
-            'method': 'post'
+            'updatePackages': {
+                'path': apiUrl,
+                'data': function (collection, options) {
+                    var packages = JSON.stringify(collection.map(function (item) {
+                        return {
+                            id: item.get('id'),
+                            title: item.get('title') || "New lesson",
+                            description: item.get('description') || "",
+                            packageType: item.get('packageType'),
+                            logo: item.get('logo')
+                        };
+                    }));
+
+                    var scope = options.scope || 'site';
+
+                    var params = {
+                        action: 'UPDATEPACKAGES',
+                        packages: packages,
+                        scope: scope,
+                        courseId: Utils.getCourseId()
+                    };
+
+                    return params;
+                },
+                'method': 'post'
+            }
         }
-    }
     });
 
     Entities.PackageCollection = Backbone.Collection.extend({
         model: Entities.Package,
-        parse: function(response){
-            this.trigger('packageCollection:updated', { total: response.total, currentPage: response.currentPage });
-            _.forEach(response.records,function(record){
+        parse: function(data){
+            this.trigger('packageCollection:updated', { total: data.total, currentPage: data.currentPage });
+
+            var lessons = [];
+
+            _.forEach(data.records,function(record){
+                var limit = record.limit || {
+                        rerunIntervalType: "unlimited"
+                    };
+                var lesson = {
+                    id: record.lesson.id,
+                    title: record.lesson.title,
+                    description: record.lesson.description,
+                    isVisible: record.lesson.isVisible,
+                    packageType: record.lesson.lessonType,
+                    logo: record.lesson.logo,
+                    passingLimit: limit.passingLimit,
+                    rerunInterval: limit.rerunInterval,
+                    rerunIntervalType: limit.rerunIntervalType,
+                    tags: record.tags,
+                    beginDate: record.lesson.beginDate,
+                    endDate: record.lesson.endDate,
+                    creationDate: record.lesson.creationDate,
+                    requiredReview: record.lesson.requiredReview,
+                    scoreLimit: record.lesson.scoreLimit
+                };
+
+                if (record.owner != undefined) lesson.owner = record.owner.name;
+
                 var tags = Array();
-                record.tags.forEach(function(item) {
-                    tags.push(item.text);
-                });
-                record.tagsList = tags.join(' • ');
+                if (lesson.tags) {
+                    lesson.tags.forEach(function (item) {
+                        tags.push(item.text);
+                    });
+                }
+                lesson.tagsList = tags.join(' • ');
+
+                lessons.push(lesson);
             });
 
-           return response.records;
+           return lessons;
         }
     }).extend(packageCollectionService);
 

@@ -1,11 +1,11 @@
 package com.arcusys.learn.liferay.update.version260
 
 import java.sql.Connection
-import com.arcusys.valamis.core.SlickDBInfo
-import com.arcusys.valamis.slide.SlideTableComponent
-import com.arcusys.valamis.slide.model.{SlideEntity, SlideSetEntity, SlideElementEntity}
 
-import scala.slick.driver.{JdbcProfile, JdbcDriver, H2Driver}
+import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+
+import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import scala.slick.jdbc.JdbcBackend
@@ -25,7 +25,7 @@ class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter {
   }
   
   before {
-    connection = db.createConnection()
+    connection = db.source.createConnection()
     table.createSchema()
   }
   after {
@@ -41,13 +41,14 @@ class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter {
     }
   }
 
+  import table._
   val updater = new DBUpdater2517(dbInfo)
-  val slideSet = SlideSetEntity(title = "title", description = "description", courseId = 1L)
+  val slideSet = SlideSet(title = "title", description = "description", courseId = 1L)
 
   test("update template <Text and image>") {
     import table._
-    val slide = SlideEntity(title = "Text and image", slideSetId = -1, isTemplate = true)
-    val slideElement = SlideElementEntity(None, "1", "1", "1", "1", "1", "old content", "text", -1)
+    val slide = Slide(title = "Text and image", slideSetId = -1, isTemplate = true)
+    val slideElement = SlideElement(None, "1", "1", "1", "1", "1", "old content", "text", -1)
 
     val elementId = db.withSession { implicit s =>
       val slideSetId = (slideSets returning slideSets.map(_.id)) += slideSet
@@ -67,8 +68,8 @@ class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter {
 
   test("update template <Title and subtitle>") {
     import table._
-    val slide = SlideEntity(title = "Title and subtitle", slideSetId = -1, isTemplate = true)
-    val slideElement = SlideElementEntity(None, "1", "1", "1", "1", "2", "old content", "text", -1)
+    val slide = Slide(title = "Title and subtitle", slideSetId = -1, isTemplate = true)
+    val slideElement = SlideElement(None, "1", "1", "1", "1", "2", "old content", "text", -1)
 
     val elementId = db.withSession { implicit s =>
       val slideSetId = (slideSets returning slideSets.map(_.id)) += slideSet
@@ -88,8 +89,8 @@ class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter {
 
   test("update not existing template") {
     import table._
-    val slide = SlideEntity(title = "Text and image", slideSetId = -1, isTemplate = false)
-    val slideElement = SlideElementEntity(None, "1", "1", "1", "1", "1", "old content", "text", -1)
+    val slide = Slide(title = "Text and image", slideSetId = -1, isTemplate = false)
+    val slideElement = SlideElement(None, "1", "1", "1", "1", "1", "old content", "text", -1)
 
     val elementId = db.withSession { implicit s =>
       val slideSetId = (slideSets returning slideSets.map(_.id)) += slideSet

@@ -1,8 +1,8 @@
 package com.arcusys.learn.liferay.update
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.learn.liferay.update.migration.{CertificateStorageMigration2303, FileStorageMigration2303}
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 
 class DBUpdater2303 extends LUpgradeProcess with SQLRunner {
   override def getThreshold = 2303

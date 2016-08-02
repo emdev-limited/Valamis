@@ -2,32 +2,36 @@ package com.arcusys.valamis.lesson.service.export
 
 import java.io.File
 
-import com.arcusys.valamis.export.ExportProcessor
+import com.arcusys.valamis.util.export.ExportProcessor
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.file.storage.FileStorage
-import com.arcusys.valamis.lesson.model.BaseManifest
-import com.arcusys.valamis.util.{ FileSystemUtil, ZipBuilder }
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
+import com.arcusys.valamis.lesson.model.{Lesson, LessonLimit}
+import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.valamis.util.{FileSystemUtil, ZipBuilder}
+import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class PackageExportProcessor(implicit val bindingModule: BindingModule) extends ExportProcessor[BaseManifest, PackageExportModel] with Injectable {
+class PackageExportProcessor(implicit val bindingModule: BindingModule)
+  extends ExportProcessor[(Lesson, Option[LessonLimit]), PackageExportModel]
+    with Injectable {
 
   protected lazy val fileService = inject[FileService]
   protected lazy val fileStorage = inject[FileStorage]
 
-  override protected def exportItemsImpl(zip: ZipBuilder, items: Seq[BaseManifest]): Seq[PackageExportModel] = {
-    items.map(p => {
-      val logoName = p.logo.filter(!_.isEmpty).map(logo => {
-        zip.addFile(p.id + "_" + logo, fileService.getFileContent(s"package_logo_${p.id}", logo))
-        p.id + "_" + logo
+  override protected def exportItemsImpl(zip: ZipBuilder,
+                                         items: Seq[(Lesson, Option[LessonLimit])]): Seq[PackageExportModel] = {
+    items.map{ case (l, limit) =>
+      val logoName = l.logo.filter(!_.isEmpty).map(logo => {
+        zip.addFile(l.id + "_" + logo, fileService.getFileContent(s"package_logo_${l.id}", logo))
+        l.id + "_" + logo
       }).getOrElse("")
-      val packageFile = s"package_${p.id}.zip"
+      val packageFile = s"package_${l.id}.zip"
 
-      val packageZipFile = composePackage(p.id)
+      val packageZipFile = composePackage(l.id)
       zip.addFile(packageZipFile, packageFile)
       packageZipFile.delete()
 
-      toExportModel(p, logoName, packageFile)
-    })
+      toExportModel(l, limit, logoName, packageFile)
+    }
   }
 
   private def composePackage(packageId: Long): File = {
@@ -41,19 +45,21 @@ class PackageExportProcessor(implicit val bindingModule: BindingModule) extends 
     zipFile
   }
 
-  def toExportModel(manifest: BaseManifest, logo: String, packageFile: String): PackageExportModel = {
-    PackageExportModel(manifest.getType.toString,
-      manifest.title,
-      manifest.summary,
-      manifest.visibility,
-      manifest.isDefault,
-      manifest.passingLimit,
-      manifest.rerunInterval,
-      manifest.rerunIntervalType.toString,
+  def toExportModel(lesson: Lesson, limit: Option[LessonLimit], logo: String, packageFile: String): PackageExportModel = {
+    val isDefault = false
+    PackageExportModel(
+      lesson.lessonType.toString,
+      lesson.title,
+      Some(lesson.description),
+      lesson.isVisible orElse Some(false),
+      isDefault,
+      limit.flatMap(_.passingLimit).getOrElse(0),
+      limit.flatMap(_.rerunInterval).getOrElse(0),
+      limit.map(_.rerunIntervalType).getOrElse(PeriodTypes.UNLIMITED).toString,
       logo,
       packageFile,
-      manifest.beginDate,
-      manifest.endDate
+      lesson.beginDate,
+      lesson.endDate
     )
   }
 }

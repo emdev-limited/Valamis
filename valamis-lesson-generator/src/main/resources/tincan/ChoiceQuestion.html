@@ -7,6 +7,7 @@
             {{#answers}}
             {{#multipleChoice}}
             <span class="choiceAnswer">
+                <span class="invisible-font">Answer</span>
                     <div>
                         <input type="checkbox" id="scormAnswer{{id}}_{{questionNumber}}" class="checkbox" style="display: none;" data-score="{{score}}"/>
                         <label class="choiceTextContainer" id="scormAnswerText{{id}}_{{questionNumber}}" for="scormAnswer{{id}}_{{questionNumber}}">
@@ -17,6 +18,7 @@
             {{/multipleChoice}}
             {{^multipleChoice}}
             <span class="choiceAnswer">
+                <span class="invisible-font">Answer</span>
                     <div>
                         <input type="radio" id="scormAnswer{{id}}_{{questionNumber}}" name="scormGroup1_{{questionNumber}}" class="radio" style="display: none;" data-score="{{score}}"/>
                         <label class="choiceTextContainer" id="scormAnswerText{{id}}_{{questionNumber}}" for="scormAnswer{{id}}_{{questionNumber}}">
@@ -28,85 +30,79 @@
             {{/answers}}
         </div>
         <!--{{#autoShowAnswer}} -->
-        <button class="valamis button big green icon-continue" type="button" id="checkAnswerButton"
+        <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
                 onclick="TinCanCourseHelpers['choiceShowAnswers_{{id}}_{{questionNumber}}']()">
             Check
         </button>
         <!--{{/autoShowAnswer}} -->
     </div>
     <!--{{#autoShowAnswer}} -->
-    <div class="answers answers{{id}}_{{questionNumber}}" style="display: none;">
-        <h2><span id="answerCorrectness{{id}}_{{questionNumber}}" style="vertical-align: baseline !important;"></span></h2>
+    <div class="answers answers{{id}}_{{questionNumber}}">
+        <div class="feedback-block-label">{{{text}}}</div>
+        <div class="feedback-correctness-label" id="answerCorrectness{{id}}_{{questionNumber}}"></div>
 
-        <div id="answerComparison{{id}}_{{questionNumber}}" style="display: none;">
-            <div>
-                <p><strong>Your answers:</strong></p>
-                <div id="usersAnswers{{id}}_{{questionNumber}}">
-                    {{#answers}}
-                    {{#multipleChoice}}
-                    <div class="val-row">
-                        <div class="s-2">
-                            <input type="checkbox" class="scormAnswer{{id}}_{{questionNumber}} checkbox" disabled/>
-                        </div>
-                        <div class="s-10">
-                            <div class="choiceTextContainer">
-                                <label>{{{text}}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    {{/multipleChoice}}
-                    {{^multipleChoice}}
-                    <div class="val-row">
-                        <div class="s-2">
-                            <input type="radio" class="scormAnswer{{id}}_{{questionNumber}} radio" name="scormGroup2_{{questionNumber}}" disabled/>
-                        </div>
-                        <div class="s-10">
-                            <div class="choiceTextContainer">
-                                <label>{{{text}}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    {{/multipleChoice}}
-                    {{/answers}}
-                </div>
-            </div>
-            <div>
-                <p><strong>Correct answers:</strong></p>
-                <div id="correctAnswers{{id}}_{{questionNumber}}">
-                    {{#answers}}
-                    {{#multipleChoice}}
-                    <div class="val-row">
-                        <div class="s-2">
-                            <input type="checkbox" class="scormAnswer{{id}}_{{questionNumber}} checkbox" disabled/>
-                        </div>
-                        <div class="s-10">
-                            <div class="choiceTextContainer">
-                                <label>{{{text}}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    {{/multipleChoice}}
-                    {{^multipleChoice}}
-                    <div class="val-row">
-                        <div class="s-2">
-                            <input type="radio" class="scormAnswer{{id}}_{{questionNumber}} radio" name="scormGroup3_{{questionNumber}}" disabled/>
-                        </div>
-                        <div class="s-10">
-                            <div class="choiceTextContainer">
-                                <label>{{{text}}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    {{/multipleChoice}}
-                    {{/answers}}
-                </div>
-            </div>
-            <br class="clear"/>
-            <br>
+        <div class="feedback-block-label js-localized-label" data-value="yourAnswersLabel"></div>
+        <div id="usersAnswers{{id}}_{{questionNumber}}" class="clearfix">
+            <table class="answers-table">
+                {{#answers}}
+                {{#multipleChoice}}
+                <tr>
+                    <td>
+                        <input type="checkbox" id="userScormAnswer{{id}}_{{questionNumber}}"
+                               class="scormAnswer{{id}}_{{questionNumber}} checkbox val-checkbox" disabled/>
+                        <label class="checkbox-label" for="userScormAnswer{{id}}_{{questionNumber}}"></label>
+                    </td>
+                    <td>
+                        {{{text}}}
+                    </td>
+                </tr>
+                {{/multipleChoice}}
+                {{^multipleChoice}}
+                <tr>
+                    <td>
+                        <input type="radio" class="scormAnswer{{id}}_{{questionNumber}} radio" name="scormGroup2_{{questionNumber}}" disabled/>
+                    </td>
+                    <td>
+                        {{{text}}}
+                    </td>
+                </tr>
+                {{/multipleChoice}}
+                {{/answers}}
+            </table>
         </div>
-        {{#hasExplanation}}
-        <h4>Explanation:</h4>
 
+        <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersLabel"></div>
+        <div id="correctAnswers{{id}}_{{questionNumber}}" class="clearfix hidden js-correct-answers">
+            <table class="answers-table">
+                {{#answers}}
+                {{#multipleChoice}}
+                <tr>
+                    <td>
+                        <input type="checkbox" id="correctScormAnswer{{id}}_{{questionNumber}}"
+                               class="scormAnswer{{id}}_{{questionNumber}} checkbox val-checkbox" disabled/>
+                        <label class="checkbox-label" for="correctScormAnswer{{id}}_{{questionNumber}}"></label>
+                    </td>
+                    <td>
+                        {{{text}}}
+                    </td>
+                </tr>
+                {{/multipleChoice}}
+                {{^multipleChoice}}
+                <tr>
+                    <td>
+                        <input type="radio" class="scormAnswer{{id}}_{{questionNumber}} radio" name="scormGroup3_{{questionNumber}}" disabled/>
+                    </td>
+                    <td>
+                        {{{text}}}
+                    </td>
+                </tr>
+                {{/multipleChoice}}
+                {{/answers}}
+            </table>
+        </div>
+
+        {{#hasExplanation}}
+        <div class="js-localized-label feedback-block-label" data-value="explanationLabel"></div>
         <div id="explanation">{{{explanation}}}</div>
         {{/hasExplanation}}
     </div>
@@ -120,7 +116,7 @@
     TinCanCourseHelpers['choiceShowAnswers_{{id}}_{{questionNumber}}'] = function() {
         function check(parent, id) {
             //{{#multipleChoice}}
-            jQuery("#"+parent+" .scormAnswer" + id).attr("checked", true);
+            jQuery("#"+parent+" .scormAnswer" + id).prop("checked", true);
             //{{/multipleChoice}}
             //{{^multipleChoice}}
             jQuery("#"+parent+" .scormAnswer" + id).prop("checked", true);
@@ -131,30 +127,31 @@
         jQuery('.content{{id}}_{{questionNumber}}').hide();
 
         var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
-        parent_el.prevAll('.rj-element').hide();
-        parent_el.nextAll('.rj-element').hide();
+        parent_el.siblings('.rj-element').hide();
 
         var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
         var correct = answers.isPassed;
         var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
-        if (correctness === "") correctness = (correct) ? "Your answer is correct" : "Your answer is incorrect";
+        if (correctness === "")
+            correctness = (correct) ? LESSON_LABELS['yourAnswerIsCorrectLabel'] : LESSON_LABELS['yourAnswerIsIncorrectLabel'];
         jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
+
+        var learnerResponse = answers.rawLearnerResponse;
+        var learnerResponseAnswers = learnerResponse.split("[,]");
+        for (var i = 0; i < learnerResponseAnswers.length; i++) {
+            check("usersAnswers{{id}}_{{questionNumber}}", learnerResponseAnswers[i]);
+        }
+
         if (!correct) {
-            jQuery("#answerComparison{{id}}_{{questionNumber}}").show();
+            jQuery('.answers{{id}}_{{questionNumber}} .js-correct-answers').removeClass('hidden');
 
-            var learnerResponse = answers.rawLearnerResponse;
             var correctPattern = answers.rawCorrectResponse;
-
-            var learnerResponseAnswers = learnerResponse.split("[,]");
-            for (var i = 0; i < learnerResponseAnswers.length; i++) {
-                check("usersAnswers{{id}}_{{questionNumber}}", learnerResponseAnswers[i]);
-            }
-
             var correctPatternAnswers = correctPattern.split("[,]");
             for (var i = 0; i < correctPatternAnswers.length; i++) {
                 check("correctAnswers{{id}}_{{questionNumber}}", correctPatternAnswers[i]);
             }
         }
+        moveAnswers({{questionNumber}});
         doScale();
     };
     /*{{/autoShowAnswer}}*/

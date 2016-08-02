@@ -6,6 +6,7 @@ import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes.PeriodType
 import org.joda.time.DateTime
 
+@deprecated
 case class TincanManifest(
     id: Long,
     title: String,
@@ -19,6 +20,7 @@ case class TincanManifest(
     rerunInterval: Int = 0,
     rerunIntervalType: PeriodType = PeriodTypes.UNLIMITED,
     beginDate: Option[DateTime],
-    endDate: Option[DateTime]) extends BaseManifest {
-  def getType: LessonType = LessonType.Tincan
+    endDate: Option[DateTime],
+    content: Option[String] = None) extends BaseManifest {
+    def getType: LessonType = LessonType.Tincan
 }

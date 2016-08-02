@@ -2,8 +2,8 @@
  *  GridSnapModule
  *
  */
+var ValamisGridSnapModule = function(GridSnapModule, App, Backbone, Marionette, $, _) {
 
-slidesApp.module("GridSnapModule", function(GridSnapModule, MyApp, Backbone, Marionette, $, _) {
     this.startWithParent = false;
 
     var gridOpts = {
@@ -11,45 +11,46 @@ slidesApp.module("GridSnapModule", function(GridSnapModule, MyApp, Backbone, Mar
         verticalCenter: [],
         horizontal: [],
         horizontalCenter: [],
-        offset: 1,
+        sideOffset: {left: -1, top: -1, right: 0, bottom: 0, center: 0},
         incidence: 6,
+        partsQuantityDefault: 2,
+        partsQuantityGrid: 12,
+        partsQuantity: 2,
+        square: false,
+        visible: false,
+        lineColor: ['#E0CC1A', '#A8F4FF'],
         linesContainer: '.slides-work-area-wrapper',
         itemsPos: []
     };
 
-    GridSnapModule.generateGrid = function() {
-        var deviceLayoutCurrent = slidesApp.devicesCollection.getCurrent();
-        if(!deviceLayoutCurrent){
+    this.generateGrid = function() {
+        var containerSize = this.getContainerSize();
+        if(_.isEmpty(containerSize)){
             return;
         }
-        var containerSize = {
-                width: deviceLayoutCurrent.get('minWidth') || deviceLayoutCurrent.get('maxWidth'),
-                height: slidesApp.activeSlideModel
-                    ? slidesApp.activeSlideModel.get('height') || deviceLayoutCurrent.get('minHeight')
-                    : deviceLayoutCurrent.get('minHeight')
-            },
-            edgeMargin = deviceLayoutCurrent.get('margin');
+        var partH = Math.ceil((containerSize.width - containerSize.margin * 2) / gridOpts.partsQuantity);
+        var partsRangeH = _.range(containerSize.margin, containerSize.width - containerSize.margin - 1, partH);
+        gridOpts.horizontal = [ 0, (containerSize.width - containerSize.margin), containerSize.width ];
+        Array.prototype.splice.apply(gridOpts.horizontal, [1, 0].concat(partsRangeH));
 
-        gridOpts.vertical = [
-            0,
-            edgeMargin,
-            Math.round(containerSize.height / 2),
-            containerSize.height - edgeMargin,
-            containerSize.height
-        ];
-        gridOpts.horizontal = [
-            0,
-            edgeMargin,
-            Math.round(containerSize.width / 2),
-            containerSize.width - edgeMargin,
-            containerSize.width
-        ];
+        gridOpts.vertical = [ 0, containerSize.height - containerSize.margin, containerSize.height ];
+        var partV = gridOpts.square
+            ? partH
+            : Math.ceil((containerSize.height - containerSize.margin * 2) / gridOpts.partsQuantity);
+        var partsRangeV = _.range(containerSize.margin, containerSize.height - containerSize.margin - 1, partV);
+        Array.prototype.splice.apply(gridOpts.vertical, [1, 0].concat(partsRangeV));
+
         gridOpts.verticalCenter = [ Math.round(containerSize.height / 2) ];
         gridOpts.horizontalCenter = [ Math.round(containerSize.width / 2) ];
+
+        //Display grid
+        if(gridOpts.visible){
+            this.displayGrid();
+        }
     };
 
     var findNear = function(pos, posName){
-        var posValues = _.range(Math.round(pos)-gridOpts.incidence+gridOpts.offset, Math.round(pos)+gridOpts.incidence+gridOpts.offset);
+        var posValues = _.range(Math.round(pos) - gridOpts.incidence, Math.round(pos) + gridOpts.incidence);
         var near = _.intersection(gridOpts[posName],posValues);
         if(near.length == 0 && _.contains(['vertical','horizontal'], posName)){
             for(var i = 0; i < gridOpts.itemsPos.length; i++){
@@ -62,32 +63,31 @@ slidesApp.module("GridSnapModule", function(GridSnapModule, MyApp, Backbone, Mar
         return near;
     };
 
-    GridSnapModule.onStart = function() {
-        GridSnapModule.generateGrid();
+    this.onStart = function() {
+        this.generateGrid();
     };
 
-    GridSnapModule.prepareItemsSnap = function() {
-        if(!slidesApp.activeElement.view) { return; }
+    this.prepareItemsSnap = function() {
+        if(!App.activeElement.view) { return; }
         gridOpts.itemsPos = [];
-        var currentSlideId = slidesApp.activeSlideModel.get('id'),
-            activeElement = slidesApp.activeElement.view.model,
-            entireId = activeElement.get('id') || activeElement.get('tempId');
-        _.each(slidesApp.slideElementCollection.where({slideId: currentSlideId, toBeRemoved: false, classHidden: ''}),function(item){
-            var itemId = item.get('id') || item.get('tempId');
+        var activeElement = App.activeElement.view.model,
+            entireId = activeElement.getId();
+        _.each(App.activeSlideModel.getElements({classHidden: ''}),function(item){
+            var itemId = item.getId();
             if(itemId != entireId){
                 gridOpts.itemsPos.push({
-                    vertical: [ parseInt(item.get('top')) + gridOpts.offset, parseInt(item.get('top')) + parseInt(item.get('height')) + gridOpts.offset ],
-                    horizontal: [ parseInt(item.get('left')) + gridOpts.offset, parseInt(item.get('left')) + parseInt(item.get('width')) + gridOpts.offset ]
+                    vertical: [ parseInt(item.get('top')), parseInt(item.get('top')) + parseInt(item.get('height')) ],
+                    horizontal: [ parseInt(item.get('left')), parseInt(item.get('left')) + parseInt(item.get('width')) ]
                 });
             }
         });
     };
 
-    GridSnapModule.findNearPos = function(pos, posName, sideName, returnCurrent) {
+    this.findNearPos = function(pos, posName, sideName, returnCurrent) {
         var near = findNear(pos, posName);
         if( near.length > 0 ){
             this.addLine(near[0], posName, sideName);
-            near[0] -= gridOpts.offset;
+            near[0] += gridOpts.sideOffset[sideName];
             return near[0];
         }else{
             this.removeLines(posName,sideName);
@@ -95,12 +95,12 @@ slidesApp.module("GridSnapModule", function(GridSnapModule, MyApp, Backbone, Mar
         }
     };
 
-    GridSnapModule.findNearPosDelta = function(pos, posName, sideName) {
+    this.findNearPosDelta = function(pos, posName, sideName) {
         var newPos = this.findNearPos(pos, posName, sideName, false);
         return newPos ? newPos - pos : 0;
     };
 
-    GridSnapModule.findNearWidth = function(pos, width, returnCurrent) {
+    this.findNearWidth = function(pos, width, returnCurrent) {
         var posSideRight = this.findNearPos(pos + width, 'horizontal', 'right', false);
         if(posSideRight){
             return posSideRight - pos;
@@ -109,7 +109,7 @@ slidesApp.module("GridSnapModule", function(GridSnapModule, MyApp, Backbone, Mar
         }
     };
 
-    GridSnapModule.findNearHeight = function(pos, height, returnCurrent) {
+    this.findNearHeight = function(pos, height, returnCurrent) {
         var posSideBottom = this.findNearPos(pos + height, 'vertical', 'bottom', false);
         if(posSideBottom){
             return posSideBottom - pos;
@@ -118,139 +118,244 @@ slidesApp.module("GridSnapModule", function(GridSnapModule, MyApp, Backbone, Mar
         }
     };
 
-    GridSnapModule.findNearPosRatio = function(pos, posName, sideName) {
+    this.findNearPosRatio = function(pos, posName, sideName) {
         var newPos = this.findNearPos(pos, posName, sideName, true);
         return newPos / pos;
     };
 
-    GridSnapModule.getPosSideTop = function(posSideTop) {
+    this.getPosSideTop = function(posSideTop) {
         posSideTop = this.findNearPos(posSideTop, 'vertical', 'top', true);
         var posSideBottom = this.findNearPos(
-            posSideTop + parseInt(slidesApp.activeElement.view.$el.height()),
+            posSideTop + parseInt(App.activeElement.view.$el.height()),
             'vertical',
             'bottom',
             false
         );
         if( posSideBottom ){
-            posSideTop = posSideBottom - parseInt(slidesApp.activeElement.view.$el.height());
+            posSideTop = posSideBottom - parseInt(App.activeElement.view.$el.height());
         }
         else {
             var posSideCenter = this.findNearPos(
-                posSideTop + (parseInt(slidesApp.activeElement.view.$el.height()) / 2),
-                'verticalCenter',
+                posSideTop + (parseInt(App.activeElement.view.$el.height()) / 2),
+                'vertical',//vertical | verticalCenter
                 'center',
                 false
             );
             if(posSideCenter){
-                posSideTop = posSideCenter - (parseInt(slidesApp.activeElement.view.$el.height()) / 2);
+                posSideTop = posSideCenter - (parseInt(App.activeElement.view.$el.height()) / 2);
             }
         }
         return posSideTop;
     };
 
-    GridSnapModule.getPosSideLeft = function(posSideLeft) {
+    this.getPosSideLeft = function(posSideLeft) {
         posSideLeft = this.findNearPos(posSideLeft, 'horizontal', 'left', true);
         var posSideRight = this.findNearPos(
-            posSideLeft + parseInt(slidesApp.activeElement.view.$el.width()),
+            posSideLeft + parseInt(App.activeElement.view.$el.width()),
             'horizontal',
             'right',
             false
         );
         if( posSideRight ){
-            posSideLeft = posSideRight - parseInt(slidesApp.activeElement.view.$el.width());
+            posSideLeft = posSideRight - parseInt(App.activeElement.view.$el.width());
         }
         else {
             var posSideCenter = this.findNearPos(
-                posSideLeft + (parseInt(slidesApp.activeElement.view.$el.width()) / 2),
-                'horizontalCenter',
+                posSideLeft + (parseInt(App.activeElement.view.$el.width()) / 2),
+                'horizontal',//horizontal | horizontalCenter
                 'center',
                 false
             );
             if(posSideCenter){
-                posSideLeft = posSideCenter - (parseInt(slidesApp.activeElement.view.$el.width()) / 2);
+                posSideLeft = posSideCenter - (parseInt(App.activeElement.view.$el.width()) / 2);
             }
         }
         return posSideLeft;
     };
 
-    GridSnapModule.snapSize = function(direction, size, pos, aspectRatio) {
+    this.snapSize = function(direction, pos, size, originalSize, aspectRatio) {
+        var ratio;
         // width
-        if(_.indexOf(['e','se','ne'],direction) > -1){
+        if(_.contains(['e','se','ne'], direction)){
             var new_width = this.findNearWidth(pos.left, size.width, false);
             if(new_width){
+                ratio = originalSize.height / originalSize.width;
+                if(direction == 'ne' && aspectRatio){
+                    pos.top -= (new_width - size.width) * ratio;
+                }
                 size.width = new_width;
                 if(aspectRatio)
-                    size.height = slidesApp.activeElement.view.model.get('height');
+                    size.height = size.width * ratio;
             }
         }
         // height
-        if(_.indexOf(['s','se','sw'],direction) > -1){
+        if(_.contains(['s','se','sw'], direction)){
             var new_height = this.findNearHeight(pos.top, size.height, false);
             if(new_height){
+                ratio = originalSize.width / originalSize.height;
+                if(direction == 'sw' && aspectRatio){
+                    pos.left -= (new_height - size.height) * ratio;
+                }
                 size.height = new_height;
                 if(aspectRatio)
-                    size.width = slidesApp.activeElement.view.model.get('width');
+                    size.width = size.height * ratio;
             }
         }
         return size;
     };
 
-    GridSnapModule.snapTopResize = function(posSideTop, currentTop, size){
-        var posSideTopDelta = this.findNearPosDelta(posSideTop, 'vertical', 'top');
-        if(posSideTopDelta){
-            if(currentTop != posSideTop + posSideTopDelta){
-                slidesApp.activeElement.view.model.set('height', size.height - posSideTopDelta);
-            }
-            size.height = slidesApp.activeElement.view.model.get('height');
+    this.snapTopResize = function(direction, pos, size, originalSize, aspectRatio){
+        var posSideTopDelta = this.findNearPosDelta(pos.top, 'vertical', 'top');
+        var ratio = originalSize.width / originalSize.height;
+        if(_.contains(['nw', 'sw'], direction) && aspectRatio){
+            pos.left += posSideTopDelta * ratio;
         }
-        return posSideTop + posSideTopDelta;
+        pos.top += posSideTopDelta;
+        size.height -= posSideTopDelta;
+        if(aspectRatio){
+            size.width = size.height * ratio;
+        }
     };
 
-    GridSnapModule.snapLeftResize = function(posSideLeft, currentLeft, size) {
-        var posSideLeftDelta = this.findNearPosDelta(posSideLeft, 'horizontal', 'left');
-        if(posSideLeftDelta){
-            if(currentLeft != posSideLeft + posSideLeftDelta){
-                slidesApp.activeElement.view.model.set('width', size.width - posSideLeftDelta);
-            }
-            size.width = slidesApp.activeElement.view.model.get('width');
+    this.snapLeftResize = function(direction, pos, size, originalSize, aspectRatio) {
+        var posSideLeftDelta = this.findNearPosDelta(pos.left, 'horizontal', 'left');
+        var ratio = originalSize.height / originalSize.width;
+        if(direction == 'nw'){
+            pos.top += posSideLeftDelta * ratio;
         }
-        return posSideLeft + posSideLeftDelta;
+        pos.left += posSideLeftDelta;
+        size.width -= posSideLeftDelta;
+        if(aspectRatio){
+            size.height = size.width * ratio;
+        }
     };
 
-    GridSnapModule.addLine = function(pos, posName, sideName) {
+    this.addLine = function(pos, posName, sideName, type, margin) {
 
-        var parent = jQueryValamis(gridOpts.linesContainer),
+        type = type || 'line';
+        margin = margin || 0;
+        var lineColor, offset;
+        if( type == 'grid' ){
+            lineColor = gridOpts.lineColor[1];
+            offset = 0 - margin;
+        } else {
+            lineColor = gridOpts.lineColor[0];
+            offset = 10 - margin;
+        }
+
+        var parent = $(gridOpts.linesContainer),
             isVertical = posName.indexOf('vertical') > -1,
-            leftPos = isVertical ? -10 : pos,
-            topPos = isVertical ? pos : -10,
-            height = isVertical ? 0 : parent.height() + 20,
-            width = isVertical ? parent.width() + 20 : 0;
+            leftPos = isVertical ? 0 - offset : pos,
+            topPos = isVertical ? pos : 0 - offset,
+            height = isVertical ? 1 : parent.height() + offset * 2,
+            width = isVertical ? parent.width() + offset * 2 : 1;
 
-        if( jQueryValamis('#gridLine'+posName+sideName+pos).size() == 0 ){
-            jQueryValamis('<div/>',{
-                'id': 'gridLine'+posName+sideName+pos,
-                'class': 'grid-line grid-line-' + posName + '-' + sideName
+        if( $('#gridLine-' + [posName, sideName, pos].join('-') + '.' + type).size() == 0 ){
+            $('<div/>',{
+                'id': 'gridLine-' + [posName, sideName, pos].join('-'),
+                'class': 'grid-line ' + type + ' grid-line-' + [posName, sideName].join('-')
             })
-            .css({
-                width: width,
-                height: height,
-                position: 'absolute',
-                left: leftPos,
-                top: topPos,
-                borderTop: isVertical ? '1px solid #E0CC1A' : '0',
-                borderLeft: !isVertical ? '1px solid #E0CC1A' : '0'
-            })
-            .appendTo(parent);
+                .css({
+                    width: width,
+                    height: height,
+                    left: leftPos,
+                    top: topPos,
+                    backgroundColor: lineColor
+                })
+                .appendTo(parent);
         }
 
     };
 
-    GridSnapModule.removeLines = function(posName, sideName) {
+    this.removeLines = function(posName, sideName) {
         if( typeof posName != 'undefined' ){
-            jQueryValamis('.grid-line-' + posName + '-' + sideName, gridOpts.linesContainer).remove();
+            $(gridOpts.linesContainer).find('.grid-line-' + [posName, sideName].join('-')).not('.grid').remove();
         }else{
-            jQueryValamis('.grid-line', gridOpts.linesContainer).remove();
+            $('.grid-line', gridOpts.linesContainer).not('.grid').remove();
         }
     };
 
-});
+    this.removeGrid = function() {
+        $('.grid-line.grid', gridOpts.linesContainer).remove();
+    };
+
+    this.disableGrid = function() {
+        if( $(gridOpts.linesContainer).find('.grid-line').size() > 0 ){
+            this.displayGridToggle();
+        }
+    };
+
+    this.getLayoutSize = function(){
+        var deviceLayoutCurrent = App.devicesCollection.getCurrent();
+        if(!deviceLayoutCurrent){
+            return {};
+        }
+        var containerSize = {
+            width: deviceLayoutCurrent.get('minWidth') || deviceLayoutCurrent.get('maxWidth'),
+            height: App.activeSlideModel && App.activeSlideModel.get('height')
+                ? App.activeSlideModel.get('height')
+                : deviceLayoutCurrent.get('minHeight'),
+            margin: deviceLayoutCurrent.get('margin')
+        };
+        return containerSize;
+    };
+
+    this.getContainerSize = function(){
+        var containerSize = this.getLayoutSize();
+        if(!_.isEmpty(containerSize)){
+            containerSize = _.mapValues(containerSize, function(val){
+                return parseInt(val, 10);
+            });
+            var excess = (containerSize.width - containerSize.margin * 2) % gridOpts.partsQuantityGrid;//Always depends on the grid size
+            containerSize.margin = Math.ceil(containerSize.margin + excess / 2);
+        }
+        return containerSize;
+    };
+
+    this.displayGridToggle = function(){
+
+        if( $(gridOpts.linesContainer).find('.grid-line').size() > 0 ){
+            this.removeGrid();
+            this.configure({
+                partsQuantity: gridOpts.partsQuantityDefault,
+                square: false,
+                visible: false
+            });
+            GridSnapModule.generateGrid();
+
+        } else {
+
+            this.configure({
+                partsQuantity: gridOpts.partsQuantityGrid,
+                square: true,
+                visible: true
+            });
+            GridSnapModule.generateGrid();
+        }
+
+    };
+
+    this.displayGrid = function(){
+        this.removeGrid();
+        var containerSize = this.getContainerSize();
+        if(!_.isEmpty(containerSize)){
+            _.each(gridOpts.horizontal, function(value, key){
+                if( _.contains([0, gridOpts.horizontal.length - 1], key) ) return;
+                GridSnapModule.addLine(value, 'horizontal', 'left', 'grid', containerSize.margin);
+            });
+            _.each(gridOpts.vertical, function(value, key){
+                if( _.contains([0, gridOpts.vertical.length - 1], key) ) return;
+                GridSnapModule.addLine(value, 'vertical', 'top', 'grid', containerSize.margin);
+            });
+        }
+    };
+
+    this.getConfig = function(){
+        return gridOpts;
+    };
+
+    this.configure = function(opts){
+        _.extend( gridOpts, opts );
+    };
+
+};

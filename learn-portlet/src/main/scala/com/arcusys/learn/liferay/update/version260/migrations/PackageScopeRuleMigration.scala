@@ -1,19 +1,19 @@
 package com.arcusys.learn.liferay.update.version260.migrations
 
-import com.arcusys.valamis.core.SlickProfile
-import com.arcusys.valamis.lesson.PackageScopeRuleTableComponent
-import com.arcusys.valamis.lesson.model.PackageScopeRule
-import com.arcusys.valamis.model.ScopeType
-import com.liferay.portal.kernel.log.LogFactoryUtil
+import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.learn.liferay.LogFactoryHelper
+
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery, GetResult, JdbcBackend}
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
+import com.arcusys.valamis.util.enumeration.EnumerationExtensions
+import slick.jdbc.GetResult
 
 class PackageScopeRuleMigration(val db: JdbcBackend#DatabaseDef,
                                 val driver: JdbcProfile)
   extends PackageScopeRuleTableComponent with SlickProfile {
   import driver.simple._
 
-  val log = LogFactoryUtil.getLog(getClass)
+  val log = LogFactoryHelper.getLog(getClass)
 
   case class OldEntity(id: Int,
                        packageId: Option[Int],
@@ -38,7 +38,7 @@ class PackageScopeRuleMigration(val db: JdbcBackend#DatabaseDef,
   }
 
   def toNewData(entity: OldEntity): Option[PackageScopeRule] = {
-    if (ScopeType.isValid(entity.scope.getOrElse("")))
+    if (entity.scope.exists(ScopeType.isValid))
       Some(PackageScopeRule(
         entity.packageId.get,
         ScopeType.withName(entity.scope.get),

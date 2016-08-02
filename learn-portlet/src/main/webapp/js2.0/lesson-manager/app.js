@@ -13,7 +13,7 @@ var LessonManager = Marionette.Application.extend({
         this.settings.fetch();
 
     },
-    start: function(options){
+    onStart: function(options){
         var previousFilter = this.settings.get('searchParams');
         this.filter = new lessonManager.Entities.Filter(previousFilter);
 
@@ -38,7 +38,9 @@ var lessonManager = new LessonManager();
 lessonManager.commands.setHandler('package:save', function(model){
     var scope = lessonManager.filter.get('scope');
     var options = {scope: scope, silent: true};
-    model.save({}, options);
+    model.save({}, options).then(function() {
+        model.trigger('itemSaved');
+    });
 });
 
 lessonManager.commands.setHandler('package:remove', function(model){

@@ -1,32 +1,34 @@
 package com.arcusys.valamis.slide.service.export
 
 import java.io.{ByteArrayInputStream, File, FileInputStream, InputStream}
-import java.util.regex.Pattern
+import javax.servlet.ServletContext
 
+import com.arcusys.learn.liferay.util.SearchEngineUtilHelper.{SearchContentFileCharset, SearchContentFileName}
 import com.arcusys.valamis.content.model.QuestionType.QuestionType
+import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.service.{PlainTextService, QuestionService}
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lesson.generator.tincan.file.TinCanRevealJSPackageGeneratorContract
 import com.arcusys.valamis.lesson.generator.tincan.file.html.TinCanQuestionViewGenerator
-
-import com.arcusys.valamis.content.model._
-
+import com.arcusys.valamis.lrs.serializer.DateTimeSerializer
 import com.arcusys.valamis.slide.model.{SlideElementModel, SlideEntityType, SlideModel}
-import com.arcusys.valamis.slide.service.{SlideElementServiceContract, SlideServiceContract, SlideSetServiceContract}
-import com.arcusys.valamis.uri.model.{ValamisURI, ValamisURIType}
-import com.arcusys.valamis.uri.service.URIServiceContract
+import com.arcusys.valamis.slide.service.{SlideServiceContract, SlideSetServiceContract}
+import com.arcusys.valamis.uri.model.{TincanURI, TincanURIType}
+import com.arcusys.valamis.uri.service.TincanURIService
+import com.arcusys.valamis.utils.ResourceReader
 import com.arcusys.valamis.util.mustache.Mustache
 import com.arcusys.valamis.util.serialization.JsonHelper._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.liferay.portal.kernel.util.HtmlUtil
 import org.json4s.{DefaultFormats, Formats}
 
 import scala.collection.mutable.ListBuffer
 
 trait SlideSetPublisherContract {
-  def composeTinCanPackage(slideSetId: Long, learnPortletPath: String, title: String, description: String): File
+  def composeTinCanPackage(servletContext: ServletContext, slideSetId: Long, title: String, description: String): File
 }
 
-class SlideSetPublisher(implicit val bindingModule: BindingModule)
+abstract class SlideSetPublisher(implicit val bindingModule: BindingModule)
   extends Injectable
   with SlideSetExportUtils
   with SlideSetPublisherContract {
@@ -34,77 +36,62 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
   private val tinCanRevealJSPackageGenerator = inject[TinCanRevealJSPackageGeneratorContract]
   private lazy val slideService = inject[SlideServiceContract]
   private lazy val slideSetService = inject[SlideSetServiceContract]
-  private lazy val slideElementService = inject[SlideElementServiceContract]
   protected lazy val questionService = inject[QuestionService]
   protected lazy val plainTextService = inject[PlainTextService]
   protected lazy val fileService = inject[FileService]
-  private val tincanQuestionViewGenerator = new TinCanQuestionViewGenerator(isPreview = false)
-  private lazy val uriService = inject[URIServiceContract]
-  implicit val jf: Formats = DefaultFormats + new SlidePropertiesSerializer + new SlideElementsPropertiesSerializer
+  private val tincanQuestionViewGenerator = new TinCanQuestionViewGenerator
+  private lazy val uriService = inject[TincanURIService]
+  def resourceReader: ResourceReader
+  implicit val jf: Formats = DefaultFormats + new SlidePropertiesSerializer + new SlideElementsPropertiesSerializer + DateTimeSerializer
 
-  private def getResourceInputStream(name: String) = Thread.currentThread.getContextClassLoader.getResourceAsStream(name)
+  private val lessonGeneratorClassLoader = classOf[TinCanQuestionViewGenerator].getClassLoader
+  private def getResourceInputStream(name: String) = lessonGeneratorClassLoader.getResourceAsStream(name)
 
-  private def flat(ls: List[Any]): List[Any] =
+  private def flat[T](ls: List[T]): List[T] =
     ls.flatten {
-      case ls: List[Any] => flat(ls)
+      case ls: List[T] => flat(ls)
       case value => List(value)
     }
 
   private lazy val indexTemplate = new Mustache(scala.io.Source.fromInputStream(getResourceInputStream("tincan/revealjs.html")).mkString)
 
-  private val vendorJSFileNames =
-    "jquery.min.js" ::
-      "reveal.min.js" ::
-      "jquery-ui-1.10.4.custom.min.js" ::
-      "jquery.ui.widget.js" ::
-      "jquery.ui.touch-punch.min.js" ::
-      "lodash.min.js" ::
-      "backbone-min.js" ::
-      "backbone.marionette_new.min.js" ::
-      "backbone.service.js" ::
-      "mustache.min.js" ::
-      Nil
+  def composeContentForSearchIndex(questions: List[(Question, Seq[Answer])], plaintexts: List[PlainText], slideElements: Seq[SlideElementModel]): String = {
+    val contentBuilder = new StringBuilder()
 
-  private val slideSetJSFileNames =
-    "Urls.js" ::
-      "lesson-studio/helper.js" ::
-      "lesson-studio/loadTemplates.js" ::
-      "lesson-studio/model-entities.js" ::
-      "question-manager/models/AnswerModel.js" ::
-      "question-manager/models/QuestionModel.js" ::
-      "lesson-studio/TinCanPackageRenderer.js" ::
-      "lesson-studio/TinCanPackageGenericItem.js" ::
-      Nil
+    questions.foreach { case (q, _) =>
+      contentBuilder.append(q.text).append(" ")
+    }
 
-  private val commonJSFileNames =
-    "base.js" ::
-      Nil
+    plaintexts.foreach { pt =>
+      contentBuilder.append(pt.text).append(" ")
+    }
 
-  private val slideSetCSSFileNames =
-    "reveal.min.css" ::
-      "video-js.min.css" ::
-      "katex.min.css" ::
-      "valamis.css" ::
-      "valamis_slides.css" ::
-      "theme/valamis_slides_theme.css" ::
-      Nil
+    slideElements.foreach { el =>
+      contentBuilder.append(el.content).append(" ")
+    }
 
-  override def composeTinCanPackage(slideSetId: Long, learnPortletPath: String, title: String, description: String): File = {
+    HtmlUtil.extractText(contentBuilder.toString())
+  }
+
+
+  override def composeTinCanPackage(servletContext: ServletContext, slideSetId: Long, title: String, description: String): File = {
     val lessonSummaryRegexStr = """.*<span.+id="lesson-summary-table".*>.*</span>.*"""
     val scriptRegex = "(?s)(<script>.*?</script>)".r
     val sectionRegex = "(?s)<section>(.*?)</section>".r
     val lessonSummaryTemplate = scala.io.Source.fromInputStream(getResourceInputStream("tincan/summary.html")).mkString
 
+    val slideElementsToIndex = new ListBuffer[SlideElementModel]()
+
     val slides = slideService.getBySlideSetId(slideSetId, Some(false)).map { slide =>
       val statementVerbWithName = slide.statementVerb
         .flatMap(x =>
           if (x.startsWith("http://adlnet.gov/expapi/verbs/"))
-            Some(ValamisURI(x, x, ValamisURIType.Verb, x.reverse.takeWhile(_ != '/').reverse))
+            Some(TincanURI(x, x, TincanURIType.Verb, x.reverse.takeWhile(_ != '/').reverse))
           else
-            uriService.getById(x, ValamisURIType.Verb))
+            uriService.getById(x, TincanURIType.Verb))
         .map(x => x.uri + "/" + x.content)
       val statementCategoryWithName = slide.statementCategoryId
-        .flatMap(uriService.getById(_, ValamisURIType.Category))
+        .flatMap(uriService.getById(_, TincanURIType.Category))
         .map(x => x.uri + "/" + x.content)
 
       val lessonSummaryHTML = sectionRegex
@@ -118,10 +105,6 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
             case SlideEntityType.Text if slideElement.content.matches(lessonSummaryRegexStr) =>
               SlideElementModel(
                 slideElement.id,
-                slideElement.top,
-                slideElement.left,
-                slideElement.width,
-                slideElement.height,
                 slideElement.zIndex,
                 slideElement.content.replaceFirst(lessonSummaryRegexStr, lessonSummaryHTML),
                 slideElement.slideEntityType,
@@ -131,6 +114,9 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
                 slideElement.notifyCorrectAnswer,
                 slideElement.properties
               )
+            case SlideEntityType.Text =>
+              slideElementsToIndex += slideElement
+              slideElement
             case _ => slideElement
           }
         }
@@ -161,20 +147,14 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
     val slideTypes = slides.map(_.slideElements).flatMap(x => x.map(_.slideEntityType)).distinct
 
     val additionalJSFileNames = slideTypes.collect {
-      case SlideEntityType.Video => "video.js"
-      case SlideEntityType.Math => "katex.min.js"
-      case SlideEntityType.Webgl => "three.min.js" :: "TrackballControls.js" :: Nil
-    }
-
-    val fontFiles = filesFromDirectory(List(learnPortletPath + "fonts/"), None, isRecursive = true)
-    val previewResourceFiles =
-      if (slideTypes contains SlideEntityType.Pdf)
-        filesFromDirectory(List(learnPortletPath + "preview-resources/pdf/"), None, isRecursive = true)
-      else Nil
+      case SlideEntityType.Video => PublisherFileLists.videoVendorJSFileNames
+      case SlideEntityType.Math => PublisherFileLists.mathVendorJSFileNames
+      case SlideEntityType.Webgl => PublisherFileLists.webglVendorJSFileNames
+    } toList
 
     val URI = {
       val uriContent = Option(Map("title" -> title, "description" -> description).toJson)
-      uriService.createLocal(ValamisURIType.Course, uriContent)
+      uriService.createRandom(TincanURIType.Course, uriContent)
     }
 
     val slideSet = slideSetService.getById(slideSetId)
@@ -185,21 +165,28 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
         slideSet
           .exists(_.isSelectedContinuity)
 
+    val (questionsMap, questions, plaintexts) = getQuestionsInfo(slides)
+
+    val contentToIndex = composeContentForSearchIndex(questions, plaintexts, slideElementsToIndex.toList)
+
     val indexPageModel = Map(
       "title" -> title,
       "slidesJson" -> slides.toJson,
       "isSlideJsonAvailable" -> true,
-      "includeVendorFiles" -> flat(additionalJSFileNames :: vendorJSFileNames).map(fileName => "js/" + fileName),
-      "includeCommonFiles" -> commonJSFileNames.map(fileName => "js/" + fileName),
-      "includeFiles" -> slideSetJSFileNames.map(fileName => "js/" + fileName),
-      "includeCSS" -> slideSetCSSFileNames.map(fileName => "css/" + fileName),
-      "includeFonts" -> fontFiles.map(file => "fonts/" + file._1.replace(learnPortletPath, "")),
-      "rootActivityId" -> URI.uri,
+      "includeVendorFiles" -> flat(additionalJSFileNames :: PublisherFileLists.vendorJSFileNames).map(fileName => "js/" + fileName),
+      "includeCommonFiles" -> PublisherFileLists.commonJSFileNames.map(fileName => "js/" + fileName),
+      "includeFiles" -> PublisherFileLists.slideSetJSFileNames.map(fileName => "js/" + fileName),
+      "includeCSS" -> PublisherFileLists.slideSetCSSFileNames.map(fileName => "css/" + fileName),
+      "includeFonts" -> PublisherFileLists.fontsFileNames.map(fileName => "fonts/" + fileName),
+      "rootActivityId" -> slideSet.get.activityId,
       "scoreLimit" -> slideSet.get.scoreLimit.getOrElse(0.7),
       "canPause" -> isSelectedContinuity,
       "duration" -> slideSet.get.duration.getOrElse(0L),
-      "playerTitle" -> slideSet.get.playerTitle
-    ) ++ getQuestionsMap(slides)
+      "playerTitle" -> slideSet.get.playerTitle,
+      "version" -> slideSet.get.version,
+      "oneAnswerAttempt" -> slideSet.get.oneAnswerAttempt,
+      "modifiedDate" -> slideSet.get.modifiedDate
+    ) ++ questionsMap
 
     val index = new ByteArrayInputStream(indexTemplate.render(
       if (lessonSummarySlidesCount.nonEmpty)
@@ -212,19 +199,20 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
     ).getBytes)
 
     val filesToAdd: List[(String, InputStream)] =
-      ("index.html" -> index) ::
+      (SearchContentFileName -> new ByteArrayInputStream(contentToIndex.getBytes(SearchContentFileCharset))) ::
+        ("index.html" -> index) ::
         getRequiredFiles(slides) :::
-        flat(additionalJSFileNames ::: vendorJSFileNames).map(fileName => "js/" + fileName -> new FileInputStream(learnPortletPath + "js2.0/vendor/" + fileName)) :::
-        commonJSFileNames.map(fileName => "js/" + fileName -> getResourceInputStream("common/" + fileName)) ::: {
-        previewResourceFiles ::: fontFiles
-      }.map(file => file._1.replaceAll(Pattern.quote(learnPortletPath), "") -> file._2) :::
-        slideSetJSFileNames.map(fileName => "js/" + fileName -> new FileInputStream(learnPortletPath + "js2.0/" + fileName)) :::
-        slideSetCSSFileNames.map(fileName => "css/" + fileName -> new FileInputStream(learnPortletPath + "css2.0/" + fileName))
+        flat(additionalJSFileNames ::: PublisherFileLists.vendorJSFileNames).map(fileName => "js/" + fileName -> resourceReader.getResourceAsStream(servletContext, "js2.0/vendor/" + fileName)) :::
+        PublisherFileLists.commonJSFileNames.map(fileName => "js/" + fileName -> getResourceInputStream("common/" + fileName)) :::
+        PublisherFileLists.previewResourceFiles.map(fileName => "pdf/" + fileName -> resourceReader.getResourceAsStream(servletContext, "preview-resources/pdf/" + fileName)) :::
+        PublisherFileLists.fontsFileNames.map(fileName => "fonts/" + fileName -> resourceReader.getResourceAsStream(servletContext, "fonts/" + fileName)) :::
+        PublisherFileLists.slideSetJSFileNames.map(fileName => "js/" + fileName -> resourceReader.getResourceAsStream(servletContext, "js2.0/" + fileName)) :::
+        PublisherFileLists.slideSetCSSFileNames.map(fileName => "css/" + fileName -> resourceReader.getResourceAsStream(servletContext, "css2.0/" + fileName))
 
-    tinCanRevealJSPackageGenerator.composePackage(omitFileDuplicates(filesToAdd), URI.uri, title, description)
+    tinCanRevealJSPackageGenerator.composePackage(omitFileDuplicates(filesToAdd), slideSet.get.activityId, title, description)
   }
 
-  private def getQuestionsMap(slides: List[SlideModel]): Map[String, Any] = {
+  private def getQuestionsInfo(slides: List[SlideModel]): (Map[String, Any], List[(Question, Seq[Answer])], List[PlainText]) = {
     val questionsList = new ListBuffer[Map[String, Any]]()
     val plaintextsList = new ListBuffer[Map[String, Any]]()
     val randomQuestionsList = new ListBuffer[Map[String, Any]]()
@@ -295,14 +283,14 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
             questionMarkup + "</script>")
       }
     }
-    Map(
+    (Map(
       "questionsJson" -> questionsList.toList.toJson,
       "plaintextsJson" -> plaintextsList.toList.toJson,
       "randomQuestionJson" -> randomQuestionsList.toList.toJson,
       "randomPlaintextJson" -> randomPlainTextList.toList.toJson,
       "questionScripts" -> questionScripts.toList,
       "questionMarkupTemplates" -> questionMarkupTemplates.toList
-    )
+    ), questions, plaintexts)
   }
 
   private def getQuestionScript(questionHTML: String): Option[String] = {
@@ -316,9 +304,9 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
   }
 
   private def getQuestionHTML(question: Question,
-    answers: Seq[Answer],
-    slide: SlideElementModel,
-    questionsList: ListBuffer[Map[String, Any]]): String = {
+                              answers: Seq[Answer],
+                              slide: SlideElementModel,
+                              questionsList: ListBuffer[Map[String, Any]]): String = {
     val autoShowAnswer = slide.notifyCorrectAnswer.getOrElse(false)
     questionsList +=
       tincanQuestionViewGenerator.getViewModelFromQuestion(
@@ -336,8 +324,8 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
   }
 
   private def getPlainTextHTML(plainText: PlainText,
-    slide: SlideElementModel,
-    plainTextList: ListBuffer[Map[String, Any]]): String = {
+                               slide: SlideElementModel,
+                               plainTextList: ListBuffer[Map[String, Any]]): String = {
     val model = tincanQuestionViewGenerator.getViewModelFromPlainText(
       plainText,
       slide.id.get
@@ -408,23 +396,5 @@ class SlideSetPublisher(implicit val bindingModule: BindingModule)
       } else if (!fileEntry.isDirectory) fileList = ((prefix + fileEntry.getName) -> new FileInputStream(fileEntry)) :: fileList
     }
     fileList
-  }
-
-  private def addSlideElement(width: String,
-                              height: String,
-                              content: String,
-                              slideElementType: String,
-                              slideId: Long,
-                              showCorrectAnswer: Option[Boolean] = None) = {
-    slideElementService.create(
-      SlideElementModel(
-        width = width,
-        height = height,
-        content = content,
-        slideEntityType = slideElementType,
-        slideId = slideId,
-        notifyCorrectAnswer = showCorrectAnswer
-      )
-    )
   }
 }

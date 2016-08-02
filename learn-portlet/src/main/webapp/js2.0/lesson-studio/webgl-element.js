@@ -32,6 +32,7 @@ var WebglElementModule = slidesApp.module('WebglElementModule', {
                     this.installModel(src);
                     this.content.css('background-color', 'transparent');
                     this.$('.content-icon-arrange').hide();
+                    this.trigger('resize:stop');
                     slidesApp.viewId = this.cid;
                     slidesApp.actionType = 'itemContentChanged';
                     slidesApp.oldValue = {contentType: 'url', content: oldUrl};

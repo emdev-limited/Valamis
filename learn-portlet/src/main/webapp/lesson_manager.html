@@ -39,7 +39,6 @@
 
         var permissionActionsLessonManager = {
             LM_MODIFY: eval('{{permissionToModify}}'),
-            LM_SET_DEFAULT: eval('{{permissionSetDefault}}'),
             LM_SET_VISIBLE: eval('{{permissionSetVisible}}'),
             LM_CAN_EXPORT: eval('{{permissionExport}}'),
             LM_CAN_UPLOAD: eval('{{permissionUpload}}')
@@ -49,11 +48,7 @@
             resourceName: 'lessonManager',
             permissions: permissionActionsLessonManager,
             app: lessonManager,
-            appOptions: {},
-            options: {
-                contextPath: '{{{contextPath}}}',
-                apiPath: path.root + path.api.prefix
-            }
+            appOptions: {}
         };
 
         valamisApp.execute('subapp:start', lessonManagerOptions);

@@ -1,6 +1,6 @@
-
 <!--[if (gte IE 8)&(lt IE 10)]>
 <script src="{{contextPath}}/js2.0/cors/jquery.xdr-transport.js"></script>
+<script src="{{contextPath}}/js2.0/vendor/classList.min.js"></script>
 <![endif]-->
 
 <div id="lessonStudioAppRegion"></div>
@@ -14,6 +14,10 @@
                 <div class="reveal-controls"></div>
             </div>
             <div id="slides-modals-layout"></div>
+            <div class="js-version-sidebar version-sidebar">
+
+
+            </div>
         </div>
     </div>
     <div class="slides-editor-topbar js-slides-editor-topbar"></div>
@@ -26,7 +30,7 @@
         lessonStudio.googleClientApiReady = true;
     }
     function onYouTubeIframeAPIReady() {
-        lessonStudio.youtubeIframeAPIReady = true;
+        lessonStudio.youtubeIframeApiReady = true;
     }
 
     jQueryValamis(function () {
@@ -57,14 +61,20 @@
             }
         };
 
+        var googleClientId = '{{{googleClientId}}}',
+            googleAppId = '{{{googleAppId}}}',
+            googleApiKey = '{{{googleApiKey}}}';
+        var googleApiConfigured = !!(googleClientId && googleAppId && googleApiKey);
         var lessonStudioOptions = {
             resourceName: 'lessonStudio',
             permissions: permissionActionsLessonStudio,
             app: lessonStudio,
             appOptions: {
-                googleClientId: '{{{googleClientId}}}',
-                googleAppId: '{{{googleAppId}}}',
-                googleApiKey: '{{{googleApiKey}}}',
+                googleClientId: googleClientId,
+                googleAppId: googleAppId,
+                googleApiKey: googleApiKey,
+                googleApiConfigured: googleApiConfigured,
+                googleClientApiConfigured: googleApiConfigured,
                 portletId: '{{{portletId}}}',
                 groupId: '{{{groupId}}}',
                 primaryKey: '{{{primaryKey}}}',

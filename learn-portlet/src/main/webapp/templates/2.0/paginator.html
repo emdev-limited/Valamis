@@ -44,17 +44,18 @@
 </script>
 
 <script type="text/mustache" id="paginatorShowingTemplate">
+    <span class="show-items-buttons">
+        {{#isShowingAll}}
+            <a class="js-show-page-items">{{showLabel}} {{itemsOnPage}} {{perPageLabel}}</a>
+        {{/isShowingAll}}
+
+        {{^isShowingAll}}
             <span>{{showingLabel}} {{startElementNumber}} - {{endElementNumber}} {{ofLabel}}
                 {{totalElements}}
             </span>
             {{#allowShowAll}}
-            <span class="show-items-buttons">
-                {{#isShowAll}}
-                    <a class="js-show-page-items">{{showLabel}} {{itemsOnPage}} {{perPageLabel}}</a>
-                {{/isShowAll}}
-                {{^isShowAll}}
-                    <a class="js-show-all-items">{{showAllLabel}}</a>
-                {{/isShowAll}}
-            </span>
+                <a class="js-show-all-items">{{showAllLabel}}</a>
             {{/allowShowAll}}
+        {{/isShowingAll}}
+    </span>
 </script>

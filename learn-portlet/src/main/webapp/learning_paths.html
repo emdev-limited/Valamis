@@ -9,12 +9,6 @@
     var Valamis = Valamis || {};
     Valamis.currentUserId = parseInt("{{userID}}");
 
-    Valamis.additionalOptions = Valamis.additionalOptions || {};
-    _.extend(Valamis.additionalOptions, {
-        contextPath: '{{{contextPath}}}',
-        apiPath: path.root + path.api.prefix
-    });
-
     jQueryValamis(document).ready(function () {
 
         if (!valamisApp.started) {
@@ -27,7 +21,9 @@
             resourceName: 'dashboard',
             permissions: permissionActionsLearningPaths,
             app: learningPaths,
-            appOptions: {}
+            appOptions: {
+                showInstanceCertificates: '{{certificateScope}}' == 'instance'
+            }
         };
 
         valamisApp.execute('subapp:start', learningPathsOptions);

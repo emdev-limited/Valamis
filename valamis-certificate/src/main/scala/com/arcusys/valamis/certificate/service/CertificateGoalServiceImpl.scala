@@ -1,8 +1,10 @@
 package com.arcusys.valamis.certificate.service
 
-import com.arcusys.valamis.certificate.model.goal.{ActivityGoal, GoalStatistic, StatementGoal}
-import com.arcusys.valamis.certificate.storage.{ActivityGoalStorage, CourseGoalStorage, PackageGoalStorage, StatementGoalStorage}
-import com.arcusys.valamis.exception.EntityDuplicateException
+import com.arcusys.valamis.certificate.model.goal._
+import com.arcusys.valamis.certificate.storage._
+import com.arcusys.valamis.lesson.service.LessonService
+import com.arcusys.valamis.lrs.service.util.{TinCanVerbs, TincanHelper}
+import com.arcusys.valamis.lrs.tincan.{Activity, Statement}
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes.PeriodType
 import com.escalatesoft.subcut.inject.Injectable
@@ -13,115 +15,117 @@ trait CertificateGoalServiceImpl extends Injectable with CertificateService {
   private lazy val activityGoalStorage = inject[ActivityGoalStorage]
   private lazy val statementGoalStorage = inject[StatementGoalStorage]
   private lazy val packageGoalStorage = inject[PackageGoalStorage]
+  private lazy val assignmentGoalStorage = inject[AssignmentGoalStorage]
   private lazy val checker = inject[CertificateStatusChecker]
+  private lazy val certificateStorage = inject[CertificateRepository]
+  private lazy val lessonService = inject[LessonService]
+  private lazy val goalRepository = inject[CertificateGoalRepository]
+  private lazy val certificateGoalGroupRepository = inject[CertificateGoalGroupRepository]
 
-  def defaultPeriodValue = 0
+  def defaultPeriodValue: Int = 0
 
   def defaultPeriodType = PeriodTypes.UNLIMITED
 
-  def addCourseGoal(certificateId: Long, courseId: Long) = {
-    val coursesAmount = courseGoalStorage.getByCertificateIdCount(certificateId)
+  def updateGoalIndexes(goals: Map[String, Int]): Unit = {
+    goalRepository.updateIndexes(goals)
+  }
 
-    if (courseGoalStorage.get(certificateId, courseId).isEmpty)
+  def updateGoal(goalId: Long,
+                 periodValue: Int,
+                 periodType: PeriodType,
+                 arrangementIndex: Int,
+                 isOptional: Boolean,
+                 count: Option[Int],
+                 groupId: Option[Long]): CertificateGoal = {
+    count.map(activityGoalStorage.modify(goalId, _))
+    goalRepository.modify(goalId, periodValue, periodType, arrangementIndex, isOptional, groupId)
+  }
+
+  def addCourseGoal(certificateId: Long, courseId: Long): CourseGoal = {
+    courseGoalStorage.get(certificateId, courseId) getOrElse {
       courseGoalStorage.create(
+          certificateId,
+          courseId,
+          defaultPeriodValue,
+          defaultPeriodType,
+          certificateStorage.getGoalsMaxArrangementIndex(certificateId) + 1)
+    }
+  }
+
+  def addActivityGoal(certificateId: Long, activityName: String, count: Int = 1): ActivityGoal = {
+    activityGoalStorage.get(certificateId, activityName) getOrElse {
+      activityGoalStorage.create(
         certificateId,
-        courseId,
-        coursesAmount + 1,
+        activityName,
+        count,
         defaultPeriodValue,
-        defaultPeriodType)
-  }
-
-  def deleteCourseGoal(certificateId: Long, courseId: Long) = {
-    courseGoalStorage.delete(certificateId, courseId)
-  }
-
-  def changeCourseGoalPeriod(certificateId: Long, courseId: Long, value: Int, period: PeriodType) = {
-    courseGoalStorage.modifyPeriod(certificateId, courseId, value, normalizePeriod(value, period))
-  }
-
-  def reorderCourseGoals(certificateId: Long, courseIds: Seq[Long]) {
-    var index = 1
-    courseIds.foreach(id => {
-      courseGoalStorage.modifyArrangementIndex(certificateId, id, index)
-      index = index + 1
-    })
-  }
-
-  def addActivityGoal(certificateId: Long, activityName: String, count: Int = 1) = {
-    if (!activityGoalStorage.getByCertificateId(certificateId).exists(_.activityName == activityName))
-      activityGoalStorage.create(certificateId, activityName, count, defaultPeriodValue, defaultPeriodType)
+        defaultPeriodType,
+        certificateStorage.getGoalsMaxArrangementIndex(certificateId) + 1)
+    }
   }
 
   def getActivityGoals(certificateId: Long): Seq[ActivityGoal] =
     activityGoalStorage.getByCertificateId(certificateId)
 
-  def getActivityGoalsCount(certificateId: Long) =
-    activityGoalStorage.getByCertificateIdCount(certificateId)
-
-  def deleteActivityGoal(certificateId: Long, activityName: String) = {
-    activityGoalStorage.delete(certificateId, activityName)
-  }
-
-  def changeActivityGoalPeriod(certificateId: Long, activityName: String, count: Int, value: Int, period: PeriodType) = {
-    val pT1 = normalizePeriod(value, period)
-
-    activityGoalStorage.modify(certificateId, activityName, count, value, pT1)
-  }
-
-  def getPackageGoals(certificateId: Long) =
+  def getPackageGoals(certificateId: Long): Seq[PackageGoal] =
     packageGoalStorage.getByCertificateId(certificateId)
 
-  def getPackageGoalsCount(certificateId: Long) =
-    packageGoalStorage.getByCertificateIdCount(certificateId)
-
-  def addPackageGoal(certificateId: Long, packageId: Long) = {
-    try {
-      Some(packageGoalStorage.create(certificateId, packageId, defaultPeriodValue, defaultPeriodType))
-    } catch {
-      case _: EntityDuplicateException => None
-    }
+  def getAffectedCertificateIds(statements: Seq[Statement]): Seq[Long] = {
+    val affectedCertIds: Seq[Long] = findCertIdsWithStatementGoal(statements) ++
+      findCertIdsWithPackageGoal(statements)
+    affectedCertIds.distinct
   }
 
-  def deletePackageGoal(certificateId: Long, packageId: Long) =
-    packageGoalStorage.delete(certificateId, packageId)
-
-  def changePackageGoalPeriod(certificateId: Long, packageId: Long, periodValue: Int, periodType: PeriodType) =
-    packageGoalStorage.modify(certificateId, packageId, periodValue, periodType)
+  def addPackageGoal(certificateId: Long, packageId: Long): PackageGoal = {
+    packageGoalStorage.get(certificateId, packageId) getOrElse {
+      packageGoalStorage.create(
+        certificateId,
+        packageId,
+        defaultPeriodValue,
+        defaultPeriodType,
+        certificateStorage.getGoalsMaxArrangementIndex(certificateId) + 1)
+    }
+  }
 
   def getStatementGoals(certificateId: Long): List[StatementGoal] =
     statementGoalStorage.getByCertificateId(certificateId).toList
 
-  def getStatementGoalsCount(certificateId: Long): Int =
-    statementGoalStorage.getByCertificateIdCount(certificateId)
-
-  def addStatementGoal(certificateId: Long, verb: String, obj: String): Unit = {
-    val exists = statementGoalStorage.get(certificateId, verb, obj)
-    if (exists.isEmpty) {
-      statementGoalStorage.create(certificateId, verb, obj, defaultPeriodValue, defaultPeriodType)
+  def addStatementGoal(certificateId: Long, verb: String, obj: String): StatementGoal = {
+    statementGoalStorage.get(certificateId, verb, obj) getOrElse {
+      statementGoalStorage.create(
+        certificateId,
+        verb,
+        obj,
+        defaultPeriodValue,
+        defaultPeriodType,
+        certificateStorage.getGoalsMaxArrangementIndex(certificateId) + 1)
     }
   }
 
-  def deleteStatementGoal(certificateId: Long, verb: String, obj: String): Unit = {
-    statementGoalStorage.delete(certificateId, verb, obj)
-  }
+  def getAssignmentGoals(certificateId: Long): List[AssignmentGoal] =
+    assignmentGoalStorage.getByCertificateId(certificateId).toList
 
-  def changeStatementGoalPeriod(certificateId: Long, verb: String, obj: String, value: Int, period: PeriodType) = {
-    statementGoalStorage.modify(certificateId, verb, obj, value, normalizePeriod(value, period))
+  def addAssignmentGoal(certificateId: Long, assignmentId: Long): AssignmentGoal = {
+    assignmentGoalStorage.get(certificateId, assignmentId) getOrElse {
+      assignmentGoalStorage.create(
+        certificateId,
+        assignmentId,
+        defaultPeriodValue,
+        defaultPeriodType,
+        certificateStorage.getGoalsMaxArrangementIndex(certificateId) + 1)
+    }
   }
 
   def getGoalsStatistic(certificateId: Long, userId: Long): GoalStatistic = {
     checker.getCourseGoalsStatistic(certificateId, userId) +
       checker.getActivityGoalsStatistic(certificateId, userId) +
       checker.getStatementGoalsStatistic(certificateId, userId) +
-      checker.getPackageGoalsStatistic(certificateId, userId)
+      checker.getPackageGoalsStatistic(certificateId, userId) +
+      checker.getAssignmentGoalsStatistic(certificateId, userId)
   }
 
-
-  def getCourseGoals(certificateId: Long) =
-    courseGoalStorage.getByCertificateId(certificateId).sortBy(_.arrangementIndex)
-
-  def getCourseGoalsCount(certificateId: Long) =
-    courseGoalStorage.getByCertificateIdCount(certificateId)
+  def getCourseGoals(certificateId: Long): Seq[CourseGoal] =
+    courseGoalStorage.getByCertificateId(certificateId)
 
   def normalizePeriod(value: Int, period: PeriodType): PeriodType = {
     if (value < 1)
@@ -129,4 +133,69 @@ trait CertificateGoalServiceImpl extends Injectable with CertificateService {
     else
       period
   }
+
+  private def findCertIdsWithStatementGoal(statements: Seq[Statement]): Seq[Long] = {
+    statements.flatMap { stmt =>
+      stmt.obj match {
+        case activity : Activity =>
+          statementGoalStorage.getByVerbAndObj(stmt.verb.id, activity.id).map(_.certificateId)
+        case _ => Seq()
+      }
+    }
+  }
+
+  private def findCertIdsWithPackageGoal(statements: Seq[Statement]): Seq[Long] = {
+    statements.flatMap { stmt =>
+      stmt.obj match {
+        case activity: Activity if TincanHelper.isVerbType(stmt.verb, TinCanVerbs.Completed) ||
+          TincanHelper.isVerbType(stmt.verb, TinCanVerbs.Passed) =>
+          val lessonId = lessonService.getByRootActivityId(activity.id)
+          lessonId.fold(Seq[Long]()) {
+            id => packageGoalStorage.getByPackageId(id).map(_.certificateId)
+          }
+        case _ => Seq()
+      }
+    }
+  }
+
+  def deleteGoal(goalId: Long): Unit = {
+    goalRepository.delete(goalId)
+  }
+
+  def deleteGoalGroup(groupId: Long, deletedContent: Boolean): Unit = {
+    if (deletedContent) {
+      goalRepository.deleteByGroup(groupId)
+    }
+    certificateGoalGroupRepository.delete(groupId)
+  }
+
+  def updateGoalGroup(goalGroup: GoalGroup): GoalGroup = {
+    certificateGoalGroupRepository.update(goalGroup)
+  }
+
+  def createGoalGroup(certificateId: Long, count: Int, goalIds: Seq[Long]): Unit = {
+    val arrangementIndex = certificateStorage.getGoalsMaxArrangementIndex(certificateId) + 1
+    val groupId = certificateGoalGroupRepository.create(
+      count,
+      certificateId,
+      defaultPeriodValue,
+      defaultPeriodType,
+      arrangementIndex)
+
+    goalIds
+      .foreach(id => {
+        goalRepository.modify(
+          id,
+          defaultPeriodValue,
+          defaultPeriodType,
+          arrangementIndex,
+          isOptional = true,
+          Some(groupId))
+      })
+  }
+
+  def updateGoalsInGroup(groupId:Long, goalIds: Seq[Long]): Unit = {
+    certificateGoalGroupRepository.updateGoals(groupId, goalIds)
+  }
+
 }

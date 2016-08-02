@@ -1,10 +1,11 @@
 package com.arcusys.learn.liferay.update.version250
 
-import com.arcusys.learn.ioc.Configuration
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
-import com.arcusys.valamis.core.SlickDBInfo
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
+
 import scala.slick.driver.JdbcProfile
 
 class DBUpdater2411 extends LUpgradeProcess with Injectable with SlideTableComponent{

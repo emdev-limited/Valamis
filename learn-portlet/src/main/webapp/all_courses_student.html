@@ -1,0 +1,25 @@
+
+<div id="coursesBrowserAppRegion"></div>
+
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(document).ready(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var coursesBrowserOptions = {
+            language: '{{language}}',
+            resourceName: 'allCourses',
+            permissions: {},
+            app: allCourses,
+            appOptions: { editor: false }
+        };
+
+        valamisApp.execute('subapp:start', coursesBrowserOptions);
+    });
+
+</script>

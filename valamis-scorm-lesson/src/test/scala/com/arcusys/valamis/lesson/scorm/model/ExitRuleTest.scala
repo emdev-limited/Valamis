@@ -5,8 +5,8 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
 class ExitRuleTest extends FlatSpec with ShouldMatchers {
-  val condition1 = new RuleCondition(ConditionType.ActivityAttempted)
-  val condition2 = new RuleCondition(ConditionType.ObjectiveStatusKnown)
+  val condition1 = new ConditionRuleItem(ConditionType.ActivityAttempted)
+  val condition2 = new ConditionRuleItem(ConditionType.ObjectiveStatusKnown)
   val conditions = Seq(condition1, condition2)
 
   "Exit rule" can "be constructed" in {

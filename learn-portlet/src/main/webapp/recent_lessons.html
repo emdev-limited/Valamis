@@ -7,12 +7,6 @@
 
     var Valamis = Valamis || {};
 
-    Valamis.additionalOptions = Valamis.additionalOptions || {};
-    _.extend(Valamis.additionalOptions, {
-        contextPath: '{{{contextPath}}}',
-        apiPath: path.root + path.api.prefix
-    });
-
     jQueryValamis(document).ready(function () {
 
         if (!valamisApp.started) {

@@ -1,9 +1,11 @@
 package com.arcusys.learn.liferay.update.version260
 
 import java.sql.Connection
+
 import com.arcusys.learn.liferay.update.version260.migrations.LrsEndpointMigration
-import com.arcusys.valamis.lrs.LrsEndpointTableComponent
+import com.arcusys.valamis.persistence.impl.lrs.LrsEndpointTableComponent
 import com.arcusys.valamis.lrsEndpoint.model.AuthType
+import com.arcusys.valamis.persistence.common.SlickProfile
 
 import scala.slick.driver.H2Driver
 import scala.slick.driver.H2Driver.simple._
@@ -18,15 +20,15 @@ class LrsEndpointMigrationTest extends FunSuite with BeforeAndAfter {
   var connection: Connection = _
 
   before {
-    connection = db.createConnection()
+    connection = db.source.createConnection()
     table.createSchema()
   }
   after {
     connection.close()
   }
 
-  val table = new LrsEndpointTableComponent {
-    override protected val driver = H2Driver
+  val table = new LrsEndpointTableComponent with SlickProfile {
+    override val driver = H2Driver
 
     def createSchema() {
       db.withSession { implicit s => lrsEndpoint.ddl.create }

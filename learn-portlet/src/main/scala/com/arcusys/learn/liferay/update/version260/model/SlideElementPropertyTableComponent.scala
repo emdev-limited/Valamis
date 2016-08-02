@@ -1,6 +1,7 @@
 package com.arcusys.learn.liferay.update.version260.model
 
-import com.arcusys.valamis.core.DbNameUtils._
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+
 import scala.slick.driver.JdbcProfile
 
 /**
@@ -135,8 +136,8 @@ trait SlideElementPropertyTableComponent {
     class SlideElementPropertyTable(tag: Tag) extends Table[SlideElementProperty](tag, tblName("SLIDE_ELEMENT_PROPERTY")) {
       def slideElementId = column[Long]("SLIDE_ELEMENT_ID")
       def deviceId = column[Long]("DEVICE_ID")
-      def key = column[String]("DATA_KEY")
-      def value = column[String]("DATA_VALUE")
+      def key = column[String]("DATA_KEY", O.Length(254, true))
+      def value = column[String]("DATA_VALUE", O.Length(254, true))
       def pk = primaryKey("PK_PROPERTY", (slideElementId, deviceId, key))
 
       def * = (slideElementId, deviceId, key, value) <>(SlideElementProperty.tupled, SlideElementProperty.unapply)
@@ -150,7 +151,7 @@ trait SlideElementPropertyTableComponent {
     class SlidePropertyTable(tag: Tag) extends Table[SlideProperty](tag, tblName("SLIDE_PROPERTY")) {
       def slideId = column[Long]("SLIDE_ID")
       def deviceId = column[Long]("DEVICE_ID")
-      def key = column[String]("DATA_KEY")
+      def key = column[String]("DATA_KEY", O.Length(254, true))
       def value = column[String]("DATA_VALUE")
       def pk = primaryKey("PK_SLIDE_PROPERTY", (slideId, deviceId, key))
 

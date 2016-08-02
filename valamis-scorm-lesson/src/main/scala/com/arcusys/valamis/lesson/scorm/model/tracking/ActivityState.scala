@@ -170,7 +170,7 @@ class ActivityState(
    * Evaluates condition from activity condition set.
    * @param condition Condition of activity
    */
-  private[scorm] def conditionApplies(condition: RuleCondition): Boolean = {
+  private[scorm] def conditionApplies(condition: ConditionRuleItem): Boolean = {
     lazy val objectiveState = if (objectiveStates.contains(condition.objectiveId)) {
       objectiveStates(condition.objectiveId)
     } else {

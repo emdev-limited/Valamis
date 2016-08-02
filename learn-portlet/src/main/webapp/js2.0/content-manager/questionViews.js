@@ -129,9 +129,6 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
             var rightAnswer = this.$('.js-right-answer').val();
             var wrongAnswer = this.$('.js-wrong-answer').val();
 
-            if(!rightAnswer) rightAnswer = Valamis.language['questionRightAnswerDefaultLabel'];
-            if(!wrongAnswer) wrongAnswer = Valamis.language['questionWrongAnswerDefaultLabel'];
-
             var answers = [];
             if(this.haveOptions) {
                 answers = this.collectAnswers();

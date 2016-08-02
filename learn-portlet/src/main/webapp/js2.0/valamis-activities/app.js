@@ -5,14 +5,19 @@ var ValamisActivities = Marionette.Application.extend({
       mainRegion: '#valamisActivitiesAppRegion'
     });
   },
-  start: function(){
+  onStart: function(options){
     this.userInfoModel = new valamisActivities.Entities.LiferayUserModel;
 
     var that = this;
-    this.userInfoModel.fetch({
+    that.resourceURL = options.resourceURL;
+    that.userInfoModel.fetch({
       'userId': Valamis.currentUserId,
       success: function() {
-        var layoutView = new valamisActivities.Views.AppLayoutView({currentUserModel: that.userInfoModel});
+        var layoutView = new valamisActivities.Views.AppLayoutView({
+          currentUserModel: that.userInfoModel,
+          resourceURL: options.resourceURL,
+          activitiesCount: options.activitiesCount
+        });
         that.mainRegion.show(layoutView);
       }
     });

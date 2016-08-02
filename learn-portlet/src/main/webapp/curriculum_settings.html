@@ -2,10 +2,25 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+    <script src="{{contextPath}}/js2.0/vendor/backbone.marionette.min.js"></script>
+    <script src="{{contextPath}}/js2.0/vendor/backbone.modal-bundled.js"></script>
+    <script src="{{contextPath}}/js2.0/vendor/backbone.model-binder.min.js"></script>
+
     <script type="text/template" id="certificate-settings-modals-template">
         <div class="modals-container"></div>
     </script>
 
+    <script type="text/template" id="certificate-common-modal-template">
+        <div class="bbm-modal__topbar">
+            <h3 class="bbm-modal__title">{{import}}</h3>
+
+            <div class="modal-close val-icon-exit">
+            </div>
+        </div>
+
+        <div class="certificate-modal-content">
+        </div>
+    </script>
 
     <script type="text/javascript">
         var SettingsLayout = Backbone.Marionette.Layout.extend({
@@ -63,7 +78,7 @@
 </head>
 <body >
 <div style="height: 100px; padding: 10px;">
-    <button class="button big primary bbm-button val-icon-download " onclick="exportAllCertificates()">
+    <button class="button big primary bbm-button val-icon-download-import-down " onclick="exportAllCertificates()">
         {{exportAll}}
     </button>
     <button class="button big primary bbm-button val-icon-upload " onclick="importCertificates()">

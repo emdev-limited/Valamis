@@ -1,5 +1,5 @@
 <script type="text/template" id="recentLessonsLayoutTemplate">
-    <div class="js-list-view list">
+    <div class="js-list-view simple-list">
         <div class="div-table no-content-table js-no-recent-lesson hidden">
             <div class="div-col div-col-center">{{noRecentLabel}}</div>
         </div>
@@ -9,7 +9,7 @@
 <script type="text/template" id="recentLessonsItemViewTemplate">
     <div class="tile-content">
         <ul>
-            <li class="title"><a href="{{packageUrl}}">{{packageTitle}}</a></li>
+            <li class="title ellipsis"><a href="{{lessonUrl}}">{{lessonTitle}}</a></li>
             <li class=""> {{inLabel}}
                 {{#courseUrl}}
                 <a href="{{courseUrl}}">

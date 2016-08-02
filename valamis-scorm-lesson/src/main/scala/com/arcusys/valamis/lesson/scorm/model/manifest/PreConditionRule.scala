@@ -6,4 +6,4 @@ package com.arcusys.valamis.lesson.scorm.model.manifest
  * @param conditions  Set of conditions that define whether the action will be applied or not
  * @param action      An action to perform if conditions hit true
  */
-class PreConditionRule(val conditions: RuleConditionSet, val action: PreConditionAction.Value)
+class PreConditionRule(conditions: RuleConditionSet, val action: PreConditionAction.Value) extends ConditionRule(conditions)

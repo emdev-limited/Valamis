@@ -18,23 +18,23 @@ abstract class GradeReportNode(val activity: Activity) {
 
 class GradeReportLeaf(override val activity: LeafActivity,
   val score: Option[Double],
-  val text: Option[String], val userResponse: Option[String], val attemptCompleted: Boolean, val essayCommentText: String, val packID: Int, val questType: Option[String])
+  val text: Option[String], val userResponse: Option[String], val attemptCompleted: Boolean, val essayCommentText: String, val packID: Long, val questType: Option[String])
     extends GradeReportNode(activity) {
   val correctShare = score
   val essayComment = essayCommentText
   val weight = 1.0
-  val packageID = packID
+  val packageID = packID.toInt
   val questionType = questType
 }
 
-class GradeReportBranch(override val activity: ContainerActivity, val children: Seq[GradeReportNode], val essayCommentText: String, val packID: Int)
+class GradeReportBranch(override val activity: ContainerActivity, val children: Seq[GradeReportNode], val essayCommentText: String, val packID: Long)
     extends GradeReportNode(activity) {
   val weight = children.filter(item => item.weightedCorrectShare.isDefined || item.questionType == Some("long_fill_in")).foldLeft(0.0)(_ + _.weight)
   // TODO: be aware of Double.NaN in case if weight == 0.0
   val correctShare = if (weight == 0.0 || children.filter(item => item.weightedCorrectShare.isDefined || item.questionType == Some("long_fill_in")).find(_.weightedCorrectShare.isEmpty).isDefined) None
   else Some(children.filter(item => item.weightedCorrectShare.isDefined || item.questionType == Some("long_fill_in")).foldLeft(0.0)(_ + _.weightedCorrectShare.get) / weight)
   val essayComment = essayCommentText
-  val packageID = packID
+  val packageID = packID.toInt
   val questionType = None
   override def toString = super.toString + ",\nChildren: " + children
 }

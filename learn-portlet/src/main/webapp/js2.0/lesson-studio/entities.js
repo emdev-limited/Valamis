@@ -6,6 +6,7 @@ lessonStudio.module("Entities", function(Entities, lessonStudio, Backbone, Mario
     Entities.LessonModel = lessonStudioModels.LessonModel;
     Entities.LessonPageModel = lessonStudioModels.LessonPageModel;
     Entities.LessonPageElementModel = lessonStudioModels.LessonPageElementModel;
+    Entities.LessonPageTemplateModel = lessonStudioModels.LessonPageTemplateModel;
     Entities.LessonPageThemeModel = lessonStudioModels.LessonPageThemeModel;
 
     Entities.Filter = lessonStudioCollections.Filter;

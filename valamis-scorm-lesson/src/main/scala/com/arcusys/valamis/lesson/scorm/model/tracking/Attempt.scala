@@ -1,10 +1,10 @@
 package com.arcusys.valamis.lesson.scorm.model.tracking
 
-import com.arcusys.valamis.user.model.ScormUser
+import com.arcusys.valamis.lesson.scorm.model.ScormUser
 
 case class Attempt(
-  id: Int,
+  id: Long,
   user: ScormUser,
-  packageID: Int,
+  packageID: Long,
   organizationID: String,
   isComplete: Boolean)

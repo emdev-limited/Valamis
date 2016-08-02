@@ -1,6 +1,7 @@
 package com.arcusys.learn.liferay.update.version250.slide
 
-import com.arcusys.valamis.core.DbNameUtils._
+import com.arcusys.valamis.persistence.common.DbNameUtils._
+import com.arcusys.valamis.persistence.common.SlickProfile
 import scala.slick.driver.JdbcProfile
 
 trait SlideTableComponent {

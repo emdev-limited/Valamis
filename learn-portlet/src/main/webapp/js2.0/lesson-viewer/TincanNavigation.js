@@ -73,7 +73,7 @@ navigationProxy = {
         this.getTreeContainer().html("");
     },
     getTreeContainer: function(){
-        return jQueryValamis('#SCORMTree');
+        return jQueryValamis('#playerTree');
     },
     navigationNodeCollection: null,
     display1DRandomizedNavigation: function(randomizedIndexes, serializedQuestionData){
@@ -108,8 +108,7 @@ navigationProxy = {
     },
     displayNavigationHelper: function(){
         this.navigationNodeCollection.afterInitialization();
-        var navigationNodeCollectionView = new NavigationNodeCollectionView({collection: this.navigationNodeCollection});
-        this.getTreeContainer().html(navigationNodeCollectionView.render().$el);
+        lessonViewer.playerRegion.currentView.buildTincanTree(this.navigationNodeCollection);
     },
     getSlideTitle2D: function(event){
         if(this.tinCanPackageRendererInitialized()) return this.data[event.indexh].childElements[event.indexV];
@@ -121,7 +120,7 @@ navigationProxy = {
         this.navigationNodeCollection.toggle(indexh);
     },
     playerDisplayContentIframe: function() {
-        return jQueryValamis("#SCORMDataOutput")[0].contentWindow
+        return jQueryValamis("#playerDataOutput")[0].contentWindow
     },
     slide: function(indexH, indexV){
         this.playerDisplayContentIframe().Reveal.slide(indexH, indexV);
@@ -132,36 +131,6 @@ navigationProxy = {
         var title = model.title;
         var duration = model.duration;
 
-        switch(model.jsonClass){
-            case "TinCanQuizPackageGenerator$Category":
-                elementType = "directory";
-                break;
-            case "PPTXQuizQuestion":
-                elementType = "pptx";
-                break;
-            case "PlainTextQuizQuestion":
-                elementType = "text";
-                break;
-            case "ExternalQuizQuestion":
-                elementType = "external resource";
-                break;
-            case "QuestionBankQuizQuestion":
-                id = model.question.id;
-                elementType = "question";
-                title = model.question.title;
-                break;
-            case "PDFQuizQuestion":
-                elementType = "pdf";
-                break;
-            case "RevealJSQuizQuestion":
-            case "PlainRevealJSQuizQuestion":
-                elementType = "page";
-                break;
-            case "DLVideoQuizQuestion":
-                elementType = "video";
-                break;
-            default: throw new Error("unknown type of question");
-        }
         return {
             id: id,
             title: title,

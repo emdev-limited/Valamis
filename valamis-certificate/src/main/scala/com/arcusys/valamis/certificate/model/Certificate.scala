@@ -18,13 +18,21 @@ case class Certificate(
     logo: String = "",
     isPermanent: Boolean = true,
     isPublishBadge: Boolean = false,
+    @deprecated
     shortDescription: String = "",
     companyId: Long,
     validPeriodType: PeriodType = PeriodTypes.UNLIMITED,
     validPeriod: Int = 0,
     createdAt: DateTime,
     isPublished: Boolean = false,
-    scope: Option[Long] = None)
+    @deprecated
+    scope: Option[Long] = None) {
+
+  def expirationDate = PeriodTypes.getEndDate(validPeriodType, validPeriod, createdAt)
+}
+
+
+
 
 
 object CertificateActionType extends Enumeration {
@@ -45,4 +53,5 @@ case class CertificateItemsCount(
     coursesCount: Int,
     statementsCount: Int,
     activitiesCount: Int,
-    packagesCount: Int)
+    packagesCount: Int,
+    assignmentsCount: Int)

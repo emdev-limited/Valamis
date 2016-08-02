@@ -1,20 +1,21 @@
 package com.arcusys.learn.liferay.update.version260.migrations
 
-import com.arcusys.valamis.core.SlickProfile
-import com.arcusys.valamis.lrs.LrsEndpointTableComponent
+import com.arcusys.learn.liferay.LogFactoryHelper
+import com.arcusys.valamis.persistence.impl.lrs.LrsEndpointTableComponent
 import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
-import com.liferay.portal.kernel.log.LogFactoryUtil
+import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.util.enumeration._
+import slick.jdbc.GetResult
 
 import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.{StaticQuery, GetResult, JdbcBackend}
-import scala.util.Try
+import scala.slick.jdbc.{JdbcBackend, StaticQuery}
 
 class LrsEndpointMigration(val db: JdbcBackend#DatabaseDef,
                            val driver: JdbcProfile)
   extends LrsEndpointTableComponent
   with SlickProfile {
 
-  val log = LogFactoryUtil.getLog(getClass)
+  val log = LogFactoryHelper.getLog(getClass)
 
   import driver.simple._
 
@@ -41,7 +42,7 @@ class LrsEndpointMigration(val db: JdbcBackend#DatabaseDef,
   }
 
   def toNewData(entity: OldEntity): Option[LrsEndpoint] = {
-    if (AuthType.isValid(entity.authType.getOrElse("")))
+    if (entity.authType.exists(AuthType.isValid))
       Some(LrsEndpoint(
         entity.endpoint.get,
         AuthType.withName(entity.authType.get),

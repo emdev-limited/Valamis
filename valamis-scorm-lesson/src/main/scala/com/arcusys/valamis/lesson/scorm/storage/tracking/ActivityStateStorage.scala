@@ -3,16 +3,16 @@ package com.arcusys.valamis.lesson.scorm.storage.tracking
 import com.arcusys.valamis.lesson.scorm.model.tracking.ActivityState
 
 trait ActivityStateStorage {
-  def getCurrentActivityStateForAttempt(attemptID: Int): Option[ActivityState]
+  def getCurrentActivityStateForAttempt(attemptID: Long): Option[ActivityState]
 
   //TODO: do we really need this?
   //def createOrganization(treeID: Int, state: ActivityState)
   //def getOrganization(treeID: Int): Option[ActivityState]
 
-  def createNodeItem(nodeID: Int, state: ActivityState)
+  def createNodeItem(nodeId: Long, state: ActivityState)
 
-  def getNodeItem(nodeID: Int): Option[ActivityState]
+  def getNodeItem(nodeId: Long): Option[ActivityState]
 
-  def modify(attemptID: Int, state: ActivityState)
-  def renew()
+  def modify(treeId: Long, state: ActivityState)
+
 }

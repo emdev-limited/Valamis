@@ -18,6 +18,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
 
   private def prepareString(source: String) = (if (isPreview) removeLineBreak(source) else ResourceHelpers.skipContextPathURL(removeLineBreak(source))).replaceAll("\n", "").replaceAll("\r", "")
   private def prepareStringKeepNewlines(source: String) = if (isPreview) source else ResourceHelpers.skipContextPathURL(source)
+  private def prepareStringReplaceNewlines(source: String) = if (isPreview) source.replaceAll("\n", "&lt;br/&gt;") else ResourceHelpers.skipContextPathURL(source.replaceAll("\n", "&lt;br/&gt;"))
 
   def getHTMLForStaticPage(pageData: String) = {
     val string = prepareString(pageData)
@@ -54,7 +55,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
         val correctAnswers = toJson(choiceQuestion.answers.filter(_.isCorrect).map(x => x.id))
         val multipleChoice = !choiceQuestion.forceCorrectCount || (choiceQuestion.answers.count(_.isCorrect) > 1)
         val viewModel = Map("title" -> removeLineBreak(choiceQuestion.title),
-          "text" -> prepareStringKeepNewlines(choiceQuestion.text),
+          "text" -> prepareStringReplaceNewlines(choiceQuestion.text),
           "answer" -> correctAnswers,
           "answers" -> answers,
           "autoShowAnswer" -> autoShowAnswer,
@@ -73,7 +74,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
           "answers" -> possibleAnswers,
           "isCaseSensitive" -> isCaseSensitive,
           "autoShowAnswer" -> autoShowAnswer,
-          "text" -> prepareStringKeepNewlines(textQuestion.text),
+          "text" -> prepareStringReplaceNewlines(textQuestion.text),
           "hasExplanation" -> textQuestion.explanationText.nonEmpty,
           "explanation" -> textQuestion.explanationText,
           "rightAnswerText" -> textQuestion.rightAnswerText,
@@ -85,7 +86,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
         val answers = toJson(numericQuestion.answers.map(answer =>
           Map("from" -> answer.notLessThan, "to" -> answer.notGreaterThan, "score" -> answer.score)))
         val viewModel = Map("title" -> removeLineBreak(numericQuestion.title),
-          "text" -> prepareStringKeepNewlines(numericQuestion.text),
+          "text" -> prepareStringReplaceNewlines(numericQuestion.text),
           "answers" -> answers,
           "autoShowAnswer" -> autoShowAnswer,
           "hasExplanation" -> numericQuestion.explanationText.nonEmpty,
@@ -98,7 +99,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
       case positioningQuestion: PositioningQuestion =>
         val answers = toJson(positioningQuestion.answers.map(answer => Map("id" -> answer.id, "text" -> prepareString(answer.text))))
         val viewModel = Map("title" -> removeLineBreak(positioningQuestion.title),
-          "text" -> prepareStringKeepNewlines(positioningQuestion.text),
+          "text" -> prepareStringReplaceNewlines(positioningQuestion.text),
           "answers" -> answers,
           "autoShowAnswer" -> autoShowAnswer,
           "score" -> positioningQuestion.answers.headOption.map(_.score),
@@ -115,7 +116,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
             "matchingText" -> removeLineBreak(answer.keyText.orNull),
             "score" -> answer.score))
         val viewModel = Map("title" -> removeLineBreak(matchingQuestion.title),
-          "text" -> prepareStringKeepNewlines(matchingQuestion.text),
+          "text" -> prepareStringReplaceNewlines(matchingQuestion.text),
           "answers" -> answers,
           "answerData" -> toJson(answers),
           "autoShowAnswer" -> autoShowAnswer,
@@ -136,7 +137,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
           sortBy(_.answerCategoryText).
           map(answer => prepareString(answer.answerCategoryText.getOrElse("")))
         val viewModel = Map("title" -> removeLineBreak(categorizationQuestion.title),
-          "text" -> prepareStringKeepNewlines(categorizationQuestion.text),
+          "text" -> prepareStringReplaceNewlines(categorizationQuestion.text),
           "answerText" -> answerText,
           "matchingText" -> matchingText,
           "answers" -> answerJSON,
@@ -170,7 +171,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
 
       case plainText: PlainText =>
         val viewModel = Map("title" -> removeLineBreak(plainText.title),
-          "text" -> prepareStringKeepNewlines(plainText.text),
+          "text" -> prepareStringReplaceNewlines(plainText.text),
           "autoShowAnswer" -> autoShowAnswer,
           "hasExplanation" -> plainText.explanationText.nonEmpty,
           "explanation" -> plainText.explanationText,

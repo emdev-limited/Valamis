@@ -15,6 +15,8 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
 
   private def prepareString(source: String) = (if (isPreview) removeLineBreak(source) else ResourceHelpers.skipContextPathURL(removeLineBreak(source))).replaceAll("\n", "").replaceAll("\r", "")
   private def prepareStringKeepNewlines(source: String) = if (isPreview) source else ResourceHelpers.skipContextPathURL(source)
+  
+  private def prepareStringReplaceNewlines(source: String) = if (isPreview) source.replaceAll("\n", "&lt;br/&gt;") else ResourceHelpers.skipContextPathURL(source.replaceAll("\n", "&lt;br/&gt;"))
 
   def getHTMLForStaticPage(pageData: String) = {
     val string = prepareString(pageData)
@@ -62,7 +64,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "id" -> choiceQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(choiceQuestion.title),
-        "text" -> prepareStringKeepNewlines(choiceQuestion.text),
+        "text" -> prepareStringReplaceNewlines(choiceQuestion.text),
         "answer" -> correctAnswers,
         "answers" -> answers,
         "multipleChoice" -> multipleChoice,
@@ -82,7 +84,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "title" -> removeLineBreak(textQuestion.title),
         "answers" -> possibleAnswers,
         "isCaseSensitive" -> isCaseSensitive,
-        "text" -> prepareStringKeepNewlines(textQuestion.text),
+        "text" -> prepareStringReplaceNewlines(textQuestion.text),
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> textQuestion.explanationText.nonEmpty,
         "explanation" -> textQuestion.explanationText,
@@ -101,7 +103,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "id" -> numericQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(numericQuestion.title),
-        "text" -> prepareStringKeepNewlines(numericQuestion.text),
+        "text" -> prepareStringReplaceNewlines(numericQuestion.text),
         "answers" -> answers,
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> numericQuestion.explanationText.nonEmpty,
@@ -120,7 +122,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "id" -> positioningQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(positioningQuestion.title),
-        "text" -> prepareStringKeepNewlines(positioningQuestion.text),
+        "text" -> prepareStringReplaceNewlines(positioningQuestion.text),
         "answers" -> answers,
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> positioningQuestion.explanationText.nonEmpty,
@@ -142,7 +144,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "id" -> matchingQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(matchingQuestion.title),
-        "text" -> prepareStringKeepNewlines(matchingQuestion.text),
+        "text" -> prepareStringReplaceNewlines(matchingQuestion.text),
         "answers" -> answers,
         "answersMatching" -> Random.shuffle(answers),
         "answerData" -> toJson(answers),
@@ -173,7 +175,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "id" -> categorizationQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(categorizationQuestion.title),
-        "text" -> prepareStringKeepNewlines(categorizationQuestion.text),
+        "text" -> prepareStringReplaceNewlines(categorizationQuestion.text),
         "answerText" -> answerText,
         "matchingText" -> matchingText,
         "randomAnswers" -> (1 to randomAnswersSize).zipWithIndex.map {
@@ -237,7 +239,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
         "id" -> plainText.id,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(plainText.title),
-        "text" -> prepareStringKeepNewlines(plainText.text),
+        "text" -> prepareStringReplaceNewlines(plainText.text),
         "autoShowAnswer" -> false,
         "explanation" -> ""
       )

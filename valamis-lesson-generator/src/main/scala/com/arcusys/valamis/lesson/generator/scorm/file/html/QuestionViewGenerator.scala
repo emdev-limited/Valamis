@@ -4,6 +4,7 @@ import com.arcusys.valamis.lesson.generator.util.ResourceHelpers
 import com.arcusys.valamis.questionbank.model._
 import com.arcusys.valamis.util.mustache.Mustache
 import com.arcusys.valamis.util.serialization.JsonHelper._
+import com.liferay.portal.kernel.util.StringPool
 
 class QuestionViewGenerator(isPreview: Boolean) {
   private lazy val genericJS = scala.io.Source.fromInputStream(getResourceStream("questionScript.html")).mkString
@@ -18,7 +19,7 @@ class QuestionViewGenerator(isPreview: Boolean) {
 
   private def prepareString(source: String) = (if (isPreview) removeLineBreak(source) else ResourceHelpers.skipContextPathURL(removeLineBreak(source))).replaceAll("\n", "").replaceAll("\r", "")
   private def prepareStringKeepNewlines(source: String) = if (isPreview) source else ResourceHelpers.skipContextPathURL(source)
-  private def prepareStringReplaceNewlines(source: String) = if (isPreview) source.replaceAll("\n", "&lt;br/&gt;") else ResourceHelpers.skipContextPathURL(source.replaceAll("\n", "&lt;br/&gt;"))
+  private def prepareStringReplaceNewlines(source: String) = if (isPreview) source.replaceAll("\n", StringPool.SPACE) else ResourceHelpers.skipContextPathURL(source.replaceAll("\n", StringPool.SPACE))
 
   def getHTMLForStaticPage(pageData: String) = {
     val string = prepareString(pageData)

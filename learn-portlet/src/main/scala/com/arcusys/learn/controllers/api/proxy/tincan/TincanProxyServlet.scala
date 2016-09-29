@@ -111,7 +111,7 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
       copyResponse(authResponse, response)
 
       checkStatements(authToken, request, newContent)
-
+      
       authResponse.getHttpResponse.getStatusCode match {
         case HttpServletResponse.SC_NOT_FOUND =>
           log.warn(s"Lrs 404. $url")

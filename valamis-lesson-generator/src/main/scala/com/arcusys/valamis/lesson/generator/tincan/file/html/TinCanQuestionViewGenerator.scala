@@ -6,6 +6,7 @@ import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.util.mustache.Mustache
 import com.arcusys.valamis.util.serialization.JsonHelper._
 import scala.util.Random
+import com.liferay.portal.kernel.util.StringPool
 
 
 class TinCanQuestionViewGenerator(isPreview: Boolean) {
@@ -16,7 +17,7 @@ class TinCanQuestionViewGenerator(isPreview: Boolean) {
   private def prepareString(source: String) = (if (isPreview) removeLineBreak(source) else ResourceHelpers.skipContextPathURL(removeLineBreak(source))).replaceAll("\n", "").replaceAll("\r", "")
   private def prepareStringKeepNewlines(source: String) = if (isPreview) source else ResourceHelpers.skipContextPathURL(source)
   
-  private def prepareStringReplaceNewlines(source: String) = if (isPreview) source.replaceAll("\n", "&lt;br/&gt;") else ResourceHelpers.skipContextPathURL(source.replaceAll("\n", "&lt;br/&gt;"))
+  private def prepareStringReplaceNewlines(source: String) = if (isPreview) source.replaceAll("\n", StringPool.SPACE) else ResourceHelpers.skipContextPathURL(source.replaceAll("\n", StringPool.SPACE))
 
   def getHTMLForStaticPage(pageData: String) = {
     val string = prepareString(pageData)

@@ -103,6 +103,13 @@ button.toast-close-button {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
+
+#toast-container > div
+{ width: 390px !important; }
+
+.toast .toast-message button
+{ color: white !important; text-shadow: 0 -1px 0 rgba(0,0,0,0.25) !important; background-color: #50a2f5 !important; border-color: #4a96e8 #4a96e8 !important; background-image: linear-gradient(to bottom,#54aaff,#4a96e8); } 
+
 #toast-container > div {
     margin: 0 0 6px;
     padding: 15px 15px 15px 50px;

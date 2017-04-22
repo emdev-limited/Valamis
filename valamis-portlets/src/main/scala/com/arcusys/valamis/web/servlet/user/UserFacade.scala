@@ -1,19 +1,16 @@
 package com.arcusys.valamis.web.servlet.user
 
 import com.arcusys.learn.liferay.LiferayClasses.LUser
-import com.arcusys.learn.liferay.services.{PermissionHelper, UserLocalServiceHelper}
-import com.arcusys.learn.liferay.util.PortletName
+import com.arcusys.learn.liferay.services.PermissionHelper
 import com.arcusys.valamis.certificate.model.CertificateStatuses
-import com.arcusys.valamis.certificate.service.{CertificateService, CertificateStatusChecker}
+import com.arcusys.valamis.certificate.service.{CertificateGoalService, CertificateStatusChecker}
 import com.arcusys.valamis.certificate.storage.CertificateStateRepository
 import com.arcusys.valamis.gradebook.service._
 import com.arcusys.valamis.lesson.service.{LessonService, TeacherLessonGradeService, UserLessonResultService}
 import com.arcusys.valamis.model.SkipTake
-import com.arcusys.valamis.user.model.UserFilter
+import com.arcusys.valamis.user.model.{User, UserFilter}
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.user.util.UserExtension
-import com.arcusys.valamis.web.portlet.base.{ViewAllPermission, ViewPermission}
-import com.arcusys.valamis.web.servlet.base.PermissionUtil
 import com.arcusys.valamis.web.servlet.response.CollectionResponse
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import org.joda.time.DateTime
@@ -25,7 +22,7 @@ class UserFacade(implicit val bindingModule: BindingModule)
 
   lazy val userService = inject[UserService]
   lazy val courseResults = inject[UserCourseResultService]
-  lazy val certificateService = inject[CertificateService]
+  lazy val certificateGoalService = inject[CertificateGoalService]
   lazy val certificateStateRepository = inject[CertificateStateRepository]
   lazy val teacherGradeService = inject[TeacherLessonGradeService]
   lazy val lessonResultService = inject[UserLessonResultService]
@@ -37,8 +34,10 @@ class UserFacade(implicit val bindingModule: BindingModule)
             page: Option[Int],
             skipTake: Option[SkipTake],
             withStat: Boolean) = {
-    val total = userService.getCountBy(filter)
-    val users = userService.getBy(filter, skipTake)
+
+    val (total, users) = if (filter.withUserIdFilter && filter.userIds.isEmpty && filter.isUserJoined) {
+      (0L, Seq())
+    } else (userService.getCountBy(filter), userService.getBy(filter, skipTake))
 
     val records =
       if (filter.certificateId.isDefined && !withStat && filter.isUserJoined && users.nonEmpty) {
@@ -62,26 +61,7 @@ class UserFacade(implicit val bindingModule: BindingModule)
   }
 
   def getById(id: Long): UserResponse = {
-      new UserResponse(userService.getById(id))
-  }
-
-  // def byPermission(permissionType: PermissionType): Seq[UserShortResponse]
-  def allCanView(courseId: Long, viewAll: Boolean): Seq[UserResponse] = {
-    val result = UserLocalServiceHelper().getAllUsers()
-      .filter(u => u.isActive && u.getFullName != "")
-      .filter(user => canView(courseId, user, viewAll))
-      .sortBy(x => x.getFullName)
-    result.map(x => new UserResponse(x))
-  }
-
-  def canView(courseId: Long, liferayUser: LUser, viewAll: Boolean): Boolean = if (viewAll) {
-    PermissionUtil.hasPermissionApi(courseId, liferayUser, ViewAllPermission, PortletName.Gradebook, PortletName.LearningTranscript)
-  } else {
-    PermissionUtil.hasPermissionApi(courseId, liferayUser, ViewPermission, PortletName.Gradebook, PortletName.LearningTranscript)
-  }
-
-  def canView(courseId: Long, liferayUserId: Long, viewAll: Boolean): Boolean = {
-    canView(courseId, userService.getById(liferayUserId), viewAll)
+    new UserResponse(userService.getById(id))
   }
 
   private def getUserCertificateStatistic(user: LUser, certificateId: Long) = UserWithCertificateStatResponse(
@@ -89,7 +69,7 @@ class UserFacade(implicit val bindingModule: BindingModule)
     user.getFullName,
     user.getPortraitUrl,
     user.getPublicUrl,
-    certificateService.getGoalsStatistic(certificateId, user.getUserId),
+    certificateGoalService.getGoalsStatistic(certificateId, user.getUserId),
     Some(certificateChecker.checkAndGetStatus(certificateId, user.getUserId))
   )
 
@@ -102,5 +82,23 @@ class UserFacade(implicit val bindingModule: BindingModule)
       user.getPublicUrl,
       formatter.print(userJoinedDate),
       status)
+  }
+
+  def getUserResponseWithCertificateStatus(user: User,
+                                           userJoinedDate: Option[DateTime], status: Option[CertificateStatuses.Value]): UserWithCertificateStatusResponse = {
+    if (user.isDeleted) {
+      UserWithCertificateStatusResponse(
+        user.id,
+        user.name,
+        "",
+        "",
+        "",
+        CertificateStatuses.InProgress,
+        true)
+
+    } else {
+      val lUser = userService.getById(user.id)
+      getUserResponseWithCertificateStatus(lUser, userJoinedDate.get, status.get)
+    }
   }
 }

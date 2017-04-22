@@ -21,8 +21,8 @@ class LearningPathsView extends OAuthPortlet with PortletBase {
       "certificateScope" -> certificateScope
     ) ++ securityScope.data
 
-    sendTextFile("/templates/2.0/learning_paths_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/learning_paths_templates.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(data, "learning_paths.html")
   }
 

@@ -1,96 +1,179 @@
 package com.arcusys.valamis.persistence.impl.slide
 
-import com.arcusys.valamis.persistence.common.SlickProfile
-import com.arcusys.valamis.slide.model.{SlideEntity, SlideModel}
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
+import com.arcusys.valamis.persistence.impl.slide.schema.SlideTableComponent
+import com.arcusys.valamis.slide.model._
 import com.arcusys.valamis.slide.storage.SlideRepository
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
-
-class SlideRepositoryImpl(db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
+class SlideRepositoryImpl(val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
   extends SlideRepository
   with SlickProfile
+  with DatabaseLayer
   with SlideTableComponent {
 
-  import driver.simple._
+  import driver.api._
 
-  override def getCount = db.withSession { implicit session =>
-    slides.length.run
+  override def getById(id: Long): Option[Slide] = execSync {
+    slides.filterById(id).result.headOption
   }
 
-  override def getAll(isTemplate: Option[Boolean]): List[SlideEntity] = db.withSession { implicit session =>
-    val templateFiltered =
-      if(isTemplate.isDefined) {
-        val templateSlideSet = slideSets.filter(_.courseId === 0L).first
-        slides.filter(
-          dbEntity => dbEntity.isTemplate === isTemplate && dbEntity.slideSetId === templateSlideSet.id.get)
+  def getByLinkSlideId(id: Long): Seq[Slide] = execSync {
+    slides.filterByLinkSlideId(id).result
+  }
+
+  override def getBySlideSetId(slideSetId: Long): Seq[Slide] = execSync {
+    slides
+      .filterBySlideSetId(slideSetId)
+      .sortBy(_.id.asc)
+      .result
+  }
+
+  override def getCountBySlideSetId(slideSetId: Long): Int = execSync {
+    slides
+      .filterBySlideSetId(slideSetId)
+      .length
+      .result
+  }
+
+  override def getSlidesWithData(slideSetId: Long, isTemplate: Boolean): SlidesData = execSync {
+    val slideList = if (isTemplate) {
+      getTemplateSlidesQuery
+    }
+    else {
+      slides
+        .filterBySlideSetId(slideSetId)
+    }
+
+    val properties = slideList
+      .join(slideProperties).on((slide, prop) => slide.id === prop.slideId)
+      .map { case (slide, prop) => prop }
+
+    val elements = slideList
+      .join(slideElements).on((slide, elem) => slide.id === elem.slideId)
+      .map { case (slide, elem) => elem }
+
+    val elementProperties = elements
+      .join(slideElementProperties).on((elem, prop) => elem.id === prop.slideElementId)
+      .map { case (elem, prop) => prop }
+
+    for {
+      slide <- slideList.result
+      property <- properties.result
+      element <- elements.result
+      eProperty <- elementProperties.result
+    } yield (slide, property, element, eProperty)
+  }
+
+  override def delete(id: Long): Unit = execSync {
+    slides.filterById(id).delete
+  }
+
+  override def create(slide: Slide): Slide = execSync {
+    val createSlide = (slides returning slides.map(_.id)).into { (row, newId) =>
+      row.copy(id = newId)
+    } += slide
+
+    for {
+      newSlide <- createSlide
+      _ <- if (slide.properties.nonEmpty) {
+        slideProperties ++= createProperties(slide, newSlide.id)
       }
-      else slides
-    templateFiltered.list
+      else {
+        DBIO.successful()
+      }
+    } yield newSlide
   }
 
-  override def getById(id: Long): Option[SlideEntity] = db.withSession { implicit session =>
-    slides.filter(_.id === id).firstOption
+  override def update(slide: Slide): Slide = execSync {
+    val updateSlide = slides.filterById(slide.id)
+      .map(s => (
+        s.title,
+        s.bgColor,
+        s.font,
+        s.questionFont,
+        s.answerFont,
+        s.answerBg,
+        s.duration,
+        s.leftSlideId,
+        s.topSlideId,
+        s.slideSetId,
+        s.statementVerb,
+        s.statementObject,
+        s.statementCategoryId,
+        s.isTemplate,
+        s.isLessonSummary,
+        s.playerTitle
+        ))
+      .update(
+        slide.title,
+        slide.bgColor,
+        slide.font,
+        slide.questionFont,
+        slide.answerFont,
+        slide.answerBg,
+        slide.duration,
+        slide.leftSlideId,
+        slide.topSlideId,
+        slide.slideSetId,
+        slide.statementVerb,
+        slide.statementObject,
+        slide.statementCategoryId,
+        slide.isTemplate,
+        slide.isLessonSummary,
+        slide.playerTitle
+      )
+    lazy val deleteProperties = slideProperties.filter(_.slideId === slide.id).delete
+    lazy val addProperties = slideProperties ++= createProperties(slide, slide.id)
+
+    for {
+      elem <- updateSlide
+      _ <- if (slide.properties.nonEmpty) {
+        deleteProperties >> addProperties
+      }
+      else {
+        DBIO.successful()
+      }
+    } yield slide
   }
 
-  override def getBySlideSetId(slideSetId: Long, isTemplate: Option[Boolean]): List[SlideEntity] = db.withSession { implicit session =>
-    val slideSetFiltered = slides.filter(_.slideSetId === slideSetId).sortBy(_.id.asc)
-    val templateFiltered =
-      if(isTemplate.isDefined) slideSetFiltered.filter(_.isTemplate === isTemplate)
-      else slideSetFiltered
-    templateFiltered.list
+  override def updateBgImage(id: Long, bgImage: Option[String]): Unit = execSync {
+    slides.filterById(id)
+      .map(_.bgImage)
+      .update(bgImage)
   }
 
-  override def countBySlideSetId(slideSetId: Long, isTemplate: Option[Boolean]) = db.withSession { implicit session =>
-    val slideSetFiltered = slides.filter(_.slideSetId === slideSetId)
-    val templateFiltered =
-      if(isTemplate.isDefined) slideSetFiltered.filter(_.isTemplate === isTemplate)
-      else slideSetFiltered
-    templateFiltered.map(_.id).length.run
-  }
-
-  override def delete(id: Long) = db.withSession { implicit session =>
-    slides.filter(_.id === id).delete
-  }
-
-  override def create(slideModel: SlideModel): SlideEntity = db.withSession { implicit session =>
-    val entity = toEntity(slideModel)
-    val id = slides.returning(slides.map(_.id)).insert(entity)
-
+  private def getTemplateSlidesQuery: Query[SlideTable, Slide, Seq] = {
+    val sets = slideSets.filter(_.courseId === 0L)
     slides
-      .filter(_.id === id)
-      .first
+      .filterByTemplate(true)
+      .join(sets).on((slide, set) => slide.slideSetId === set.id)
+      .map { case (slide, set) => slide }
   }
 
-  override def update(slideModel: SlideModel): SlideEntity = db.withSession { implicit session =>
-    slides
-      .filter(_.id === slideModel.id.get)
-      .map(_.update)
-      .update(toEntity(slideModel))
-
-    slides
-      .filter(_.id === slideModel.id.get)
-      .first
+  private def createProperties(slideModel: Slide, newSlideId: Long): Seq[SlidePropertyEntity] = {
+    slideModel.properties.flatMap { property =>
+      property.properties.map(pr =>
+        SlidePropertyEntity(
+          newSlideId,
+          property.deviceId,
+          pr.key,
+          pr.value)
+      )
+    }
   }
 
-  private def toEntity(from: SlideModel) =
-    SlideEntity(
-      id = from.id,
-      title = from.title,
-      bgColor = from.bgColor,
-      bgImage = from.bgImage,
-      font = from.font,
-      questionFont = from.questionFont,
-      answerFont = from.answerFont,
-      answerBg = from.answerBg,
-      duration = from.duration,
-      leftSlideId = from.leftSlideId,
-      topSlideId = from.topSlideId,
-      slideSetId = from.slideSetId,
-      statementVerb = from.statementVerb,
-      statementObject = from.statementObject,
-      statementCategoryId = from.statementCategoryId,
-      isTemplate = from.isTemplate,
-      isLessonSummary = from.isLessonSummary,
-      playerTitle = from.playerTitle)
+  implicit class SlideQueryExt(query: Query[SlideTable, SlideTable#TableElementType, Seq]) {
+    private type SlideQuery = Query[SlideTable, Slide, Seq]
+
+    def filterById(id: Long): SlideQuery = query.filter(_.id === id)
+
+    def filterByLinkSlideId(id: Long): SlideQuery = query.filter(s => s.leftSlideId === id || s.topSlideId === id)
+
+    def filterByTemplate(isTemplate: Boolean): SlideQuery = query.filter(_.isTemplate === isTemplate)
+
+    def filterBySlideSetId(slideSetId: Long): SlideQuery = query.filter(_.slideSetId === slideSetId)
+  }
 }

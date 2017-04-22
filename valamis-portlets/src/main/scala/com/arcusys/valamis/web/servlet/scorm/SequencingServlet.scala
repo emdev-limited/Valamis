@@ -132,20 +132,6 @@ class SequencingServlet extends BaseApiController {
     }
   }
 
-  //TODO: obsolete ?
-  post("/sequencing/setSession") {
-    request.getSession.setAttribute("packageId", params("id"))
-    request.getSession.setAttribute("packageType", params("type"))
-    request.getSession.setAttribute("packageTitle", params("title"))
-    request.getSession.setAttribute("playerID", params("playerID"))
-  }
-  post("/sequencing/clearSession") {
-    request.getSession.removeAttribute("packageId")
-    request.getSession.removeAttribute("packageType")
-    request.getSession.removeAttribute("packageTitle")
-    request.getSession.removeAttribute("playerID")
-  }
-
   // private methods
   private def getActivityData(packageID: Int, id: String): Map[String, Any] = {
     val activityOption = activityManager.getActivityOption(packageID, id)

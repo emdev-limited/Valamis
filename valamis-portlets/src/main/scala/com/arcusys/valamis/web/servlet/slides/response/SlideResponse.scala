@@ -1,6 +1,6 @@
 package com.arcusys.valamis.web.servlet.slides.response
 
-import com.arcusys.valamis.slide.model.{SlideElementModel, SlideModel}
+import com.arcusys.valamis.slide.model.{SlideElement,Slide}
 
 case class SlideElementResponse(id: Long,
                                 zIndex: String,
@@ -23,7 +23,7 @@ case class SlideResponse(id: Long,
                          duration: Option[String],
                          leftSlideId: Option[Long],
                          topSlideId: Option[Long],
-                         slideElements: List[SlideElementResponse],
+                         slideElements: Seq[SlideElementResponse],
                          slideSetId: Long,
                          statementVerb: Option[String],
                          statementObject: Option[String],
@@ -35,16 +35,16 @@ case class SlideResponse(id: Long,
 
 
 object SlideConverter {
-  implicit class SlideModelExt(val model: SlideModel) extends AnyRef {
+  implicit class SlideModelExt(val model: Slide) extends AnyRef {
     import SlideElementConverter._
 
-    def convertSlideModel(): SlideResponse = {
-      val newSlideElements = model.slideElements.map(element => element.convertSlideElementModel())
+    def convertSlideModel: SlideResponse = {
+      val newSlideElements = model.slideElements.map(_.convertSlideElementModel)
       val newProperties = model.properties
         .map(x => (x.deviceId,
           x.properties.map(p => (p.key, p.value)).toMap)).toMap
       SlideResponse(
-        model.id.get,
+        model.id,
         model.title,
         model.bgColor,
         model.bgImage,
@@ -69,15 +69,15 @@ object SlideConverter {
 }
 
 object SlideElementConverter {
-  implicit class SlideElementModelExt(val model: SlideElementModel) extends AnyRef {
+  implicit class SlideElementModelExt(val model: SlideElement) extends AnyRef {
 
-    def convertSlideElementModel() : SlideElementResponse = {
+    def convertSlideElementModel : SlideElementResponse = {
       val newProperties = model.properties
         .map(x => (x.deviceId,
           x.properties.map(p => (p.key, p.value)).toMap)).toMap
 
       SlideElementResponse(
-        model.id.get,
+        model.id,
         model.zIndex,
         model.content,
         model.slideEntityType,

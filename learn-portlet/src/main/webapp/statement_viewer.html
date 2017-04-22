@@ -89,6 +89,17 @@
         <button id="showAdvancedOptions">{{showAdvancedOpitons}}</button>
         <button id="showQuery">{{showTcapiQueryLabel}}</button>
     </div>
+    <div>
+        {{importCSVLabel}}
+        <input id="exportCount" type="text" placeholder="all" />
+        <button id="export">{{exportButtonLabel}}</button>
+        <button id="cancel" style="display: none;">{{cancelButtonLabel}}</button>
+        <div id='exportLoading' class="loading-container" style="display: none;"></div>
+        <a href="" id="linkCSV" style="display: none;">{{downloadCSVLabel}}</a>
+        <a href="" id="linkJSON"  style="display: none;">{{downloadJSONLabel}}</a>
+        <span id="status"></span>
+    </div>
+    <br/>
     <div id='theStatements'></div>
     <div id='statementsLoading' class="loading-container">
     </div>
@@ -115,6 +126,10 @@
         TC_VIEWER.pageInitialize();
         TC_VIEWER.searchStatements();
     });
+
+    window.onbeforeunload = function () {
+        jQueryValamis("#cancel").trigger( "click" );
+    };
 </script>
 </body>
 </html>

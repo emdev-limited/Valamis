@@ -20,7 +20,7 @@ trait UserLessonResultService {
 
   def isLessonFinished(user: LUser, lesson: Lesson): Boolean
 
-  def getLastLessons(user: LUser, count: Int): Seq[(UserLessonResult, Lesson)]
+  def getLastLessons(user: LUser, courseIds: Seq[Long], count: Int): Seq[(UserLessonResult, Lesson)]
 
   def getUserResults(user: LUser, courseId: Long): Seq[UserLessonResult]
 

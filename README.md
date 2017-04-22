@@ -4,13 +4,17 @@
 
 [![build status](https://api.travis-ci.org/arcusys/Valamis.png)](http://travis-ci.org/arcusys/Valamis)
 
-###This is Valamis CE version - No support - No warranty
-###To get supported Valamis Enterprise Edition contact us in http://valamis.arcusys.com/get-valamis
-###Or buy straight from Liferay Marketplace http://www.liferay.com/marketplace/-/mp/application/35268197
-####The following features are not supported in the CE version
-#####-Competences
-#####-Phenomenizer
-#####-Mobile application
+### This is Valamis CE version - No support - No warranty
+To get supported Valamis Enterprise Edition contact us in http://valamis.arcusys.com/get-valamis
+or buy straight from Liferay Marketplace http://www.liferay.com/marketplace/-/mp/application/35268197
+
+#### The following features are not supported in the CE version
+* Competences
+* Phenomenizer
+* Mobile application
+* Assignments
+* Training Events
+* Liferay DXP
 
 Valamis is a social learning environment for sharing and receiving knowledge. We want to help people to share knowledge and learn. You can use Valamis as your organization's social learning environment.
 
@@ -34,14 +38,16 @@ Since version 2.4 Valamis Community Edition is separated into two packages in Gi
 ### Download 
 Download Valamis CE source code from this repository and compile the application yourself
 
-###Post-deployment process
-
-
-###Known issues
+### Known issues
 **PermGen issue**: Valamis requires 512Mb of PermGen size. This is default size in Liferay bundled with glassfish, but permgen in Tomcat and jBoss bundles should be increased.
 
 Liferay 6.1 EE bundled with Tomcat 7 can throw errors while accessing uploaded content. To avoid this problems just turn off GZip conmpression:
 `com.liferay.portal.servlet.filters.gzip.GZipFilter=false`
+
+## Version 3.2 Update 21.04.2017
+The new portlet, called Learning Report, gathers data on learning patterns in a specific course, and then displays them in an interactive table.  This matrix shows the overall progress of every user in the course for every lesson and learning path.
+Course portlets have been upgraded, allowing for more details and settings in your courses, e.g. maximum amount of participants, availability time, etc.
+E-mail notifications have been introduced in order to keep users informed about relevant things that happen in the course.
 
 ## Version 3.0 Update 02.08.2016
 The biggest new feature of Valamis 3.0 is the updated Gradebook portlet. The upgraded user interface places all courses, lessons and user information in a single place, allowing instructors to easily oversee all aspects of learning - from general data to specific activity details. It is designed to be more intuitive than ever before, providing clear access to all necessary information with a single click.
@@ -202,5 +208,4 @@ Fixed problems:
  - A lot of small improvements regarding to UI
  
 ### Building
-
 This is SBT project.

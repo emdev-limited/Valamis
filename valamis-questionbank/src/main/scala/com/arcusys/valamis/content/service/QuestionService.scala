@@ -4,7 +4,6 @@ import com.arcusys.valamis.content.exceptions.NoQuestionException
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.storage._
 import com.arcusys.valamis.persistence.common.DatabaseLayer
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,37 +41,33 @@ trait QuestionService {
 }
 
 
-class QuestionServiceImpl(implicit val bindingModule: BindingModule)
-  extends QuestionService
-    with Injectable {
+abstract class QuestionServiceImpl extends QuestionService {
 
-  lazy val categoryStorage = inject[CategoryStorage]
-  lazy val questionStorage = inject[QuestionStorage]
-  lazy val answerStorage = inject[AnswerStorage]
-
-  lazy val dbLayer = inject[DatabaseLayer]
+  def categoryStorage: CategoryStorage
+  def questionStorage: QuestionStorage
+  def answerStorage: AnswerStorage
+  def dbLayer: DatabaseLayer
 
   import DatabaseLayer._
-  import dbLayer._
 
   override def getById(id: Long): Question = {
-    execSync(questionStorage.getById(id)).getOrElse(throw new NoQuestionException(id))
+    dbLayer.execSync(questionStorage.getById(id)).getOrElse(throw new NoQuestionException(id))
   }
 
   override def getWithAnswers(id: Long): (Question, Seq[Answer]) = {
     //TODO use joins in getWithAnswers
-    val question = execSync(questionStorage.getById(id)).getOrElse(throw new NoQuestionException(id))
-    (question, execSync(answerStorage.getByQuestion(id)))
+    val question = dbLayer.execSync(questionStorage.getById(id)).getOrElse(throw new NoQuestionException(id))
+    (question, dbLayer.execSync(answerStorage.getByQuestion(id)))
   }
 
-  override def getAnswers(id: Long): Seq[Answer] = execSync(answerStorage.getByQuestion(id))
+  override def getAnswers(id: Long): Seq[Answer] = dbLayer.execSync(answerStorage.getByQuestion(id))
 
   override def getQuestionNodeById(questionId: Long): QuestionNode =
-    execSync(questionStorage.getById(questionId)).fold(throw new NoQuestionException(questionId)) { q =>
-      new TreeBuilder(qId => execSync(answerStorage.getByQuestion(qId))).getQuestionNode(q)
+    dbLayer.execSync(questionStorage.getById(questionId)).fold(throw new NoQuestionException(questionId)) { q =>
+      new TreeBuilder(qId => dbLayer.execSync(answerStorage.getByQuestion(qId))).getQuestionNode(q)
     }
 
-  override def delete(id: Long): Unit = execSync {
+  override def delete(id: Long): Unit = dbLayer.execSync {
     questionStorage.delete(id)
   }
 
@@ -106,18 +101,18 @@ class QuestionServiceImpl(implicit val bindingModule: BindingModule)
 
   override def create(question: Question, answers: Seq[Answer]): Question = {
     //TODO QuestionService.create return with answers
-    execSyncInTransaction(buildCreateAction(question, answers))
+    dbLayer.execSyncInTransaction(buildCreateAction(question, answers))
   }
 
   override def createWithNewCategory(question: Question, answers: Seq[Answer], categoryId: Option[Long]): Question =
-    execSyncInTransaction {
+    dbLayer.execSyncInTransaction {
       for {
         created <- questionStorage.createWithCategory(question, categoryId)
         _ <- createAnswers(created, answers)
       } yield created
     }
 
-  override def update(question: Question, answers: Seq[Answer]): Unit = execSyncInTransaction {
+  override def update(question: Question, answers: Seq[Answer]): Unit = dbLayer.execSyncInTransaction {
     questionStorage.update(question) >> createAnswers(question, answers, withReplace = true)
   }
 
@@ -153,7 +148,7 @@ class QuestionServiceImpl(implicit val bindingModule: BindingModule)
     } yield results
 
   override def copyByCategory(categoryId: Option[Long], newCategoryId: Option[Long], courseId: Long): Seq[Question] =
-    execSyncInTransaction {
+    dbLayer.execSyncInTransaction {
       copyByCategoryAction(categoryId, newCategoryId, courseId)
     }
 
@@ -163,9 +158,9 @@ class QuestionServiceImpl(implicit val bindingModule: BindingModule)
   }
 
   override def moveToCourse(id: Long, courseId: Long, moveToRoot: Boolean): Unit =
-    execSyncInTransaction(moveToCourseAction(id, courseId, moveToRoot))
+    dbLayer.execSyncInTransaction(moveToCourseAction(id, courseId, moveToRoot))
 
-  override def moveToCategory(id: Long, newCategoryId: Option[Long], courseId: Long): Unit = execSync {
+  override def moveToCategory(id: Long, newCategoryId: Option[Long], courseId: Long): Unit = dbLayer.execSync {
     if (newCategoryId.isDefined) {
       for {
         newCourseId <- categoryStorage.getById(newCategoryId.get).map(_.map(_.courseId).getOrElse(courseId))
@@ -176,7 +171,7 @@ class QuestionServiceImpl(implicit val bindingModule: BindingModule)
     }
   }
 
-  override def getByCategory(categoryId: Option[Long], courseId: Long): Seq[Question] = execSync {
+  override def getByCategory(categoryId: Option[Long], courseId: Long): Seq[Question] = dbLayer.execSync {
     questionStorage.getByCategory(categoryId, courseId)
   }
 

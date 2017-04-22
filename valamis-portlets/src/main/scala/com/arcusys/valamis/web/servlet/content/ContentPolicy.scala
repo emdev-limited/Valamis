@@ -1,7 +1,7 @@
 package com.arcusys.valamis.web.servlet.content
 
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.web.portlet.base.{ModifyPermission, ViewPermission}
+import com.arcusys.valamis.web.portlet.base.{Permission, ModifyPermission, ViewPermission}
 import com.arcusys.valamis.web.servlet.base.PermissionUtil
 import org.scalatra.ScalatraBase
 
@@ -15,6 +15,9 @@ trait ContentPolicy { self : ScalatraBase =>
   )
 
   before(request.getMethod == "POST") (
-    PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.ContentManager)
+    PermissionUtil.requirePermissionApi(
+      Permission(ModifyPermission, List(PortletName.ContentManager)),
+      Permission(ViewPermission, List(PortletName.LessonStudio))
+    )
   )
 }

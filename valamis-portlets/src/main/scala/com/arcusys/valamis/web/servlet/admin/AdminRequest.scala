@@ -2,7 +2,7 @@ package com.arcusys.valamis.web.servlet.admin
 
 import com.arcusys.valamis.lrsEndpoint.model.AuthorizationType
 import com.arcusys.valamis.lrsEndpoint.model.AuthorizationType.AuthorizationType
-import com.arcusys.valamis.web.servlet.admin.AdminActionType.AdminActionType
+import com.arcusys.valamis.web.servlet.admin.AdminSettingType.AdminSettingType
 import com.arcusys.valamis.web.servlet.request.{BaseRequest, Parameter}
 import org.scalatra.ScalatraBase
 
@@ -24,6 +24,12 @@ object AdminRequest extends BaseRequest {
   val GoogleClientId = "googleClientId"
   val GoogleAppId = "googleAppId"
   val GoogleApiKey = "googleApiKey"
+  val LtiVersion = "ltiVersion"
+  val LtiMessageType = "ltiMessageType"
+  val LtiLaunchPresentationReturnUrl = "ltiLaunchPresentationReturnUrl"
+  val LtiOauthVersion = "ltiOauthVersion"
+  val LtiOauthSignatureMethod = "ltiOauthSignatureMethod"
+  val Type = "type"
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
 
@@ -38,9 +44,15 @@ object AdminRequest extends BaseRequest {
     def googleClientId = Parameter(AdminRequest.GoogleClientId).required
     def googleAppId = Parameter(AdminRequest.GoogleAppId).required
     def googleApiKey = Parameter(AdminRequest.GoogleApiKey).required
-    def actionType: AdminActionType = AdminActionType.withName(Parameter(AdminRequest.Action).required.toUpperCase)
+    def settingType: AdminSettingType = AdminSettingType.withName(Parameter(AdminRequest.Type).required.toLowerCase)
     def isExternalLrs: Boolean = Parameter(AdminRequest.IsExternalLRS).booleanRequired
     def courseId = Parameter(CourseId).intRequired
+
+    def ltiVersion = Parameter(AdminRequest.LtiVersion).required
+    def ltiMessageType = Parameter(AdminRequest.LtiMessageType).required
+    def ltiLaunchPresentationReturnUrl = Parameter(AdminRequest.LtiLaunchPresentationReturnUrl).required
+    def ltiOauthVersion = Parameter(AdminRequest.LtiOauthVersion).required
+    def ltiOauthSignatureMethod = Parameter(AdminRequest.LtiOauthSignatureMethod).required
 
     def customHost = Parameter(AdminRequest.CustomHost).option("")
 

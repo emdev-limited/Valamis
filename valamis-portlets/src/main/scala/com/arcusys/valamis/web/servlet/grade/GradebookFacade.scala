@@ -2,7 +2,7 @@ package com.arcusys.valamis.web.servlet.grade
 
 import com.arcusys.learn.liferay.LiferayClasses.LAddress
 import com.arcusys.learn.liferay.util.CountryUtilHelper
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.gradebook.service._
 import com.arcusys.valamis.lesson.model._
 import com.arcusys.valamis.lesson.service._
@@ -14,8 +14,6 @@ import com.arcusys.valamis.tag.model.ValamisTag
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.user.util.UserExtension
 import com.arcusys.valamis.util.serialization.JsonHelper
-import com.arcusys.valamis.web.servlet.base.PermissionUtil
-import com.arcusys.valamis.web.servlet.base.exceptions.AccessDeniedException
 import com.arcusys.valamis.web.servlet.grade.response.{PackageGradeResponse, PieData, StudentResponse}
 import com.arcusys.valamis.web.servlet.user.UserFacadeContract
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
@@ -131,8 +129,6 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
                           sortAsc: Boolean = false,
                           withStatements: Boolean = true): StudentResponse = {
     val student = userService.getById(studentId)
-    if (!userFacade.canView(PermissionUtil.getCourseId, PermissionUtil.getUserId, viewAll = false))
-      throw AccessDeniedException()
 
     StudentResponse(
       id = student.getUserId,

@@ -1,84 +1,119 @@
 <section data-state="short_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
-<div class="SCORMPlayerContentDisplay content{{id}}_{{questionNumber}}">
-    <div class="playerHeader">
-        <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
-    </div>
-    <div class="playerMainArea">
-        <input class="playerShortAnswerField" id="scormShortAnswer{{id}}_{{questionNumber}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
-    </div>
-    <!--{{#autoShowAnswer}} -->
-    <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
-            onclick="TinCanCourseHelpers['shortShowAnswers_{{id}}_{{questionNumber}}']()">
-        Check
-    </button>
-    <!--{{/autoShowAnswer}} -->
-</div>
-<!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}_{{questionNumber}}">
-    <div class="feedback-block-label">{{{text}}}</div>
-    <div class="feedback-correctness-label" id="answerCorrectness{{id}}_{{questionNumber}}"></div>
+    <div class="short-question">
+        <div class="valamis-question js-valamis-question content{{id}}_{{questionNumber}}">
+            <div class="question-text">{{{text}}}</div>
+            <div class="answers-options js-answers-options">
+                <input class="question-short-answers" id="scormShortAnswer{{id}}_{{questionNumber}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
+            </div>
+            <!--{{#autoShowAnswer}} -->
+            <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
+                    onclick="TinCanCourseHelpers['shortShowAnswers_{{id}}_{{questionNumber}}']()">
+            </button>
+            <!--{{/autoShowAnswer}} -->
+        </div>
+        <!--{{#autoShowAnswer}} -->
+        <div class="valamis-question js-valamis-question js-question-feedback answers answers{{id}}_{{questionNumber}}">
+            <div class="question-text">{{{text}}}</div>
 
-    <div class="feedback-block-label js-localized-label" data-value="yourAnswersLabel"></div>
-    <div id="usersAnswers{{id}}_{{questionNumber}}" class="clearfix"></div>
+            <div class="result-icon small shift-left val-icon js-result-icon"></div>
+            <div class="result-label js-localized-label" data-value="yourAnswersLabel"></div>
+            <div id="usersAnswers{{id}}_{{questionNumber}}" class="answer-container answer-list-icon clearfix"></div>
 
-    <!-- {{#isCaseSensitive}} -->
-    <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersCaseSensitiveLabel"></div>
-    <!-- {{/isCaseSensitive}} -->
-    <!-- {{^isCaseSensitive}} -->
-    <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersLabel"></div>
-    <!-- {{/isCaseSensitive}} -->
-    <div id="correctAnswers{{id}}_{{questionNumber}}" class="clearfix hidden js-correct-answers">
-        <table class="answers-table"></table>
+            <div class="result-icon small shift-left val-icon js-correct-answers hidden correct"></div>
+            <!-- {{#isCaseSensitive}} -->
+            <div class="js-localized-label result-label js-correct-answers hidden" data-value="correctAnswersCaseSensitiveLabel"></div>
+            <!-- {{/isCaseSensitive}} -->
+            <!-- {{^isCaseSensitive}} -->
+            <div class="js-localized-label result-label js-correct-answers hidden" data-value="correctAnswersLabel"></div>
+            <!-- {{/isCaseSensitive}} -->
+            <div id="correctAnswers{{id}}_{{questionNumber}}" class="answer-container js-correct-answers hidden clearfix">
+                <table class="answers-table"></table>
+            </div>
+
+            <div class="result-icon shift-left val-icon js-result-icon"></div>
+            <div id="answerCorrectness{{id}}_{{questionNumber}}" class="result-label">
+                <div class="js-right-answer-correctness">{{{rightAnswerText}}}</div>
+                <div class="js-wrong-answer-correctness">{{{wrongAnswerText}}}</div>
+            </div>
+
+            <div class="decorative-line">
+                <div class="choice-line"></div>
+            </div>
+
+            {{#hasExplanation}}
+            <div class="js-localized-label invisible-font" data-value="explanationLabel"></div>
+            <div id="explanation" class="question-explanation js-question-explanation">{{{explanation}}}</div>
+            {{/hasExplanation}}
+        </div>
     </div>
-
-    {{#hasExplanation}}
-    <div class="js-localized-label feedback-block-label" data-value="explanationLabel"></div>
-    <div id="explanation">{{{explanation}}}</div>
-    {{/hasExplanation}}
-</div>
 <!--{{/autoShowAnswer}} -->
 </section>
 <script type="text/javascript">
     /*{{#autoShowAnswer}}*/
     TinCanCourseHelpers['shortShowAnswers_{{id}}_{{questionNumber}}'] = function() {
         var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
-        //Replace all tags with /> to >, as we get not closed tags in answer
-        var dataToCompare = JSON.parse(unescapeElement('{{answers}}').replace(/[\s]+\/>/gi, '>'));
+        var dataToCompare = answersToJSON('{{answers}}');
 
-        jQuery('.answers{{id}}_{{questionNumber}}').show();
-        jQuery('.content{{id}}_{{questionNumber}}').hide();
+        var questionContainer = jQuery('#slideEntity_{{questionNumber}}');
+        questionContainer.siblings('.rj-element').hide();
 
-        var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
-        parent_el.siblings('.rj-element').hide();
+        var questionContent = questionContainer.find('.content{{id}}_{{questionNumber}}');
+        var userAnswers = questionContainer.find('.answers{{id}}_{{questionNumber}}');
+        questionContent.hide();
+        userAnswers.show();
 
         var correct = answers.isPassed;
-        var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
-        if (correctness === "")
-            correctness = (correct) ? LESSON_LABELS['yourAnswerIsCorrectLabel'] : LESSON_LABELS['yourAnswerIsIncorrectLabel'];
-        jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
+        var rightAnswerCorrectness = userAnswers.find('#answerCorrectness{{id}}_{{questionNumber}} .js-right-answer-correctness');
+        var wrongAnswerCorrectness = userAnswers.find('#answerCorrectness{{id}}_{{questionNumber}} .js-wrong-answer-correctness');
+
+        if (correct) {
+            var rightAnswerCorrectnessText = rightAnswerCorrectness.html();
+            if (rightAnswerCorrectnessText == '') {
+                rightAnswerCorrectness.html(LESSON_LABELS['yourAnswerIsCorrectLabel']);
+            }
+            rightAnswerCorrectness.show();
+            wrongAnswerCorrectness.hide();
+
+            questionContainer.find('.js-result-icon').addClass('correct');
+        }
+        else {
+            var wrongAnswerCorrectnessText = wrongAnswerCorrectness.html();
+            if (wrongAnswerCorrectnessText == '') {
+                wrongAnswerCorrectness.html(LESSON_LABELS['yourAnswerIsIncorrectLabel']);
+            }
+            rightAnswerCorrectness.hide();
+            wrongAnswerCorrectness.show();
+
+            questionContainer.find('.js-result-icon').addClass('incorrect');
+        }
 
         var learnerResponse = answers.learnerResponse;
         if (learnerResponse.length)
             jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(learnerResponse);
         else
             jQuery("#usersAnswers{{id}}_{{questionNumber}}").html(LESSON_LABELS['noAnswerLabel']);
-
         if (!correct) {
             jQuery('.answers{{id}}_{{questionNumber}} .js-correct-answers').removeClass('hidden');
 
             for (var i = 0; i < dataToCompare.length; i++) {
-                var elem = jQuery("<td>").append(jQuery('<p>').append(dataToCompare[i].text));
+                var elem = jQuery("<td class='answer-list-icon'>").append(dataToCompare[i].text);
                 jQuery("#correctAnswers{{id}}_{{questionNumber}} table").append(jQuery("<tr>").append(elem));
             }
-
         }
 
         moveAnswers({{questionNumber}});
+
+        var questionId = {{id}};
+        var questionNumber = {{questionNumber}};
+        recalculateFeedbackSlideHeight(questionId, questionNumber);
+
+        /*resfresh div for screen readers*/
+        refreshStatusDiv();
     };
     /*{{/autoShowAnswer}}*/
 
     TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function() {
-        var dataToCompare = JSON.parse(unescapeElement('{{answers}}').replace(/[\s]+\/>/gi, '>'));
+        var dataToCompare = answersToJSON('{{answers}}');
         var isCaseSensitive = JSON.parse('{{{isCaseSensitive}}}');
         var score = 0,
             hasScore = false;

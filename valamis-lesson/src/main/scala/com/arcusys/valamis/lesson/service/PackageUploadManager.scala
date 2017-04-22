@@ -32,9 +32,10 @@ abstract class PackageUploadManager {
 
     val lesson = customUploaders.find(u => u.isValidPackage(fileName, packageFile)) match {
       case None =>
+        FileSystemUtil.deleteFile(packageFile)
         throw new UnsupportedOperationException("unsupportedPackageException")
       case Some(uploader) =>
-        uploader.upload(title, description, packageFile, courseId, userId)
+        uploader.upload(title, description, packageFile, courseId, userId, fileName)
     }
 
     updatePackageAssetEntry(lesson)

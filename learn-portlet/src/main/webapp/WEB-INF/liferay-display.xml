@@ -2,28 +2,20 @@
 <!DOCTYPE display PUBLIC "-//Liferay//DTD Display 6.2.0//EN" "http://www.liferay.com/dtd/liferay-display_6_2_0.dtd">
 <display>
     <category name="Valamis Analytics">
+        <portlet id="Gradebook">Gradebook</portlet>
+        <portlet id="ValamisReport">Valamis report</portlet>
         <portlet id="TinCanStatementViewer">Valamis TinCan Statement Viewer</portlet>
-        <portlet id="TinCanReportViewer">Valamis TinCan Statement Reports</portlet>
-        <portlet id="TinCanReportByPeriod">Valamis TinCan Statement Reports by period</portlet>
-        <portlet id="TinCanLatestStatements">Valamis TinCan My Latest statements</portlet>
-        <portlet id="TinCanStudentsLatestStatements">Valamis TinCan Students Latest statements</portlet>
-        <portlet id="TinCanMostActiveStudents">Valamis TinCan Teacher's most active students</portlet>
-        <portlet id="TinCanStudentsLeaderboard">Valamis TinCan Students Leaderboard</portlet>
-        <portlet id="TinCanCourseReport">Valamis TinCan Course Report</portlet>
-        <portlet id="CourseEventReport">Course Event Report</portlet>
-        <portlet id="ParticipantReport">Participant Report</portlet>
         <portlet id="LearningTranscript">Learning Transcript</portlet>
+        <portlet id="LearningReport">Learning Pattern Report</portlet>
     </category>
 
     <category name="Valamis Curriculum tools">
         <portlet id="Curriculum">Curriculum</portlet>
         <portlet id="CurriculumUser">Curriculum user</portlet>
-        <portlet id="SCORMUserAccount">My Account</portlet>
     </category>
 
     <category name="Valamis Lesson tools">
         <portlet id="SCORMApplication">SCORMApplication</portlet>
-        <portlet id="Gradebook">Gradebook</portlet>
         <portlet id="ContentManager">ContentManager</portlet>
         <portlet id="PackageManager">PackageManager</portlet>
         <portlet id="ValamisSlidesEditor">Lesson Studio</portlet>
@@ -35,6 +27,7 @@
         <portlet id="SCORMApplicationAdmin">SCORMApplicationAdmin</portlet>
         <portlet id="SocialActivitiesTinCanMapper">Valamis TinCan Social Activity Mapper</portlet>
         <portlet id="LRSToActivityMapper">Valamis LRS To Activity Mapper</portlet>
+        <portlet id="ContentProviderManager">Content Provider Manager</portlet>
     </category>
 
     <category name="Valamis Dashboard">

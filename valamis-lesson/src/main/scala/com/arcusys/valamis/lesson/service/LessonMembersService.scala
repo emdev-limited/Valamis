@@ -1,9 +1,11 @@
 package com.arcusys.valamis.lesson.service
 
 import com.arcusys.learn.liferay.LiferayClasses.LUser
-import com.arcusys.valamis.lesson.model.{LessonUser, Lesson, LessonViewer}
+import com.arcusys.valamis.lesson.model.{Lesson, LessonUser, LessonViewer}
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
 import com.arcusys.valamis.member.model.{Member, MemberTypes}
+import com.arcusys.valamis.user.model.User
+
 
 /**
   * Created by mminin on 26.02.16.
@@ -23,7 +25,7 @@ trait LessonMembersService {
                      nameFilter: Option[String],
                      ascending: Boolean,
                      skipTake: Option[SkipTake],
-                     organizationId: Option[Long]): RangeResult[LUser]
+                     organizationId: Option[Long]): RangeResult[User]
 
   def getAvailableMembers(lessonId: Long,
                           viewerType: MemberTypes.Value,

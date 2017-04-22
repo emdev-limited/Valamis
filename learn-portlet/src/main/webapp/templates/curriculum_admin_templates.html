@@ -1,0 +1,962 @@
+
+<script type="text/template" id="curriculumManagerLayoutTemplate">
+    <div id="curriculumManagerToolbar"></div>
+    <div id="curriculumManagerCertificates"></div>
+    <div id="curriculumManagerPaginator" class="val-paginator text-center"></div>
+</script>
+
+<script type="text/template" id="curriculumManagerToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            </div>
+        </div>
+
+        <div class="dropdown filter-element shift-left js-scope-filter" data-value="">
+            <button class="button medium simple">
+              <span class="dropdown-text"> {{instanceScopeLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value=""> {{instanceScopeLabel}} </li>
+                <li data-value="{{currentCourseId}}"> {{currentSiteScopeLabel}} </li>
+            </ul>
+        </div>
+
+        {{#CurriculumManager.MODIFY}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-create-certificate">
+                <span class="val-icon-plus"></span>{{newCertificatePlaceholderLabel}}
+            </button>
+        </div>
+        {{/CurriculumManager.MODIFY}}
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="curriculumManagerPaginatorShowing"> </div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="creationDate:false">
+            <button class="button medium simple">
+            <span class="dropdown-text"> {{newestLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="creationDate:false"> {{newestLabel}} </li>
+                <li data-value="creationDate:true"> {{oldestLabel}} </li>
+                <li data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+
+        <button class="button medium simple no-text hide-s shift-right js-display-option" data-value="{{tilesModeOption}}">
+                <span class="val-icon-grid-view">Grid View</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option" data-value="{{listModeOption}}">
+                <span class="val-icon-list-view">List View</span>
+        </button>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerCertificatesItemTemplate">
+    <div class="tile-content with-action">
+        <div class="image certificate"
+             {{#logo}}
+             style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
+             {{/logo}} >
+        </div>
+        <ul>
+            <li class="title">{{title}}</li>
+            <li class="description">{{description}}</li>
+            <li class="categories"> {{userCount}}&nbsp;{{usersSubtitleLabel}} • {{goalsCount}}&nbsp;{{goalsSubtitleLabel}} </li>
+            {{^isActive}}
+            <li class="status">
+                <span class="val-label"> {{inactiveLabel}} </span>
+            </li>
+            {{/isActive}}
+        </ul>
+        <div class="dropdown actions shift-right">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-edit-certificate">
+                    {{#CurriculumManager.MODIFY}} {{editCertificateLabel}} {{/CurriculumManager.MODIFY}}
+                    {{^CurriculumManager.MODIFY}} {{viewDetailsLabel}} {{/CurriculumManager.MODIFY}}
+                </li>
+                <li class="js-edit-goals">
+                    {{#CurriculumManager.MODIFY}}{{editCoursesLabel}} {{/CurriculumManager.MODIFY}}
+                    {{^CurriculumManager.MODIFY}}{{viewGoalsLabel}} {{/CurriculumManager.MODIFY}}
+                </li>
+                <li class="js-edit-members">
+                    {{#CurriculumManager.MODIFY}} {{editUsersLabel}} {{/CurriculumManager.MODIFY}}
+                    {{^CurriculumManager.MODIFY}} {{viewUsersLabel}} {{/CurriculumManager.MODIFY}}
+                </li>
+                {{#CurriculumManager.MODIFY}}
+                <li class="js-clone-certificate"> {{cloneCertificateLabel}} </li>
+                {{/CurriculumManager.MODIFY}}
+
+                {{#CurriculumManager.ACTIVATE}}
+                {{^isActive}}
+                <li class="js-activate-certificate"> {{activateCertificateLabel}} </li>
+                {{/isActive}}
+                {{#isActive}}
+                <li class="js-deactivate-certificate"> {{deactivateCertificateLabel}} </li>
+                {{/isActive}}
+                {{/CurriculumManager.ACTIVATE}}
+
+                {{#CurriculumManager.MODIFY}}
+                <li class="js-delete-certificate"> {{deleteCertificateLabel}} </li>
+                <li class="js-export-certificate"> {{exportLabel}} </li>
+                {{/CurriculumManager.MODIFY}}
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerEditModalTemplate">
+    <div class="modal-content"></div>
+</script>
+
+<script type="text/html" id="curriculumManagerEditCertificateTemplate">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="editCertificateTabs">
+            <li class=""><a href="#editDetails">{{editDetailsLabel}}</a></li>
+            <li class=""><a href="#editGoals" class="hidden">{{editGoalsLabel}}</a></li>
+            <li class=""><a href="#editMembers" class="hidden">{{editMembersLabel}}</a></li>
+        </ul>
+
+        <div class="tab-content" style="position: relative">
+            <div id="editDetails" class="tab-pane"> </div>
+            <div id="editGoals" class="tab-pane"> </div>
+            <div id="editMembers" class="tab-pane"> </div>
+        </div>
+    </div>
+    <div class="modal-close val-icon-exit"></div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+
+        {{#CurriculumManager.MODIFY}}
+        <button class="button big primary js-submit-button">
+            {{certificateSaveButtonTooltipLabel}}
+        </button>
+        <button class="button big primary js-save-continue">
+            {{certificateContinueLabel}}
+        </button>
+        {{/CurriculumManager.MODIFY}}
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerEditDetailsTemplate">
+    <div class="div-row">
+        <div class="div-col name-col">
+            {{certificateTitleLabel}}
+        </div>
+        <div class="div-col content-col">
+            <input type="text" class="js-certificate-title" value="{{title}}" placeholder="{{newCertificatePlaceholderLabel}}"
+                   {{^CurriculumManager.MODIFY}} disabled="disabled" {{/CurriculumManager.MODIFY}} />
+        </div>
+    </div>
+    <div class="div-row">
+        <div class="div-col name-col">
+            {{coverImageLabel}}
+        </div>
+        <div class="div-col content-col">
+            <img class="shift-left val-img-logo certificate js-logo {{#CurriculumManager.MODIFY}} js-upload-image {{/CurriculumManager.MODIFY}}"
+                 src="{{#logo}}/delegate/certificates/{{id}}/logo?courseId={{courseId}}{{/logo}}"/>
+
+            <div class="button-block shift-left">
+                {{#CurriculumManager.MODIFY}}
+                <button class="button medium primary inline js-upload-image">
+                    {{uploadLogoLabel}}
+                </button>
+                <button class="button medium simple no-text val-icon-trash danger-color inline js-delete-logo">
+                    {{deleteLogoLabel}}
+                </button>
+                <button class="button medium neutral js-design-new-badge">
+                    {{designNewBadge}}
+                </button>
+                <button class="button medium neutral js-select-from-media-gallery">
+                    {{openMediaGalleryLabel}}
+                </button>
+                {{/CurriculumManager.MODIFY}}
+            </div>
+        </div>
+    </div>
+    <div class="div-row">
+        <div class="div-col name-col">
+            {{certificateDescriptionLabel}}
+        </div>
+        <div class="div-col content-col">
+            <textarea class="js-certificate-description" rows="5" placeholder="{{descriptionPlaceholderLabel}}"
+                      {{^CurriculumManager.MODIFY}} disabled="disabled" {{/CurriculumManager.MODIFY}} >{{description}}</textarea>
+        </div>
+    </div>
+    <div class="div-row">
+        <div class="div-col name-col">
+            {{certificateScopeLabel}}
+        </div>
+        <div class="div-col content-col">
+            <input type="text" class="form-input js-scope-name" value="" disabled="disabled" />
+
+            {{#CurriculumManager.MODIFY}}
+            <button class="button medium neutral js-edit-scope">
+                {{changeLabel}}
+            </button>
+
+            <button class="button medium danger js-delete-scope">
+                {{removeLabel}}
+            </button>
+            {{/CurriculumManager.MODIFY}}
+        </div>
+    </div>
+    <div class="div-row">
+        <div class="div-col name-col">
+            {{validPeriodLabel}}
+        </div>
+        <div class="div-col content-col">
+            <div class="valid-div">
+                <div>
+                    <input type="radio" value="true" name="validPeriod" class="shift-left" id="permanentPeriod" {{^CurriculumManager.MODIFY}} disabled="disabled" {{/CurriculumManager.MODIFY}}/>
+                    <label for="permanentPeriod">{{permanentLabel}}</label>
+                </div>
+                <div class="clearfix">
+                    <input type="radio" value="false" name="validPeriod" class="shift-left" id="nonPermanentPeriod" {{^CurriculumManager.MODIFY}} disabled="disabled" {{/CurriculumManager.MODIFY}}/>
+                    <label id="labelNonPermanentPeriod" for="nonPermanentPeriod" class="shift-left">{{validForLabel}}</label>
+
+                    <div class="js-plus-minus shift-left"></div>
+
+                    <div class="val-select shift-left">
+                        <select class="js-valid-period-type">
+                            <option value="DAYS">{{daysLabel}}</option>
+                            <option value="WEEKS">{{weeksLabel}}</option>
+                            <option value="MONTH">{{monthLabel}}</option>
+                            <option value="YEAR">{{yearLabel}}</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="div-row">
+        <div class="div-col name-col">
+            {{openBadgesIntegrationLabel}}
+        </div>
+        <div class="div-col content-col">
+            <input type="checkbox" id="openBadgeIntegration" class="val-checkbox" {{#isOpenBadgesIntegration}} checked {{/isOpenBadgesIntegration}}
+            {{^CurriculumManager.MODIFY}} disabled="disabled" {{/CurriculumManager.MODIFY}}/>
+            <label class="checkbox-label" for="openBadgeIntegration"></label>
+        </div>
+    </div>
+    <div class="div-row js-openBadgesDescription {{^isOpenBadgesIntegration}} hidden {{/isOpenBadgesIntegration}}">
+        <div class="div-col name-col">
+            {{shortDescriptionLabel}}
+        </div>
+        <div class="div-col content-col">
+            <input type="text" class="js-openbadges-description" value="{{shortDescription}}" {{^CurriculumManager.MODIFY}} disabled="disabled" {{/CurriculumManager.MODIFY}}/>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerEditGoalsTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            </div>
+        </div>
+        <div class="filter-element shift-left paging-showing-label">
+            <span class="js-goals-amount"> 0 </span>
+            <span>{{goalsListedLabel}}</span>
+        </div>
+
+        {{#CurriculumManager.MODIFY}}
+        <div class="filter-element shift-left">
+            <span class="button-divider-v neutral js-divider hidden"></span>
+        </div>
+
+        <div class="filter-element shift-left">
+            <button class="button medium neutral js-goal-group hidden">
+                {{groupLabel}}
+            </button>
+            <button class="button medium neutral js-delete-selected hidden">
+               {{removeLabel}}
+            </button>
+        </div>
+
+        <div class="filter-element dropdown actions shift-right">
+            <button class="button medium primary">
+                <span class="dropdown-text">{{addGoalLabel}}</span>
+                <span class="val-icon-dropdown val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-add-course" data-value="">{{addCourseLabel}}</li>
+                <li class="js-add-statement" data-value="">{{addStatementLabel}}</li>
+                <li class="js-add-activity" data-value="">{{addActivityLabel}}</li>
+                <li class="js-add-lesson" data-value="">{{addLessonLabel}}</li>
+                {{#assignmentDeployed}}
+                <li class="js-add-assignment" data-value="">{{addAssignmentLabel}}</li>
+                {{/assignmentDeployed}}
+                {{#eventsDeployed}}
+                <li class="js-add-event" data-value="">{{addEventLabel}}</li>
+                {{/eventsDeployed}}
+            </ul>
+        </div>
+
+        <div class="filter-element shift-right {{^hasGoalChanges}} hidden {{/hasGoalChanges}}">
+            <input type="checkbox" id="showChanges" class="val-checkbox" />
+            <label class="checkbox-label" for="showChanges"></label>
+            {{showChangesLabel}}
+        </div>
+        {{/CurriculumManager.MODIFY}}
+    </div>
+
+    <label class="valamis-info-label shifted hidden js-no-goals-label"> {{noAvailableGoalsLabel}} </label>
+
+    <div class="val-list-table">
+        <div class="val-row val-list-table-header js-certificate-goals-header">
+            <div class="s-5 js-certificate-goal-title-header">
+                {{#CurriculumManager.MODIFY}}
+                <span class='handle val-icon-sort' style="visibility: hidden;"></span>
+                <input type="checkbox" id="selectAllGoals" class="val-checkbox"/>
+                <label class="checkbox-label" for="selectAllGoals"></label>
+                {{/CurriculumManager.MODIFY}}
+
+                {{learningGoalLabel}}
+            </div>
+            <div class="s-2">{{typeLabel}}</div>
+            <div class="s-2">{{deadlineLabel}}</div>
+            <div class="s-1 text-center">{{optionalLabel}}</div>
+            <div class="s-2 hidden js-certificate-goal-changes-header">{{changesLabel}}</div>
+        </div>
+        <ul class="js-certificate-goals">
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerGoalsGroupGoalTemplate">
+    <div class="val-row list-table-row">
+        <div class="s-5 title ellipsis {{^isAvailable}} inactive {{/isAvailable}}">
+            {{#canModify}}
+            <span class='handle val-icon-sort'></span>
+            <input type="checkbox" id="toggleGoal1_{{uniqueId}}" class="val-checkbox js-select-goal"/>
+            <label class="checkbox-label" for="toggleGoal1_{{uniqueId}}"></label>
+            {{/canModify}}
+            
+            {{group1Label}}
+            <input type="text" class="onlyDigits js-digits-only js-group-count" value="{{count}}"
+                   {{^canModify}} disabled="disabled" {{/canModify}}
+            />
+            {{group2Label}}
+        </div>
+
+        <div class="s-2 {{^isAvailable}} inactive {{/isAvailable}}">&nbsp;</div>
+
+        <div class="s-2 {{^isAvailable}} inactive {{/isAvailable}}">
+            <div class="clearfix val-during-period shift-right">
+                <input type="text" class="onlyDigits shift-left js-digits-only js-period-value" value="{{periodValue}}"
+                       {{^canModify}} disabled="disabled" {{/canModify}}
+                />
+
+                <div class="val-select shift-left">
+                    <select class="js-period-type" {{^canModify}} disabled="disabled" {{/canModify}} >
+                    <option value="DAYS">{{daysLabel}}</option>
+                    <option value="WEEKS">{{weeksLabel}}</option>
+                    <option value="MONTH">{{monthLabel}}</option>
+                    <option value="YEAR">{{yearLabel}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="s-1">&nbsp;</div>
+
+        <div class="s-2 goal-changes hidden">
+            {{#user}}
+            <div class="name">{{byLabel}} {{user.name}}</div>
+            <div class="date">{{modifiedDate}}</div>
+            {{/user}}
+
+        </div>
+
+        {{#canModify}}
+        <div class="s-2 text-right">
+            <button class="button medium neutral js-goal-ungroup">
+                {{ungroupLabel}}
+            </button>
+        </div>
+        {{/canModify}}
+    </div>
+    <ul class="js-items goals-group"></ul>
+</script>
+
+<script type="text/template" id="curriculumManagerGoalsSingleGoalTemplate">
+    <div class="val-row list-table-row">
+        <div class="{{^showChanges}} s-5 {{/showChanges}} {{#showChanges}} s-4 {{/showChanges}} {{^isAvailable}} inactive {{/isAvailable}} title">
+            {{#canModify}}
+            <span class="handle val-icon-sort"></span>
+            <input type="checkbox" id="toggleGoal1_{{uniqueId}}" class="val-checkbox js-select-goal"/>
+            <label class="checkbox-label" for="toggleGoal1_{{uniqueId}}"></label>
+            {{/canModify}}
+            
+            {{#isActivity}}
+            <input type="text" class="onlyDigits js-digits-only js-activity-count" value="{{count}}"
+                   {{^canModify}} disabled="disabled" {{/canModify}}
+            />
+            {{/isActivity}}
+
+            {{#isSubjectDeleted}} <span class="valamis-info-label"> {{deletedItemLabel}} </span> {{/isSubjectDeleted}}
+
+            {{^isSubjectDeleted}}
+            {{#url}}<a href="{{url}}" target="_blank">{{/url}}
+            {{title}}
+            {{#url}}</a>{{/url}}
+            {{/isSubjectDeleted}}
+        </div>
+
+        <div class="s-2 {{^isAvailable}}{{#showChanges}} inactive {{/showChanges}}{{/isAvailable}}">{{goalItemTypeText}}&nbsp;</div>
+
+        <div class="s-2 {{^isAvailable}}{{#showChanges}} inactive {{/showChanges}}{{/isAvailable}}">
+            {{#groupId}}
+            &nbsp;
+            {{/groupId}}
+
+            {{^groupId}}
+            <div class="clearfix val-during-period shift-right">
+                <input type="text" class="onlyDigits shift-left js-digits-only js-period-value" value="{{periodValue}}"
+                       {{^canModify}} disabled="disabled" {{/canModify}}
+                />
+
+                <div class="val-select shift-left">
+                    <select class="js-period-type" {{^canModify}} disabled="disabled" {{/canModify}} >
+                    <option value="DAYS">{{daysLabel}}</option>
+                    <option value="WEEKS">{{weeksLabel}}</option>
+                    <option value="MONTH">{{monthLabel}}</option>
+                    <option value="YEAR">{{yearLabel}}</option>
+                    </select>
+                </div>
+            </div>
+            {{/groupId}}
+        </div>
+
+        <div class="s-1 text-center">
+            {{^groupId}}
+            <input type="checkbox" id="optionalGoal1_{{uniqueId}}" class="val-checkbox js-is-optional"
+                   {{^canModify}} disabled="disabled" {{/canModify}} {{#isOptional}}checked{{/isOptional}}/>
+            <label class="checkbox-label {{^isAvailable}}{{#showChanges}} inactive {{/showChanges}}{{/isAvailable}}"
+                   for="optionalGoal1_{{uniqueId}}"> </label>
+            {{/groupId}}
+            &nbsp;
+        </div>
+
+        <div class="s-2 goal-changes hidden">
+            {{^groupId}}{{#user}}
+            <div class="name">{{byLabel}} {{user.name}}</div>
+            <div class="date">{{modifiedDate}}</div>
+            {{/user}}{{/groupId}}
+        </div>
+
+        {{^isAvailable}}{{#showChanges}}{{^groupId}}
+        <button class="button medium simple no-text js-goal-undo">
+            <span class="val-icon-undo"></span> {{undoLabel}}
+        </button>
+        {{/groupId}}
+        {{#groupId}}&nbsp;{{/groupId}}{{/showChanges}}{{/isAvailable}}
+        {{#canModify}}
+        <div class="s-2 text-right">
+            <button class="button medium simple no-text js-goal-delete">
+                <span class="val-icon-trash"></span> {{deleteLabel}}
+            </button>
+        </div>
+        {{/canModify}}
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerUserGoalResultsViewTemplate">
+    <label class="valamis-info-label shifted hidden js-no-goals-label"> {{noAvailableGoalsLabel}} </label>
+
+    <div class="val-list-table">
+        <div class="val-row val-list-table-header js-certificate-goals-header">
+            <div class="s-5"> {{learningGoalLabel}} </div>
+            <div class="s-2">{{typeLabel}}</div>
+            <div class="s-2">{{deadlineLabel}}</div>
+            <div class="s-1 text-center">{{optionalLabel}}</div>
+            <div class="s-2 text-right">{{statusLabel}}</div>
+        </div>
+        <ul class="js-certificate-goals">
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerUserGroupGoalResultsItemViewTemplate">
+    <div class="val-row list-table-row">
+        <div class="s-5 title ellipsis">
+            {{group1Label}}
+            <input type="text" class="onlyDigits js-digits-only js-group-count" value="{{count}}" disabled="disabled" />
+            {{group2Label}}
+        </div>
+
+        <div class="s-2">&nbsp;</div>
+
+        <div class="s-2">
+            <div class="clearfix val-during-period shift-right">
+                <input type="text" class="onlyDigits shift-left js-digits-only js-period-value" value="{{periodValue}}"
+                       disabled="disabled" />
+
+                <div class="val-select shift-left">
+                    <select class="js-period-type" {{^canModify}} disabled="disabled" {{/canModify}} >
+                    <option value="DAYS">{{daysLabel}}</option>
+                    <option value="WEEKS">{{weeksLabel}}</option>
+                    <option value="MONTH">{{monthLabel}}</option>
+                    <option value="YEAR">{{yearLabel}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="s-1">&nbsp;</div>
+
+        <div class="s-2 text-right">{{statusItemLabelText}}</div>
+    </div>
+    <ul class="js-items goals-group"></ul>
+</script>
+
+<script type="text/template" id="curriculumManagerUserGoalResultsItemViewTemplate">
+    <div class="val-row list-table-row">
+        <div class="s-5 title ellipsis">
+            {{#isActivity}}
+            <input type="text" class="onlyDigits js-digits-only js-activity-count" value="{{count}}" disabled="disabled" />
+            {{/isActivity}}
+
+            {{#isSubjectDeleted}} <span class="valamis-info-label"> {{deletedItemLabel}} </span> {{/isSubjectDeleted}}
+
+            {{^isSubjectDeleted}}
+            {{#url}}<a href="{{url}}" target="_blank">{{/url}}
+            {{title}}
+            {{#url}}</a>{{/url}}
+            {{/isSubjectDeleted}}
+        </div>
+
+        <div class="s-2">{{goalItemTypeText}}&nbsp;</div>
+
+        <div class="s-2">
+            {{#groupId}}
+            &nbsp;
+            {{/groupId}}
+
+            {{^groupId}}
+            <div class="clearfix val-during-period shift-right">
+                <input type="text" class="onlyDigits shift-left js-digits-only js-period-value" value="{{periodValue}}"
+                       disabled="disabled"/>
+
+                <div class="val-select shift-left">
+                    <select class="js-period-type" disabled="disabled" >
+                    <option value="DAYS">{{daysLabel}}</option>
+                    <option value="WEEKS">{{weeksLabel}}</option>
+                    <option value="MONTH">{{monthLabel}}</option>
+                    <option value="YEAR">{{yearLabel}}</option>
+                    </select>
+                </div>
+            </div>
+            {{/groupId}}
+        </div>
+
+        <div class="s-1 text-center">
+            {{^groupId}}
+            <input type="checkbox" id="optionalGoal1_{{uniqueId}}" class="val-checkbox js-is-optional" disabled="disabled"
+                   {{#isOptional}}checked{{/isOptional}}/>
+            <label class="checkbox-label" for="optionalGoal1_{{uniqueId}}"> </label>
+            {{/groupId}}
+            &nbsp;
+        </div>
+
+        <div class="s-2 text-right"> {{^isSubjectDeleted}} {{statusItemLabelText}} {{/isSubjectDeleted}}</div>
+    </div>
+</script>
+
+<script type="text/html" id="curriculumManagerActivitySelectViewTemplate">
+    <table class="val-table medium list no-out-margin">
+        <tbody class="js-activity-list">
+        </tbody>
+    </table>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+        <button class="button big primary js-submit-button">{{addActivitiesLabel}}</button>
+    </div>
+</script>
+
+<script type="text/html" id="curriculumManagerActivitySelectItemViewTemplate">
+    <td>{{title}}</td>
+    <td class="text-right">
+        <button class="button medium neutral no-text js-select-activity">
+            <span class="val-icon-checkmark"></span> Add
+        </button>
+    </td>
+</script>
+
+<script type="text/template" id="curriculumManagerStatementsAddViewTemplate">
+    <table class="val-table medium list no-out-margin">
+        <tbody class="js-statements-list">
+        </tbody>
+    </table>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button big primary shift-left js-new-statement">{{newStatementsLabel}}</button>
+        <button class="button big primary shift-left js-select-statements">{{selectStatementsLabel}}</button>
+
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+        <button class="button big primary js-submit-button">{{addStatementsLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerStatementAddItemViewTemplate">
+    <td>{{actorLabel}}</td>
+
+    <td>
+        <div class="position-relative">
+            <div class="val-select">
+                <select class="js-statement-verb">
+                    {{#verbs}}
+                    <option value="{{id}}"> {{title}}</option>
+                    {{/verbs}}
+                </select>
+            </div>
+        </div>
+    </td>
+
+    <td>
+        <input type="text" value="{{obj}}" class="js-statement-object" />
+    </td>
+
+    <td class="text-right">
+        <button class="button medium danger no-text js-delete-statement">
+            <span class="val-icon-trash"></span> Delete
+        </button>
+    </td>
+</script>
+
+<script type="text/template" id="curriculumManagerStatementsSelectViewTemplate">
+    <div id="statementsListToolbar"></div>
+    <div id="statementsList"></div>
+    <div id="statementsListPaginator" class="val-paginator text-center top-shifted"></div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+        <button class="button big primary js-submit-button">{{selectStatementsLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerStatementsToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            </div>
+        </div>
+        <div class="filter-element shift-left">
+            <button class="button medium neutral js-select-all">
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
+            </button>
+        </div>
+        <div class="filter-element paging-showing-label shift-left" id="statementsListPaginatorShowing"></div>
+
+        <div class="filter-element shift-right dropdown js-sort-filter" data-value="name:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{newestLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="creationDate:false"> {{newestLabel}} </li>
+                <li data-value="creationDate:true"> {{oldestLabel}} </li>
+                <li data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerStatementsListViewTemplate">
+    <label class="valamis-info-label shifted js-no-statements-label"> {{noAvailableStatementsLabel}}</label>
+    <table class="val-table medium list js-statements-list no-out-margin">
+        <tbody></tbody>
+    </table>
+</script>
+
+<script type="text/template" id="curriculumManagerStatementsListItemViewTemplate">
+    <td>{{verbName}}</td>
+    <td>{{objName}}</td>
+    <td class="narrow-col">
+        <button class="button medium neutral no-text js-select-statement">
+            <span class="val-icon-checkmark"></span> Add
+        </button>
+    </td>
+</script>
+
+<script type="text/template" id="curriculumManagerMembersToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            </div>
+        </div>
+        <div class="filter-element shift-left">
+            <div class="dropdown js-member-type" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{usersLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="selected" data-value="{{memberTypeObject.USER}}">{{usersLabel}}</li>
+                    <li data-value="{{memberTypeObject.ORGANIZATION}}">{{organizationsLabel}}</li>
+                    <li data-value="{{memberTypeObject.GROUP}}">{{groupsLabel}}</li>
+                    <li data-value="{{memberTypeObject.ROLE}}">{{rolesLabel}}</li>
+                </ul>
+            </div>
+        </div>
+
+        {{#isMemberUser}}
+        <div class="filter-element shift-left">
+            <div class="dropdown js-organizations-filter" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{allOrganizationsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu edit-members-dropdown">
+                    <li class="selected" data-value="">{{allOrganizationsLabel}}</li>
+                    {{#organizations}}
+                    <li data-value="{{id}}">{{name}}</li>
+                    {{/organizations}}
+                </ul>
+            </div>
+        </div>
+        {{/isMemberUser}}
+
+        <div class="filter-element paging-showing-label shift-left js-paginator-showing"></div>
+
+        {{^available}}
+        {{#CurriculumManager.MODIFY}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-add-items" data-value="{{memberType}}">
+                {{addButtonLabelText}}
+            </button>
+        </div>
+        {{/CurriculumManager.MODIFY}}
+        {{/available}}
+    </div>
+
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <button class="button medium neutral shift-left js-select-all">
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
+            </button>
+        </div>
+
+        {{^available}}
+        {{#CurriculumManager.MODIFY}}
+        <div class="dropdown actions filter-element shift-left">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionLabel}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-delete-items" data-value="1">{{deleteLabel}}</li>
+            </ul>
+        </div>
+        {{/CurriculumManager.MODIFY}}
+        {{/available}}
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="curriculumManagerEditMembersItemViewTemplate">
+    <td class="checkbox-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
+    </td>
+
+    {{#isUser}}
+    <td class="narrow-col">
+        {{#picture}}
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+        {{/picture}}
+    </td>
+    {{/isUser}}
+
+    <td> {{name}} </td>
+
+    <td class="text-right">
+        {{#status}}
+        {{statusItemLabel}}
+        <button class="button medium neutral no-text js-show-details">
+            <span class="val-icon-preview"></span> {{viewDetailsLabel}}
+        </button>
+        {{/status}}
+
+        {{#CurriculumManager.MODIFY}}
+        <button class="button medium danger no-text js-delete-item">
+            <span class="val-icon-trash"></span> {{deleteLabel}}
+        </button>
+        {{/CurriculumManager.MODIFY}}
+    </td>
+</script>
+
+<!-- assignment select dialog -->
+
+<script type="text/template" id="assignmentSelectLayoutViewTemplate">
+    <div id="assignmentsListToolbar"></div>
+    <div id="assignmentsList"></div>
+    <div id="assignmentsListPaginator" class="val-paginator text-center top-shifted"></div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+        <button class="button big primary js-submit-button">{{addAssignmentsLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="assignmentSelectToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            </div>
+        </div>
+        <div class="filter-element paging-showing-label shift-left" id="assignmentsListPaginatorShowing"></div>
+
+        <div class="filter-element shift-right dropdown js-sort-filter" data-value="title:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="title:true"> {{byNameAscLabel}} </li>
+                <li data-value="title:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="assignmentSelectListViewTemplate">
+    <label class="valamis-info-label shifted hidden js-no-assignments-label"> {{noAvailableAssignmentsLabel}}</label>
+    <table class="val-table medium list no-out-margin">
+        <tbody class="js-assignments-list"></tbody>
+    </table>
+</script>
+
+<script type="text/template" id="assignmentSelectListItemViewTemplate">
+    <td> {{title}} </td>
+    <td class="text-right">
+        <button class="button medium neutral no-text js-select-assignment">
+            <span class="val-icon-checkmark"></span> {{addLabel}}
+        </button>
+    </td>
+</script>
+
+<!-- events select dialog -->
+
+<script type="text/template" id="eventsSelectLayoutViewTemplate">
+    <div id="eventsListToolbar"></div>
+    <div id="eventsList"></div>
+    <div id="eventsListPaginator" class="val-paginator text-center top-shifted"></div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+        <button class="button big primary js-submit-button">{{addEventsLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="eventsSelectToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            </div>
+        </div>
+        <div class="filter-element shift-left dropdown js-calendar-filter" data-value="">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{allCalendarsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value=""> {{allCalendarsLabel}} </li>
+                {{#calendars}}
+                <li data-value="{{id}}">{{title}}</li>
+                {{/calendars}}
+            </ul>
+        </div>
+
+        <div class="filter-element paging-showing-label shift-left" id="eventsListPaginatorShowing"></div>
+
+        <div class="filter-element shift-right dropdown js-sort-filter" data-value="starttime:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{upcomingLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="starttime:true"> {{upcomingLabel}} </li>
+                <li data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="eventsSelectListViewTemplate">
+    <label class="valamis-info-label shifted hidden js-no-events-label"> {{noAvailableEventsLabel}}</label>
+    <table class="val-table medium list no-out-margin">
+        <tbody class="js-events-list"></tbody>
+    </table>
+</script>
+
+<script type="text/template" id="eventsSelectListItemViewTemplate">
+    <td> {{title}} </td>
+    <td class="text-right"> {{startTimeFormatted}} - {{endTimeFormatted}} </td>
+    <td class="text-right narrow-col">
+        <button class="button medium neutral no-text js-select-event">
+            <span class="val-icon-checkmark"></span> {{addLabel}}
+        </button>
+    </td>
+</script>
+
+<!-- certificate activate dialog -->
+<script type="text/template" id="curriculumManagerActivateGoalChangesTemplate">
+    <label class="group-label"> {{reviseCertificateProgressLabel}} </label>
+
+    <div class="div-table display-options-table">
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="revisionSettings" value="true" id="reviseCertificate" checked="checked">
+            </div>
+            <div class="div-col">
+                <label for="reviseCertificate"> {{revisionOnLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{revisionOnHintLabel}}
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="revisionSettings" value="false" id="skipRevision">
+            </div>
+            <div class="div-col">
+                <label for="skipRevision"> {{revisionOffLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{revisionOffHintLabel}}
+            </div>
+        </div>
+    </div>
+
+    <button class="button big primary js-submit-button">{{certificateActivateHeaderLabel}}</button>
+    <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+</script>

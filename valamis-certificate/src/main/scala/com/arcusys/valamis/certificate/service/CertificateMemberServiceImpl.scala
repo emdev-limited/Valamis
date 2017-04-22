@@ -2,22 +2,23 @@ package com.arcusys.valamis.certificate.service
 
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.services.CompanyHelper
-import com.arcusys.valamis.certificate.model.CertificateState
+import com.arcusys.valamis.certificate.model.CertificateUserStatus
 import com.arcusys.valamis.certificate.storage.{CertificateMemberRepository, CertificateStateRepository}
 import com.arcusys.valamis.exception.EntityNotFoundException
 import com.arcusys.valamis.member.model.{Member, MemberTypes}
 import com.arcusys.valamis.member.service.MemberService
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.arcusys.valamis.user.service.UserService
 
+abstract class CertificateMemberServiceImpl extends CertificateMemberService {
 
-class CertificateMemberServiceImpl(implicit val bindingModule: BindingModule)
-  extends CertificateMemberService
-    with Injectable {
+  def certificateMemberRepository: CertificateMemberRepository
 
-  private lazy val certificateMemberRepository = inject[CertificateMemberRepository]
-  private lazy val memberService = inject[MemberService]
-  private lazy val certificateStateRepository = inject[CertificateStateRepository]
+  def memberService: MemberService
+
+  def certificateStateRepository: CertificateStateRepository
+
+  def userService: UserService
 
   override def addMembers(certificateId: Long,
                           memberIds: Seq[Long],
@@ -35,10 +36,10 @@ class CertificateMemberServiceImpl(implicit val bindingModule: BindingModule)
     lazy val companyId = CompanyHelper.getCompanyId
     val memberIds = certificateMemberRepository.getMemberIds(certificateId, memberType)
 
-    if (memberIds.isEmpty){
+    if (memberIds.isEmpty) {
       RangeResult(0, Nil)
     }
-    else{
+    else {
       memberService.getMembers(memberIds, true, memberType, companyId, nameFilter, ascending, skipTake)
     }
   }
@@ -65,20 +66,23 @@ class CertificateMemberServiceImpl(implicit val bindingModule: BindingModule)
                               nameFilter: Option[String],
                               ascending: Boolean,
                               skipTake: Option[SkipTake],
-                              orgId: Option[Long]): RangeResult[(LUser, CertificateState)] = {
+                              orgId: Option[Long]): RangeResult[CertificateUserStatus] = {
 
-    lazy val companyId = CompanyHelper.getCompanyId
     val memberIds = certificateMemberRepository.getMemberIds(certificateId, MemberTypes.User)
 
-    if (memberIds.isEmpty){
-      RangeResult(0, Nil)
-    }
-    else {
-      memberService.getUserMembers(memberIds, true, companyId, nameFilter, ascending, skipTake, orgId)
-        .map(user =>
-          (user, certificateStateRepository.getBy(user.getUserId, certificateId)
-            .getOrElse(throw new EntityNotFoundException(s"no certificate state with id: $certificateId and user ${user.getUserId}"))))
-    }
+    val items = skipTake
+      .map(r => memberIds.slice(r.skip, r.take))
+      .getOrElse(memberIds)
+      .map { id =>
+        val user = userService.getWithDeleted(id)
+        if (user.isDeleted) {
+          CertificateUserStatus(user)
+        } else {
+          CertificateUserStatus(user, certificateStateRepository.getBy(user.id, certificateId))
+        }
+      }
+
+    RangeResult(memberIds.size, items)
   }
 
   override def getAvailableUserMembers(certificateId: Long,

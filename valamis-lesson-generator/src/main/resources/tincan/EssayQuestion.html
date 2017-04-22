@@ -1,17 +1,21 @@
 <section data-state="essay_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
-<div class="SCORMPlayerContentDisplay">
-    <div class="playerHeader">
-        <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
+    <div class="essay-question">
+        <div class="valamis-question js-valamis-question content{{id}}_{{questionNumber}}">
+            <div class="question-text">{{{text}}}</div>
+            <div class="answers-options js-answers-options">
+                <textarea class="answer-textarea" id="answer{{id}}_{{questionNumber}}" rows="15" cols="60" placeholder="{{typeYourAnswerLabelLabel}}"></textarea>
+            </div>
+        </div>
     </div>
-    <div class="playerMainArea">
-        <textarea class="playerLongAnswerField" id="scormAnswer{{id}}_{{questionNumber}}" rows="15" cols="60" placeholder="{{typeYourAnswerLabelLabel}}"></textarea>
-    </div>
-</div>
 </section>
 <script>
 
     TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}'] = function() {
-        var userAnswer =  jQuery("#scormAnswer{{id}}_{{questionNumber}}").val();
+        var userAnswer =  jQuery("#answer{{id}}_{{questionNumber}}").val();
+
+        var questionId = {{id}};
+        var questionNumber = {{questionNumber}};
+        recalculateFeedbackSlideHeight(questionId, questionNumber);
 
         return {
             learnerResponse: userAnswer,
@@ -39,7 +43,7 @@
     };
 
     TinCanCourseSetAnswers['essay_{{id}}_{{questionNumber}}'] = function(userAnswer) {
-        jQuery("#scormAnswer{{id}}_{{questionNumber}}").val(userAnswer);
+        jQuery("#answer{{id}}_{{questionNumber}}").val(userAnswer);
     };
 
     TinCanCourseQuestionsAll['essay_{{id}}_{{questionNumber}}'] = unescapeElement('{{title}}');

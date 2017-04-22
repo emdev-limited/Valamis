@@ -113,7 +113,7 @@ abstract class GradeBookServiceImpl extends GradeBookService {
       obj.description.flatMap(_.values.headOption),
       statement.result.flatMap(_.response),
       obj.interactionType.map(_.toString),
-      statement.result.flatMap(_.success) getOrElse false,
+      statement.result.flatMap(x => x.success orElse x.completion) getOrElse false,
       statement.result.flatMap(_.score).flatMap(_.scaled),
       statement.result.flatMap(_.duration) getOrElse "",
       obj.correctResponsesPattern.headOption,

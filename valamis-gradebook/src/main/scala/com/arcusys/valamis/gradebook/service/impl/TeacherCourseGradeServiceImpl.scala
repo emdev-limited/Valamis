@@ -31,24 +31,33 @@ class TeacherCourseGradeServiceImpl(val db: JdbcBackend#DatabaseDef, val driver:
     }
   }
 
-  def set(courseId: Long, userId: Long, grade: Option[Float], comment: Option[String], companyId: Long) {
+  def get(courseIds: Seq[Long], userId: Long): Seq[CourseGrade] = {
+     db.withSession { implicit s =>
+      courseGrades
+        .filter(x => x.userId === userId)
+        .filter(x => x.courseId inSet courseIds)
+        .list
+    }
+  }
+
+  def set(courseId: Long, userId: Long, grade: Float, comment: Option[String], companyId: Long) {
     db.withTransaction { implicit s =>
       val updatedCount = courseGrades
         .filter(x => x.courseId === courseId && x.userId === userId)
         .map(x => (x.grade, x.comment))
-        .update((grade, comment))
+        .update((Some(grade), comment))
 
       if (updatedCount == 0) {
         courseGrades += CourseGrade(
           courseId,
           userId,
-          grade,
+          Some(grade),
           DateTime.now(),
           comment)
       }
     }
 
-    if (grade.exists(_ > LessonSuccessLimit)) {
+    if (grade > LessonSuccessLimit) {
       socialActivityHelper.addWithSet(
         companyId,
         userId,
@@ -57,6 +66,25 @@ class TeacherCourseGradeServiceImpl(val db: JdbcBackend#DatabaseDef, val driver:
         classPK = Option(courseId),
         createDate = DateTime.now
       )
+    }
+  }
+
+  def setComment(courseId: Long, userId: Long, comment: String, companyId: Long): Unit = {
+    db.withTransaction { implicit s =>
+      val updatedCount = courseGrades
+        .filter(x => x.courseId === courseId && x.userId === userId)
+        .map(x => x.comment)
+        .update(Some(comment))
+
+      if (updatedCount == 0) {
+        courseGrades += CourseGrade(
+          courseId,
+          userId,
+          None,
+          DateTime.now(),
+          Some(comment)
+        )
+      }
     }
   }
 }

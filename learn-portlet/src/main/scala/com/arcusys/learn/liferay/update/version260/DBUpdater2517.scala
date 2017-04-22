@@ -41,7 +41,7 @@ class DBUpdater2517(dbInfo: SlickDBInfo) extends LUpgradeProcess with SlideTable
   }
 
   private def updateContent(slideId: Option[Long], zIndex: String, content: String) =
-    db.withSession { implicit session =>
+    db.withTransaction { implicit session =>
       if (slideId.isDefined) {
         slideElements.filter(x => x.slideId === slideId && x.zIndex === zIndex).map(_.content).update(content)
       }

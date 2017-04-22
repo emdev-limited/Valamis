@@ -29,7 +29,7 @@ object AssignmentRequest extends BaseCollectionFilteredRequest with BaseRequest 
     def idOption = Parameter(Id).longOption
     def certificateId = Parameter(CertificateId).intRequired
     def title = Parameter(Title).option("")
-    def deadline = Parameter(Deadline).dateTimeOption("")
+    def deadline = Parameter(Deadline).dateOption
     def groupId = Parameter(GroupId).longOption
     def status = Parameter(Status).option("")
     def userId = Parameter(UserId).longRequired

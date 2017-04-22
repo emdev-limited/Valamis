@@ -13,20 +13,16 @@ import scala.collection.JavaConversions._
 
 object SocialActivityLocalServiceHelper extends ActivityConverter {
 
+  def get(className: String,
+          start: Int = QueryUtil.ALL_POS,
+          end: Int = QueryUtil.ALL_POS) : Seq[LSocialActivity] = {
+    SocialActivityLocalServiceUtil.getActivities(className, start, end)
+  }
+
   def interpret(selector: String, activity: LSocialActivity, ctx: ServiceContext): SocialActivityFeedEntry =
     SocialActivityInterpreterLocalServiceUtil.interpret(selector, activity, ctx)
 
   def updateSocialActivity(activity: SocialActivity): SocialActivity = SocialActivityLocalServiceUtil.updateSocialActivity(activity)
-
-  def toOption(liferayOptionalValue: Long) = {
-    if (liferayOptionalValue == 0) None
-    else Some(liferayOptionalValue)
-  }
-
-  def toOption(liferayOptionalValue: String) = {
-    if (liferayOptionalValue == "") None
-    else Some(liferayOptionalValue)
-  }
 
   def deleteActivities(className: String, classPK: Long): Unit = {
     SocialActivityLocalServiceUtil.deleteActivities(className, classPK)
@@ -95,8 +91,6 @@ object SocialActivityLocalServiceHelper extends ActivityConverter {
 
 trait ActivityConverter {
 
-  import SocialActivityLocalServiceHelper.toOption
-
   private def getLiferayFeedEntry(activity: SocialActivity) = {
     if (activity.getClassName.contains("com.liferay")) {
       val ctx = ServiceContextThreadLocal.getServiceContext
@@ -108,6 +102,14 @@ trait ActivityConverter {
     } else {
       None
     }
+  }
+
+  private def toOption(liferayOptionalValue: Long) = {
+    Some(liferayOptionalValue).filterNot(_ == 0)
+  }
+
+  private def toOption(liferayOptionalValue: String) = {
+    Some(liferayOptionalValue).filterNot(_.isEmpty)
   }
 
   protected def toModel(from: SocialActivity): Activity = {

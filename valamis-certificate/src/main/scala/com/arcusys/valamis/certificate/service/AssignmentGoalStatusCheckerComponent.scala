@@ -15,6 +15,11 @@ trait AssignmentGoalStatusCheckerComponent extends AssignmentGoalStatusChecker {
   protected def goalRepository: CertificateGoalRepository
   protected def assignmentService: AssignmentService
 
+  protected def updateUserGoalState(userId: Long,
+                                    goal: CertificateGoal,
+                                    status: GoalStatuses.Value,
+                                    date: DateTime): (GoalStatuses.Value, DateTime)
+
   override def getAssignmentGoalsStatus(certificateId: Long,
                                         userId: Long): Seq[GoalStatus[AssignmentGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
@@ -76,20 +81,7 @@ trait AssignmentGoalStatusCheckerComponent extends AssignmentGoalStatusChecker {
 
         val status = if (isTimeOut) GoalStatuses.Failed else GoalStatuses.Success
 
-        goalStateRepository.getBy(userId, goal.goalId) match {
-          case Some(goalState) =>
-            if (goalState.status == GoalStatuses.InProgress) {
-              goalStateRepository.modify(goalState.goalId, userId, status, evaluationDate)
-            }
-          case None => goalStateRepository.create(
-            CertificateGoalState(
-              userId,
-              goal.certificateId,
-              goal.goalId,
-              status,
-              evaluationDate,
-              goalData.isOptional))
-        }
+        updateUserGoalState(userId, goalData, status, evaluationDate)
       }
     }
   }
@@ -112,15 +104,9 @@ trait AssignmentGoalStatusCheckerComponent extends AssignmentGoalStatusChecker {
           GoalStatuses.Success
       }
     }
-    goalStateRepository.create(
-      CertificateGoalState(
-        userId,
-        goal.certificateId,
-        goal.goalId,
-        status,
-        new DateTime,
-        goalData.isOptional)
-    )
+
+    updateUserGoalState(userId, goalData, status, new DateTime())
+
     status
   }
 }

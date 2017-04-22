@@ -1,21 +1,17 @@
 package com.arcusys.learn.liferay.update.version270
 
-import java.sql.Connection
-
 import com.arcusys.learn.liferay.update.version270.slide.SlideTableComponent
 import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 
-class SetTopDownNavigationTest extends FunSuite with BeforeAndAfter{
+class SetTopDownNavigationTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
-  val driver = H2Driver
   import driver.simple._
-  val db = Database.forURL("jdbc:h2:mem:topdwnnavigation", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val bindingModule = new NewBindingModule({ implicit module =>
     module.bind[SlickDBInfo] toSingle new SlickDBInfo {
@@ -26,15 +22,15 @@ class SetTopDownNavigationTest extends FunSuite with BeforeAndAfter{
   })
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     table.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val table = new SlideTableComponent {
-    override protected val driver: JdbcProfile = H2Driver
+    override protected val driver: JdbcProfile = SetTopDownNavigationTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._

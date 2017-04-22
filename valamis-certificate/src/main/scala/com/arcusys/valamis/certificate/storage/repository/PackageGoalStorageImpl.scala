@@ -4,28 +4,37 @@ import com.arcusys.valamis.certificate.model.goal.{GoalType, PackageGoal}
 import com.arcusys.valamis.certificate.storage.schema.PackageGoalTableComponent
 import com.arcusys.valamis.certificate.storage.{CertificateGoalRepository, PackageGoalStorage}
 import com.arcusys.valamis.model.PeriodTypes
-import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 
 abstract class PackageGoalStorageImpl(val db: JdbcBackend#DatabaseDef,
                                         val driver: JdbcProfile)
   extends PackageGoalStorage
     with PackageGoalTableComponent
-  with SlickProfile {
+    with SlickProfile
+    with DatabaseLayer
+    with Queries {
 
-  import driver.simple._
+  import driver.api._
 
   def certificateGoalRepository: CertificateGoalRepository
 
-  override def get(certificateId: Long, packageId: Long) = db.withSession { implicit session =>
-    packageGoals.filter(ag => ag.certificateId === certificateId && ag.packageId === packageId).firstOption
+  private def getPackageAction(certificateId: Long, packageId: Long, isDeleted: Option[Boolean]) = {
+    packageGoals
+      .filterByCertificateId(certificateId)
+      .filter(_.packageId === packageId)
+      .filterByDeleted(isDeleted)
+      .map(_._1)
+      .result
   }
 
-  override def getBy(goalId: Long): Option[PackageGoal] = db.withTransaction { implicit session =>
-    packageGoals.filter(_.goalId === goalId).firstOption
-  }
+  override def get(certificateId: Long, packageId: Long, isDeleted: Option[Boolean]) =
+    execSync(getPackageAction(certificateId, packageId, isDeleted).headOption)
+
+  override def getBy(goalId: Long): Option[PackageGoal] =
+    execSync(packageGoals.filterByGoalId(goalId).result.headOption)
 
   override def create(certificateId: Long,
                       packageId: Long,
@@ -34,7 +43,24 @@ abstract class PackageGoalStorageImpl(val db: JdbcBackend#DatabaseDef,
                       arrangementIndex: Int,
                       isOptional: Boolean = false,
                       groupId: Option[Long] = None): PackageGoal = {
-    db.withTransaction { implicit session =>
+
+    val deletedGoal = get(certificateId, packageId, isDeleted = Some(true))
+
+    val insertOrUpdate = deletedGoal map { goal =>
+      val certificateGoal = certificateGoalRepository.getById(goal.goalId, isDeleted = Some(true))
+      certificateGoalRepository.modify(
+        goal.goalId,
+        certificateGoal.periodValue,
+        certificateGoal.periodType,
+        certificateGoal.arrangementIndex,
+        isOptional = false,
+        groupId = None,
+        oldGroupId = None,
+        userId = None,
+        isDeleted = false
+      )
+      DBIO.successful()
+    } getOrElse {
       val goalId = certificateGoalRepository.create(
         certificateId,
         GoalType.Package,
@@ -49,16 +75,23 @@ abstract class PackageGoalStorageImpl(val db: JdbcBackend#DatabaseDef,
         certificateId,
         packageId)
 
-      packageGoals insert packageGoal
-      packageGoals.filter(ag => ag.certificateId === certificateId && ag.packageId === packageId).first
+      packageGoals += packageGoal
     }
+
+    val resultAction = getPackageAction(certificateId, packageId, Some(false)).head
+
+    execSyncInTransaction(insertOrUpdate >> resultAction)
   }
 
-  override def getByPackageId(packageId: Long): Seq[PackageGoal] = db.withSession { implicit session =>
-    packageGoals.filter(_.packageId === packageId).run
-  }
+  override def getByPackageId(packageId: Long): Seq[PackageGoal] =
+    execSync(packageGoals.filter(_.packageId === packageId).result)
 
-  override def getByCertificateId(certificateId: Long): Seq[PackageGoal] = db.withSession { implicit session =>
-    packageGoals.filter(_.certificateId === certificateId).run
+  override def getByCertificateId(certificateId: Long,
+                                  isDeleted: Option[Boolean]): Seq[PackageGoal] = execSync {
+    packageGoals
+      .filterByCertificateId(certificateId)
+      .filterByDeleted(isDeleted)
+      .map(_._1)
+      .result
   }
 }

@@ -22,8 +22,8 @@ class ValamisStudySummaryView extends OAuthPortlet with PortletBase {
         "permissionHideStatistic" -> permission.hasPermission(HideStatisticPermission.name)
       ) ++ securityScope.data
 
-    sendTextFile("/templates/2.0/valamis_study_summary_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/valamis_study_summary_templates.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(data, "valamis_study_summary.html" )
   }
 

@@ -35,7 +35,8 @@ class StatementToActivityStorageImpl(val db: JdbcBackend#DatabaseDef,
 
   def create(entity: StatementToActivity): StatementToActivity = {
     db.withSession { implicit s =>
-      (statementToActivity returning statementToActivity) += entity
+      val newId = (statementToActivity returning statementToActivity.map(_.id)) += entity
+      entity.copy(id = Option(newId))
     }
   }
 

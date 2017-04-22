@@ -17,7 +17,7 @@ trait StatementGoalStorage {
              isOptional: Boolean = false,
              groupId: Option[Long] = None): StatementGoal
   def getByVerbAndObj(verb: String, obj: String): Seq[StatementGoal]
-  def get(certificateId: Long, verb: String, obj: String): Option[StatementGoal]
+  def get(certificateId: Long, verb: String, obj: String, isDeleted: Option[Boolean] = Some(false)): Option[StatementGoal]
   def getBy(goalId: Long): Option[StatementGoal]
-  def getByCertificateId(certificateId: Long): Seq[StatementGoal]
+  def getByCertificateId(certificateId: Long, isDeleted: Option[Boolean] = Some(false)): Seq[StatementGoal]
 }

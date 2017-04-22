@@ -79,19 +79,20 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
     val agent = JsonHelper.fromJson[Agent](request.getParameter("agent"))
     // For: annonymus user not to work with state
     if (agent.account.map(_.name).contains("anonymous"))
-     request.getMethod match {
-       case "GET" =>
-         response.setStatus(HttpServletResponse.SC_NOT_FOUND)
-       case _ =>
-         response.setStatus(HttpServletResponse.SC_OK)
-     }
+      request.getMethod match {
+        case "GET" =>
+          response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+        case _ =>
+          response.setStatus(HttpServletResponse.SC_OK)
+      }
     else
       doProxy(request, response)
   }
 
   private def doProxy(request: HttpServletRequest, response: HttpServletResponse) {
+    implicit val companyId = PortalUtilHelper.getCompanyId(request)
     val authHeader = request.getHeader(AUTHORIZATION) match {
-      case null => throw new NotAuthorizedException(s"$AUTHORIZATION header not found")
+      case null => throw NotAuthorizedException(s"$AUTHORIZATION header not found")
       case a => a.replace(AuthConstants.Basic, "").trim
     }
 
@@ -184,19 +185,19 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
       .filterNot(_.equalsIgnoreCase(AUTHORIZATION))
       .filterNot(h => headersList.exists(_.getKey.equalsIgnoreCase(h)))
       .foreach(name =>
-      if (name.equalsIgnoreCase(HOST)) {
-        val url = new URL(lrsUrl)
-        val hostValue = url.getPort match {
-          case -1 => url.getHost
-          case _ => url.getHost + ':' + url.getPort
+        if (name.equalsIgnoreCase(HOST)) {
+          val url = new URL(lrsUrl)
+          val hostValue = url.getPort match {
+            case -1 => url.getHost
+            case _ => url.getHost + ':' + url.getPort
+          }
+          authRequest.getHeaders.add(new Parameter(name, hostValue))
+        } else if (name.equalsIgnoreCase(CONTENT_LENGTH)) {
+          val count = inputStream.available.toString
+          authRequest.getHeaders.add(new Parameter(name, count))
+        } else {
+          authRequest.getHeaders.add(new Parameter(name, request.getHeader(name)))
         }
-        authRequest.getHeaders.add(new Parameter(name, hostValue))
-      } else if (name.equalsIgnoreCase(CONTENT_LENGTH)) {
-        val count = inputStream.available.toString
-        authRequest.getHeaders.add(new Parameter(name, count))
-      } else {
-        authRequest.getHeaders.add(new Parameter(name, request.getHeader(name)))
-      }
       )
     authRequest
   }
@@ -208,7 +209,7 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
       case AuthType.INTERNAL => {
         val host = settings.customHost match {
           case Some(customHost) => customHost
-          case None => PortalUtilHelper.getLocalHostUrl(PortalUtilHelper.getCompanyId(request), request.isSecure)
+          case None => PortalUtilHelper.getLocalHostUrl(PortalUtilHelper.getCompanyId(request), request)
         }
         host.toString.stripSuffix("/") + settings.endpoint.stripSuffix("/")
       }
@@ -224,11 +225,12 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
     if (request.getRequestURI contains "/statements") {
       try {
         authToken match {
-          case OAuthAuthInfo("","","") =>
+          case OAuthAuthInfo("", "", "") =>
             val context = ServiceContextHelper.getServiceContext
             if (context != null) {
               val request = context.getRequest
               val session = request.getSession
+              implicit val companyId = context.getCompanyId
               session.setAttribute("LRS_ENDPOINT_INFO", lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All))
             }
           case _ =>

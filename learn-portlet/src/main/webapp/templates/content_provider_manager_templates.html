@@ -1,0 +1,180 @@
+
+<script type="text/template" id="contentProviderManagerMainAppLayoutTemplate">
+    <div id="contentProvidersRegion"></div>
+</script>
+
+<script type="text/template" id="contentProviderManagerAppLayoutTemplate">
+    <div id="contentProvidersToolbar"></div>
+    <div id="contentProvidersList"></div>
+    <div id="contentProvidersPaginator" class="val-paginator text-center"></div>
+</script>
+
+<script type="text/template" id="contentProviderManagerToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+        {{#CONTENT_PROVIDER_MANAGER.MODIFY_ACTION}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-new-provider">
+                <span class="val-icon-plus"></span>{{addProviderButtonLabel}}
+            </button>
+        </div>
+        {{/CONTENT_PROVIDER_MANAGER.MODIFY_ACTION}}
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="contentProvidersToolbarShowing"></div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter">
+            <button class="button medium simple ">
+                <span class="dropdown-text"> {{byNameAscLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+
+            <ul class="dropdown-menu">
+                <li class="js-sort" data-value="nameAsc"> {{byNameAscLabel}} </li>
+                <li class="js-sort" data-value="nameDesc"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+
+        <button class="button medium simple no-text hide-s shift-right js-display-option" data-value="{{tilesModeOption}}">
+            <span class="val-icon-grid-view">Grid View</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option" data-value="{{listModeOption}}">
+            <span class="val-icon-list-view">List View</span>
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="contentProviderManagerMainEditView">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="editProviderTabs">
+            <li class="">
+                <a id="editProviderDetailsTab" href="#editProviderDetails">{{editProviderInfoLabel}}</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="editProviderDetails" class="tab-pane"> </div>
+        </div>
+    </div>
+    <div class="modal-close val-icon-exit"></div>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">
+            {{cancelLabel}}
+        </button>
+        <button class="button big primary js-submit-button ">
+            {{saveProviderButtonLabel}}
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="contentProviderManagerEditCourseView">
+    <div class="div-table val-info-table">
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{providerNameLabel}}</div>
+            <div class="div-col content-col">
+                <input type='text' title='{{requiredFieldTooltipLabel}}'
+                       class="js-provider-name text-input valamis" value='{{name}}' placeholder='{{newProviderLabel}}'/>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{slidesetLogoLabel}}</div>
+            <div class="div-col content-col">
+                <img src="{{image}}" class='js-logo shift-left val-img-logo provider js-upload-image'>
+                <input type='text' class="js-provider-image provider-image text-input valamis" value='{{image}}' placeholder='{{newProviderImage}}'/>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{providerDescriptionLabel}}</div>
+            <div class="div-col content-col">
+                <textarea rows="4" class="js-provider-description textarea valamis "
+                          placeholder='{{providerDescriptionPlaceholder}}'>{{description}}</textarea>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{providerUrlLabel}}</div>
+            <div class="div-col content-col">
+                <input type='text' title='{{requiredFieldTooltipLabel}}'
+                       class="js-provider-url text-input valamis" value='{{url}}' placeholder='{{newProviderUrl}}'/>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{isProviderPrivate}}</div>
+            <div class="div-col content-col">
+
+                <div>
+                    <label class="radio-inline">
+                        <input type="radio" name="isProviderPrivate" id="providerPrivateYes">
+                        {{yesLabel}}
+                    </label>
+
+                    <label class="radio-inline">
+                        <input type="radio" name="isProviderPrivate" id="providerPrivateNo">
+                        {{noLabel}}
+                    </label>
+                </div>
+
+                <div class="js-provider-credentials-area">
+                    {{providerCustomerKey}}  <input type='text' class="js-provider-customer-key text-input valamis" value='{{customerKey}}' placeholder='{{providerCustomerKeyPlaceholder}}'/>
+                    {{providerCustomerSecret}}  <input type='text' class="js-provider-customer-secret text-input valamis" value='{{customerSecret}}' placeholder='{{providerCustomerSecretPlaceholder}}'/>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="contentProviderManagerLayoutTemplate">
+    <div class="js-providers-list val-row list"></div>
+    <div class="div-table no-content-table hidden js-no-items">
+        <div class="div-col div-col-center">{{noProvidersLabel}}</div>
+    </div>
+</script>
+
+<script type="text/template" id="contentProviderManagerRowViewTemplate">
+    <div class="tile-content with-action">
+        <div class="tile-with-rating">
+            <div class="image provider cursor-pointer js-open-provider-edit"
+                 {{#image}}
+                 style="background-image: url('{{image}}')"
+                 {{/image}}
+            >
+        </div>
+    </div>
+    <ul>
+        <li class="titleRow">
+            <span class="title">{{name}}</span>
+        </li>
+        {{#description}}
+        <li class="description">{{description}}</li>
+        {{/description}}
+        {{#url}}
+        <li class="urlRow">{{url}}</li>
+        {{/url}}
+    </ul>
+    {{#CONTENT_PROVIDER_MANAGER.MODIFY_ACTION}}
+    <div class="dropdown actions shift-right">
+        <button class="button medium neutral">
+            <span class="dropdown-text">{{actionsButtonLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li class="js-provider-info-edit" data-value="editInfo:true"> {{editInfoButtonLabel}} </li>
+            <li class="js-provider-delete" data-value="delete:true"> {{deleteButtonLabel}} </li>
+        </ul>
+    </div>
+    {{/CONTENT_PROVIDER_MANAGER.MODIFY_ACTION}}
+    </div>
+</script>
+
+<script type="text/template" id="contentProvidersEditModalTemplate">
+    <div class="modal-content"></div>
+</script>

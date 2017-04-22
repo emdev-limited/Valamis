@@ -1,12 +1,12 @@
 package com.arcusys.valamis.slide.service.export
 
 object PublisherFileLists {
-  // libs from js2.0/vendor
-  val vendorJSFileNames =
+  val VendorJSFolder = "js/vendor/"
+  val VendorJSFileNames =
       "jquery.min.js" ::
       "classList.min.js" ::
       "reveal.min.js" ::
-      "jquery-ui-1.10.4.custom.min.js" ::
+      "jquery-ui-1.11.4.custom.min.js" ::
       "jquery.ui.widget.js" ::
       "jquery.ui.touch-punch.min.js" ::
       "lodash.min.js" ::
@@ -17,26 +17,30 @@ object PublisherFileLists {
       "tincan-min.js" ::
       "head.min.js" ::
       "toastr.min.js" ::
+      "d3.min.js" ::
       Nil
 
-  val videoVendorJSFileNames = "video.js"
-  val mathVendorJSFileNames = "katex.min.js"
-  val webglVendorJSFileNames = "three.min.js" :: "TrackballControls.js" :: Nil
+  val VideoVendorJSFileNames = "video.js" :: Nil
+  val MathVendorJSFileNames = "katex.min.js" :: Nil
+  val WebglVendorJSFileNames = "three.min.js" :: "TrackballControls.js" :: Nil
 
-  val slideSetJSFileNames =
+  val SlideSetJSFolder ="js/"
+  val SlideSetJSFileNames =
     "lesson-studio/helper.js" ::
       "lesson-studio/model-base-entities.js" ::
       "question-manager/models/QuestionType.js" ::
-      "lesson-studio/TinCanPackageRenderer.js" ::
-      "lesson-studio/TinCanPackageGenericItem.js" ::
       Nil
 
-  val commonJSFileNames =
+  val CommonJSFolder = "common/"
+  val CommonJSFileNames =
     "base.js" ::
       "translations.js" ::
+      "TinCanPackageRenderer.js" ::
+      "TinCanPackageGenericItem.js" ::
       Nil
 
-  val slideSetCSSFileNames =
+  val SlideSetCSSFolder ="css/"
+  val SlideSetCSSFileNames =
     "reveal.min.css" ::
       "video-js.min.css" ::
       "katex.min.css" ::
@@ -46,7 +50,8 @@ object PublisherFileLists {
       "valamis_slides_theme.css" ::
       Nil
 
-  val fontsFileNames =
+  val FontsFolder ="fonts/"
+  val FontsFileNames =
     "device-icons26.eot" ::
     "device-icons26.svg" ::
     "device-icons26.ttf" ::
@@ -100,17 +105,18 @@ object PublisherFileLists {
     "KaTeX_Size4-Regular.ttf" ::
     "KaTeX_Size4-Regular.woff" ::
     "KaTeX_Size4-Regular.woff2" ::
-    "valamis-icons30.eot" ::
-    "valamis-icons30.svg" ::
-    "valamis-icons30.ttf" ::
-    "valamis-icons30.woff" ::
+    "valamis-icons32.eot" ::
+    "valamis-icons32.svg" ::
+    "valamis-icons32.ttf" ::
+    "valamis-icons32.woff" ::
     "vjs.eot" ::
     "vjs.svg" ::
     "vjs.ttf" ::
     "vjs.woff" ::
     Nil
 
-  val previewResourceFiles =
+  val PreviewResourceFolder = "preview-resources/pdf/"
+  val PreviewResourceFiles =
     "build/pdf.js" ::
     "build/pdf.worker.js" ::
     "components/compatibility.js" ::

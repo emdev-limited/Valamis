@@ -2,11 +2,11 @@ package com.arcusys.valamis.web.service
 
 import com.arcusys.learn.liferay.services.{CompanyHelper, ServiceContextHelper, UserLocalServiceHelper}
 import com.arcusys.valamis.certificate.model.CertificateStatuses
-import com.arcusys.valamis.certificate.service.{CertificateService, CertificateStatusChecker}
+import com.arcusys.valamis.certificate.service.{CertificateGoalService, CertificateStatusChecker, CertificateUserService}
 import com.arcusys.valamis.certificate.storage.CertificateStateRepository
 import com.arcusys.valamis.lesson.service.UserLessonResultService
 import com.arcusys.valamis.lrs.service.util.StatementChecker
-import com.arcusys.valamis.lrs.tincan.{Activity, Account, Statement}
+import com.arcusys.valamis.lrs.tincan.{Account, Activity, Statement}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 /**
@@ -19,7 +19,8 @@ abstract class StatementCheckerImpl(implicit val bindingModule: BindingModule) e
   def gradeChecker: GradeChecker
   lazy val certificateStateRepository = inject[CertificateStateRepository]
   lazy val lessonResult = inject[UserLessonResultService]
-  lazy val certificateService = inject[CertificateService]
+  lazy val certificateGoalService = inject[CertificateGoalService]
+  lazy val certificateUserService = inject[CertificateUserService]
 
   def checkStatements(statements: Seq[Statement], companyIdOpt: Option[Long] = None) = {
     if (statements.nonEmpty) {
@@ -50,12 +51,11 @@ abstract class StatementCheckerImpl(implicit val bindingModule: BindingModule) e
           }
         }
 
-        certificateService.getAffectedCertificateIds(statements).foreach { certId =>
-          if (certificateService.isUserJoined(certId, userId)) {
+        certificateGoalService.getAffectedCertificateIds(statements).foreach { certId =>
+          if (certificateUserService.isUserJoined(certId, userId)) {
             certificateCompletionChecker.checkAndGetStatus(certId, userId)
           }
         }
-
         lessonResult.update(user, statements)
       }
     }

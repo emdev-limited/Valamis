@@ -1,0 +1,5443 @@
+/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+/**
+ * 1. Set default font family to sans-serif.
+ * 2. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+html {
+  font-family: sans-serif;
+  /* 1 */
+  -ms-text-size-adjust: 100%;
+  /* 2 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+}
+
+/**
+ * Remove default margin.
+ */
+body {
+  margin: 0;
+}
+
+/* HTML5 display definitions
+   ========================================================================== */
+/**
+ * Correct `block` display not defined for any HTML5 element in IE 8/9.
+ * Correct `block` display not defined for `details` or `summary` in IE 10/11
+ * and Firefox.
+ * Correct `block` display not defined for `main` in IE 11.
+ */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+/**
+ * 1. Correct `inline-block` display not defined in IE 8/9.
+ * 2. Normalize vertical alignment of `progress` in Chrome, Firefox, and Opera.
+ */
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  /* 1 */
+  vertical-align: baseline;
+  /* 2 */
+}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+/**
+ * Address `[hidden]` styling not present in IE 8/9/10.
+ * Hide the `template` element in IE 8/9/11, Safari, and Firefox < 22.
+ */
+[hidden],
+template {
+  display: none;
+}
+
+/* Links
+   ========================================================================== */
+/**
+ * Remove the gray background color from active links in IE 10.
+ */
+a {
+  background-color: transparent;
+}
+
+/**
+ * Improve readability when focused and also mouse hovered in all browsers.
+ */
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * Address styling not present in IE 8/9/10/11, Safari, and Chrome.
+ */
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+/**
+ * Address style set to `bolder` in Firefox 4+, Safari, and Chrome.
+ */
+b,
+strong {
+  font-weight: bold;
+}
+
+/**
+ * Address styling not present in Safari and Chrome.
+ */
+dfn {
+  font-style: italic;
+}
+
+/**
+ * Address variable `h1` font-size and margin within `section` and `article`
+ * contexts in Firefox 4+, Safari, and Chrome.
+ */
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+/**
+ * Address styling not present in IE 8/9.
+ */
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+/**
+ * Address inconsistent and variable font size in all browsers.
+ */
+small {
+  font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` affecting `line-height` in all browsers.
+ */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Embedded content
+   ========================================================================== */
+/**
+ * Remove border when inside `a` element in IE 8/9/10.
+ */
+img {
+  border: 0;
+}
+
+/**
+ * Correct overflow not hidden in IE 9/10/11.
+ */
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/* Grouping content
+   ========================================================================== */
+/**
+ * Address margin not present in IE 8/9 and Safari.
+ */
+figure {
+  margin: 1em 40px;
+}
+
+/**
+ * Address differences between Firefox and other browsers.
+ */
+hr {
+  box-sizing: content-box;
+  height: 0;
+}
+
+/**
+ * Contain overflow in all browsers.
+ */
+pre {
+  overflow: auto;
+}
+
+/**
+ * Address odd `em`-unit font size rendering in all browsers.
+ */
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+/* Forms
+   ========================================================================== */
+/**
+ * Known limitation: by default, Chrome and Safari on OS X allow very limited
+ * styling of `select`, unless a `border` property is set.
+ */
+/**
+ * 1. Correct color not being inherited.
+ *    Known issue: affects color of disabled elements.
+ * 2. Correct font properties not being inherited.
+ * 3. Address margins set differently in Firefox 4+, Safari, and Chrome.
+ */
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+  margin: 0;
+  /* 3 */
+}
+
+/**
+ * Address `overflow` set to `hidden` in IE 8/9/10/11.
+ */
+button {
+  overflow: visible;
+}
+
+/**
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Firefox, IE 8/9/10/11, and Opera.
+ * Correct `select` style inheritance in Firefox.
+ */
+button,
+select {
+  text-transform: none;
+}
+
+/**
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
+ *    and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type
+ *    `input` and others.
+ */
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  /* 2 */
+  cursor: pointer;
+  /* 3 */
+}
+
+/**
+ * Re-set default cursor for disabled elements.
+ */
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+/**
+ * Remove inner padding and border in Firefox 4+.
+ */
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/**
+ * Address Firefox 4+ setting `line-height` on `input` using `!important` in
+ * the UA stylesheet.
+ */
+input {
+  line-height: normal;
+}
+
+/**
+ * It's recommended that you don't attempt to style these elements.
+ * Firefox's implementation doesn't respect box-sizing, padding, or width.
+ *
+ * 1. Address box sizing set to `content-box` in IE 8/9/10.
+ * 2. Remove excess padding in IE 8/9/10.
+ */
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+ * Fix the cursor style for Chrome's increment/decrement buttons. For certain
+ * `font-size` values of the `input`, it causes the cursor style of the
+ * decrement button to change from `default` to `text`.
+ */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/**
+ * 1. Address `appearance` set to `searchfield` in Safari and Chrome.
+ * 2. Address `box-sizing` set to `border-box` in Safari and Chrome
+ *    (include `-moz` to future-proof).
+ */
+input[type="search"] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  /* 2 */
+  box-sizing: content-box;
+}
+
+/**
+ * Remove inner padding and search cancel button in Safari and Chrome on OS X.
+ * Safari (but not Chrome) clips the cancel button when the search input has
+ * padding (and `textfield` appearance).
+ */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/**
+ * Define consistent border, margin, and padding.
+ */
+/**
+ * 1. Correct `color` not being inherited in IE 8/9/10/11.
+ * 2. Remove padding so people aren't caught out if they zero out fieldsets.
+ */
+legend {
+  border: 0;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+ * Remove default vertical scrollbar in IE 8/9/10/11.
+ */
+textarea {
+  overflow: auto;
+}
+
+/**
+ * Don't inherit the `font-weight` (applied by a rule above).
+ * NOTE: the default cannot safely be changed in Chrome and Safari on OS X.
+ */
+optgroup {
+  font-weight: bold;
+}
+
+/* Tables
+   ========================================================================== */
+/**
+ * Remove most spacing between table cells.
+ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+/**
+ *
+ * @author Andrei Muraviov
+ *
+ * @name Valamis Reports
+ *
+ *
+ */
+@font-face {
+  font-family: "valamis-icons";
+  font-style: normal;
+  font-weight: normal;
+  src: url('../fonts/valamis-icons32.eot?#iefix') format("embedded-opentype"), url('../fonts/valamis-icons32.woff') format("woff"), url('../fonts/valamis-icons32.ttf') format("truetype"), url('../fonts/valamis-icons32.svg#valamis-icons') format("svg");
+}
+
+@font-face {
+  font-family: "device-icons";
+  font-style: normal;
+  font-weight: normal;
+  src: url('../fonts/device-icons26.eot?#iefix') format("embedded-opentype"), url('../fonts/device-icons26.woff') format("woff"), url('../fonts/device-icons26.ttf') format("truetype"), url('../fonts/device-icons26.svg#device-icons') format("svg");
+}
+
+.valamis-reports {
+  /* Neat 1.7.0
+ * http://neat.bourbon.io
+ * Copyright 2012-2014 thoughtbot, inc.
+ * MIT License */
+  /* Button Groups */
+  /* Dropdown Buttons */
+  /* selectize */
+  /* Helpers */
+}
+
+.valamis-reports * {
+  box-sizing: content-box;
+}
+
+.valamis-reports ul, .valamis-reports li {
+  margin: 0;
+  padding: 0;
+}
+
+.valamis-reports .portlet-content {
+  padding: 0;
+}
+
+.valamis-reports .valamis-report-container {
+  padding: 12px 10px 10px;
+}
+
+.valamis-reports .shift-right .button {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+.valamis-reports .shift-right .button:first-child {
+  margin-left: 0;
+}
+
+.valamis-reports .button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  margin-right: 10px;
+  transition: 0.05s all linear;
+  border-radius: 3px;
+  border: 1px solid;
+  color: white;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0 14px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.valamis-reports .button.shift-right {
+  margin-right: 0px;
+  margin-left: 10px;
+}
+
+.valamis-reports .button.shift-right:last-child {
+  margin-left: 0px;
+}
+
+.valamis-reports .button.shift-right.js-display-option {
+  margin-left: 0px;
+}
+
+.valamis-reports .button.shift-right.no-text.simple {
+  margin-left: 0px;
+}
+
+.valamis-reports .button:hover {
+  text-decoration: none;
+}
+
+.valamis-reports .button.no-text {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  font-size: 0px;
+}
+
+.valamis-reports .button.no-text > [class^="val-icon-"]:before,
+.valamis-reports .button.no-text > [class*=" val-icon-"]:before {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  height: 100%;
+  line-height: inherit;
+}
+
+.valamis-reports .button.big {
+  line-height: 36px;
+  height: 40px;
+}
+
+.valamis-reports .button.big.no-text {
+  width: 40px;
+}
+
+.valamis-reports .button.big.button-tooltip {
+  width: 40px;
+  padding: 0;
+}
+
+.valamis-reports .button.medium {
+  line-height: 32px;
+  height: 34px;
+}
+
+.valamis-reports .button.medium.no-text {
+  width: 34px;
+}
+
+.valamis-reports .button.medium.button-tooltip {
+  width: 34px;
+  padding: 0;
+}
+
+.valamis-reports .button.small {
+  line-height: 24px;
+  height: 26px;
+}
+
+.valamis-reports .button.small.no-text {
+  width: 26px;
+}
+
+.valamis-reports .button.primary {
+  border-color: #598000;
+  background: #598000;
+  color: white;
+}
+
+.valamis-reports .button.primary:hover {
+  background: #3E5900;
+  border-color: #3E5900;
+}
+
+.valamis-reports .button.primary [class^="val-icon-"]:before,
+.valamis-reports .button.primary [class*=" val-icon-"]:before {
+  color: white;
+}
+
+.valamis-reports .button.neutral {
+  background: #F2F2F2;
+  color: #555;
+  border-color: #CCCCCC;
+}
+
+.valamis-reports .button.neutral:hover {
+  color: #2c2c2c;
+}
+
+.valamis-reports .button.neutral:hover > [class^="val-icon-"]:before,
+.valamis-reports .button.neutral:hover > [class*=" val-icon-"]:before {
+  color: #555;
+}
+
+.valamis-reports .button.neutral.active {
+  background: #ebebeb;
+}
+
+.valamis-reports .button.neutral.active-page {
+  color: #2974A6;
+  border: 1px solid #2974A6;
+}
+
+.valamis-reports .button.neutral > [class^="val-icon-"]:before,
+.valamis-reports .button.neutral > [class*=" val-icon-"]:before {
+  color: #AAA;
+}
+
+.valamis-reports .button.danger {
+  background: #CC4233;
+  color: white;
+  border-color: #CC4233;
+}
+
+.valamis-reports .button.danger:hover {
+  background-color: #993226;
+  border-color: #993226;
+}
+
+.valamis-reports .button.simple {
+  background: transparent;
+  color: #555;
+  border: 1px solid transparent;
+}
+
+.valamis-reports .button.simple > span {
+  color: #AAA;
+}
+
+.valamis-reports .button.simple:hover {
+  color: #2c2c2c;
+}
+
+.valamis-reports .button.simple:hover > span {
+  color: #555;
+}
+
+.valamis-reports .button.simple.active {
+  color: #2c2c2c;
+  border: 1px solid #CCCCCC;
+  border-radius: 0;
+}
+
+.valamis-reports .button.simple.active > span {
+  color: #555;
+}
+
+.valamis-reports .button.simple.danger-color {
+  color: #CC4233;
+}
+
+.valamis-reports .button:focus {
+  outline: none;
+}
+
+.valamis-reports .button > [class^="val-icon-"],
+.valamis-reports .button > [class*=" val-icon-"] {
+  width: 20px;
+  height: 20px;
+}
+
+.valamis-reports .button > [class^="val-icon-"]:before,
+.valamis-reports .button > [class*=" val-icon-"]:before {
+  margin: -2px 10px 0 -4px;
+  vertical-align: middle;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+
+.valamis-reports .button > .val-icon-right:before {
+  margin: -1px -4px 0 10px;
+}
+
+.valamis-reports .button:last-child {
+  margin-right: 0;
+}
+
+.valamis-reports .button.button-tooltip {
+  position: relative;
+}
+
+.valamis-reports .button.button-tooltip:hover .val-badge {
+  display: block;
+}
+
+.valamis-reports .button.button-tooltip.correct:hover .linked-slide-thumbnail {
+  display: block;
+}
+
+.valamis-reports .button.button-tooltip.incorrect:hover .linked-slide-thumbnail {
+  display: block;
+}
+
+.valamis-reports .button.button-tooltip .val-badge {
+  background-color: #555;
+  position: absolute;
+  display: none;
+  top: 7px;
+  left: 100%;
+  margin: 0 0 0 5px;
+  z-index: 10000;
+}
+
+.valamis-reports .button.button-tooltip .val-badge.left {
+  top: 7px;
+  left: -5px;
+  margin: 0 5px 0 0;
+  -ms-transform: translate(-100%, 0);
+      transform: translate(-100%, 0);
+}
+
+.valamis-reports .button.button-tooltip .val-badge.bottom {
+  left: 0;
+  top: 34px;
+  bottom: -16px;
+  -ms-transform: translate(0, 100%);
+      transform: translate(0, 100%);
+  margin: 0;
+}
+
+.valamis-reports .button.button-tooltip .linked-slide-thumbnail {
+  position: absolute;
+  display: none;
+  width: 1000px;
+  height: 750px;
+  left: 43px;
+  top: 38px;
+  -moz-transform: scale(0.2);
+  -moz-transform-origin: 0% 0%;
+  -webkit-transform: scale(0.2);
+  -webkit-transform-origin: 0% 0%;
+  -ms-transform: scale(0.2);
+  -ms-transform-origin: 0% 0%;
+  border: none;
+  word-break: break-word;
+  white-space: normal;
+  color: black;
+}
+
+.valamis-reports .button.button-tooltip .linked-slide-thumbnail.slide-thumbnail-bordered {
+  border: 5px solid #1C1C1C !important;
+}
+
+.valamis-reports .button.button-tooltip > [class^="val-icon-"]:before,
+.valamis-reports .button.button-tooltip > [class*=" val-icon-"]:before {
+  margin: 0 auto;
+}
+
+.valamis-reports .button.google-drive-icon {
+  background: url("../img/icon-drive.png") no-repeat 10px center;
+  background-size: 20px;
+  padding-left: 40px;
+}
+
+.valamis-reports .button[disabled] {
+  color: #AAA;
+  background: #EAEAEA;
+  border-color: #EAEAEA;
+  cursor: default;
+}
+
+.valamis-reports .button[disabled]:hover {
+  color: #AAA;
+  background: #EAEAEA;
+  border-color: #EAEAEA;
+}
+
+.valamis-reports .button[disabled]:hover > [class^="val-icon-"]:before,
+.valamis-reports .button[disabled]:hover > [class*=" val-icon-"]:before {
+  color: #AAA;
+}
+
+.valamis-reports .button-group {
+  float: left;
+  margin-right: 10px;
+}
+
+.valamis-reports .button-group > * {
+  margin-right: 0px;
+  float: left;
+}
+
+.valamis-reports .button-group.button-group-big {
+  float: none;
+  display: inline-block;
+  margin: 0 0 20px 0;
+}
+
+.valamis-reports .button-group.button-group-big .button {
+  margin: 0;
+  padding-left: 40px;
+  padding-right: 40px;
+  margin-right: 0;
+  background-color: transparent;
+  border-color: #F2F2F2;
+  color: #777;
+  border-radius: 0;
+}
+
+.valamis-reports .button-group.button-group-big .button.active {
+  background-color: #F2F2F2;
+  border-color: #2974A6;
+  color: #4C4C4C;
+}
+
+.valamis-reports td.button-group > * {
+  float: none;
+}
+
+.valamis-reports .button-block .button {
+  display: block;
+  margin-bottom: 6.06667px;
+}
+
+.valamis-reports .button-block .button.inline {
+  display: inline-block;
+}
+
+.valamis-reports .button-block .button:not(.inline):last-child {
+  margin-bottom: 0;
+}
+
+.valamis-reports .button-block.wide .button {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.valamis-reports .button-divider-v {
+  display: inline-block;
+  width: 6px;
+  height: 34px;
+  border-right: 1px solid #000000;
+  margin-right: 5px;
+  vertical-align: top;
+}
+
+.valamis-reports .button-divider-v.neutral {
+  border-color: #CCCCCC;
+}
+
+.valamis-reports .dropdown-selector {
+  position: relative;
+  overflow: hidden;
+}
+
+.valamis-reports .dropdown-selector.show-dropdown-menu {
+  overflow: visible;
+}
+
+.valamis-reports .dropdown-selector.show-dropdown-menu .dropdown-wrapper {
+  visibility: visible;
+}
+
+.valamis-reports .dropdown-selector .current-selection {
+  font-size: 13px;
+  line-height: 1.4;
+  width: 260px;
+  border: 1px solid #CCCCCC;
+  position: relative;
+  cursor: pointer;
+}
+
+.valamis-reports .dropdown-selector .current-selection span,
+.valamis-reports .dropdown-selector .current-selection strong {
+  display: inline-block;
+}
+
+.valamis-reports .dropdown-selector .current-selection .cs-label {
+  padding: 10px 30px 10px 10px;
+}
+
+.valamis-reports .dropdown-selector .current-selection:after {
+  content: 'y';
+  font-family: valamis-icons;
+  font-size: 24px;
+  line-height: 36px;
+  font-weight: normal;
+  color: #AAA;
+  position: absolute;
+  top: 0;
+  margin-top: 1px;
+  width: 32px;
+  right: 0;
+  text-align: center;
+}
+
+.valamis-reports .dropdown-selector .dropdown-wrapper {
+  width: 260px;
+  padding: 5px 0 10px;
+  position: absolute;
+  left: 0;
+  top: 39px;
+  background: #FFF;
+  border: 1px solid #CCCCCC;
+  box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, 0.1);
+  z-index: 300;
+  visibility: hidden;
+}
+
+.valamis-reports .dropdown-selector .dates-selector {
+  padding: 5px 14px;
+}
+
+.valamis-reports .dropdown-selector .dates-selector form {
+  margin: 0;
+}
+
+.valamis-reports .dropdown-selector .dates-selector .date-inputs {
+  white-space: nowrap;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+  box-pack: justify;
+  -moz-justify-content: space-between;
+  -ms-justify-content: space-between;
+  -o-justify-content: space-between;
+  justify-content: space-between;
+  -ms-flex-pack: justify;
+  padding-bottom: 5px;
+}
+
+.valamis-reports .dropdown-selector .dates-selector input[type="text"] {
+  color: #2c2c2c;
+  width: 48%;
+  text-align: center;
+}
+
+.valamis-reports .dropdown-selector .dates-selector input[type="text"] + input[type="text"] {
+  margin-left: 4px;
+}
+
+.valamis-reports .dropdown-selector .dates-selector input[type="text"].focus {
+  border-color: #2974A6;
+  box-shadow: none;
+}
+
+.valamis-reports .dropdown-selector .dates-selector .submit-button {
+  margin: 3px 0;
+}
+
+.valamis-reports .dropdown-selector .dates-selector .submit-button .button.medium {
+  height: 30px;
+  line-height: 20px;
+  padding: 0 10px 2px;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  background: #FFF;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li {
+  display: block;
+  padding: 0;
+  margin: 6px 0 0 0;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li > span {
+  display: block;
+  padding: 2px 20px 2px 14px;
+  cursor: pointer;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li > span:hover {
+  font-weight: bold;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li.active > span {
+  border-left: 4px solid #2974A6;
+  padding-left: 10px;
+  font-weight: bold;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li.disabled > span {
+  cursor: default;
+  color: #777;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li.disabled > span:hover {
+  background: transparent;
+  font-weight: normal;
+}
+
+.valamis-reports .dropdown-selector .dropdown-options > li.group-first-item {
+  border-top: 1px solid #CCCCCC;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu {
+  padding: 2px 0 0 0;
+  margin: 0;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu > li {
+  display: block;
+  padding: 0;
+  margin: 2px 0 0 0;
+  position: relative;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu > li > span {
+  display: block;
+  padding: 2px 20px 2px 30px;
+  cursor: pointer;
+  position: relative;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu > li > span:hover {
+  font-weight: bold;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu > li.active span:before {
+  content: '6';
+  display: block;
+  font-family: valamis-icons;
+  color: #598000;
+  font-size: 16px;
+  line-height: 26px;
+  position: absolute;
+  left: 8px;
+  top: 0;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu > li.disabled > span {
+  cursor: default;
+  color: #AAA;
+}
+
+.valamis-reports .dropdown-selector .dropdown-submenu > li.disabled > span:hover {
+  font-weight: normal;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector {
+  z-index: 100;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector.show-dropdown-menu {
+  z-index: 1000;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .current-selection {
+  display: inline-block;
+  color: #555;
+  width: auto;
+  border: none;
+  white-space: nowrap;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .current-selection:after {
+  content: '';
+  display: none;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .current-selection .cs-label {
+  padding: 0 0 0 5px;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .current-selection .val-icon-arrow-down {
+  color: #AAA;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .current-selection:hover {
+  color: #2c2c2c;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .current-selection:hover .val-icon-arrow-down {
+  color: #555;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .dropdown-wrapper {
+  width: 195px;
+  padding: 5px 0;
+  top: 25px;
+  border-radius: 3px;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .dropdown-wrapper:after, .valamis-reports .report-period-selector .dropdown-selector .dropdown-wrapper:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .dropdown-wrapper:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #FFF;
+  border-width: 5px;
+  margin-left: -5px;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .dropdown-wrapper:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #CCCCCC;
+  border-width: 6px;
+  margin-left: -6px;
+}
+
+.valamis-reports .report-period-selector .dropdown-selector .dates-selector input[type="text"] + input[type="text"] {
+  margin-left: 2px;
+}
+
+.valamis-reports .dropdown-filter {
+  position: relative;
+  overflow: hidden;
+}
+
+.valamis-reports .dropdown-filter.show-dropdown-filter {
+  overflow: visible;
+}
+
+.valamis-reports .dropdown-filter.show-dropdown-filter .dropdown-wrapper {
+  visibility: visible;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-button {
+  display: inline-block;
+  background: #EAEAEA;
+  border: 1px solid #CCCCCC;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0 3px 0 10px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-button:hover {
+  background-color: #F8F8F8;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-button span {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 13px;
+  line-height: 30px;
+  font-weight: bold;
+  color: #555;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-button:after {
+  display: inline-block;
+  vertical-align: middle;
+  content: 'y';
+  font-family: valamis-icons;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: normal;
+  color: #777;
+  width: 20px;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.valamis-reports .dropdown-filter.disabled .filter-toggle-button {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.valamis-reports .dropdown-filter.disabled .filter-toggle-button:hover {
+  background: #EAEAEA;
+}
+
+.valamis-reports .dropdown-filter .dropdown-wrapper {
+  width: 195px;
+  padding: 20px 0 6px;
+  position: absolute;
+  right: 0;
+  top: 42px;
+  background: #FFF;
+  border: 1px solid #C1C1C1;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+  z-index: 300;
+  visibility: hidden;
+}
+
+.valamis-reports .dropdown-filter .dropdown-wrapper:after, .valamis-reports .dropdown-filter .dropdown-wrapper:before {
+  bottom: 100%;
+  right: 25px;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis-reports .dropdown-filter .dropdown-wrapper:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #FFF;
+  border-width: 5px;
+  margin-right: 1px;
+}
+
+.valamis-reports .dropdown-filter .dropdown-wrapper:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #C1C1C1;
+  border-width: 6px;
+}
+
+.valamis-reports .dropdown-filter .filter-section {
+  margin-bottom: 10px;
+}
+
+.valamis-reports .dropdown-filter .filter-section-title {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: bold;
+  padding: 0 20px 0 11px;
+  margin-bottom: 4px;
+  cursor: default;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list ul {
+  list-style: none;
+  margin: 0;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li {
+  display: block;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li span {
+  display: block;
+  line-height: 18px;
+  padding: 3px 20px 3px 33px;
+  cursor: pointer;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li span:hover {
+  font-weight: bold;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li.active:before {
+  content: '6';
+  display: inline-block;
+  font-family: valamis-icons;
+  color: #598000;
+  font-size: 16px;
+  line-height: 26px;
+  position: absolute;
+  left: 10px;
+  top: 0;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li.active span:hover {
+  font-weight: normal;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li.disabled span {
+  cursor: default;
+  color: #AAA;
+}
+
+.valamis-reports .dropdown-filter .filter-option-list li.disabled span:hover {
+  font-weight: normal;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-switch {
+  width: 100%;
+  overflow: hidden;
+  padding-top: 4px;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-switch .filter-section-title {
+  float: left;
+  min-width: 100px;
+  max-width: 120px;
+  padding-right: 0;
+  padding-top: 2px;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-switch label.val-switch {
+  display: block;
+  position: relative;
+  width: 39px;
+  height: 20px;
+  background: #EAEAEA;
+  box-shadow: 0 0 0 1px #CCCCCC inset;
+  border-radius: 10px;
+  float: right;
+  cursor: pointer;
+  margin: 0 12px 0 0;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-switch label.val-switch input.switch-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-switch label.val-switch input.switch-input:checked ~ .switch-handle {
+  left: 19px;
+  background-color: #2974A6;
+}
+
+.valamis-reports .dropdown-filter .filter-toggle-switch label.val-switch .switch-handle {
+  position: absolute;
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  left: 0;
+  top: 0;
+  background-color: #bbb;
+  cursor: pointer;
+  transition: left 0.15s ease-out, background-color 0.15s;
+}
+
+.valamis-reports .dropdown-filter .filter-search-field {
+  padding: 0 12px 5px 11px;
+}
+
+.valamis-reports .dropdown-filter .val-search {
+  height: 30px;
+}
+
+.valamis-reports .dropdown-filter .val-search input {
+  height: 28px;
+}
+
+.valamis-reports .dropdown-filter .val-search:before {
+  font-size: 16px;
+  top: 5px;
+  right: 5px;
+}
+
+.valamis-reports .active-filters-block .active-filters {
+  cursor: default;
+  white-space: nowrap;
+}
+
+.valamis-reports .active-filters-block .active-filters ul,
+.valamis-reports .active-filters-block .active-filters li,
+.valamis-reports .active-filters-block .active-filters .active-filters-title {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.valamis-reports .active-filters-block .active-filters .active-filters-title {
+  white-space: nowrap;
+  padding: 6px 5px 7px 0;
+  color: #777;
+}
+
+.valamis-reports .active-filters-block .active-filters ul {
+  list-style: none;
+  text-align: left;
+}
+
+.valamis-reports .active-filters-block .active-filters li {
+  white-space: nowrap;
+  color: #777;
+  background: #F8F8F8;
+  border-top: 1px solid #DEDEDE;
+  padding: 5px 8px 7px 11px;
+  margin: 0 0 4px 3px;
+}
+
+.valamis-reports .active-filters-block .active-filters li span {
+  display: inline-block;
+  font-weight: 700;
+  margin-left: 3px;
+  color: #555;
+}
+
+.valamis-reports .active-filters-block .active-filters li i.remove {
+  font-style: normal;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 5px;
+}
+
+.valamis-reports .active-filters-block .active-filters li i.remove:before {
+  font-size: 14px;
+}
+
+.valamis-reports .active-filters-block .active-filters li.hilited {
+  background: #F2F2F2;
+}
+
+.valamis-reports .active-filters-block .active-filters li.hilited i.remove {
+  color: #CC4233;
+}
+
+.valamis-reports input,
+.valamis-reports label,
+.valamis-reports select {
+  display: block;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+  outline: none;
+}
+
+.valamis-reports label {
+  margin-right: 4.55px;
+  margin-bottom: 4.55px;
+}
+
+.valamis-reports label.required:after {
+  content: "*";
+}
+
+.valamis-reports label abbr {
+  display: none;
+}
+
+.valamis-reports textarea,
+.valamis-reports input[type="email"], .valamis-reports input[type="number"], .valamis-reports input[type="password"], .valamis-reports input[type="search"], .valamis-reports input[type="tel"], .valamis-reports input[type="text"], .valamis-reports input[type="url"], .valamis-reports input[type="color"], .valamis-reports input[type="date"], .valamis-reports input[type="datetime"], .valamis-reports input[type="datetime-local"], .valamis-reports input[type="month"], .valamis-reports input[type="time"], .valamis-reports input[type="week"],
+.valamis-reports select[multiple=multiple],
+.valamis-reports .val-search {
+  box-sizing: border-box;
+  transition: border-color;
+  background: #FFF;
+  border-radius: 1px;
+  border: 1px solid #CCCCCC;
+  box-shadow: none;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  margin-bottom: 0;
+  padding: 6.06667px 6.06667px;
+  width: 100%;
+  color: #555;
+  height: inherit;
+  line-height: 1.4;
+}
+
+.valamis-reports textarea:hover,
+.valamis-reports input[type="email"]:hover, .valamis-reports input[type="number"]:hover, .valamis-reports input[type="password"]:hover, .valamis-reports input[type="search"]:hover, .valamis-reports input[type="tel"]:hover, .valamis-reports input[type="text"]:hover, .valamis-reports input[type="url"]:hover, .valamis-reports input[type="color"]:hover, .valamis-reports input[type="date"]:hover, .valamis-reports input[type="datetime"]:hover, .valamis-reports input[type="datetime-local"]:hover, .valamis-reports input[type="month"]:hover, .valamis-reports input[type="time"]:hover, .valamis-reports input[type="week"]:hover,
+.valamis-reports select[multiple=multiple]:hover,
+.valamis-reports .val-search:hover {
+  border-color: 1px solid #CCCCCC;
+}
+
+.valamis-reports textarea:focus, .valamis-reports textarea.focus,
+.valamis-reports input[type="email"]:focus,
+.valamis-reports input[type="email"].focus, .valamis-reports input[type="number"]:focus, .valamis-reports input[type="number"].focus, .valamis-reports input[type="password"]:focus, .valamis-reports input[type="password"].focus, .valamis-reports input[type="search"]:focus, .valamis-reports input[type="search"].focus, .valamis-reports input[type="tel"]:focus, .valamis-reports input[type="tel"].focus, .valamis-reports input[type="text"]:focus, .valamis-reports input[type="text"].focus, .valamis-reports input[type="url"]:focus, .valamis-reports input[type="url"].focus, .valamis-reports input[type="color"]:focus, .valamis-reports input[type="color"].focus, .valamis-reports input[type="date"]:focus, .valamis-reports input[type="date"].focus, .valamis-reports input[type="datetime"]:focus, .valamis-reports input[type="datetime"].focus, .valamis-reports input[type="datetime-local"]:focus, .valamis-reports input[type="datetime-local"].focus, .valamis-reports input[type="month"]:focus, .valamis-reports input[type="month"].focus, .valamis-reports input[type="time"]:focus, .valamis-reports input[type="time"].focus, .valamis-reports input[type="week"]:focus, .valamis-reports input[type="week"].focus,
+.valamis-reports select[multiple=multiple]:focus,
+.valamis-reports select[multiple=multiple].focus,
+.valamis-reports .val-search:focus,
+.valamis-reports .val-search.focus {
+  border-color: #2974A6;
+  box-shadow: none;
+  background-color: white;
+  outline: none;
+  color: #2c2c2c;
+}
+
+.valamis-reports textarea {
+  resize: vertical;
+  font-weight: normal;
+  color: #555;
+  min-height: 100px;
+}
+
+.valamis-reports input[type="text"], .valamis-reports .val-search {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  font-weight: normal;
+  color: #555;
+  height: 34px;
+}
+
+.valamis-reports .val-search {
+  position: relative;
+  padding: 0;
+}
+
+.valamis-reports .val-search:before {
+  font-family: valamis-icons !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 20px;
+  content: 'M';
+  top: 6px;
+  right: 6px;
+  position: absolute;
+}
+
+.valamis-reports .val-search input {
+  padding-right: 30px;
+  border: none;
+  outline: none;
+  -webkit-appearance: none;
+  height: 32px;
+}
+
+.valamis-reports input[type="text"] {
+  display: inline-block;
+}
+
+.valamis-reports input[type="search"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+}
+
+.valamis-reports input[type="checkbox"],
+.valamis-reports input[type="radio"] {
+  display: inline;
+  margin-right: 4.55px;
+  vertical-align: middle;
+  position: inherit;
+}
+
+.valamis-reports input[type="file"] {
+  padding-bottom: 9.1px;
+  width: 100%;
+}
+
+.valamis-reports select {
+  max-width: 100%;
+  width: auto;
+}
+
+.valamis-reports input.form-input {
+  margin-bottom: 9.1px;
+}
+
+.valamis-reports input.form-input[disabled=disabled] {
+  background: #EAEAEA;
+  color: #777;
+}
+
+.valamis-reports input[type=checkbox].val-checkbox {
+  display: none;
+  vertical-align: middle;
+}
+
+.valamis-reports input[type=checkbox].val-checkbox + label {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  margin-bottom: 0;
+}
+
+.valamis-reports input[type=checkbox].val-checkbox + label:before {
+  font-family: valamis-icons;
+  border: 1px solid #CCCCCC;
+  background: #FFF;
+  content: '6';
+  margin-right: 4.55px;
+  color: transparent;
+  padding: 1px;
+  font-size: 16px;
+  border-radius: 1px;
+}
+
+.valamis-reports input[type=checkbox].val-checkbox:checked + label:before {
+  color: black;
+}
+
+.valamis-reports input[type=checkbox].val-checkbox:disabled + label {
+  cursor: not-allowed;
+}
+
+.valamis-reports input[type=checkbox].val-checkbox:disabled + label:before {
+  background: #EAEAEA;
+}
+
+.valamis-reports input[type=radio].val-radio {
+  margin: 0 4.55px 3.64px 0;
+}
+
+.valamis-reports .radio-label {
+  display: inline;
+}
+
+.valamis-reports .val-select {
+  box-sizing: border-box;
+  background: #FFF;
+  border: 1px solid #CCCCCC;
+  position: relative;
+  z-index: 1;
+  border-radius: 1px;
+}
+
+.valamis-reports .val-select:before {
+  font-family: valamis-icons;
+  line-height: normal;
+  position: absolute;
+  top: 50%;
+  margin-top: -10px;
+  font-size: 20px;
+  font-weight: normal;
+  width: 32px;
+  right: 0;
+  text-align: center;
+  content: 'y';
+  z-index: -1;
+  color: #AAA;
+}
+
+.valamis-reports .val-select select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  border-radius: 1px;
+  display: block;
+  padding: 4.55px 25px 4.55px 4.55px;
+  width: 100%;
+  text-align: left;
+  color: #555;
+  line-height: normal;
+  height: 32px;
+  margin: 0;
+}
+
+.valamis-reports .val-select select:focus {
+  border: none;
+  outline: none;
+}
+
+.valamis-reports .val-select select::-ms-expand {
+  display: none;
+  /* to ie 10 */
+}
+
+.valamis-reports :-moz-any(.val-select):before {
+  pointer-events: none;
+  /* https://developer.mozilla.org/en-US/docs/Web/CSS/pointer-events  */
+  z-index: 1;
+  /* this is necessary for overcome the pseudo element */
+}
+
+.valamis-reports .dropdown {
+  position: relative;
+}
+
+.valamis-reports .dropdown .button.simple {
+  font-size: 13px;
+  padding: 0px;
+  margin: 0;
+}
+
+.valamis-reports .dropdown .button.simple .dropdown-text {
+  color: #555;
+}
+
+.valamis-reports .dropdown .button.simple:hover .dropdown-text {
+  color: #2c2c2c;
+}
+
+.valamis-reports .dropdown .button.primary .dropdown-text {
+  color: white !important;
+}
+
+.valamis-reports .dropdown.actions .button > [class^="val-icon-"]:before,
+.valamis-reports .dropdown.actions .button > [class*=" val-icon-"]:before {
+  margin: -1px -4px 0 4px;
+}
+
+.valamis-reports .dropdown.shift-right ul {
+  right: 0;
+  left: inherit;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #FFF;
+  border: 1px solid #CCCCCC;
+  border-radius: 0;
+  padding: 6.06667px;
+  padding-right: 18.2px;
+  box-shadow: 0 0 0 3px rgba(228, 228, 228, 0.6);
+  margin: 5px 0 0 3px;
+  z-index: 1000;
+  min-width: 0;
+  font-size: inherit;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu.dropdown-visible {
+  display: block;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu li {
+  display: block;
+  color: #777;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  padding: 3.03333px 0;
+  font-weight: bold;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu li:hover {
+  color: #2c2c2c;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu li:before {
+  font-size: 1.5em;
+  content: "6";
+  font-family: valamis-icons;
+  vertical-align: middle;
+  height: 100%;
+  color: transparent;
+  margin-right: 4.55px;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu li.selected {
+  color: #2c2c2c;
+}
+
+.valamis-reports .dropdown ul.dropdown-menu li.selected:before {
+  color: #598000;
+}
+
+.valamis-reports .dropdown.actions ul.dropdown-menu li {
+  padding: 3.03333px;
+}
+
+.valamis-reports .dropdown.actions ul.dropdown-menu li:before {
+  content: none;
+}
+
+.valamis-reports .dropdown.filter-element {
+  padding: 0;
+}
+
+.valamis-reports .dropdown.filter-element.actions ul li {
+  padding: 6.06667px 3.03333px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .dropdown.filter-element {
+  padding: 0 14px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .dropdown.filter-element.actions ul li {
+  padding: 0 10px;
+}
+
+.valamis-reports .selectize-input {
+  border: 1px solid #CCCCCC;
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+.valamis-reports .filters-row {
+  padding: 0;
+  line-height: 34px;
+}
+
+.valamis-reports .filters-row .filter-element {
+  padding: 9.1px 9.1px;
+  border-bottom: 1px solid #CCCCCC;
+  width: 100%;
+}
+
+.valamis-reports .filters-row-narrow {
+  padding: 0 15px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row {
+  border-top: 1px solid #CCCCCC;
+  padding: 12.13333px 12.13333px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .filter-element {
+  border: none;
+  width: inherit;
+  padding: 0;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .filter-element.shift-left {
+  margin-right: 30px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .filter-element.shift-right {
+  margin-left: 30px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .filter-element .val-search {
+  width: 240px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .filter-element.shift-left:last-child {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row:first-child {
+  border: none;
+}
+
+.valamis-reports .filters-row .dropdown.filter-element {
+  width: 100%;
+}
+
+.valamis-reports .filters-row .dropdown.filter-element > button {
+  width: 100%;
+}
+
+.valamis-reports .filters-row .dropdown.filter-element > button .dropdown-text {
+  float: left;
+}
+
+.valamis-reports .filters-row .dropdown.filter-element > button .val-icon-right {
+  float: right;
+}
+
+.valamis-reports .filters-row .dropdown.filter-element > button .val-icon-right:before {
+  margin: -1px -4px 0 0;
+}
+
+.valamis-reports .filters-row .dropdown.filter-element ul {
+  position: relative;
+  border: none;
+  box-shadow: none;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .dropdown.filter-element {
+  width: inherit;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .dropdown.filter-element > button .dropdown-text, .valamis-reports .portlet[min-width~="480px"] .filters-row .dropdown.filter-element > button .val-icon-right {
+  float: none;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul {
+  position: absolute;
+  border: 1px solid #CCCCCC;
+  box-shadow: 0 0 0 3px rgba(228, 228, 228, 0.6);
+}
+
+.valamis-reports .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul li {
+  font-weight: bold;
+}
+
+.valamis-reports .portlet[min-width~="768px"] .filters-row .dropdown.actions .button span {
+  display: inline-block;
+  text-indent: 0px;
+}
+
+.valamis-reports .portlet[min-width~="768px"] .filters-row .button > [class^="val-icon-"],
+.valamis-reports .portlet[min-width~="768px"] .filters-row .button > [class*=" val-icon-"] {
+  display: inline-block;
+  text-indent: 0px;
+}
+
+.valamis-reports input.onlyDigits {
+  width: 34px;
+  height: 34px;
+  text-align: center;
+  box-shadow: none !important;
+}
+
+.valamis-reports input.onlyDigits:focus {
+  border-color: #CCCCCC !important;
+}
+
+.valamis-reports .val-during-period {
+  width: 140px;
+}
+
+.valamis-reports .val-during-period .val-select {
+  border-radius: 0 1px 1px 0;
+}
+
+.valamis-reports .val-during-period input {
+  margin: 0 !important;
+  border-right: none;
+  border-radius: 1px 0 0 1px;
+}
+
+.valamis-reports .thumbnail-container .thumbnail-item {
+  padding: 10px;
+  height: 175px;
+  width: 148px;
+}
+
+.valamis-reports .thumbnail-container .thumbnail-item .image-thumbnail {
+  display: block;
+  max-width: 128px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.valamis-reports .thumbnail-container .thumbnail-item.thumbnail-provider-item {
+  height: auto;
+}
+
+.valamis-reports .thumbnail-container .thumbnail-item.thumbnail-provider-item .image-thumbnail {
+  width: 100%;
+  height: 128px;
+  background-size: contain;
+}
+
+.valamis-reports .able-to-run-container input {
+  width: 100px;
+  margin-right: 9.1px;
+}
+
+.valamis-reports .able-to-run-container label {
+  margin-top: 4.55px;
+}
+
+.valamis-reports .toggle-container {
+  cursor: pointer;
+  text-align: center;
+  background: #F2F2F2;
+  font-size: 13px;
+  font-weight: bold;
+  color: #777;
+  padding: 12.13333px;
+}
+
+.valamis-reports .toggle-container [class*="val-icon-"] {
+  color: #AAA;
+}
+
+.valamis-reports .loading-container {
+  width: 100%;
+  height: 50px;
+  background: transparent url("../img/loading.gif") center no-repeat;
+}
+
+.valamis-reports .status-label {
+  background: #DEDEDE;
+  color: #555;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 10px;
+  line-height: 10px;
+  padding: 4px 8px;
+  display: inline-block;
+  border-radius: 2px;
+}
+
+.valamis-reports .status-label.success {
+  background: #598000;
+  color: #FFF;
+}
+
+.valamis-reports .status-label.failed {
+  background: #CC4233;
+  color: #FFF;
+}
+
+.valamis-reports .val-rounded-icon:before {
+  color: #FFF;
+  border-radius: 50%;
+  background: none 0px 0px repeat #DEDEDE;
+}
+
+.valamis-reports .val-rounded-icon.success:before {
+  background-color: #598000;
+}
+
+.valamis-reports .val-rounded-icon.failed:before {
+  background-color: #CC4233;
+}
+
+.valamis-reports .ui-resizable-handle.val-rounded-icon:before {
+  border: 1px solid #4BA5D7;
+  background: #4BA5D7;
+  font-size: 11px;
+}
+
+.valamis-reports .val-rounded-div {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #DEDEDE;
+  background: #FFF;
+  border-radius: 50%;
+  color: #FFF;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.valamis-reports .val-rounded-div.success {
+  border-color: #598000;
+}
+
+.valamis-reports .val-rounded-div.failed {
+  border-color: #CC4233;
+}
+
+.valamis-reports .val-rounded-div.failed.filled {
+  background: #CC4233;
+}
+
+.valamis-reports .val-rounded-div.inprogress {
+  border-color: #f7ac1d;
+}
+
+.valamis-reports .val-rounded-div.inprogress.filled {
+  background: #f7ac1d;
+}
+
+.valamis-reports .val-rounded-div.small {
+  width: 16px;
+  height: 16px;
+}
+
+.valamis-reports .val-rounded-div span {
+  display: inline-block;
+  cursor: default;
+  vertical-align: middle;
+}
+
+.valamis-reports .val-link-help {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  color: #FFF;
+  border: 0;
+  background-color: #777;
+  text-align: center;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.valamis-reports .val-link-help.valamis-tooltip {
+  border: none;
+}
+
+.valamis-reports .radio-inline {
+  display: inline-block;
+  padding-right: 30px;
+  padding-left: 0;
+  height: 20px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.valamis-reports .radio-inline input {
+  margin: 0;
+  height: 100%;
+}
+
+.valamis-reports .item-info {
+  line-height: initial;
+}
+
+.valamis-reports .item-info > div:not(.item-title):not(.item-description) {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.valamis-reports .item-info img, .valamis-reports .item-info .image {
+  margin-right: 10px;
+}
+
+.valamis-reports .item-info .item-title {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.valamis-reports .item-info .item-title:not(:last-child) {
+  padding-bottom: 5px;
+}
+
+.valamis-reports .item-info .title-separator {
+  font-weight: normal;
+}
+
+.valamis-reports .item-info .item-description {
+  color: #555;
+  font-size: 13px;
+}
+
+.valamis-reports .item-info .item-description:not(:last-child) {
+  padding-bottom: 5px;
+}
+
+.valamis-reports .text-left {
+  text-align: left !important;
+}
+
+.valamis-reports .text-center {
+  text-align: center !important;
+}
+
+.valamis-reports .text-right {
+  text-align: right !important;
+}
+
+.valamis-reports .text-justify {
+  text-align: justify !important;
+}
+
+.valamis-reports .shift-right {
+  float: right !important;
+}
+
+.valamis-reports .shift-left {
+  float: left !important;
+}
+
+.valamis-reports .ellipsis, .valamis-reports .ellipsis p {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.valamis-reports .center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  float: none !important;
+}
+
+.valamis-reports .overflow-visible {
+  overflow: visible;
+}
+
+.valamis-reports .clearfix::after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.valamis-reports .hide-s, .valamis-reports .l-only, .valamis-reports .m-only {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .hide-s, .valamis-reports .portlet[min-width~="480px"] .l-only, .valamis-reports .portlet[min-width~="480px"] .m-only {
+  display: block !important;
+  visibility: visible !important;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .hide-m, .valamis-reports .portlet[min-width~="480px"] .s-only, .valamis-reports .portlet[min-width~="480px"] .l-only {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.valamis-reports .portlet[min-width~="1024px"] .hide-m, .valamis-reports .portlet[min-width~="1024px"] .s-only, .valamis-reports .portlet[min-width~="1024px"] .l-only {
+  display: block !important;
+  visibility: visible !important;
+}
+
+.valamis-reports .portlet[min-width~="1024px"] .hide-l, .valamis-reports .portlet[min-width~="1024px"] .s-only, .valamis-reports .portlet[min-width~="1024px"] .m-only {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.valamis-reports .show {
+  display: block !important;
+}
+
+.valamis-reports .hide, .valamis-reports .hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.valamis-reports .invisible {
+  visibility: hidden;
+}
+
+.valamis-reports .hide-text {
+  height: 1em;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+.valamis-reports .hide-text::before {
+  content: "";
+  display: block;
+  width: 0;
+  height: 100%;
+}
+
+.valamis-reports .invisible-font {
+  font-size: 0 !important;
+}
+
+.valamis-reports .display-inline {
+  display: inline !important;
+}
+
+.valamis-reports .cursor-pointer {
+  cursor: pointer;
+}
+
+.valamis-reports .text-bold {
+  font-weight: bold;
+}
+
+.valamis-reports .vertical-middle {
+  display: table;
+}
+
+.valamis-reports .vertical-middle div {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.valamis-reports .arrow-icon-indent {
+  padding-left: 25px;
+}
+
+.valamis-reports [data-icon]:before {
+  font-family: valamis-icons !important;
+  content: attr(data-icon);
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.valamis-reports [class^="val-icon"]:before,
+.valamis-reports [class*="val-icon"]:before {
+  font-family: valamis-icons !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 20px;
+  vertical-align: middle;
+}
+
+.valamis-reports .val-icon-with-label {
+  display: inline;
+}
+
+.valamis-reports .val-icon-with-label:before {
+  vertical-align: middle;
+}
+
+.valamis-reports .val-icon-with-label span {
+  vertical-align: middle;
+  margin-left: 3px;
+  text-indent: -9999px;
+  display: none;
+}
+
+.valamis-reports .portlet[min-width~="768px"] .val-icon-with-label span {
+  text-indent: inherit;
+  display: inline-block;
+}
+
+.valamis-reports .val-icon-arrow-left-two:before,
+.valamis-reports .val-icon-arrow-right-two:before,
+.valamis-reports .val-icon-arrow-down-two:before {
+  content: "y";
+}
+
+.valamis-reports .val-icon-arrow-left-two:before,
+.valamis-reports .val-icon-arrow-right-two:before {
+  display: inline-block;
+}
+
+.valamis-reports .val-icon-arrow-left-two:before {
+  -ms-transform: rotate(90deg);
+      transform: rotate(90deg);
+}
+
+.valamis-reports .val-icon-arrow-right-two:before {
+  -ms-transform: rotate(270deg);
+      transform: rotate(270deg);
+}
+
+.valamis-reports .val-icon-drag:before {
+  content: "c";
+}
+
+.valamis-reports .val-icon-bell:before {
+  content: "F";
+}
+
+.valamis-reports .val-icon-heart:before {
+  content: "e";
+}
+
+.valamis-reports .val-icon-menu-hamburger:before {
+  content: "5";
+}
+
+.valamis-reports .val-icon-settings:before {
+  content: "N";
+}
+
+.valamis-reports .val-icon-star:before {
+  content: "Q";
+}
+
+.valamis-reports .val-icon-link:before {
+  content: "C";
+}
+
+.valamis-reports .val-icon-arrange:before {
+  content: "w";
+}
+
+.valamis-reports .val-icon-arrow-down:before {
+  content: "x";
+}
+
+.valamis-reports .val-icon-arrow-left:before {
+  content: "x";
+  -ms-transform: rotate(90deg);
+      transform: rotate(90deg);
+  display: inline-block;
+}
+
+.valamis-reports .val-icon-arrow-right:before {
+  content: "x";
+  -ms-transform: rotate(270deg);
+      transform: rotate(270deg);
+  display: inline-block;
+}
+
+.valamis-reports .val-icon-arrow-up:before {
+  content: "x";
+  -ms-transform: rotate(180deg);
+      transform: rotate(180deg);
+  display: inline-block;
+}
+
+.valamis-reports .val-icon-dropdown:before {
+  content: "A";
+}
+
+.valamis-reports .val-icon-menu:before {
+  content: "L";
+}
+
+.valamis-reports .val-icon-upload:before {
+  content: "m";
+}
+
+.valamis-reports .val-icon-video:before {
+  content: "o";
+}
+
+.valamis-reports .val-icon-minus:before {
+  content: "1";
+}
+
+.valamis-reports .val-icon-duplicate:before {
+  content: "z";
+}
+
+.valamis-reports .val-icon-edit:before {
+  content: "E";
+}
+
+.valamis-reports .val-icon-pause:before {
+  content: "h";
+}
+
+.valamis-reports .val-icon-pdf:before {
+  content: "g";
+}
+
+.valamis-reports .val-icon-plus:before {
+  content: "t";
+}
+
+.valamis-reports .val-icon-ppt:before {
+  content: "s";
+}
+
+.valamis-reports .val-icon-book:before {
+  content: "G";
+}
+
+.valamis-reports .val-icon-checkmark:before {
+  content: "6";
+}
+
+.valamis-reports .val-icon-clock:before {
+  content: "3";
+}
+
+.valamis-reports .val-icon-content:before {
+  content: "Y";
+}
+
+.valamis-reports .val-icon-dots:before {
+  content: "W";
+}
+
+.valamis-reports .val-icon-download-import-down:before {
+  content: "d";
+}
+
+.valamis-reports .val-icon-download-import-right:before {
+  content: "d";
+  -ms-transform: rotate(270deg);
+      transform: rotate(270deg);
+  display: inline-block;
+}
+
+.valamis-reports .val-icon-drop:before {
+  content: "v";
+}
+
+.valamis-reports .val-icon-list-view:before {
+  content: "D";
+}
+
+.valamis-reports .val-icon-image-bg:before {
+  content: "B";
+}
+
+.valamis-reports .val-icon-image:before {
+  content: "u";
+}
+
+.valamis-reports .val-icon-iframe:before {
+  content: "f";
+}
+
+.valamis-reports .val-icon-grid:before {
+  content: "U";
+}
+
+.valamis-reports .val-icon-grid-view:before {
+  content: "V";
+}
+
+.valamis-reports .val-icon-globe:before {
+  content: "Z";
+}
+
+.valamis-reports .val-icon-fullscreen-exit:before {
+  content: "2";
+}
+
+.valamis-reports .val-icon-fullscreen:before {
+  content: "4";
+}
+
+.valamis-reports .val-icon-folder:before {
+  content: "I";
+}
+
+.valamis-reports .val-icon-exit:before {
+  content: "J";
+}
+
+.valamis-reports .val-icon-presentation:before {
+  content: "r";
+}
+
+.valamis-reports .val-icon-preview:before {
+  content: "q";
+}
+
+.valamis-reports .val-icon-question:before {
+  content: "p";
+}
+
+.valamis-reports .val-icon-search:before {
+  content: "M";
+}
+
+.valamis-reports .val-icon-sort:before {
+  content: "P";
+}
+
+.valamis-reports .val-icon-text:before {
+  content: "j";
+}
+
+.valamis-reports .val-icon-trash:before {
+  content: "k";
+}
+
+.valamis-reports .val-icon-undo:before {
+  content: "l";
+}
+
+.valamis-reports .val-icon-redo:before {
+  content: "l";
+  -ms-transform: scaleX(-1);
+      transform: scaleX(-1);
+}
+
+.valamis-reports .val-icon-display:before {
+  content: "X";
+}
+
+.valamis-reports .val-icon-user:before {
+  content: "n";
+}
+
+.valamis-reports .val-icon-alert:before {
+  content: "b";
+}
+
+.valamis-reports .val-icon-math:before {
+  content: "K";
+}
+
+.valamis-reports .val-icon-share:before {
+  content: "O";
+}
+
+.valamis-reports .val-icon-3d:before {
+  content: "a";
+}
+
+.valamis-reports .val-icon-brush:before {
+  content: "H";
+}
+
+.valamis-reports .val-icon-move-backward:before {
+  content: "0";
+}
+
+.valamis-reports .val-icon-move-forward:before {
+  content: "T";
+}
+
+.valamis-reports .val-icon-star-half:before {
+  content: "R";
+}
+
+.valamis-reports .val-icon-navigator-view:before {
+  content: "S";
+}
+
+.valamis-reports .val-icon-table-view:before {
+  content: "i";
+}
+
+.valamis-reports .val-icon-attach:before {
+  content: "7";
+}
+
+.valamis-reports .val-icon-print:before {
+  content: "8";
+}
+
+.valamis-reports .val-icon-audio:before {
+  content: "9";
+}
+
+.valamis-reports .val-icon-delete:before {
+  content: "J";
+}
+
+.valamis-reports .val-img-logo {
+  max-width: 90px;
+  max-height: 60px;
+  margin-right: 18.2px;
+  cursor: pointer;
+}
+
+.valamis-reports .val-img-logo.preview {
+  cursor: auto;
+}
+
+.valamis-reports .val-img-logo[src=""] {
+  width: 90px;
+  height: 60px;
+  background: transparent url("../img/lesson_cover.svg") center no-repeat;
+  background-origin: padding-box;
+  background-size: cover;
+}
+
+.valamis-reports .val-img-logo[src=""].certificate {
+  background-image: url("../img/certificate_cover.svg");
+}
+
+.valamis-reports .val-img-logo[src=""].course {
+  background-image: url("../img/course_cover.svg");
+}
+
+.valamis-reports .val-img-logo[src=""].event {
+  background-image: url("../img/event_cover.svg");
+}
+
+.valamis-reports .val-img-logo[src=""].provider {
+  background-image: url("../img/external.svg");
+}
+
+.valamis-reports .image {
+  background: transparent url("../img/lesson_cover.svg") center no-repeat;
+  background-origin: padding-box;
+  background-size: cover;
+}
+
+.valamis-reports .image.certificate {
+  background-image: url("../img/certificate_cover.svg");
+}
+
+.valamis-reports .image.course {
+  background-image: url("../img/course_cover.svg");
+}
+
+.valamis-reports .image.event {
+  background-image: url("../img/event_cover.svg");
+}
+
+.valamis-reports .image.provider {
+  background-image: url("../img/external.svg");
+}
+
+.valamis-reports .img-circle {
+  border-radius: 100%;
+  border: 1px solid #CCCCCC;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+}
+
+.valamis-reports .img-circle.small {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+}
+
+.valamis-reports .img-circle.big {
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+}
+
+.valamis-reports .img-circle.success {
+  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #598000;
+  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #598000;
+}
+
+.valamis-reports .img-circle.failed {
+  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
+  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
+}
+
+.valamis-reports .image.img-square {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.valamis-reports .image.img-rect {
+  width: 60px !important;
+  height: 40px !important;
+}
+
+.valamis-reports .image.img-rect.big {
+  width: 80px !important;
+  height: 50px !important;
+}
+
+.valamis-reports .image.img-rect.small {
+  width: 45px !important;
+  height: 30px !important;
+}
+
+.valamis-reports .image-selection {
+  padding-bottom: 9.1px;
+  position: relative;
+  cursor: pointer;
+  border-radius: 2px;
+  width: 160px;
+  height: 160px;
+  background: transparent url("../img/orientation-horizontal.png") center no-repeat;
+  background-origin: padding-box;
+  background-size: cover;
+}
+
+.valamis-reports .image-selection.vertical {
+  background-image: url("../img/orientation-vertical.png");
+}
+
+.valamis-reports .image-selection .val-rounded-icon {
+  display: none;
+}
+
+.valamis-reports .image-selection.selected {
+  border: 1px solid #598000;
+}
+
+.valamis-reports .image-selection.selected .val-rounded-icon {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: block;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .val-img-logo {
+  max-width: 150px;
+  max-height: 100px;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .val-img-logo[src=""] {
+  width: 150px;
+  height: 100px;
+}
+
+.valamis-reports .portlet[min-width~="1024px"] .val-img-logo {
+  max-width: 180px;
+  max-height: 120px;
+}
+
+.valamis-reports .portlet[min-width~="1024px"] .val-img-logo[src=""] {
+  width: 180px;
+  height: 120px;
+}
+
+.valamis-reports .val-modal h1 {
+  margin: 0;
+}
+
+.valamis-reports .val-modal p {
+  color: #2c2c2c;
+  line-height: 1.4;
+}
+
+.valamis-reports .val-modal label {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.valamis-reports .val-modal .modal-state {
+  display: none;
+}
+
+.valamis-reports .val-modal .modal-window {
+  transition: opacity 0.25s ease;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  padding-top: 0.6em;
+  text-align: left;
+  visibility: hidden;
+  z-index: 99999999999;
+  overflow: auto;
+}
+
+@media screen and (min-width: 61.42857em) {
+  .valamis-reports .val-modal .modal-window {
+    padding-top: 5em;
+    padding-bottom: 5em;
+  }
+}
+
+.valamis-reports .val-modal .modal-window .modal-bg {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  cursor: pointer;
+}
+
+.valamis-reports .val-modal .modal-inner {
+  position: relative;
+  transition: opacity 0.25s ease;
+  background: #FFF;
+  border-radius: 0;
+  margin: auto;
+  margin-top: 0;
+  width: 95%;
+}
+
+@media screen and (min-width: 45.71429em) {
+  .valamis-reports .val-modal .modal-inner {
+    width: 60%;
+  }
+}
+
+@media screen and (min-width: 61.42857em) {
+  .valamis-reports .val-modal .modal-inner {
+    width: 50%;
+  }
+}
+
+.valamis-reports .val-modal .modal-inner .modal-header {
+  width: 100%;
+  height: 3.5rem;
+  line-height: 3.5rem;
+  border-bottom: 1px solid #CCCCCC;
+  background-color: #EAEAEA;
+}
+
+.valamis-reports .val-modal .modal-inner .modal-header .modal-close {
+  font-size: 1.2em;
+  display: block;
+  float: right;
+  cursor: pointer;
+  width: 3.5rem;
+  height: 3.5rem;
+  line-height: 3.5rem;
+  text-align: center;
+  background-color: #DEDEDE;
+}
+
+.valamis-reports .val-modal .modal-inner .modal-header .modal-close:before {
+  color: #555;
+  font-family: valamis-icons;
+  content: 'J';
+  display: block;
+}
+
+.valamis-reports .val-modal .modal-inner .modal-header .modal-close:hover:before {
+  color: #3c3c3c;
+}
+
+.valamis-reports .val-modal .modal-inner .modal-footer {
+  height: 3.5rem;
+  line-height: 3.5rem;
+  border-top: 1px solid #CCCCCC;
+  background-color: #EAEAEA;
+}
+
+.valamis-reports .val-modal .modal-inner .modal-content {
+  color: #2c2c2c;
+}
+
+@media screen and (min-width: 45.71429em) {
+  .valamis-reports .val-modal .modal-inner .modal-content {
+    -moz-columns: 2 8em;
+    columns: 2 8em;
+  }
+}
+
+.valamis-reports .val-modal .modal-inner a.cta {
+  color: white;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: 1em;
+}
+
+.valamis-reports .val-modal .modal-inner a.cta:last-child {
+  padding: 0 2em;
+}
+
+.valamis-reports .val-modal .modal-state:checked + .modal-window {
+  opacity: 1;
+  visibility: visible;
+}
+
+.valamis-reports .val-modal .modal-state:checked + .modal-window .modal-inner {
+  top: 0.5em;
+}
+
+.valamis-reports .val-modal .modal-closed {
+  overflow: auto;
+}
+
+.valamis-reports .val-modal .modal-small {
+  width: 510px;
+  background-color: #FFF;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -200px 0 0 -230px;
+  cursor: auto;
+}
+
+.valamis-reports .val-modal .modal-small .modal-small-body {
+  padding: 30px;
+}
+
+.valamis-reports .val-modal .modal-small .modal-small-body .top-label {
+  text-align: center;
+  font-weight: bold;
+}
+
+.valamis-reports .val-modal .modal-small h3 {
+  text-align: center;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.valamis-reports .val-modal .modal-small h5 {
+  font-size: 13px;
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.valamis-reports .val-modal .modal-small div[class^="s-"] {
+  padding-left: 0;
+  margin-top: 20px;
+}
+
+.valamis-reports .val-modal .modal-small .button.medium.primary {
+  margin-top: 20px;
+}
+
+.valamis-reports .val-modal .modal-small .button.simple {
+  position: absolute;
+  right: 0;
+  top: 10px;
+}
+
+.valamis-reports .val-modal .modal-small .modal-small-footer {
+  background-color: #F2F2F2;
+  border-top: 1px solid #ddd;
+  padding: 20px;
+}
+
+.valamis-reports.modal-open {
+  overflow: hidden;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open {
+  padding: 40px 0;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .bbm-modal__topbar {
+  background: #FFF;
+  border: none;
+  height: 40px;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .bbm-modal__topbar .bbm-modal__title {
+  width: auto;
+  float: none;
+  text-align: center;
+  font-size: 20.0px;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .bbm-modal__topbar .modal-close {
+  background: white;
+  padding: 10px;
+  top: -40px;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .bbm-modal__topbar .val-icon-exit:before {
+  font-size: 20.0px;
+  color: #AAA;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .modal-content .val-info-table {
+  margin: 0;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .modal-content .button {
+  margin-top: 18.2px;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .modal-content .button-group .button {
+  margin-top: 0;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .arrow-down {
+  left: 50%;
+  right: auto;
+  bottom: -10px;
+  margin-left: -5px;
+}
+
+.valamis-reports .light-val-modal .bbm-modal.bbm-modal--open .arrow-right {
+  top: 50%;
+  right: -10px;
+  margin-top: -5px;
+}
+
+.valamis-reports .light-val-modal.overflow-visible .bbm-modal.bbm-modal--open {
+  overflow: visible;
+}
+
+.valamis-reports .bbm-modal {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__topbar {
+  background: #F2F2F2;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__topbar .bbm-modal__title {
+  font-size: 13px;
+  font-weight: bold;
+  padding-left: 20px;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__topbar .modal-close {
+  top: 0;
+  right: 0;
+  position: absolute;
+  background-color: #DEDEDE;
+  margin: 0;
+  padding: 20px;
+  max-height: 60px;
+  cursor: pointer;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__section .radio {
+  padding: 10px 0;
+  line-height: 1.2;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__section .radio input, .valamis-reports .bbm-modal .bbm-modal__section .radio label {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__bottombar {
+  background: #F2F2F2;
+  border-top: 1px solid #CCCCCC;
+  padding: 18.2px;
+  text-align: right;
+}
+
+.valamis-reports .bbm-modal .bbm-modal__bottombar .button {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+.valamis-reports .bbm-modal .modal-content {
+  box-shadow: none;
+  border: none;
+}
+
+.valamis-reports .arrow-modal .modal-content {
+  overflow: visible;
+}
+
+.valamis-reports .arrow-modal .bbm-modal {
+  width: 350px !important;
+  border-radius: 3px;
+  padding: 20px 30px;
+  overflow: visible;
+}
+
+.valamis-reports .arrow-modal .bbm-modal.left-arrow:before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: dashed 10px rgba(255, 0, 0, 0);
+  border-bottom: dashed 10px rgba(255, 0, 0, 0);
+  border-right: solid 10px #fff;
+  position: absolute;
+  z-index: 3;
+  left: -10px;
+  top: 10px;
+}
+
+.valamis-reports .arrow-modal .bbm-modal.right-arrow:after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: dashed 10px rgba(255, 0, 0, 0);
+  border-bottom: dashed 10px rgba(255, 0, 0, 0);
+  border-left: solid 10px #fff;
+  position: absolute;
+  z-index: 3;
+  right: -10px;
+  top: 10px;
+}
+
+.valamis-reports .arrow-modal .bbm-modal span.modal-close {
+  position: relative;
+  z-index: 2;
+  opacity: 0.5;
+  float: right;
+  top: -10px;
+  right: -18px;
+  cursor: pointer;
+}
+
+.valamis-reports .arrow-modal .bbm-modal span.modal-close:hover {
+  opacity: 1;
+}
+
+.valamis-reports .arrow-modal .bbm-modal .bbm-modal__topbar {
+  background: #fff;
+  padding: 0;
+  border: none;
+  height: auto !important;
+}
+
+.valamis-reports .arrow-modal .bbm-modal .bbm-modal__topbar .bbm-modal__title {
+  padding: 0 0 5px 0;
+}
+
+.valamis-reports .arrow-modal .bbm-modal .bbm-modal__bottombar {
+  background: #fff;
+  padding: 20px 0 0 0;
+  border: none;
+}
+
+.valamis-reports .val-paginator .paginator-showing {
+  display: inline;
+}
+
+.valamis-reports .val-paginator .pagination-group {
+  padding-bottom: 18.2px;
+}
+
+.valamis-reports .val-paginator .pagination-group li {
+  display: inline;
+}
+
+.valamis-reports .val-paginator .pagination-group li.full-view {
+  display: none;
+  visibility: hidden;
+}
+
+.valamis-reports .val-paginator.top-shifted .pagination-group {
+  padding-top: 18.2px;
+}
+
+.valamis-reports .val-modal .val-paginator .pagination-group li.full-view {
+  display: none;
+  visibility: hidden;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .val-paginator .pagination-group li.full-view {
+  display: initial;
+  visibility: visible;
+}
+
+.valamis-reports .portlet[min-width~="480px"] .val-modal .val-paginator .pagination-group li.full-view {
+  display: none;
+  visibility: hidden;
+}
+
+.valamis-reports .paging-showing-label {
+  line-height: 34px;
+  font-weight: bold;
+  color: #555;
+}
+
+.valamis-reports .paging-showing-label .show-items-buttons {
+  margin-left: 10px;
+  display: inline-block;
+}
+
+.valamis-reports .val-table {
+  border-collapse: collapse;
+  margin: 9.1px 0;
+  width: 100%;
+  background: #FFF;
+  border: 1px solid #CCCCCC;
+}
+
+.valamis-reports .val-table.small {
+  font-size: 100%;
+}
+
+.valamis-reports .val-table.no-out-margin {
+  margin: 0;
+}
+
+.valamis-reports .val-table.no-border {
+  border: none;
+}
+
+.valamis-reports .val-table.no-border th, .valamis-reports .val-table.no-border tr, .valamis-reports .val-table.no-border td {
+  border: none;
+}
+
+.valamis-reports .val-table.no-side-border {
+  border: none;
+}
+
+.valamis-reports .val-table.no-top-border {
+  border-top: none;
+}
+
+.valamis-reports .val-table.no-top-border tr:first-child {
+  border-top: none;
+}
+
+.valamis-reports .val-table.no-top-border tr:first-child td, .valamis-reports .val-table.no-top-border tr:first-child th {
+  border-top: none;
+}
+
+.valamis-reports .val-table.no-bottom-border {
+  border-bottom: none;
+}
+
+.valamis-reports .val-table.no-bottom-border tr:last-child {
+  border-bottom: none;
+}
+
+.valamis-reports .val-table.no-bottom-border tr:last-child td, .valamis-reports .val-table.no-bottom-border tr:last-child th {
+  border-bottom: none;
+}
+
+.valamis-reports .val-table th {
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #CCCCCC;
+  font-weight: bold;
+  padding: 9.1px 18.2px;
+  text-align: left;
+  color: #555;
+  line-height: 20px;
+}
+
+.valamis-reports .val-table th.narrow-col {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.valamis-reports .val-table td {
+  border-bottom: 1px solid #CCCCCC;
+  padding: 9.1px 0;
+  font-weight: bold;
+}
+
+.valamis-reports .val-table td.buttons {
+  text-align: right;
+}
+
+.valamis-reports .val-table td.buttons button {
+  float: none;
+}
+
+.valamis-reports .val-table td.narrow-col {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.valamis-reports .val-table td > p,
+.valamis-reports .val-table td > span {
+  line-height: 1.4;
+}
+
+.valamis-reports .val-table td a {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.valamis-reports .val-table td .val-icon-sort {
+  color: #AAA;
+}
+
+.valamis-reports .val-table tr,
+.valamis-reports .val-table td,
+.valamis-reports .val-table th {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+  vertical-align: middle;
+  border: 1px solid #CCCCCC;
+}
+
+.valamis-reports .val-table tr, .valamis-reports .val-table li {
+  background-color: #FFF;
+}
+
+.valamis-reports .val-table tr:nth-child(even) {
+  background-color: #FAFAFA;
+}
+
+.valamis-reports .val-table tr.selected {
+  border: 2px solid #598000;
+}
+
+.valamis-reports .val-table.neutral tr {
+  background-color: #F2F2F2;
+}
+
+.valamis-reports .val-table.simple {
+  border: none;
+}
+
+.valamis-reports .val-table.simple tr {
+  border: none;
+  background-color: #FFF;
+}
+
+.valamis-reports .val-table.simple tr td {
+  border-left: none;
+  border-right: none;
+}
+
+.valamis-reports .val-table.simple tr:first-child td {
+  border-top: none;
+}
+
+.valamis-reports .val-table.simple tr:last-child td {
+  border-bottom: none;
+}
+
+.valamis-reports .list th {
+  border: none;
+  border-bottom: 1px solid #CCCCCC;
+  font-size: inherit;
+}
+
+.valamis-reports .list td, .valamis-reports .list tr {
+  border-right: none;
+  border-left: none;
+}
+
+.valamis-reports .big td {
+  line-height: 34px;
+  padding: 12.13333px 9.1px;
+}
+
+.valamis-reports .big td.buttons {
+  white-space: nowrap;
+  padding-right: 0;
+}
+
+.valamis-reports .medium td {
+  line-height: 30px;
+  padding: 9.1px;
+}
+
+.valamis-reports .small td {
+  line-height: 26px;
+  padding: 6.06667px;
+}
+
+.valamis-reports .big td.item-info, .valamis-reports .medium td.item-info, .valamis-reports .small td.item-info {
+  line-height: initial;
+}
+
+.valamis-reports .big td:first-child, .valamis-reports .medium td:first-child, .valamis-reports .small td:first-child {
+  padding-left: 18.2px;
+}
+
+.valamis-reports .big td:last-child, .valamis-reports .medium td:last-child, .valamis-reports .small td:last-child {
+  padding-right: 18.2px;
+}
+
+.valamis-reports .big td.buttons, .valamis-reports .medium td.buttons, .valamis-reports .small td.buttons {
+  padding-right: 9.1px;
+}
+
+.valamis-reports .div-table {
+  display: table;
+  width: 100%;
+}
+
+.valamis-reports .div-row {
+  display: table-row;
+}
+
+.valamis-reports .div-col {
+  display: table-cell;
+}
+
+.valamis-reports .val-info-table {
+  border-collapse: collapse;
+}
+
+.valamis-reports .val-info-table .div-row {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.valamis-reports .val-info-table .div-row:last-child {
+  border-bottom: none;
+}
+
+.valamis-reports .val-info-table .div-row.without-bottom-border {
+  border-bottom: none;
+}
+
+.valamis-reports .val-info-table .div-row.without-bottom-border .div-col {
+  padding-bottom: 0;
+}
+
+.valamis-reports .val-info-table .div-col {
+  padding: 18.2px;
+}
+
+.valamis-reports .val-info-table .div-col > input:last-child {
+  margin-bottom: 0 !important;
+}
+
+.valamis-reports .val-info-table .div-row.grouped-row {
+  border-bottom: none;
+}
+
+.valamis-reports .val-info-table .div-row.grouped-row .div-col {
+  padding-bottom: 0;
+}
+
+.valamis-reports .val-info-table .name-col {
+  text-align: right;
+  vertical-align: middle;
+  font-weight: bolder;
+  padding-left: 10%;
+}
+
+.valamis-reports .val-info-table .content-col {
+  width: 65%;
+  padding-right: 10%;
+}
+
+.valamis-reports .val-info-table.settings-table .name-col {
+  text-align: left;
+  padding-left: 18.2px;
+  width: 200px;
+}
+
+.valamis-reports .val-info-table.settings-table .content-col {
+  width: initial;
+  padding-left: 18.2px;
+}
+
+.valamis-reports .val-info-table.small-width .name-col {
+  padding-left: 5%;
+}
+
+.valamis-reports .val-info-table.small-width .content-col {
+  width: 75%;
+  padding-right: 5%;
+}
+
+.valamis-reports td.checkbox-col {
+  width: 16px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.valamis-reports td.checkbox-col label {
+  margin: 0;
+}
+
+.valamis-reports td.checkbox-col label:before {
+  margin-right: 0;
+}
+
+.valamis-reports td.thin {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.valamis-reports td.handle {
+  cursor: move;
+}
+
+.valamis-reports .new-packages-list-table td:first-child {
+  width: 1%;
+}
+
+.valamis-reports .new-packages-list-table .name-col {
+  padding-left: 0;
+}
+
+.valamis-reports .div-table.no-content-table {
+  height: 200px;
+}
+
+.valamis-reports .div-table.no-content-table .div-col-center {
+  vertical-align: middle;
+  text-align: center;
+  font-weight: bold;
+}
+
+.valamis-reports .val-list-table {
+  padding: 0 18.2px;
+}
+
+.valamis-reports .val-list-table a {
+  color: inherit;
+}
+
+.valamis-reports .val-list-table .handle {
+  cursor: move;
+  color: #AAA;
+  padding-right: 16px;
+}
+
+.valamis-reports .val-list-table .checkbox-label {
+  margin: 0;
+}
+
+.valamis-reports .val-list-table .checkbox-label:before {
+  margin: 0;
+}
+
+.valamis-reports .val-list-table .val-list-table-header {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #777;
+  padding: 9.1px 0;
+  border-bottom: 2px solid #CCCCCC;
+}
+
+.valamis-reports .val-list-table .list-table-row {
+  line-height: 50px;
+}
+
+.valamis-reports .val-list-table .list-table-row .val-during-period {
+  padding-top: 8px;
+}
+
+.valamis-reports .val-list-table .list-table-row .title {
+  font-weight: bold;
+}
+
+.valamis-reports .val-list-table .list-table-row .goal-changes {
+  padding-top: 9px;
+}
+
+.valamis-reports .val-list-table .list-table-row .goal-changes .name, .valamis-reports .val-list-table .list-table-row .goal-changes .date {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.valamis-reports .val-list-table .list-table-row .inactive {
+  opacity: 0.6;
+}
+
+.valamis-reports .val-list-table .goals-group .list-table-row .title {
+  padding-left: 30px;
+  font-weight: normal;
+}
+
+.valamis-reports .val-list-table > ul > li {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.valamis-reports .val-list-table > ul > li:last-child {
+  border-bottom: none;
+}
+
+.valamis-reports .val-tabs .tabs-header {
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.valamis-reports .val-tabs .tabs-header .nav-tabs {
+  border-bottom: none;
+}
+
+.valamis-reports .val-tabs .tabs-header .tab-side {
+  display: table-cell;
+  height: 60px;
+  vertical-align: middle;
+}
+
+.valamis-reports .val-tabs .nav-tabs {
+  margin: 0;
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #CCCCCC;
+  padding: 0 18.2px;
+}
+
+.valamis-reports .val-tabs .nav-tabs > li {
+  float: left;
+}
+
+.valamis-reports .val-tabs .nav-tabs > li > a {
+  font-size: 13px;
+  padding: 0 12.13333px;
+  margin: 4px 0 0 0;
+  color: #555;
+  display: inline-block;
+  border: none;
+  border-bottom: 4px solid transparent;
+  line-height: 52px;
+  outline-offset: 0;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+.valamis-reports .val-tabs .nav-tabs > li > a:hover {
+  color: #598000;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.valamis-reports .val-tabs .nav-tabs > li > a:focus {
+  outline-offset: 0;
+}
+
+.valamis-reports .val-tabs .nav-tabs > li.active > a {
+  border: none;
+  border-radius: 0;
+  font-weight: bold;
+  color: #598000;
+  border-bottom: 4px solid #507400;
+  background-color: transparent;
+  margin: 4px 0 0 0;
+}
+
+.valamis-reports .val-tabs .nav-tabs.centered {
+  text-align: center;
+}
+
+.valamis-reports .val-tabs .nav-tabs.centered > li {
+  display: inline-block;
+  float: none;
+}
+
+.valamis-reports .val-tabs .tab-content {
+  position: relative;
+  overflow: inherit;
+}
+
+.valamis-reports .val-tabs .tab-content > .tab-pane {
+  display: none;
+}
+
+.valamis-reports .val-tabs .tab-content > .tab-pane.active {
+  display: block;
+}
+
+.valamis-reports .portlet-body {
+  -webkit-font-smoothing: antialiased;
+  background-color: #FFF;
+  color: #2c2c2c;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 1.4;
+}
+
+.valamis-reports h1, .valamis-reports .h1 h2, .valamis-reports .h2 h3, .valamis-reports .h3 h4, .valamis-reports .h4 h5, .valamis-reports .h5 h6, .valamis-reports .h6 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1;
+  margin: 0 0 18.2px 0;
+  text-rendering: optimizeLegibility;
+}
+
+.valamis-reports h1, .valamis-reports .h1 {
+  font-size: 22.0px;
+}
+
+.valamis-reports h2, .valamis-reports .h2 {
+  font-size: 20.0px;
+}
+
+.valamis-reports h3, .valamis-reports .h3 {
+  font-size: 18.0px;
+  font-weight: 500;
+}
+
+.valamis-reports h4, .valamis-reports .h4 {
+  font-size: 16.0px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.valamis-reports h5, .valamis-reports .h5 {
+  font-size: 15.0px;
+}
+
+.valamis-reports h6, .valamis-reports .h6 {
+  font-size: 13px;
+}
+
+.valamis-reports p {
+  margin: 0 0 9.1px;
+}
+
+.valamis-reports a {
+  transition: color 0.1s linear;
+  color: #2974A6;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.valamis-reports a:hover {
+  color: #1a4969;
+}
+
+.valamis-reports a:active, .valamis-reports a:focus {
+  color: #1a4969;
+  outline: none;
+}
+
+.valamis-reports hr {
+  border-bottom: 1px solid #CCCCCC;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  margin: 18.2px 0;
+}
+
+.valamis-reports img,
+.valamis-reports picture {
+  margin: 0;
+  max-width: 100%;
+}
+
+.valamis-reports blockquote {
+  border-left: 2px solid #CCCCCC;
+  color: #525252;
+  margin: 18.2px 0;
+  padding-left: 9.1px;
+}
+
+.valamis-reports cite {
+  color: #6c6c6c;
+  font-style: italic;
+}
+
+.valamis-reports cite:before {
+  content: "\2014 \00A0";
+}
+
+.valamis-reports h1.shifted, .valamis-reports .h1.shifted,
+.valamis-reports h2.shifted, .valamis-reports .h2.shifted,
+.valamis-reports h3.shifted, .valamis-reports .h3.shifted,
+.valamis-reports h4.shifted, .valamis-reports .h4.shifted,
+.valamis-reports h5.shifted, .valamis-reports .h5.shifted,
+.valamis-reports h6.shifted, .valamis-reports .h6.shifted {
+  margin: 18.2px;
+}
+
+.valamis-reports .valamis-info-label {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  font-weight: normal !important;
+}
+
+.valamis-reports .valamis-info-label.shifted {
+  padding: 18.2px;
+}
+
+.valamis-reports .img-circle,
+.valamis-reports .button {
+  box-sizing: border-box;
+}
+
+.valamis-reports .loading-message-block {
+  text-align: center;
+}
+
+.valamis-reports .loading-message {
+  font-size: 16px;
+  line-height: 40px;
+  padding-left: 40px;
+  margin: 20px 0;
+  background: transparent url("../img/loading.gif") 0 center no-repeat;
+  display: inline-block;
+  cursor: default;
+}
+
+.valamis-reports .axis {
+  fill: none;
+  stroke: none;
+}
+
+.valamis-reports .axis .tick text {
+  fill: #1C1C1C;
+  font-size: 13px;
+}
+
+.valamis-reports .chart-line {
+  fill: none;
+  stroke-width: 2px;
+}
+
+.valamis-reports .bars-horizontal line,
+.valamis-reports .top-margin line {
+  stroke: #EAEAEA;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.valamis-reports .interactive-vertical-bar {
+  stroke: #EAEAEA;
+  stroke-width: 2px;
+}
+
+.valamis-reports .point-value {
+  fill: #FFF;
+}
+
+.valamis-reports .point-value circle {
+  stroke-width: 2px;
+}
+
+.valamis-reports .point-value text {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.valamis-reports .point-value rect.tooltip-bg {
+  fill: #000000;
+  fill-opacity: 0.7;
+  stroke: #000000;
+  stroke-width: 1px;
+  stroke-opacity: 0.8;
+}
+
+.valamis-reports .legend-item .legend-item-hover-area {
+  cursor: pointer;
+}
+
+.valamis-reports .legend-item rect {
+  stroke: none;
+}
+
+.valamis-reports .legend-item text {
+  font-size: 13px;
+  color: #555;
+}
+
+.valamis-reports .emphasize-mode .chart-line {
+  opacity: 0.5;
+}
+
+.valamis-reports .emphasize-mode .chart-line.emphasize {
+  opacity: 1;
+  stroke-width: 4px;
+}
+
+.valamis-reports .emphasize-mode .point-value rect,
+.valamis-reports .emphasize-mode .point-value text {
+  opacity: 0;
+}
+
+.valamis-reports .emphasize-mode .point-value.emphasize rect,
+.valamis-reports .emphasize-mode .point-value.emphasize text {
+  opacity: 1;
+}
+
+.valamis-reports .emphasize-mode .point-value.emphasize circle {
+  stroke-width: 4px;
+}
+
+.valamis-reports .emphasize-mode .legend-item {
+  opacity: 0.5;
+}
+
+.valamis-reports .emphasize-mode .legend-item.emphasize {
+  opacity: 1;
+}
+
+.valamis-reports #selector-datepicker-wrapper {
+  position: relative;
+  max-height: 208px;
+  overflow: hidden;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget .list-unstyled {
+  padding: 5px 0 8px;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td, .valamis-reports .bootstrap-datetimepicker-widget table th {
+  border-radius: 50%;
+  padding: 3px 0 4px;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td.day,
+.valamis-reports .bootstrap-datetimepicker-widget table th.prev,
+.valamis-reports .bootstrap-datetimepicker-widget table th.next {
+  width: 25px;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table th.prev,
+.valamis-reports .bootstrap-datetimepicker-widget table th.next {
+  color: #777;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table th.prev:hover,
+.valamis-reports .bootstrap-datetimepicker-widget table th.next:hover {
+  background-color: transparent;
+  color: #555;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table th.dow {
+  font-weight: normal;
+  padding-bottom: 7px;
+  cursor: default;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table th.picker-switch {
+  background: transparent;
+  border-radius: 2px;
+  width: 125px;
+  cursor: default;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table th.picker-switch:hover {
+  background: transparent;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td {
+  height: auto;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td.today {
+  font-weight: bold;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td.today:before {
+  content: none;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td.active {
+  background-color: #2473A8;
+  color: #FFF;
+  text-shadow: none;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td.old, .valamis-reports .bootstrap-datetimepicker-widget table td.new {
+  color: #AFC1D2;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td.disabled {
+  color: #CCCCCC;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td span {
+  height: 26px;
+  line-height: 26px;
+  border-radius: 2px;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td span:hover {
+  background-color: #CCCCCC;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget table td span .disabled:hover {
+  background: transparent;
+}
+
+.valamis-reports .bootstrap-datetimepicker-widget .datepicker-days table th.picker-switch:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.valamis-reports .report-settings-wrapper {
+  padding: 5px;
+}
+
+.valamis-reports .report-settings-wrapper .delimiter {
+  height: 0;
+  border-top: 1px solid #CCCCCC;
+  margin: 10px 0;
+}
+
+.valamis-reports .report-settings-wrapper .fieldset {
+  padding: 10px 0;
+  width: 100%;
+}
+
+.valamis-reports .report-settings-wrapper .fieldset:after, .valamis-reports .report-settings-wrapper .fieldset:before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  clear: both;
+}
+
+.valamis-reports .report-settings-wrapper .fieldset .field-label {
+  width: 20%;
+  max-width: 200px;
+  float: left;
+  position: relative;
+}
+
+.valamis-reports .report-settings-wrapper .fieldset .field-label span {
+  display: block;
+  font-size: 13px;
+  text-align: right;
+  padding: 10px 20px 0 0;
+}
+
+.valamis-reports .report-settings-wrapper .fieldset .field-content {
+  width: 80%;
+  float: left;
+  position: relative;
+}
+
+.valamis-reports .val-reports .cell-tooltip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: transparent;
+}
+
+.valamis-reports .val-reports .cell-tooltip + .tooltip.in {
+  opacity: 1;
+}
+
+.valamis-reports .val-reports .cell-tooltip + .tooltip .tooltip-inner {
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  box-shadow: 1px 1px 3px 0 rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  padding: 8px 12px;
+}
+
+.valamis-reports .val-reports .cell-tooltip + .tooltip .tooltip-inner strong {
+  white-space: nowrap;
+}
+
+.valamis-reports .val-reports .cell-tooltip + .tooltip .tooltip-arrow {
+  border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+@media (min-width: 768px) {
+  .valamis-reports .val-reports .cell-tooltip + .tooltip {
+    max-width: 600px;
+  }
+  .valamis-reports .val-reports .cell-tooltip + .tooltip .tooltip-inner {
+    max-width: 576px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.aui .valamis-reports .top-lessons-report .alert {
+  margin: 20px 0 10px;
+}
+
+.valamis-reports .top-lessons-report .top-lessons-wrapper {
+  margin: 30px auto 40px;
+  position: relative;
+  z-index: 10;
+}
+
+.valamis-reports .top-lessons-report .top-lessons-wrapper:hover {
+  z-index: 150;
+}
+
+.valamis-reports .top-lessons-report .cell {
+  background-size: cover;
+  background-position: center center;
+  position: absolute;
+  border-radius: 2px;
+  margin: 1px;
+  cursor: default;
+}
+
+.valamis-reports .top-lessons-report .cell-content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+}
+
+.valamis-reports .top-lessons-report .cell-label {
+  display: block;
+  color: #FFF;
+  font-size: 15.0px;
+  line-height: 1.2;
+  font-weight: bold;
+  background: transparent;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  white-space: normal;
+  padding: 2px 3px 0 9px;
+}
+
+.valamis-reports .top-lessons-report .cell-label:first-child {
+  padding-top: 7px;
+}
+
+.valamis-reports .most-active-users-report .top-lessons-wrapper {
+  margin: 10px 0 10px 5%;
+  position: relative;
+  z-index: 10;
+}
+
+.valamis-reports .most-active-users-report .top-lessons-wrapper:hover {
+  z-index: 150;
+}
+
+.valamis-reports .most-active-users-report .cell {
+  position: absolute;
+  border: 1px solid #CCCCCC;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center center;
+  cursor: default;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip {
+  background: transparent;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip .tooltip-inner {
+  padding: 8px 8px;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip .tooltip-header {
+  border-bottom: 2px solid #FFF;
+  width: 100%;
+  min-width: 115px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  position: relative;
+  text-align: left;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip .tooltip-header strong {
+  display: block;
+  padding-right: 30px;
+  white-space: nowrap;
+  line-height: 21px;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip .tooltip-header .image {
+  float: none;
+  position: absolute;
+  border: 1px solid #FFF;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  right: 0;
+  top: -2px;
+  background-position: center center;
+  background-size: cover;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip ul li {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 2px 40px 2px 1px;
+  position: relative;
+}
+
+.valamis-reports .most-active-users-report .cell-tooltip + .tooltip ul li strong {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+
+.valamis-reports .legend-checkmark, .valamis-reports .learning-report-legend .legend-icon:before, .valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expiring input:checked + .legend-icon:before, .valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expired input:checked + .legend-icon:before {
+  font-size: 16px;
+  content: '6';
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  line-height: 20px;
+  text-align: center;
+  color: #FFF;
+}
+
+.valamis-reports .legend-clockmark, .valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expiring .legend-icon:before, .valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expired .legend-icon:before, .valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expiring:after, .valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expired:after, .valamis-reports .learning-report-table .certificate-block .cert-expiring .certificate-icon:before, .valamis-reports .learning-report-table .certificate-block .cert-expired .certificate-icon:before {
+  content: '';
+  position: absolute;
+  z-index: 9;
+  left: 7px;
+  top: 6px;
+  width: 3px;
+  height: 5px;
+  overflow: hidden;
+  background: transparent;
+  border-right: 1px solid #FFF;
+  border-bottom: 1px solid #FFF;
+}
+
+.valamis-reports .valamis-learning-report-container .val-tabs .nav-tabs {
+  text-align: center;
+}
+
+.valamis-reports .valamis-learning-report-container .val-tabs .nav-tabs > li {
+  float: none;
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-course-selector {
+  float: left;
+  white-space: nowrap;
+  padding-left: 20px;
+}
+
+.valamis-reports .learning-report-course-selector .course-title {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: bold;
+}
+
+.valamis-reports .learning-report-course-selector .dropdown {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-course-selector .dropdown .button {
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-size: 28px;
+  color: #2c2c2c;
+  padding: 0;
+  margin: 0;
+}
+
+.valamis-reports .learning-report-course-selector .dropdown .button > .val-icon-right:before {
+  margin: 0 0 0 5px;
+  color: #777;
+}
+
+.valamis-reports .learning-report-course-selector .dropdown .button:hover > .val-icon-right:before {
+  color: #000000;
+}
+
+.valamis-reports .learning-report-heading {
+  padding: 0 0 15px;
+  position: relative;
+}
+
+.valamis-reports .learning-report-filter {
+  position: relative;
+  height: 60px;
+}
+
+.valamis-reports .learning-report-filter .dropdown-filter {
+  position: absolute;
+  right: 20px;
+  top: -47px;
+  height: 32px;
+}
+
+.valamis-reports .learning-report-filter .active-filters-block {
+  padding: 10px 20px;
+}
+
+.valamis-reports .learning-report-legend {
+  float: right;
+  padding-right: 10px;
+}
+
+.valamis-reports .learning-report-legend ul {
+  list-style: none;
+  white-space: nowrap;
+}
+
+.valamis-reports .learning-report-legend li {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0;
+  margin: 5px 10px;
+}
+
+.valamis-reports .learning-report-legend label {
+  display: inline-block;
+  margin: 0;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-legend input {
+  display: none;
+}
+
+.valamis-reports .learning-report-legend input:checked + .legend-icon:before {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-legend input:checked + .legend-icon:after {
+  opacity: 1;
+}
+
+.valamis-reports .learning-report-legend .legend-label {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.valamis-reports .learning-report-legend .legend-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  vertical-align: middle;
+  margin: 0 5px 0 0;
+  box-sizing: border-box;
+  background: #FFF;
+  overflow: hidden;
+}
+
+.valamis-reports .learning-report-legend .legend-icon:before {
+  display: none;
+}
+
+.valamis-reports .learning-report-legend .legend-icon:after {
+  display: inline-block;
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  opacity: 0.6;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-icon {
+  border-radius: 2px;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-finished .legend-icon:after {
+  background-color: #598000;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-in-progress .legend-icon:after {
+  background-color: #f7ac1d;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-failed .legend-icon:after {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-not-started .legend-icon:after,
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-attempted .legend-icon:after {
+  border: 2px solid #CCCCCC;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-not-started .legend-icon:before,
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-attempted .legend-icon:before {
+  color: #000000;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-attempted .legend-icon:after {
+  border-left-width: 10px;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .svg-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 20px;
+  height: 20px;
+  margin: 0 5px 0 0;
+  opacity: 0.6;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .svg-icon svg {
+  fill: #CCCCCC;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-finished .svg-icon svg {
+  fill: #598000;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-in-progress .svg-icon svg {
+  fill: #f7ac1d;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .legend-item-failed .svg-icon svg {
+  fill: #CC4233;
+}
+
+.valamis-reports .learning-report-legend .learning-report-lessons-legend .checked .svg-icon {
+  opacity: 1;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-icon,
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-icon:after {
+  border-radius: 50%;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-achieved .legend-icon:after {
+  background-color: #598000;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-failed .legend-icon:after {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expiring .legend-icon:after {
+  background-color: #f7ac1d;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expired .legend-icon:after {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-in-progress .legend-icon:after {
+  border: 2px solid #CCCCCC;
+  border-left-width: 10px;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-in-progress .legend-icon:before {
+  color: #000000;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expiring .legend-icon:before,
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expired .legend-icon:before {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expiring input:checked + .legend-icon:before,
+.valamis-reports .learning-report-legend .learning-report-paths-legend .legend-item-expired input:checked + .legend-icon:before {
+  width: auto;
+  height: auto;
+  border: none;
+}
+
+.valamis-reports .learning-report-legend .legend-item-not-available {
+  display: none;
+}
+
+.valamis-reports .learning-report-detailed-view-header {
+  float: left;
+  position: relative;
+  padding-left: 20px;
+  cursor: default;
+}
+
+.valamis-reports .learning-report-detailed-view-header .back-link {
+  position: absolute;
+  left: 15px;
+  top: -45px;
+  color: #555;
+  white-space: nowrap;
+}
+
+.valamis-reports .learning-report-detailed-view-header .back-link span {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-detailed-view-header .back-link > span {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-detailed-view-header .back-link .val-icon {
+  vertical-align: top;
+  margin-right: -7px;
+}
+
+.valamis-reports .learning-report-detailed-view-header .back-link .val-icon + span:hover {
+  text-decoration: underline;
+}
+
+.valamis-reports .learning-report-detailed-view-header .grid-title {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: bold;
+}
+
+.valamis-reports .learning-report-content {
+  min-height: 195px;
+}
+
+.valamis-reports .learning-report-content .valamis-info-label {
+  padding: 20px 0;
+}
+
+.valamis-reports .learning-report-content .loading .learning-report-table {
+  visibility: hidden;
+}
+
+.valamis-reports .learning-report-content .toggle-container {
+  position: relative;
+}
+
+.valamis-reports .learning-report-content .toggle-container .loading-spinner {
+  display: none;
+  font-style: normal;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: url("../img/loading.gif") center center no-repeat #F2F2F2;
+  cursor: default;
+}
+
+.valamis-reports .learning-report-content .toggle-container.loading .loading-spinner {
+  display: block;
+}
+
+.valamis-reports .learning-report-table {
+  cursor: default;
+  position: relative;
+}
+
+.valamis-reports .learning-report-table .learning-report-tr {
+  white-space: nowrap;
+  overflow: hidden;
+  border-bottom: 1px solid #EAEAEA;
+  padding: 8px 10px;
+}
+
+.valamis-reports .learning-report-table .learning-report-th,
+.valamis-reports .learning-report-table .learning-report-td {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.valamis-reports .learning-report-table .learning-report-th {
+  height: 40px;
+}
+
+.valamis-reports .learning-report-table .learning-report-td {
+  height: 30px;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .title,
+.valamis-reports .learning-report-table .learning-report-th .detail-title {
+  font-weight: bold;
+  width: 100%;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .title {
+  margin-bottom: 4px;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .title span {
+  display: inline-block;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .detail-title {
+  white-space: normal;
+  height: 3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .actions span {
+  color: #777;
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .actions span.action {
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .actions span.action:hover {
+  text-decoration: underline;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .actions span.loading-label {
+  font-style: italic;
+  display: none;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .actions .action-hidden {
+  display: none;
+}
+
+.valamis-reports .learning-report-table .learning-report-th.loading .actions span.action {
+  display: none;
+}
+
+.valamis-reports .learning-report-table .learning-report-th.loading .actions span.loading-label {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .field-titles {
+  display: none;
+  color: #777;
+}
+
+.valamis-reports .learning-report-table .learning-report-th .field-titles div {
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+}
+
+.valamis-reports .learning-report-table .learning-report-user-list,
+.valamis-reports .learning-report-table .learning-report-user-summary {
+  position: relative;
+  width: 100%;
+  height: 0;
+}
+
+.valamis-reports .learning-report-table .learning-report-user-list {
+  z-index: 20;
+}
+
+.valamis-reports .learning-report-table .learning-report-user-summary {
+  z-index: 30;
+}
+
+.valamis-reports .learning-report-table .userlist-summary {
+  background: rgba(255, 255, 255, 0.98);
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: none;
+  width: 200px;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-user-row {
+  height: 30px;
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid #EAEAEA;
+  white-space: nowrap;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header {
+  height: 40px;
+  padding: 8px 0 8px 22px;
+  border-bottom: 1px solid #EAEAEA;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .summary-values-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .summary-values-legend li {
+  display: inline-block;
+  width: 30px;
+  vertical-align: top;
+  margin: 0;
+  padding: 0;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-finished,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-achieved {
+  background-color: #598000;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-in-progress,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expiring {
+  background-color: #f7ac1d;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-failed,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expired {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-attempted,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-not-started,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-started {
+  background-color: #FFF;
+  border: 2px solid #CCCCCC;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-attempted,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-started {
+  border-left-width: 7px;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expiring,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expired {
+  position: relative;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expiring:after,
+.valamis-reports .learning-report-table .userlist-summary .summary-header .user-summary-heading-expired:after {
+  left: 4px;
+  top: 3px;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value {
+  white-space: nowrap;
+  width: 30px;
+  display: inline-block;
+  line-height: 30px;
+  opacity: 0.9;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value span {
+  display: block;
+  text-align: center;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .hover .user-summary-value {
+  font-weight: bold;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-finished,
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-achieved {
+  color: #598000;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-in-progress,
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-expiring {
+  color: #f7ac1d;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-failed,
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-expired {
+  color: #CC4233;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-attempted,
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-not-started,
+.valamis-reports .learning-report-table .userlist-summary .user-summary-value-started {
+  color: #AAA;
+}
+
+.valamis-reports .learning-report-table .userlist-summary .total-bar-cover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -36px;
+  height: 36px;
+  background: #fbfbfb;
+  z-index: 250;
+}
+
+.valamis-reports .learning-report-table .userlist-slides-summary {
+  width: 135px;
+}
+
+.valamis-reports .learning-report-table .userlist-data {
+  width: 270px;
+  background: rgba(255, 255, 255, 0.98);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.valamis-reports .learning-report-table .userlist-data .actions {
+  padding-left: 10px;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-th {
+  position: relative;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-th .title span {
+  padding-left: 10px;
+  cursor: default;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-th .user-grade span {
+  position: absolute;
+  right: 0;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-th .hide-details-icon {
+  position: absolute;
+  right: -3px;
+  top: 0;
+  display: none;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #777;
+  background: #FFF;
+  border-radius: 50%;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-th .hide-details-icon:before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 2px;
+  margin: 5px 3px;
+  background: #777;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-th .hide-details-icon:hover, .valamis-reports .learning-report-table .userlist-data .learning-report-th .hide-details-icon:hover:before {
+  opacity: 1;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.valamis-reports .learning-report-table .userlist-data .learning-report-td span {
+  font-size: 15px;
+  line-height: 30px;
+  vertical-align: middle;
+}
+
+.valamis-reports .learning-report-table .userlist-data .user-name {
+  width: 260px;
+  padding-left: 10px;
+}
+
+.valamis-reports .learning-report-table .userlist-data .user-name img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 5px 0 0;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.8) inset;
+}
+
+.valamis-reports .learning-report-table .userlist-data .user-grade {
+  width: 40px;
+  text-align: right;
+  opacity: 0.8;
+  display: none;
+}
+
+.valamis-reports .learning-report-table .userlist-data .user-organization {
+  width: 150px;
+  padding-left: 20px;
+  opacity: 0.8;
+  display: none;
+}
+
+.valamis-reports .learning-report-table .userlist-data.show-grades .user-organization {
+  width: 110px;
+}
+
+.valamis-reports .learning-report-table .userlist-data .total-bar-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -36px;
+  height: 36px;
+  box-sizing: border-box;
+  background: #fbfbfb;
+  color: #777;
+  line-height: 20px;
+  padding: 7px 0 0 20px;
+  z-index: 250;
+}
+
+.valamis-reports .learning-report-table.show-users-information .userlist-data {
+  width: 470px;
+  background: rgba(248, 248, 248, 0.98);
+}
+
+.valamis-reports .learning-report-table.show-users-information .userlist-data .actions {
+  display: none;
+}
+
+.valamis-reports .learning-report-table.show-users-information .userlist-data .field-titles,
+.valamis-reports .learning-report-table.show-users-information .userlist-data .hide-details-icon {
+  display: block;
+}
+
+.valamis-reports .learning-report-table.show-users-information .userlist-data .user-grade,
+.valamis-reports .learning-report-table.show-users-information .userlist-data .user-organization {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-table.show-users-information .userlist-data .learning-report-tr.hover {
+  background: #F2F2F2;
+}
+
+.valamis-reports .learning-report-table.show-users-information .learning-report-data-grid {
+  padding-left: 470px;
+}
+
+.valamis-reports .learning-report-table .learning-report-data-grid {
+  position: relative;
+  padding-left: 270px;
+  padding-bottom: 36px;
+  z-index: 10;
+  overflow: auto;
+}
+
+.valamis-reports .learning-report-table .learning-report-data-grid .learning-report-th,
+.valamis-reports .learning-report-table .learning-report-data-grid .learning-report-td {
+  text-align: center;
+  margin-left: 20px;
+  width: 120px;
+  vertical-align: middle;
+}
+
+.valamis-reports .learning-report-table .learning-report-grid-headers,
+.valamis-reports .learning-report-table .learning-report-grid-data {
+  display: table;
+  min-width: 100%;
+}
+
+.valamis-reports .learning-report-table .lesson-block .svg-icon {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  padding-top: 2px;
+  text-align: center;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-table .lesson-block .svg-icon svg {
+  fill: #CCCCCC;
+}
+
+.valamis-reports .learning-report-table .lesson-block .val-icon {
+  color: #CCCCCC;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-table .lesson-block .val-icon:before {
+  line-height: 30px;
+}
+
+.valamis-reports .learning-report-table .lesson-block .lesson-not-available + .lesson-pages-chain li {
+  display: none;
+}
+
+.valamis-reports .learning-report-table .lesson-finished > .val-icon {
+  color: #598000;
+}
+
+.valamis-reports .learning-report-table .lesson-in-progress > .val-icon {
+  color: #f7ac1d;
+}
+
+.valamis-reports .learning-report-table .lesson-failed > .val-icon {
+  color: #CC4233;
+}
+
+.valamis-reports .learning-report-table .lesson-finished > .svg-icon svg {
+  fill: #598000;
+}
+
+.valamis-reports .learning-report-table .lesson-in-progress > .svg-icon svg {
+  fill: #f7ac1d;
+}
+
+.valamis-reports .learning-report-table .lesson-failed > .svg-icon svg {
+  fill: #CC4233;
+}
+
+.valamis-reports .learning-report-table .certificate-block .certificate-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  vertical-align: middle;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 5px 0 0;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-table .certificate-block .certificate-icon:after {
+  display: inline-block;
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.valamis-reports .learning-report-table .certificate-block .cert-achieved .certificate-icon:after {
+  border-color: #598000;
+  background-color: rgba(89, 128, 0, 0.666667);
+}
+
+.valamis-reports .learning-report-table .certificate-block .cert-failed .certificate-icon:after {
+  border-color: #CC4233;
+  background-color: rgba(204, 66, 51, 0.666667);
+}
+
+.valamis-reports .learning-report-table .certificate-block .cert-expiring .certificate-icon:after {
+  border-color: #f7ac1d;
+  background-color: rgba(247, 172, 29, 0.666667);
+}
+
+.valamis-reports .learning-report-table .certificate-block .cert-expired .certificate-icon:after {
+  border-color: #CC4233;
+  background-color: rgba(204, 66, 51, 0.666667);
+}
+
+.valamis-reports .learning-report-table .certificate-block .cert-in-progress .certificate-icon:after {
+  border-color: #CCCCCC;
+  background-color: #FFF;
+  border-width: 2px 2px 2px 10px;
+}
+
+.valamis-reports .learning-report-table .certificate-block .cert-expiring .certificate-icon:before,
+.valamis-reports .learning-report-table .certificate-block .cert-expired .certificate-icon:before {
+  display: inline-block;
+}
+
+.valamis-reports .learning-report-table .goal-block .goal-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 5px 0 0;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+.valamis-reports .learning-report-table .goal-block .goal-state-achieved {
+  background-color: #598000;
+}
+
+.valamis-reports .learning-report-table .goal-block .goal-state-failed {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-table .goal-block .goal-state-in-progress {
+  background-color: #FFF;
+  border: 2px solid #CCCCCC;
+  border-left-width: 10px;
+}
+
+.valamis-reports .learning-report-table .hover {
+  background: #F8F8F8;
+}
+
+.valamis-reports .learning-report-table .hover .lesson-block .val-icon,
+.valamis-reports .learning-report-table .hover .lesson-block .svg-icon,
+.valamis-reports .learning-report-table .hover .slide-block .slide-icon,
+.valamis-reports .learning-report-table .hover .lesson-pages-chain,
+.valamis-reports .learning-report-table .hover .path-goals-chain,
+.valamis-reports .learning-report-table .hover .certificate-block .certificate-icon {
+  opacity: 1;
+}
+
+.valamis-reports .learning-report-table .learning-report-user-list .learning-report-th {
+  display: block;
+}
+
+.valamis-reports .learning-report-table .learning-report-user-list .learning-report-tr.hover {
+  padding-left: 6px;
+  border-left: 4px solid #2974A6;
+}
+
+.valamis-reports .learning-report-table .learning-report-user-list .learning-report-tr.hover span {
+  color: #2974A6;
+  font-weight: bold;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain,
+.valamis-reports .learning-report-table .path-goals-chain {
+  list-style: none;
+  white-space: nowrap;
+  margin: 0;
+  opacity: 0.6;
+  display: none;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain li,
+.valamis-reports .learning-report-table .path-goals-chain li {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  background-color: #FFF;
+  vertical-align: top;
+  position: relative;
+  cursor: pointer;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain li + li,
+.valamis-reports .learning-report-table .path-goals-chain li + li {
+  margin-left: -1px;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain {
+  padding: 6.5px 0;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain li {
+  color: #FFF;
+  border-radius: 2px;
+  line-height: 17px;
+  text-align: center;
+  width: 17px;
+  height: 17px;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain .page-state-finished {
+  background-color: #598000;
+  box-shadow: 0 0 1px 0 #598000;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain .page-state-in-progress {
+  background-color: #f7ac1d;
+  box-shadow: 0 0 1px 0 #f7ac1d;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain .page-state-failed {
+  background-color: #CC4233;
+  box-shadow: 0 0 1px 0 #CC4233;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain .page-state-not-started {
+  border: 2px solid #AAA;
+  color: #AAA;
+  box-sizing: border-box;
+  line-height: 13px;
+}
+
+.valamis-reports .learning-report-table .lesson-pages-chain .page-has-question:before {
+  content: '?';
+}
+
+.valamis-reports .learning-report-table .path-goals-chain {
+  padding: 5px 0;
+}
+
+.valamis-reports .learning-report-table .path-goals-chain li {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.valamis-reports .learning-report-table .path-goals-chain .goal-state-achieved {
+  background-color: #598000;
+}
+
+.valamis-reports .learning-report-table .path-goals-chain .goal-state-failed {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-table .path-goals-chain .goal-state-in-progress {
+  border: 2px solid #CCCCCC;
+  border-left-width: 10px;
+  box-sizing: border-box;
+}
+
+.valamis-reports .learning-report-table .slide-block {
+  text-align: center;
+}
+
+.valamis-reports .learning-report-table .slide-block .slide-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  color: #FFF;
+  background-color: #FFF;
+  border-radius: 2px;
+  text-align: center;
+  margin: 5px 0 0;
+  position: relative;
+  opacity: 0.6;
+}
+
+.valamis-reports .learning-report-table .slide-block .slide-state-finished {
+  background-color: #598000;
+}
+
+.valamis-reports .learning-report-table .slide-block .slide-state-in-progress {
+  background-color: #f7ac1d;
+}
+
+.valamis-reports .learning-report-table .slide-block .slide-state-failed {
+  background-color: #CC4233;
+}
+
+.valamis-reports .learning-report-table .slide-block .slide-state-not-started {
+  border: 2px solid #AAA;
+  color: #AAA;
+  box-sizing: border-box;
+  line-height: 16px;
+}
+
+.valamis-reports .learning-report-table .slide-block .slide-has-question:before {
+  content: '?';
+}
+
+.valamis-reports .learning-report-table .element-tooltip-content {
+  display: none;
+}
+
+.valamis-reports .learning-report-table .loading-overlay {
+  position: absolute;
+  background: rgba(204, 204, 204, 0.8);
+  z-index: 100;
+  overflow: hidden;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: wait;
+  display: none;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36px;
+  background: #fbfbfb;
+  border-top: 1px solid #e1e1e1;
+  z-index: 150;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-container {
+  position: absolute;
+  top: 0;
+  left: 280px;
+  height: 36px;
+  background: #fbfbfb;
+  z-index: 151;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content {
+  margin: 0;
+  padding: 0 10px 0 0;
+  list-style: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content > li {
+  display: inline-block;
+  width: 120px;
+  height: 29px;
+  margin: 0 0 0 20px;
+  padding-top: 7px;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content > li:hover {
+  background: #F2F2F2;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content > li:hover .total-bar-brief li {
+  font-weight: bold;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .total-bar-brief {
+  list-style: none;
+  width: 100%;
+  text-align: center;
+  margin: 0;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .total-bar-brief li {
+  display: inline-block;
+  margin: 0 3px;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .total-bar-brief .val-icon-dots {
+  opacity: 0.3;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .lesson-state-finished {
+  color: #6a8e22;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .lesson-state-in-progress {
+  color: #f9b334;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .lesson-state-failed {
+  color: #cb4a41;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .lesson-state-attempted {
+  color: #aaa;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .lesson-state-not-started {
+  color: #555;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .certificate-state-achieved {
+  color: #6a8e22;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .certificate-state-expiring {
+  color: #f9b334;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .certificate-state-failed {
+  color: #cb4a41;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .certificate-state-expired {
+  color: #cb4a41;
+}
+
+.valamis-reports .learning-report-table .learning-report-total-bar .total-bar-content .certificate-state-in-progress {
+  color: #aaa;
+}
+
+.valamis-reports .learning-report-table.total-bar-hidden .learning-report-total-bar,
+.valamis-reports .learning-report-table.total-bar-hidden .total-bar-title,
+.valamis-reports .learning-report-table.total-bar-hidden .total-bar-cover {
+  display: none;
+}
+
+.valamis-reports .learning-report-table.total-bar-hidden .learning-report-data-grid {
+  padding-bottom: 0;
+}
+
+.valamis-reports .learning-report-table.show-users-information .learning-report-total-bar .total-bar-container {
+  left: 480px;
+}
+
+.valamis-reports .show-overlay .learning-report-table .loading-overlay {
+  display: block;
+}
+
+.valamis-reports .show-user-summary .learning-report-table .userlist-summary {
+  display: block;
+}
+
+.valamis-reports .show-user-summary .learning-report-table .learning-report-data-grid .learning-report-headers {
+  height: 40px;
+}
+
+.valamis-reports .show-user-summary .learning-report-table .learning-report-data-grid .user-row {
+  height: 30px;
+}
+
+.valamis-reports .show-user-summary .learning-report-table .learning-report-data-grid .learning-report-headers,
+.valamis-reports .show-user-summary .learning-report-table .learning-report-data-grid .grid-content {
+  padding-right: 200px;
+}
+
+.valamis-reports .show-user-summary.detail-layout .learning-report-table .learning-report-data-grid .learning-report-headers,
+.valamis-reports .show-user-summary.detail-layout .learning-report-table .learning-report-data-grid .grid-content {
+  padding-right: 135px;
+}
+
+.valamis-reports .hilite-finished .learning-report-table .lesson-block .lesson-finished .svg-icon,
+.valamis-reports .hilite-finished .learning-report-table .lesson-block .lesson-finished + .lesson-pages-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-in-progress .learning-report-table .lesson-block .lesson-in-progress .svg-icon,
+.valamis-reports .hilite-in-progress .learning-report-table .lesson-block .lesson-in-progress + .lesson-pages-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-failed .learning-report-table .lesson-block .lesson-failed .svg-icon,
+.valamis-reports .hilite-failed .learning-report-table .lesson-block .lesson-failed + .lesson-pages-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-attempted .learning-report-table .lesson-block .lesson-attempted .svg-icon,
+.valamis-reports .hilite-attempted .learning-report-table .lesson-block .lesson-attempted + .lesson-pages-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-not-started .learning-report-table .lesson-block .lesson-not-started .svg-icon,
+.valamis-reports .hilite-not-started .learning-report-table .lesson-block .lesson-not-started + .lesson-pages-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-finished .learning-report-table .slide-block .slide-state-finished {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-in-progress .learning-report-table .slide-block .slide-state-in-progress {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-failed .learning-report-table .slide-block .slide-state-failed {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-attempted .learning-report-table .slide-block .slide-state-attempted {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-not-started .learning-report-table .slide-block .slide-state-not-started {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-achieved .learning-report-table .certificate-block .cert-achieved .certificate-icon,
+.valamis-reports .hilite-achieved .learning-report-table .certificate-block .cert-achieved + .path-goals-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-failed .learning-report-table .certificate-block .cert-failed .certificate-icon,
+.valamis-reports .hilite-failed .learning-report-table .certificate-block .cert-failed + .path-goals-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-in-progress .learning-report-table .certificate-block .cert-in-progress .certificate-icon,
+.valamis-reports .hilite-in-progress .learning-report-table .certificate-block .cert-in-progress + .path-goals-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-expiring .learning-report-table .certificate-block .cert-expiring .certificate-icon,
+.valamis-reports .hilite-expiring .learning-report-table .certificate-block .cert-expiring + .path-goals-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-expired .learning-report-table .certificate-block .cert-expired .certificate-icon,
+.valamis-reports .hilite-expired .learning-report-table .certificate-block .cert-expired + .path-goals-chain {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-achieved .learning-report-table .goal-block .goal-state-achieved {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-failed .learning-report-table .goal-block .goal-state-failed {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-in-progress .learning-report-table .goal-block .goal-state-in-progress {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-expiring .learning-report-table .goal-block .goal-state-expiring {
+  opacity: 1;
+}
+
+.valamis-reports .hilite-detailed-expired .learning-report-table .goal-block .goal-state-expired {
+  opacity: 1;
+}

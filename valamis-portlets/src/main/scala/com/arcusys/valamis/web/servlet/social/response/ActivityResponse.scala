@@ -7,7 +7,6 @@ import com.arcusys.valamis.social.service.{CommentService, LikeService}
 import com.arcusys.valamis.user.model.UserInfo
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.web.service.ActivityInterpreter
-import com.escalatesoft.subcut.inject.BindingModule
 import org.ocpsoft.prettytime.PrettyTime
 
 import scala.util.Try
@@ -22,7 +21,6 @@ case class ActivityResponse(id: Long,
                             url: Option[String] = None)
 
 trait ActivityConverter extends CommentConverter {
-  implicit protected val bindingModule: BindingModule
   protected def userService: UserService
   protected def commentService: CommentService
   protected def likeService: LikeService
@@ -30,7 +28,9 @@ trait ActivityConverter extends CommentConverter {
 
   val prettyTime = new PrettyTime()
 
-  def toResponse(activity: Activity, plId: Option[Long] = None, isSecure: Boolean = false): Option[ActivityResponse] = {
+  def toResponse(activity: Activity,
+                 plId: Option[Long] = None,
+                 isSecure: Boolean = false): Option[ActivityResponse] = {
     val comments =
       commentService.getBy(
         CommentFilter(
@@ -52,7 +52,14 @@ trait ActivityConverter extends CommentConverter {
 
     val userLiked = userService.getByIds(activity.companyId, userLikedIds.toSet)
 
-    activityInterpreter.getObj(activity.className, activity.classPK, activity.extraData, plId, activity.liferayFeedEntry, isSecure)
+    activityInterpreter.getObj(
+      activity.className,
+      activity.classPK,
+      activity.extraData,
+      plId,
+      activity.liferayFeedEntry,
+      isSecure
+    )
       .map { obj =>
         ActivityResponse(
           activity.id,

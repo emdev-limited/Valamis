@@ -10,10 +10,14 @@ object LayoutSetLocalServiceHelper {
     LayoutSetLocalServiceUtil.updateLogo(courseId, privateLayout, logo, content)
 
   def updateLookAndFeel(groupId: Long,
-    privateLayout: Boolean,
-    themeId: String,
-    colorSchemeId: String,
-    css: String,
-    wapTheme: Boolean): LayoutSet =
-    LayoutSetLocalServiceUtil.updateLookAndFeel(groupId, privateLayout, themeId, colorSchemeId, css, wapTheme)
+                        themeId: String,
+                        colorSchemeId: String,
+                        css: String): Unit =
+    LayoutSetLocalServiceUtil.updateLookAndFeel(groupId, themeId, colorSchemeId, css, false)
+
+  def updateLayoutSet(layout: LayoutSet): LayoutSet =
+    LayoutSetLocalServiceUtil.updateLayoutSet(layout)
+
+  def addLayoutSet(layout: LayoutSet): LayoutSet =
+    LayoutSetLocalServiceUtil.addLayoutSet(layout)
 }

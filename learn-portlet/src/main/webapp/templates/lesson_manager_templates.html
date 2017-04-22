@@ -1,0 +1,344 @@
+<script type="text/template" id="lessonManagerLayoutTemplate">
+    <div id="lessonManagerToolbar"></div>
+    <div id="lessonManagerPackages"></div>
+    <div id="lessonManagerPaginator" class="val-paginator text-center"></div>
+
+    <div id="lessonManagerEditModalRegion"></div>
+    <div id="lessonManagerModalRegion">
+    </div>
+</script>
+
+<script type="text/template" id="packageManagerToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+        <div class="dropdown filter-element shift-left js-category-filter" id="lessonManagerTags" data-value="">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{allCategoriesLabel}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected js-category" data-value="">{{allCategoriesLabel}}</li>
+                {{#categories}}
+                <li class="js-category" data-value="{{id}}">{{text}}</li>
+                {{/categories}}
+            </ul>
+        </div>
+        <div class="dropdown filter-element shift-left js-display-filter">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{searchFormDisplayAllPackagesOption}} </span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-display" data-value="" >{{searchFormDisplayAllPackagesOption}} </li>
+                <li class="js-display" data-value="tincan">{{searchFormDisplayTincanPackagesOption}} </li>
+                <li class="js-display" data-value="scorm">{{searchFormDisplayScormPackagesOption}} </li>
+            </ul>
+        </div>
+        <div class="dropdown filter-element shift-left js-scope-filter">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{searchFormScopeSiteScope}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-scope" data-value="site"> {{searchFormScopeSiteScope}} </li>
+                <li class="js-scope" data-value="instance"> {{searchFormScopeInstanceScope}} </li>
+            </ul>
+        </div>
+
+        {{#LM_MODIFY}}
+        {{#LM_CAN_UPLOAD}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-package-upload">
+                <span class="val-icon-upload"></span>{{fileUploadOpenDialogButtonLabel}}
+            </button>
+        </div>
+        {{/LM_CAN_UPLOAD}}
+        {{/LM_MODIFY}}
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="lessonManagerToolbarShowing"></div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter">
+            <button class="button medium simple ">
+                <span class="dropdown-text"> {{byNameAscLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+
+            <ul class="dropdown-menu">
+                <li class="js-sort" data-value="nameAsc"> {{byNameAscLabel}} </li>
+                <li class="js-sort" data-value="nameDesc"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-tile-view">
+            <span class="val-icon-grid-view">Grid View</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-list-view">
+            <span class="val-icon-list-view">List View</span>
+        </button>
+    </div>
+
+</script>
+
+<script type="text/html" id="packageManagerItemView">
+    <div class="tile-content with-action">
+        <div class="image"
+             {{#logo}}
+                 style="background-image: url('/delegate/packages/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
+             {{/logo}}
+        ></div>
+    <ul>
+        <li class="title">{{title}}</li>
+        <li> {{packageAuthor}} {{dateString}} </li>
+        <li class="categories">{{tagsList}}</li>
+        <li class="description">{{description}}</li>
+
+        {{^canChangeVisibility}}
+        <li class="status">
+            <span class="val-label">{{itemVisibilityLabel}}</span>
+        </li>
+        {{/canChangeVisibility}}
+
+        {{#canChangeVisibility}}
+        <li class="dropdown js-visible-dropdown" data-value="">
+            <button class="button small simple">
+                <span class="dropdown-text"> {{hiddenLabel}} </span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu js-visible">
+                <li class="selected" data-value="false"> {{hiddenLabel}} </li>
+                <li class="" data-value="true"> {{visibleForAllLabel}} </li>
+                <li class="" data-value="some"> {{visibleForSomeLabel}} </li>
+            </ul>
+        </li>
+        {{/canChangeVisibility}}
+    </ul>
+    <div class="dropdown actions shift-right">
+        <button class="button medium neutral">
+            <span class="dropdown-text">{{actionsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li class="js-package-edit" data-value="1">
+                {{#LM_MODIFY}} {{packageItemEditButtonLabel}} {{/LM_MODIFY}}
+                {{^LM_MODIFY}} {{packageItemViewButtonLabel}} {{/LM_MODIFY}}
+            </li>
+            {{#LM_MODIFY}}
+            <li class="js-package-delete" data-value="2"> {{packageItemDeleteButtonLabel}} </li>
+            {{/LM_MODIFY}}
+            {{#LM_CAN_EXPORT}}
+            <li class="js-package-export" data-value="3"> {{exportLabel}} </li>
+            <li class="js-package-download" data-value="4"> {{downloadItemLabel}} </li>
+            {{/LM_CAN_EXPORT}}
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="packageManagerPackageList">
+</script>
+
+<script type="text/template" id="packageManagerEditPackageViewTemplate">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="editPackageTabs">
+            <li class=""><a href="#editDetails">{{editDetailsLabel}}</a></li>
+            <li class=""><a href="#editVisibility" class="hidden">{{editMembersLabel}}</a></li>
+        </ul>
+
+        <div class="tab-content" style="position: relative">
+            <div id="editDetails" class="tab-pane active"> </div>
+            <div id="editVisibility" class="tab-pane"> </div>
+        </div>
+    </div>
+    <div class="modal-close val-icon-exit"></div>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">{{editPackageCancelButtonLabel}}</button>
+        {{#LM_MODIFY}}<button class="button big primary js-save-package js-submit-button">{{editPackageSubmitButtonLabel}}</button>{{/LM_MODIFY}}
+    </div>
+</script>
+
+<script type="text/template" id="packageManagerEmptyModalTemplate">
+    <div class="bbm-modal__topbar" style="margin-bottom: 0px;">
+        <h3 class="bbm-modal__title">{{header}}</h3>
+
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section modal-content">
+
+    </div>
+</script>
+
+<script type="text/template" id="packageManagerEditItemView">
+        <div class="div-table val-info-table">
+            <div class="div-row">
+                <div class="div-col name-col">{{editPackageItemTitleLabel}}</div>
+                <div class="div-col content-col">
+                    <input type='text' class="js-package-title text-input" value='{{title}}' {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col name-col">{{editPackageItemCoverImage}}</div>
+                <div class="div-col content-col">
+                    <img class='js-logo shift-left val-img-logo {{#LM_MODIFY}} js-upload-image {{/LM_MODIFY}}'
+                         src="{{#logo}}/delegate/packages/{{id}}/logo?courseId={{courseId}}{{/logo}}" />
+                    <div class="button-block shift-left">
+                        {{#LM_MODIFY}}
+                        <button class="button big primary js-upload-image inline">
+                            {{editPackageUploadImageButtonLabel}}
+                        </button>
+                        <button class="button medium simple no-text val-icon-trash danger-color inline js-delete-logo">
+                            {{deleteLogoLabel}}
+                        </button>
+                        <button class="button big neutral js-select-from-media-gallery">
+                            {{openMediaGalleryLabel}}
+                        </button>
+                        {{/LM_MODIFY}}
+                    </div>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col name-col">{{editPackageItemDescriptionLabel}}</div>
+                <div class=" div-col content-col buttons">
+                            <textarea rows="5" class="js-package-description textarea" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}>{{description}}</textarea>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col name-col">{{editPackageItemPassingLimitToggleLabel}}</div>
+                <div class="div-col content-col buttons">
+                    <div  class="shift-left">
+                        <input type="checkbox" id="passingLimitCheckbox" class="js-passing-limit-enable val-checkbox" checked {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
+                        <label class="checkbox-label" for="passingLimitCheckbox"></label>
+                    </div>
+                    <div class="js-plus-minus js-passing-limit shift-left"></div>
+                </div>
+            </div>
+            <div class="div-row without-bottom-border">
+                <div class="div-col name-col">{{ableToRunLabel}}</div>
+                <div class="div-col content-col buttons">
+                    <div class="">
+                        <input type="checkbox" id="isAbleToRunCheckbox" class="js-able-to-run-enable val-checkbox" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
+                        <label class="checkbox-label" for="isAbleToRunCheckbox"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col name-col"></div>
+                <div class="div-col content-col able-to-run-container">
+                    <label class="shift-left" for="isAbleToRunFrom">{{fromLabel}}</label>
+                    <input type="text" class="js-is-able-from shift-left" id="isAbleToRunFrom" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}} />
+                    <label class="shift-left" for="isAbleToRunTo">{{toLabel}}</label>
+                    <input type="text" class="js-is-able-to shift-left" id="isAbleToRunTo" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}} />
+                </div>
+            </div>
+            <div class="div-row without-bottom-border">
+                <div class="div-col name-col">{{editPackageItemRerunIntervalToggleLabel}}</div>
+                <div class="div-col content-col buttons">
+                        <input type="checkbox" id="rerunIntervalCheckbox" class="js-rerun-interval-enable val-checkbox" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
+                        <label class="checkbox-label" for="rerunIntervalCheckbox"></label>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col name-col">{{editPackageItemRerunIntervalLabel}}</div>
+                <div class="div-col content-col">
+                    <div class="js-plus-minus js-rerun-interval shift-left"></div>
+                    <div class="val-select shift-left">
+                        <select class="js-rerun-interval-type" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}>
+                            <option value="DAYS">{{daysLabel}}</option>
+                            <option value="WEEKS">{{weeksLabel}}</option>
+                            <option value="MONTH">{{monthLabel}}</option>
+                            <option value="YEAR">{{yearLabel}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col name-col">{{editPackageItemTagsLabel}}</div>
+                <div class="div-col content-col">
+                    <input type="text" id="input-tags" class="val-tags demo-default selectized" title="Valamis package tags" tabindex="-1" style="display: none;" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}>
+                </div>
+            </div>
+
+            <div class="div-row without-bottom-border">
+                <div class="div-col name-col">{{editPackageRequiredReviewLabel}}</div>
+                <div class="div-col content-col buttons">
+                    <input type="checkbox" id="requiredReview" class="js-required-review val-checkbox" {{^LM_MODIFY}} disabled="disabled" {{/LM_MODIFY}}/>
+                    <label class="checkbox-label" for="requiredReview">{{editPackageRequiredReviewHintLabel}}</label>
+                </div>
+            </div>
+            <div class ="div-row">
+                <div class="div-col name-col">{{editPackageScoreLimitLable}} </div>
+                <div class="div-col content-col buttons">
+                <div id="scorepicker">
+                    <div class="js-plus-minus js-score-limit"></div>
+                </div>
+                </div>
+            </div>
+
+        </div>
+</script>
+
+<script type="text/template" id="packageManagerNewPackageList">
+    <table class="val-table medium list new-packages-list-table">
+        <tbody class="js-new-package-items">
+
+        </tbody>
+    </table>
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="button big neutral modal-close js-cancel-upload-data">Cancel</a>
+        <button class="button big primary js-save-packages-data js-submit-button">Save</button>
+
+    </div>
+</script>
+
+<script type="text/html" id="packageManagerNewPackagesItemView">
+        <td>
+            <img class="val-img-logo js-logo js-upload-image"
+                 src="{{#logo}}/delegate/packages/{{id}}/logo?courseId={{courseId}}{{/logo}}" />
+        </td>
+        <td>
+            <div class="div-table val-info-table">
+                <div class="div-row without-bottom-border">
+                    <div class="div-col name-col">{{editPackageItemFilenameLabel}}</div>
+                    <div class="div-col content-col">{{filename}}</div>
+                </div>
+                <div class="div-row">
+                    <div class="div-col name-col">{{editPackageItemTitleLabel}}</div>
+                    <div class="div-col content-col">
+                        <input type='text' class="js-new-package-title text-input no-margin" value='{{title}}' placeholder="New lesson"/>
+                    </div>
+                </div>
+            </div>
+        </td>
+</script>
+
+<script type="text/template" id="packageManagerEditModalTemplate">
+    <div class="modal-content"></div>
+</script>
+
+
+<!--//TODO extract this -->
+<script type="text/template" id="deleteConfirmationTemplate">
+    <div class="confirmation-question">{{warningDeletePackageMessageLabel}}</div>
+    <div>
+        <button class='confirmation btn-primary'>{{yesLabel}}</button>
+        <button>{{cancelLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="valamisAppLayoutTemplate">
+    <div id="valamisAppModalRegion" class="portlet-body"></div>
+</script>
+
+
+<script type="text/template" id="valamisAppModalTemplate">
+    <div class="bbm-modal__topbar" style="margin-bottom: 0px;">
+        <h3 class="bbm-modal__title">{{header}}</h3>
+
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section modal-content">
+
+    </div>
+</script>

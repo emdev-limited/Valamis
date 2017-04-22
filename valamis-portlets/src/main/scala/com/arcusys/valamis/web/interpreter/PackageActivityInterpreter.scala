@@ -5,6 +5,7 @@ import java.util.Date
 import com.arcusys.learn.liferay.LBaseSocialActivityInterpreter
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.lesson.model.{Lesson, PackageActivityType}
 import com.arcusys.valamis.lesson.service.LessonService
 import com.arcusys.valamis.web.configuration.ioc.Configuration
@@ -36,22 +37,23 @@ abstract class PackageActivityInterpreter extends LBaseSocialActivityInterpreter
     case PackageActivityType.Completed => "completed"
   }
 
-  override protected def doInterpret(activity: LSocialActivity , context: Context): LSocialActivityFeedEntry = {
+  override protected def doInterpret(activity: LSocialActivity, context: Context): LSocialActivityFeedEntry = {
     val title = ""
     val body = renderFeedEntryBodyHelper(
       lessonService.getLesson(activity.getClassPK).get,
-      activity
+      activity,
+      PortalUtilHelper.getPathContext(context.getLiferayPortletRequest)
     )
     new LSocialActivityFeedEntry(title, body)
   }
 
   val prettyTime = new PrettyTime()
-  private def renderFeedEntryBodyHelper(model: Lesson, activity: LSocialActivity) = {
+  private def renderFeedEntryBodyHelper(model: Lesson, activity: LSocialActivity, contextPath: String) = {
     val userName = UserLocalServiceHelper().getUser(activity.getUserId).getFullName
     val verb = getVerb(activity.getType)
 
     val logoSrc = if(model.logo.isDefined && model.logo.get != "") s"""/delegate/files/images?folderId=package_logo_${model.id}&file=${model.logo.get}"""
-    else """/learn-portlet/img/imgo.jpg"""
+    else s"""/delegate/files/resources?file=/img/lesson_cover.svg"""
 
     val displayLogo = """<img style="width: 180px; height: 120px;" src="""" + logoSrc + """"/>"""
 

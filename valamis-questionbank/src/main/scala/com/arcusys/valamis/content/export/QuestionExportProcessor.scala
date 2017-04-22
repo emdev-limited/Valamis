@@ -7,18 +7,15 @@ import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.service._
 import com.arcusys.valamis.util.ZipBuilder
 import com.arcusys.valamis.util.export.ExportProcessor
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class QuestionExportProcessor(implicit val bindingModule: BindingModule)
-  extends ExportProcessor[QuestionCategoryExport, QuestionCategoryExport]
-    with Injectable {
+abstract class QuestionExportProcessor
+  extends ExportProcessor[QuestionCategoryExport, QuestionCategoryExport] {
 
   override protected def exportItemsImpl(zip: ZipBuilder, items: Seq[QuestionCategoryExport]): Seq[QuestionCategoryExport] = items
 
-  private lazy val questionService = inject[QuestionService]
-  private lazy val plainTextService = inject[PlainTextService]
-  private lazy val catService = inject[CategoryService]
-
+  def questionService: QuestionService
+  def plainTextService: PlainTextService
+  def catService: CategoryService
 
   def exportAll(courseId: Long): FileInputStream = {
     val questionsWithoutCategory = questionService.getByCategory(None, courseId)

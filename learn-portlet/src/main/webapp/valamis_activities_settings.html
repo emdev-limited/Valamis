@@ -40,11 +40,21 @@
             if ('{{showWebContents}}' == 'true') {
                 jQuery('#showWebContents').attr('checked', 'checked');
             }
+
+            jQuery('.js-digits-only').valamisDigitsOnly();
+
+            jQuery('.js-show-checkbox').change(function() {
+                jQuery('.js-save-settings').prop('disabled', false);
+            });
+
+            jQuery('#feedActivitiesCount').keyup(function() {
+                jQuery('.js-save-settings').prop('disabled', false);
+            });
         });
 
         function saveSettings() {
-            window.LearnAjax.post('{{actionURL}}', {
-                saveSettings: "true",
+            window.LearnAjax.post('{{{actionURL}}}', {
+                action: "saveSettings",
                 showBlogs: jQuery("#showBlogs").is(':checked'),
                 showBookmarks: jQuery("#showBookmarks").is(':checked'),
                 showEvents: jQuery("#showEvents").is(':checked'),
@@ -52,6 +62,7 @@
                 showWebContents: jQuery("#showWebContents").is(':checked'),
                 activitiesCount: jQuery("#feedActivitiesCount").val()
             }).done(function () {
+                jQuery('.js-save-settings').prop('disabled', true);
             });
         }
 
@@ -76,27 +87,37 @@
         {{activitiesSettingsLabel}}
     </div>
 
-    <input type="checkbox" id="showBlogs" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showBlogs"></label>
-    <label for="showBlogs"> {{showBlogsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showBlogs" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showBlogs"></label>
+        <label for="showBlogs"> {{showBlogsLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showBookmarks" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showBookmarks"></label>
-    <label for="showBookmarks"> {{showBookmarksLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showBookmarks" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showBookmarks"></label>
+        <label for="showBookmarks"> {{showBookmarksLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showEvents" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showEvents"></label>
-    <label for="showEvents"> {{showEventsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showEvents" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showEvents"></label>
+        <label for="showEvents"> {{showEventsLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showDocuments" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showDocuments"></label>
-    <label for="showDocuments"> {{showDocumentsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showDocuments" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showDocuments"></label>
+        <label for="showDocuments"> {{showDocumentsLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showWebContents" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showWebContents"></label>
-    <label for="showWebContents"> {{showWebContentsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showWebContents" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showWebContents"></label>
+        <label for="showWebContents"> {{showWebContentsLabel}} </label>
+    </div>
 
-    <button class="button valamis big primary val-icon-save-next" onclick="saveSettings()">
+    <button class="button big primary js-save-settings" disabled="disabled" onclick="saveSettings()">
         {{saveSettingsLabel}}
     </button>
 </div>

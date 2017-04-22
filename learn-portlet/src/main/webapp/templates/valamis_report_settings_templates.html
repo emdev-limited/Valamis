@@ -1,0 +1,176 @@
+<script type="text/template" id="ValamisReportLayoutTemplate">
+    <div id="valamisReportSettings">
+        <div class="loading-message-block">
+            <div class="loading-message">{{loadingLabel}}...</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="reportSettingsFieldset">
+
+    <div class="field-label">
+        <span>{{title}}</span>
+    </div>
+
+    <div class="field-content">
+
+        {{#isDropdown}}
+        <div class="field-type-dropdown dropdown-selector js-dropdown-selector">
+
+            <div class="current-selection">
+                <div class="ellipsis cs-label js-label">{{currentOptionTitle}}</div>
+            </div>
+
+            {{#options.length}}
+            <div class="dropdown-wrapper">
+                <ul class="dropdown-options"></ul>
+                {{#isDateSelector}}
+                <div class="dates-selector">
+                    <form onsubmit="return false;">
+                        <div class="date-inputs">
+                            <input type="text" id="period-selector-start" value="{{startDate}}">
+                            <input type="text" id="period-selector-end" value="{{endDate}}">
+                        </div>
+
+                        <div id="selector-datepicker-wrapper"></div>
+
+                        <div class="submit-button">
+                            <button type="submit" class="button medium neutral js-apply" disabled="disabled">{{applyLabel}}</button>
+                        </div>
+                    </form>
+                </div>
+                {{/isDateSelector}}
+            </div>
+            {{/options.length}}
+        </div>
+        {{/isDropdown}}
+
+        {{#isModal}}
+        <div class="field-type-popup-trigger js-select-users">
+            <span class="button big neutral">{{buttonLabel}}</span>
+        </div>
+        {{/isModal}}
+
+    </div>
+
+</script>
+
+<script type="text/template" id="reportDropDownSelectorOption">
+    <span data-value="{{id}}">{{optionTitle}}</span>
+</script>
+
+<script type="text/template" id="reportSelectUsersModalTemplate">
+    <div class="bbm-modal__topbar">
+        <h3 class="bbm-modal__title">{{header}}</h3>
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section modal-content"></div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{closeLabel}}</a>
+        <!--<a class="button big primary js-save-users">{{saveLabel}}</a>-->
+    </div>
+
+</script>
+
+<script type="text/template" id="reportSettingsUsersToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            </div>
+        </div>
+        {{#showUserTypes}}
+        <div class="filter-element shift-left">
+            <div class="dropdown js-user-type" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{usersLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="selected" data-value="{{userTypeObject.USER}}">{{usersLabel}}</li>
+                    <li data-value="{{userTypeObject.ORGANIZATION}}">{{organizationsLabel}}</li>
+                    <li data-value="{{userTypeObject.GROUP}}">{{groupsLabel}}</li>
+                    <li data-value="{{userTypeObject.ROLE}}">{{rolesLabel}}</li>
+                </ul>
+            </div>
+        </div>
+        {{/showUserTypes}}
+
+        {{#isUser}}
+        <div class="filter-element shift-left">
+            <div class="dropdown js-organizations-filter" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{allOrganizationsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu edit-users-dropdown">
+                    <li class="selected" data-value="">{{allOrganizationsLabel}}</li>
+                    {{#organizations}}
+                    <li data-value="{{id}}">{{name}}</li>
+                    {{/organizations}}
+                </ul>
+            </div>
+        </div>
+        {{/isUser}}
+
+        <div class="filter-element paging-showing-label shift-left js-paginator-showing"></div>
+
+        {{^showAvailable}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-add-items" data-value="{{userType}}">
+                {{addButtonLabelText}}
+            </button>
+        </div>
+        {{/showAvailable}}
+    </div>
+
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <button class="button medium neutral shift-left js-select-all">
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
+            </button>
+        </div>
+
+        {{^available}}
+        <div class="dropdown actions filter-element shift-left">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionLabel}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-delete-items" data-value="1">{{deleteLabel}}</li>
+            </ul>
+        </div>
+        {{/available}}
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="reportSettingsEditUsersItemViewTemplate">
+    <td class="checkbox-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
+    </td>
+
+    {{#picture}}
+    <td class="narrow-col">
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+    </td>
+    {{/picture}}
+
+    <td>{{name}}</td>
+
+    <td class="text-right">
+        <button class="button medium danger no-text js-delete-item">
+            <span class="val-icon-trash"></span> {{deleteLabel}}
+        </button>
+    </td>
+</script>

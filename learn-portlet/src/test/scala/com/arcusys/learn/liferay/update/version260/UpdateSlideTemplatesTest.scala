@@ -4,19 +4,16 @@ import java.sql.Connection
 
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
 import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import scala.slick.jdbc.JdbcBackend
 
-class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter {
+class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
-  val driver = H2Driver
   import driver.simple._
-
-  val db = Database.forURL("jdbc:h2:mem:templates", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val dbInfo = new SlickDBInfo {
     def databaseDef: JdbcBackend#DatabaseDef = db    
@@ -25,15 +22,15 @@ class UpdateSlideTemplatesTest extends FunSuite with BeforeAndAfter {
   }
   
   before {
-    connection = db.source.createConnection()
+    createDB()
     table.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val table = new SlideTableComponent {
-    override protected val driver: JdbcProfile = H2Driver
+    override protected val driver: JdbcProfile = UpdateSlideTemplatesTest.this.driver
     
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._

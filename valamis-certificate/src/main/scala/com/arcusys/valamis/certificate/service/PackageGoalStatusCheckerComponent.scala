@@ -20,6 +20,11 @@ trait PackageGoalStatusCheckerComponent extends PackageGoalStatusChecker {
   protected def lessonResultService: UserLessonResultService
   protected def teacherGradeService: TeacherLessonGradeService
 
+  protected def updateUserGoalState(userId: Long,
+                                    goal: CertificateGoal,
+                                    status: GoalStatuses.Value,
+                                    date: DateTime): (GoalStatuses.Value, DateTime)
+
   override def getPackageGoalsStatus(certificateId: Long,
                                      userId: Long): Seq[GoalStatus[PackageGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
@@ -81,20 +86,7 @@ trait PackageGoalStatusCheckerComponent extends PackageGoalStatusChecker {
 
         val status = if (isTimeOut) GoalStatuses.Failed else GoalStatuses.Success
 
-        goalStateRepository.getBy(userId, goal.goalId) match {
-          case Some(goalState) =>
-            if (goalState.status == GoalStatuses.InProgress) {
-              goalStateRepository.modify(goalState.goalId, userId, status, attemptDate)
-            }
-          case None => goalStateRepository.create(
-            CertificateGoalState(
-              userId,
-              goal.certificateId,
-              goal.goalId,
-              status,
-              attemptDate,
-              goalData.isOptional))
-        }
+        updateUserGoalState(userId, goalData,status, attemptDate)
       }
     }
   }
@@ -117,15 +109,9 @@ trait PackageGoalStatusCheckerComponent extends PackageGoalStatusChecker {
           GoalStatuses.Success
       }
     }
-    goalStateRepository.create(
-      CertificateGoalState(
-        userId,
-        goal.certificateId,
-        goal.goalId,
-        status,
-        new DateTime,
-        goalData.isOptional)
-    )
+
+    updateUserGoalState(userId, goalData, status, DateTime.now)
+
     status
   }
 }

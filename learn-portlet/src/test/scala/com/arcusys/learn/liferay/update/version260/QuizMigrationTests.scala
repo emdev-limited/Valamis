@@ -2,37 +2,38 @@ package com.arcusys.learn.liferay.update.version260
 
 import java.sql.Connection
 
-import com.arcusys.learn.liferay.update.version260.model.{LFQuizQuestion, LFQuiz}
+import com.arcusys.learn.liferay.update.version260.model.{LFQuiz, LFQuizQuestion}
 import com.arcusys.learn.liferay.update.version260.slide.SlideTableComponent
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import scala.slick.driver.H2Driver
-import scala.slick.driver.H2Driver.simple._
+
 import scala.slick.jdbc.JdbcBackend
 import scala.util.Try
 
-class QuizMigrationTests extends FunSuite with BeforeAndAfter {
+class QuizMigrationTests extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
-  val db = Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver")
-  var connection: Connection = _
   val fileService = null
-  val migration = new QuizMigration(db, H2Driver, fileService)
+  val migration = new QuizMigration(db, driver, fileService)
+
+  import driver.simple._
 
   // db data will be released after connection close
   before {
-    connection = db.source.createConnection()
+    createDB()
     createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val tables = new SlideTableComponent {
-    override protected val driver = H2Driver
+    override protected val driver = QuizMigrationTests.this.driver
   }
 
   def createSchema() {
     new SlideTableComponent {
-      override protected val driver = H2Driver
+      override protected val driver = QuizMigrationTests.this.driver
+      import driver.simple._
       db.withSession { implicit s =>
         import driver.simple._
         (slides.ddl ++ slideSets.ddl ++ slideElements.ddl).create
@@ -80,7 +81,7 @@ class QuizMigrationTests extends FunSuite with BeforeAndAfter {
 
 
   test("transaction test") {
-    val migration = new QuizMigration(db, H2Driver, fileService) {
+    val migration = new QuizMigration(db, driver, fileService) {
       override def getQuizSet(implicit session: JdbcBackend#Session) = List(
         new LFQuiz(1, None, None, None, None, None, None, None),
         new LFQuiz(2, None, None, None, None, None, None, None),

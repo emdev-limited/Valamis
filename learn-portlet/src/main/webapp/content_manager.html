@@ -1,12 +1,13 @@
 
-<div class="overflow-hidden val-portlet" id="questionBankBody">
+<div class="val-portlet" id="questionBankBody">
     <div id="contentManagerAppRegion"></div>
 
     <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
-    <input type="hidden" id="courseId" value="{{courseId}}"/>
 </div>
 
 <script type="text/javascript">
+    CKEDITOR_BASEPATH = Utils.getContextPath() + "/js/vendor/ckeditor/";
+
     jQueryValamis(function () {
 
         if (!valamisApp.started) {

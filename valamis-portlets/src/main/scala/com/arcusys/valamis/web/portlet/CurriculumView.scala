@@ -4,7 +4,6 @@ import java.io.PrintWriter
 import javax.portlet._
 
 import com.arcusys.learn.liferay.util.{PortalUtilHelper, PortletURLUtilHelper}
-import com.arcusys.valamis.certificate.service.AssignmentService
 import com.arcusys.valamis.web.portlet.base._
 
 /**
@@ -13,14 +12,11 @@ import com.arcusys.valamis.web.portlet.base._
  */
 abstract class CurriculumAbstract extends OAuthPortlet with PortletBase {
 
-  lazy val assignmentService = inject[AssignmentService]
-
   protected def sendResponse(data: Map[String, Any], templateName: String)(implicit out: PrintWriter) = {
-    sendTextFile("/templates/2.0/common_templates.html")
-    sendTextFile("/templates/2.0/paginator.html")
-    sendTextFile("/templates/2.0/image_gallery_templates.html")
-    sendTextFile("/templates/2.0/user_select_templates.html")
-    sendTextFile("/templates/2.0/file_uploader.html")
+    sendTextFile("/templates/common_templates.html")
+    sendTextFile("/templates/paginator.html")
+    sendTextFile("/templates/user_select_templates.html")
+    sendTextFile("/templates/file_uploader.html")
     sendMustacheFile(data, templateName)
   }
 
@@ -36,32 +32,26 @@ abstract class CurriculumAbstract extends OAuthPortlet with PortletBase {
       "contextPath" -> getContextPath(request)
     ) ++ getTranslation("curriculum", language)
 
-    sendTextFile("/templates/2.0/curriculum_admin_templates.html")
-    sendTextFile("/templates/2.0/file_uploader.html")
+    sendTextFile("/templates/curriculum_admin_templates.html")
+    sendTextFile("/templates/file_uploader.html")
     sendMustacheFile(data, "curriculum_settings.html")
   }
 
   protected def doViewHelper(request: RenderRequest, response: RenderResponse): SecurityData = {
-
-    val language = LiferayHelpers.getLanguage(request)
-
     val httpServletRequest = PortalUtilHelper.getHttpServletRequest(request)
     val url = getRootUrl(request, response)
-
-    val translations = getTranslation("curriculum", language)
 
     val securityScope = getSecurityData(request)
     httpServletRequest.getSession.setAttribute("userID", securityScope.userId)
     val permission = new PermissionUtil(request, this)
-    val publishPermission = permission.hasPermission(PublishPermission.name)
+    val activatePermission = permission.hasPermission(PublishPermission.name)
 
     securityScope.data = securityScope.data ++
       Map(
         "root" -> url,
         "isAdmin" -> securityScope.permissionToModify,
-        "permissionToPublish" -> publishPermission,
-        "assignmentDeployed" -> assignmentService.isAssignmentDeployed
-      ) ++ translations
+        "permissionToActivate" -> activatePermission
+      )
 
     securityScope
   }
@@ -79,7 +69,7 @@ class CurriculumAdmin extends CurriculumAbstract {
 
     implicit val out = response.getWriter
 
-    sendTextFile("/templates/2.0/curriculum_admin_templates.html")
+    sendTextFile("/templates/curriculum_admin_templates.html")
     sendResponse(scope.data, "curriculum_admin.html")
   }
 
@@ -95,7 +85,7 @@ class CurriculumUser extends CurriculumAbstract {
 
     implicit val out = response.getWriter
 
-    sendTextFile("/templates/2.0/curriculum_user_templates.html")
+    sendTextFile("/templates/curriculum_user_templates.html")
     sendResponse(scope.data, "curriculum_user.html")
   }
 }

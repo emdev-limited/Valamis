@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <body>
-<table class="valamis list-table medium-table">
+<table id="valamisSocialActivities" class="valamis list-table">
     <thead>
     <tr>
         <th>{{activity}}</th>
         <th>{{tinCanVerb}}</th>
     </tr>
     </thead>
-    <tbody class="social-activities-mapper-data"></tbody>
+    <tbody class="js-social-activities-mapper-data"></tbody>
 </table>
 
 <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
@@ -30,7 +30,7 @@
 
         var collection = ActivityMapperApp.request('setting:list');
         // {{#activityToVerb}}
-        collection.add({activityID: '{{className}}', mappedVerb: '{{verb}}'});
+        collection.add({activityID: '{{className}}', mappedVerb: '{{verb}}', title: '{{title}}'});
         // {{/activityToVerb}}
     }
 </script>

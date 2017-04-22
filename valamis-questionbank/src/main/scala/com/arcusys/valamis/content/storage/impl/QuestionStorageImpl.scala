@@ -58,6 +58,12 @@ class QuestionStorageImpl(val db: JdbcBackend#DatabaseDef,
     questions.filter(_.courseId === courseId).
       result.map(_.map(makeCustomQuestion))
 
+  override def getByCategory(categoryId: Long) = {
+    questions.
+      filter(q => q.categoryId === categoryId)
+      .result.map(_.map(makeCustomQuestion))
+  }
+
   override def getByCategory(categoryId: Option[Long], courseId: Long) = {
     questions.
       filter(q => optionFilter(q.categoryId, categoryId) && q.courseId === courseId)

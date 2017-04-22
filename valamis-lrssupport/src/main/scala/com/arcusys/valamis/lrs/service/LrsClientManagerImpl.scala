@@ -2,7 +2,7 @@ package com.arcusys.valamis.lrs.service
 
 import java.io.InputStream
 
-import com.arcusys.learn.liferay.services.ServiceContextHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, ServiceContextHelper}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.lrs.api._
 import com.arcusys.valamis.lrs.api.valamis._
@@ -12,7 +12,6 @@ import com.arcusys.valamis.lrs.tincan.{AuthorizationScope, Statement}
 import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.oauth.HttpClientPoolImpl
 import com.arcusys.valamis.oauth.util.OAuthUtils
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import com.liferay.portal.kernel.log.LogFactoryUtil
 import net.oauth.OAuth.Parameter
 import net.oauth._
@@ -25,15 +24,19 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 // TODO: refactor and split this file
-class LrsClientManagerImpl(implicit val bindingModule: BindingModule) extends LrsClientManager with Injectable {
+abstract class LrsClientManagerImpl extends LrsClientManager {
   private implicit val log = LogFactoryUtil.getLog(classOf[LrsClientManagerImpl])
-  private lazy val authCredentials = inject[UserCredentialsStorage]
-  private lazy val lrsRegistration = inject[LrsRegistration]
-  private lazy val lrsEndpointService = inject[LrsEndpointService]
-  private lazy val statementChecker = inject[StatementChecker]
 
+  def authCredentials: UserCredentialsStorage
+  def lrsRegistration: LrsRegistration
+  def lrsEndpointService: LrsEndpointService
+  def statementChecker: StatementChecker
 
-  def statementApi[T](action: (StatementApi => T), authInfo: Option[String], statementsToCheck: Seq[Statement] = Seq()): T = {
+  implicit def getCompanyId: Long = CompanyHelper.getCompanyId
+
+  def statementApi[T](action: (StatementApi => T),
+                      authInfo: Option[String],
+                      statementsToCheck: Seq[Statement] = Seq()): T = {
     val auth = authInfo.getOrElse(getUserAuth)
     val api = new StatementApi(Some(getOAuthInvoker(auth)))(getLrsSettingsForLrsApiNoProxy(auth))
     val res = run(api, action)
@@ -73,15 +76,6 @@ class LrsClientManagerImpl(implicit val bindingModule: BindingModule) extends Lr
     } finally {
       api.close()
     }
-  }
-
-  private def getLrsSettingsForLrsApi(auth: String, version: String = ProxyLrsInfo.Version) = {
-    val proxyUrl = lrsEndpointService.getEndpoint.filter(_.customHost.isDefined).flatMap(_.customHost) match {
-      case Some(host) => host + ProxyLrsInfo.FullPrefix
-      case _ => PortalUtilHelper.getLocalHostUrl + ProxyLrsInfo.FullPrefix
-    }
-
-    LrsSettings(proxyUrl, version, new LrsAuthDefaultSettings(auth))
   }
 
   private def getUserAuth = {

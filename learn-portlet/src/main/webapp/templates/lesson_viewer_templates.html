@@ -1,0 +1,266 @@
+<script type="text/template" id="lessonViewerLayoutTemplate">
+    <div id="lessonViewerToolbar"></div>
+    <div id="lessonViewerPackages"></div>
+    <div id="lessonViewerPaginator" class="val-paginator text-center js-lesson-viewer-paginator"></div>
+</script>
+
+<script type="text/template" id="lessonViewerToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left">
+            <div class="val-search">
+                <input class="js-search" type="text" id="playerPackageFilter" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+        <div class="dropdown filter-element shift-left js-category-filter" data-value="">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{allCategoriesLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected js-category" data-value="">{{allCategoriesLabel}}</li>
+                {{#categories}}
+                <li class="js-category" data-value="{{id}}">{{text}}</li>
+                {{/categories}}
+            </ul>
+        </div>
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="lessonViewerToolbarShowing"> </div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="default:true">
+            <button class="button medium simple">
+                <span class="dropdown-text"> {{defaultLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="default:true"> {{defaultLabel}} </li>
+                <li data-value="date:false"> {{newestLabel}} </li>
+                <li data-value="date:true"> {{oldestLabel}} </li>
+                <li data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-tile-view">
+            <span class="val-icon-grid-view">{{508GridViewLabel}}</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-list-view">
+            <span class="val-icon-list-view">{{508ListViewLabel}}</span>
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="playerTileItemView">
+    {{#canOrder}}
+    <div class="val-icon-drag js-sortable-element"></div>
+    {{/canOrder}}
+    <div class="tile-content">
+        <div class="tile-with-rating">
+            <div class="image"
+                 {{#logo}}
+                 style="background-image: url('/delegate/packages/{{id}}/logo?courseId={{courseId}}')"
+                 {{/logo}}
+                >
+                <a href={{link}}><span class="invisible">{{508LessonLogoLabel}}</span></a>
+            </div>
+            <div class="val-rating js-valamis-rating{{#notRated}} not-rated{{/notRated}}{{#noAverage}} no-average{{/noAverage}}">
+                <div class="val-rating-content js-rating-content">
+                    <span class="val-rating-average"><i class="val-icon val-icon-star"></i><em class="js-rating-average">{{ratingAverage}}</em></span>
+                    <span class="val-rating-score js-rating-score">
+                        <span class="current"><i class="val-icon val-icon-star"></i><em class="js-rating-current">{{ratingScore}}</em></span>
+                        <span class="delete js-rating-delete"><i class="val-icon val-icon-delete"></i></span>
+                    </span>
+                </div>
+                <div class="val-rating-area js-rating-area"></div>
+            </div>
+        </div>
+        <ul>
+            <li class="title"><a href={{link}}>{{title}}</a></li>
+            <li> {{packageAuthor}} {{dateString}} </li>
+            <li class="categories">{{categories}}</li>
+            <li class="description">{{description}}</li>
+            <li class="status">
+                {{#LessonViewer.LV_SHARE}}
+                <button class="button small simple no-text hide-s shift-left js-share-package">
+                    <span class="val-icon-share">{{508ShareLabel}}</span>
+                </button>
+                {{/LessonViewer.LV_SHARE}}
+
+                <span class="val-label">
+                    {{packageStatusLabel}}
+                </span>
+                {{#remain}} {{remain}} {{remainLabel}} {{/remain}}
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="scormPlayerLayoutTemplate">
+    <div class="portlet-sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">{{lessonContentSubTitleLabel}}</h3>
+            <button class="button small simple no-text hide-sidebar js-toggle-sidebar">
+                <span class="val-icon-exit">{{508CloseSidebarLabel}}</span>
+            </button>
+        </div>
+        <div id="playerTree" class="sidebar-content"></div>
+    </div>
+    <div id="playerContent" class="content-wrapper">
+        <div class="content-header clearfix">
+            <div class="content-controls shift-left">
+                <button class="button small simple no-text js-toggle-sidebar">
+                    <span class="val-icon-menu">{{508MenuLabel}}</span>
+                </button>
+            </div>
+            <div class="content-controls shift-right">
+                <button class="button small simple no-text js-player-launch-fullscreen">
+                    <span class="val-icon-fullscreen">{{508FullscreenLabel}}</span>
+                </button>
+                <button class="button small simple no-text player-exit-fullscreen hidden js-player-exit-fullscreen">
+                    <span class="val-icon-fullscreen-exit">{{508ExitFullscreenLabel}}</span>
+                </button>
+                <button class="button small simple no-text js-player-navigation-suspend">
+                    <span class="val-icon-pause">{{508SuspendLabel}}</span>
+                </button>
+                <!--the button need id for old packages-->
+                <button id="SCORMNavigationExit" class="button small simple no-text js-player-navigation-exit">
+                    <span class="val-icon-exit">{{508ExitLabel}}</span>
+                </button>
+            </div>
+            <h2 id="currentPackageName" class="content-title package-name"></h2>
+        </div>
+        <div class="content-container">
+            <div class="spinner-container">
+                <div class="spinner center">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <iframe id="playerDataOutput" src=""></iframe>
+        </div>
+        <div class="content-footer clearfix">
+            <button id="playerNavigationBackward" class="button big neutral shift-left"> {{navigationButtonBackLabel}} </button>
+            <button id="playerNavigationForward" class="button big neutral shift-right"> {{navigationButtonNextLabel}} </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="tincanPlayerLayoutTemplate">
+    <div class="portlet-sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">{{lessonContentSubTitleLabel}}</h3>
+            <button class="button small simple no-text hide-sidebar js-toggle-sidebar">
+                <span class="val-icon-exit">{{508CloseSidebarLabel}}</span>
+            </button>
+        </div>
+        <div id="playerTree" class="sidebar-content"></div>
+    </div>
+    <div id="playerContent" class="content-wrapper">
+        <div class="content-header clearfix">
+            <div class="content-controls shift-left">
+                <button class="button small simple no-text js-toggle-sidebar">
+                    <span class="val-icon-menu">{{508MenuLabel}}</span>
+                </button>
+            </div>
+            <div class="content-controls shift-right">
+                <button class="button small simple no-text js-player-launch-fullscreen">
+                    <span class="val-icon-fullscreen">{{508FullscreenLabel}}</span>
+                </button>
+                <button class="button small simple no-text player-exit-fullscreen hidden js-player-exit-fullscreen">
+                    <span class="val-icon-fullscreen-exit">{{508ExitFullscreenLabel}}</span>
+                </button>
+                <!--<button class="button small simple no-text hidden js-player-navigation-suspend">-->
+                    <!--<span class="val-icon-pause">{{508SuspendLabel}}</span>-->
+                <!--</button>-->
+                <!--the button need id for old packages-->
+                <button id="SCORMNavigationExit" class="button small simple no-text js-player-navigation-exit">
+                    <span class="val-icon-exit">{{508ExitLabel}}</span>
+                </button>
+            </div>
+            <h2 id="currentPackageName" class="content-title package-name"></h2>
+        </div>
+        <div class="content-container">
+            <div class="spinner-container">
+                <div class="spinner center">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <iframe id="playerDataOutput" src=""></iframe>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="navigationItemTemplate">
+    <div class="lesson-item {{#completed}} completed {{/completed}} {{#active}} active {{/active}} ">
+        {{#active}}
+        <span class="hidden"> {{508ActiveLabel}} </span>
+        {{/active}}
+        {{#completed}}
+        <span class="hidden"> {{508CompletedLabel}} </span>
+        {{/completed}}
+        <span class="lesson-item-title"> {{title}} </span>
+        <span class="lesson-item-status"></span>
+        {{#duration}}
+        <span class="lesson-item-duration"> {{duration}} </span>
+        {{/duration}}
+    </div>
+</script>
+
+<script type="text/html" id="navigationCategoryItemTemplate">
+    {{#hasChildren}}
+    <span class="arrow-text invisible">{{508HideListLabel}}</span>
+    {{/hasChildren}}
+    <div class="lesson-items js-lesson-items"></div>
+</script>
+
+
+<script type="text/html" id="lessonViewerSharePackageViewTemplate">
+    <div class="div-table val-info-table">
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{commentLabel}}
+            </div>
+            <div class="div-col content-col">
+                <input type="text" class="js-package-comment" />
+            </div>
+        </div>
+    </div>
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+
+        <button class="button big primary js-post-share-package js-submit-button">
+            {{shareLabel}}
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="packageSortableListTemplate">
+    <div id="sortable" class="js-package-items-sortable"></div>
+    <div class='loading-container'></div>
+</script>
+
+<script type="text/html" id="warningNoLtiTemplate">
+    <div class="warning js-no-lti">
+        {{errorNoLTILabel}}
+    </div>
+</script>

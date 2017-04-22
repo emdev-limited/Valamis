@@ -18,11 +18,14 @@ object SettingType extends Enumeration {
   val IssuerOrganization = Value("IssuerOrganization")
   val IssuerEmail = Value("IssuerEmail")
   val DBVersion = Value("DBVersion")
-  val SendMessages = Value("SendMessages")
   val GoogleClientId = Value("GoogleClientId")
   val GoogleAppId = Value("GoogleAppId")
   val GoogleApiKey = Value("GoogleApiKey")
-  val License = Value("License")
+  var LtiVersion = Value("LtiVersion")
+  var LtiMessageType = Value("LtiMessageType")
+  var LtiLaunchPresentationReturnUrl = Value("LtiLaunchPresentationReturnUrl")
+  var LtiOauthVersion = Value("LtiOauthVersion")
+  var LtiOauthSignatureMethod = Value("LtiOauthSignatureMethod")
 }
 
 object EmptySetting {

@@ -35,6 +35,10 @@ case class CourseResponse(id: Long,
                           title: String,
                           url: String)
 
+case class SubmissionReportConfig(courseIds: Seq[Long],
+                                  since: DateTime,
+                                  until: DateTime)
+
 object AssignmentStatuses extends Enumeration {
   val Draft = Value
   val Published = Value
@@ -67,6 +71,7 @@ object AssignmentJsonFields {
   val Url = "url"
   val UserIds = "userIds"
   val Users = "users"
+  val Submissions = "submissions"
 }
 
 object AssignmentMessageFields {
@@ -80,6 +85,7 @@ object AssignmentMessageFields {
   val Take = "take"
   val TitlePattern = "titlePattern"
   val UserId = "userId"
+  val Json = "json"
 }
 
 object AssignmentMessageActionType extends Enumeration {
@@ -90,4 +96,5 @@ object AssignmentMessageActionType extends Enumeration {
   val List = Value
   val SubmissionStatus = Value
   val UserAssignments = Value
+  val UserSubmissionsByPeriod = Value
 }

@@ -21,10 +21,6 @@ trait SettingService {
 
   def getIssuerEmail(): String
 
-  def setSendMessages(value: Boolean): Unit
-
-  def getSendMessages(): Boolean
-
   def setGoogleClientId(value: String): Unit
 
   def getGoogleClientId(): String
@@ -39,7 +35,18 @@ trait SettingService {
 
   def setDBVersion(value: String): Unit
 
-  def setLicense(value: String): Unit
+  def getLtiVersion(): String
+  def setLtiVersion(value: String): Unit
 
-  def getLicense: String
+  def getLtiMessageType(): String
+  def setLtiMessageType(value: String): Unit
+
+  def getLtiLaunchPresentationReturnUrl(): String
+  def setLtiLaunchPresentationReturnUrl(value: String): Unit
+
+  def getLtiOauthVersion(): String
+  def setLtiOauthVersion(value: String): Unit
+
+  def getLtiOauthSignatureMethod(): String
+  def setLtiOauthSignatureMethod(value: String): Unit
 }

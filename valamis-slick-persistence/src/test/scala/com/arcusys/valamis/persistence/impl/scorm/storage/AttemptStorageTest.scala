@@ -5,10 +5,8 @@ import java.sql.Connection
 import com.arcusys.valamis.lesson.scorm.model.ScormUser
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.persistence.impl.scorm.schema._
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.scalatest.{BeforeAndAfter, FunSuite}
-
-import scala.slick.driver.H2Driver
-import scala.slick.driver.H2Driver.simple._
 
 
 /**
@@ -18,24 +16,20 @@ class AttemptStorageTest extends FunSuite
   with AttemptTableComponent
   with ScormUserComponent
   with SlickProfile
-  with BeforeAndAfter {
+  with BeforeAndAfter
+  with SlickDbTestBase {
 
-  val db = Database.forURL("jdbc:h2:mem:AttemptStorageTest", driver = "org.h2.Driver")
-  override val driver = H2Driver
   val storages = new StorageFactory(db, driver)
 
   val attemptStorage = storages.getAttemptStorage
   val scormUserStorage = storages.getScormUserStorage
 
-  var connection: Connection = _
-
-  // db data will be released after connection close
   before {
-    connection = db.source.createConnection()
+    createDB()
     createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   def createSchema() {

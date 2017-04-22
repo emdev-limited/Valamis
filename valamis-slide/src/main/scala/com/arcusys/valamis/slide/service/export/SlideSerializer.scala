@@ -7,10 +7,10 @@ import org.json4s.{DefaultFormats, CustomSerializer}
 
 
 //FIXME: we lose other custom serializers from format
-class SlidePropertiesSerializer extends CustomSerializer[SlideModel](implicit format => ( {
+class SlidePropertiesSerializer extends CustomSerializer[Slide](implicit format => ( {
   case jValue: JValue => ???
 }, {
-  case i: SlideModel =>
+  case i: Slide =>
     decompose(i)(DefaultFormats + new SlideElementsPropertiesSerializer)
       .replace("properties" :: Nil, JObject(i.properties.map(x =>
       x.deviceId.toString -> JObject(x.properties.map(p =>
@@ -20,10 +20,10 @@ class SlidePropertiesSerializer extends CustomSerializer[SlideModel](implicit fo
 }
   ))
 
-class SlideElementsPropertiesSerializer extends CustomSerializer[SlideElementModel](implicit format => ( {
+class SlideElementsPropertiesSerializer extends CustomSerializer[SlideElement](implicit format => ( {
   case jValue: JValue => ???
 }, {
-  case i: SlideElementModel =>
+  case i: SlideElement =>
     decompose(i)(DefaultFormats)
       .replace("properties" :: Nil, JObject(i.properties.map(x =>
       x.deviceId.toString -> JObject(x.properties.map(p =>

@@ -2,82 +2,78 @@ package com.arcusys.valamis.certificate.service.export
 
 import java.io.File
 
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.valamis.certificate.model.Certificate
-import com.arcusys.valamis.certificate.model.goal.{ ActivityGoal, CourseGoal, PackageGoal, StatementGoal }
+import com.arcusys.valamis.certificate.model.goal.{ActivityGoal, CourseGoal, PackageGoal, StatementGoal}
+import com.arcusys.valamis.certificate.service.CertificateService
 import com.arcusys.valamis.certificate.storage._
-import com.arcusys.valamis.course.CourseService
-import com.arcusys.valamis.util.export.ImportProcessor
-import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.valamis.course.api.CourseService
+import com.arcusys.valamis.model.{Context, Period, PeriodTypes}
 import com.arcusys.valamis.util.FileSystemUtil
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
-import org.joda.time.DateTime
+import com.arcusys.valamis.util.export.ImportProcessor
 
-class CertificateImportProcessor(implicit val bindingModule: BindingModule) extends ImportProcessor[CertificateExportModel] with Injectable {
+abstract class CertificateImportProcessor extends ImportProcessor[CertificateExportModel] {
 
-  private lazy val fileFacade = inject[FileService]
-  private lazy val courseService = inject[CourseService]
-
-  private lazy val certificateStorage = inject[CertificateRepository]
-  private lazy val courseGoalStorage = inject[CourseGoalStorage]
-  private lazy val activityGoalStorage = inject[ActivityGoalStorage]
-  private lazy val statementGoalStorage = inject[StatementGoalStorage]
-  private lazy val packageGoalStorage = inject[PackageGoalStorage]
+  def courseService: CourseService
+  def certificateService: CertificateService
+  def courseGoalStorage: CourseGoalStorage
+  def activityGoalStorage: ActivityGoalStorage
+  def statementGoalStorage: StatementGoalStorage
+  def packageGoalStorage: PackageGoalStorage
 
   override protected def importItems(certificates: List[CertificateExportModel],
-                                     companyId: Long,
-                                     tempDirectory: File,
+                                     courseId: Long,
+                                     filesDirectory: File,
                                      userId: Long,
                                      data: String): Unit = {
-    certificates.foreach(c => {
 
-      val importedCertificate = importCertificate(c, companyId, logo = "")
+    implicit val context = Context(CompanyHelper.getCompanyId, courseId, userId)
+    certificates.foreach(data => {
 
-      c.courses.foreach(importCourseGoal(_, importedCertificate, companyId))
-      c.statements.foreach(importStatementGoal(_, importedCertificate))
-      c.packages.foreach(importPackageGoal(_, importedCertificate))
-      c.activities.foreach(importActivityGoal(_, importedCertificate))
+      val certificate = importCertificate(data)
 
-      for (importedLogo <- importLogo(c, importedCertificate, tempDirectory)) {
-        certificateStorage.update(importedCertificate.copy(logo = importedLogo))
-      }
+      data.courses.foreach(importCourseGoal(_, certificate))
+      data.statements.foreach(importStatementGoal(_, certificate))
+      data.packages.foreach(importPackageGoal(_, certificate))
+      data.activities.foreach(importActivityGoal(_, certificate))
+
+      importLogo(data, certificate, filesDirectory)
+
     })
   }
 
-  private def importLogo(certificateInfo: CertificateExportModel, certificate: Certificate, tempDirectory: File): Option[String] = {
-    if (certificateInfo.logo == null || certificateInfo.logo.isEmpty)
-      None
-    else {
-      val separatorPosition = certificateInfo.logo.indexOf("_")
+  private def importLogo(certificateInfo: CertificateExportModel, certificate: Certificate, tempDirectory: File)
+                        (implicit context: Context): Unit = {
+    Option(certificateInfo.logo)
+      .filterNot(_.isEmpty)
+      .foreach { logo =>
 
-      val logoName = if (separatorPosition > 0) certificateInfo.logo.substring(separatorPosition + 1)
-      else certificateInfo.logo
+        val logoName = Some(logo.indexOf("_"))
+          .filter(index => index > 0)
+          .map(index => certificateInfo.logo.substring(index + 1))
+          .getOrElse(certificateInfo.logo)
 
-      val content = FileSystemUtil.getFileContent(new File(tempDirectory, certificateInfo.logo))
+        val content = FileSystemUtil.getFileContent(new File(tempDirectory, certificateInfo.logo))
 
-      fileFacade.setFileContent(certificate.id.toString, logoName, content)
-
-      Some(logoName)
-    }
+        certificateService.setLogo(certificate.id, logoName, content)
+      }
   }
 
-  private def importCertificate(certificateInfo: CertificateExportModel, companyId: Long, logo: String): Certificate = {
-    certificateStorage.create(Certificate(-1,
-      certificateInfo.title,
-      certificateInfo.description,
-      logo,
-      certificateInfo.isPermanent,
-      certificateInfo.isOpenBadgesIntegration,
-      certificateInfo.shortDescription,
-      companyId,
-      PeriodTypes.parse(certificateInfo.validPeriodType),
-      certificateInfo.validPeriod,
-      DateTime.now()
-    ))
+  private def importCertificate(data: CertificateExportModel)
+                               (implicit context: Context): Certificate = {
+    certificateService.create(
+      data.title,
+      data.description,
+      data.isPermanent,
+      data.isOpenBadgesIntegration,
+      data.shortDescription,
+      Period(PeriodTypes.parse(data.validPeriodType), data.validPeriod)
+    )
   }
 
-  private def importCourseGoal(goalInfo: CourseGoalExport, certificate: Certificate, companyId: Long): Option[CourseGoal] = {
-    val courseOption = courseService.getByCompanyId(companyId)
+  private def importCourseGoal(goalInfo: CourseGoalExport, certificate: Certificate)
+                              (implicit context: Context): Option[CourseGoal] = {
+    val courseOption = courseService.getByCompanyId(context.companyId)
       .find(c => c.getDescriptiveName == goalInfo.title && c.getFriendlyURL == goalInfo.url)
 
     courseOption.map(course => courseGoalStorage.create(

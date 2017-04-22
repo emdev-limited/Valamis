@@ -1,12 +1,11 @@
 package com.arcusys.valamis.settings.service
 
-import com.arcusys.valamis.settings.model.SettingType
+import com.arcusys.valamis.settings.model.{LTIConstants, SettingType}
 import com.arcusys.valamis.settings.storage.SettingStorage
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
 
-class SettingServiceImpl(implicit val bindingModule: BindingModule) extends SettingService with Injectable {
+abstract class SettingServiceImpl extends SettingService {
 
-  lazy val settingStorage: SettingStorage = inject[SettingStorage]
+  def settingStorage: SettingStorage
 
   override def setIssuerName(value: String): Unit = {
     settingStorage.modify(SettingType.IssuerName, value)
@@ -40,14 +39,6 @@ class SettingServiceImpl(implicit val bindingModule: BindingModule) extends Sett
     settingStorage.modify(SettingType.IssuerEmail, value)
   }
 
-  override def setSendMessages(value: Boolean): Unit = {
-    settingStorage.modify(SettingType.SendMessages, value.toString)
-  }
-
-  override def getSendMessages(): Boolean = {
-    settingStorage.getByKey(SettingType.SendMessages).exists(_.value == true.toString)
-  }
-
   override def setGoogleClientId(value: String): Unit = {
     settingStorage.modify(SettingType.GoogleClientId, value.toString)
   }
@@ -76,11 +67,43 @@ class SettingServiceImpl(implicit val bindingModule: BindingModule) extends Sett
     settingStorage.modify(SettingType.DBVersion, value)
   }
 
-  override def setLicense(value: String): Unit = {
-    settingStorage.modify(SettingType.License, value)
+  override def getLtiVersion(): String = {
+    settingStorage.getByKey(SettingType.LtiVersion).map(_.value).getOrElse(LTIConstants.LtiVersion)
   }
 
-  override def getLicense: String= {
-    settingStorage.getByKey(SettingType.License).map(_.value).getOrElse("")
+  override def setLtiVersion(value: String): Unit = {
+    settingStorage.modify(SettingType.LtiVersion, value)
+  }
+
+  override def setLtiOauthSignatureMethod(value: String): Unit = {
+    settingStorage.modify(SettingType.LtiOauthSignatureMethod, value)
+  }
+
+  override def getLtiMessageType(): String = {
+    settingStorage.getByKey(SettingType.LtiMessageType).map(_.value).getOrElse(LTIConstants.LtiMessageType)
+  }
+
+  override def setLtiMessageType(value: String): Unit = {
+    settingStorage.modify(SettingType.LtiMessageType, value)
+  }
+
+  override def getLtiLaunchPresentationReturnUrl(): String = {
+    settingStorage.getByKey(SettingType.LtiLaunchPresentationReturnUrl).map(_.value).getOrElse(LTIConstants.LtiLaunchPresentationReturnUrl)
+  }
+
+  override def setLtiLaunchPresentationReturnUrl(value: String): Unit = {
+    settingStorage.modify(SettingType.LtiLaunchPresentationReturnUrl, value)
+  }
+
+  override def setLtiOauthVersion(value: String): Unit = {
+    settingStorage.modify(SettingType.LtiOauthVersion, value)
+  }
+
+  override def getLtiOauthSignatureMethod(): String = {
+    settingStorage.getByKey(SettingType.LtiOauthSignatureMethod).map(_.value).getOrElse(LTIConstants.LtiOauthSignatureMethod)
+  }
+
+  override def getLtiOauthVersion(): String = {
+    settingStorage.getByKey(SettingType.LtiOauthVersion).map(_.value).getOrElse(LTIConstants.LtiOauthVersion)
   }
 }

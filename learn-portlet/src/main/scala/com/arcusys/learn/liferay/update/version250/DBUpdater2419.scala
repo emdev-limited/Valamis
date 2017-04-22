@@ -18,7 +18,7 @@ class DBUpdater2419 extends LUpgradeProcess with Injectable with SlideTableCompo
   import driver.simple._
 
   override def doUpgrade(): Unit = {
-    db.withSession { implicit session =>
+    db.withTransaction { implicit session =>
         var themes = Seq[SlideTheme]()
         themes = themes :+ createSlideTheme("Black and White",
           "#000000",

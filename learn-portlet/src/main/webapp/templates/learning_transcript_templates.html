@@ -1,0 +1,154 @@
+
+<script type="text/template" id="transcriptLayoutTemplate">
+    <div id="transcriptUserInfo"></div>
+    <div id="transcriptCoursesInfo"></div>
+    <div class="loading-container js-loading"></div>
+    <div id="transcriptCertificatesInfo"></div>
+</script>
+
+<script type="text/template" id="transcriptUserInfoTemplate">
+    <div class="user-info transcript-layout">
+        <div class="">
+            <div class="user-logo">
+                <img src="{{picture}}" alt="{{name}}" class="img-circle">
+            </div>
+            <div class="user-name">
+                {{name}}
+            </div>
+            <div class="action-buttons">
+                {{#LearningTranscript.VIEW_ALL}}
+                <button class="button medium primary js-select-user">{{selectUserLabel}}</button>
+                {{/LearningTranscript.VIEW_ALL}}
+                <button class="button medium primary no-text js-print-form">
+                    <span class="val-icon-print"></span> Print
+                </button>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="transcriptCoursesCollectionTemplate">
+    <div class="block-label">{{coursesLabel}}</div>
+    <div class="js-courses-table clearfix"></div>
+</script>
+
+<script type="text/template" id="transcriptCourseItemTemplate">
+    <div class="div-table course-info-table">
+        <div class="div-row">
+            <div class="div-col image-col">
+                <div class="image course img-rect big"
+                     {{#logoUrl}}
+                     style="background-image: url('{{logoUrl}}&tmstamp={{timestamp}}')"
+                     {{/logoUrl}}
+                ></div>
+            </div>
+            <div class="div-col">
+                <div class="course-name">{{course.title}}</div>
+                <div>
+                    <span class="js-show-details cursor-pointer hidden">{{showDetailsLabel}}</span>
+                    <span class="js-hide-details cursor-pointer hidden">{{hideDetailsLabel}}</span>
+                </div>
+            </div>
+            <div class="div-col course-grade">
+                {{#gradeFormatted}}
+                {{gradeFormatted}}<span class="val-percent-sign">%</span>
+                {{/gradeFormatted}}
+            </div>
+        </div>
+    </div>
+
+    <div class="js-lessons-list hidden course-content"></div>
+    <div class="js-assignments-list hidden course-content"></div>
+</script>
+
+<script type="text/template" id="transcriptLessonsCollectionTemplate">
+    <table class="simple-table">
+        <thead>
+            <tr>
+                <th>{{lessonsLabel}}</th>
+                <th class="text-right narrow-col">
+                    <span class="hide-s">{{instructorGradeLabel}}</span>
+                    <span class="s-only">{{instructorGradeShortLabel}}</span>
+                </th>
+                <th class="text-right narrow-col">
+                    <span class="hide-s">{{autoGradeLabel}}</span>
+                    <span class="s-only">{{autoGradeShortLabel}}</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</script>
+
+<script type="text/template" id="transcriptLessonsItemTemplate">
+    <td>{{lesson.title}}</td>
+    <td class="bold text-right narrow-col">
+        {{#teacherGradeValue}}
+        {{teacherGradeValue}}<span class="val-percent-sign">%</span>
+        {{/teacherGradeValue}}
+    </td>
+    <td class="bold text-right narrow-col">
+        {{#autoGradeValue}}
+        {{autoGradeValue}}<span class="val-percent-sign">%</span>
+        {{/autoGradeValue}}
+    </td>
+</script>
+
+<script type="text/template" id="transcriptAssignmentsCollectionTemplate">
+    <table class="simple-table">
+        <thead>
+        <tr>
+            <th>{{assignmentsLabel}}</th>
+            <th class="text-right narrow-col">
+                <span class="hide-s">{{instructorGradeLabel}}</span>
+                <span class="s-only">{{instructorGradeShortLabel}}</span>
+            </th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</script>
+
+<script type="text/template" id="transcriptAssignmentItemTemplate">
+    <td>{{title}}</td>
+    <td class="bold text-right narrow-col">
+        {{#submission.grade}}
+            {{submission.grade}}<span class="val-percent-sign">%</span>
+        {{/submission.grade}}
+    </td>
+</script>
+
+<script type="text/template" id="transcriptCertificatesCollectionTemplate">
+    <div class="block-label">{{certificatesLabel}}</div>
+    <div class="js-certificates-list clearfix certificates-list"></div>
+</script>
+
+<script type="text/template" id="transcriptCertificateItemTemplate">
+    <div class="image certificate img-rect big"
+         {{#logo}}
+         style="background-image: url('{{logoUrl}}')"
+         {{/logo}}
+    ></div>
+
+
+    <div class="title">{{title}}</div>
+
+    <div class="info">
+    {{#isOpenbadges}}
+        {{openbadgesLabel}}
+    {{/isOpenbadges}}
+
+    {{^isOpenbadges}}
+
+        {{achievementDateFormatted}} &mdash;
+
+        {{#expirationDateFormatted}}
+        <span {{#isOverdue}} class="overdue" {{/isOverdue}} > {{expirationDateFormatted}} </span>
+        {{/expirationDateFormatted}}
+        {{^expirationDateFormatted}}
+        {{permanentLabel}}
+        {{/expirationDateFormatted}}
+
+    {{/isOpenbadges}}
+    </div>
+</script>

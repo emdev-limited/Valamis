@@ -4,15 +4,21 @@ import com.arcusys.learn.liferay.LiferayClasses.LSocialActivity
 import com.arcusys.learn.liferay.services.{PermissionHelper, SocialActivityCounterLocalServiceHelper, SocialActivityLocalServiceHelper}
 import com.arcusys.valamis.certificate.model.CertificateState
 import com.arcusys.valamis.certificate.model.goal._
-import com.arcusys.valamis.certificate.storage.{CertificateGoalRepository, CertificateGoalStateRepository, ActivityGoalStorage, CertificateStateRepository}
+import com.arcusys.valamis.certificate.storage._
 import com.arcusys.valamis.model.PeriodTypes
 import org.joda.time.DateTime
 
 trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
+  protected def certificateRepository: CertificateRepository
   protected def certificateStateRepository: CertificateStateRepository
   protected def activityGoalStorage: ActivityGoalStorage
   protected def goalStateRepository: CertificateGoalStateRepository
   protected def goalRepository: CertificateGoalRepository
+
+  protected def updateUserGoalState(userId: Long,
+                                    goal: CertificateGoal,
+                                    status: GoalStatuses.Value,
+                                    date: DateTime): (GoalStatuses.Value, DateTime)
 
   override def getActivityGoalsStatus(certificateId: Long, userId: Long): Seq[GoalStatus[ActivityGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
@@ -51,9 +57,9 @@ trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
     activityGoalStorage.getByCertificateId(certificateId)
       //.filterNot(isCounterActivity) They have unlimited period type, shouldn't check
       .map { goal =>
-      val goalData = goalRepository.getById(goal.goalId)
-      GoalDeadline(goal, PeriodTypes.getEndDateOption(goalData.periodType, goalData.periodValue, startDate))
-    }
+        val goalData = goalRepository.getById(goal.goalId)
+        GoalDeadline(goal, PeriodTypes.getEndDateOption(goalData.periodType, goalData.periodValue, startDate))
+      }
   }
 
   override def getActivityGoalsStatistic(certificateId: Long, userId: Long): GoalStatistic = {
@@ -61,38 +67,39 @@ trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
       .foldLeft(GoalStatistic.empty)(_ add _.status)
   }
 
-  override def updateActivityGoalState(state: CertificateState, userId: Long): Unit ={
-    activityGoalStorage.getByCertificateId(state.certificateId).foreach(goal => {
-      val goalData = goalRepository.getById(goal.goalId)
-      lazy val endDate = PeriodTypes.getEndDate(goalData.periodType, goalData.periodValue, state.userJoinedDate)
-      val activitiesCount = if (goal.activityName == "participation" || goal.activityName == "contribution") {
-        SocialActivityCounterLocalServiceHelper
-          .getUserValue(userId, goal.activityName)
-          .getOrElse(0)
-      }
-      else {
-        SocialActivityLocalServiceHelper
-          .getCountActivities(userId, state.userJoinedDate, endDate, goal.activityName)
-      }
-      val status = if (activitiesCount >= goal.count) GoalStatuses.Success
-      else if (DateTime.now isAfter endDate) GoalStatuses.Failed
-      else GoalStatuses.InProgress
-      goalStateRepository.getBy(userId, goal.goalId) match {
-        case Some(goalState) =>
-          if (goalState.status == GoalStatuses.InProgress) {
-            goalStateRepository.modify(goalState.goalId, userId, status, new DateTime())
-          }
-        case None => goalStateRepository.create(
-          CertificateGoalState(
-            userId,
-            state.certificateId,
-            goal.goalId,
-            status,
-            new DateTime(),
-            goalData.isOptional))
-      }
+  override def updateActivityGoalState(state: CertificateState, userId: Long): Unit = {
+    val certificate = certificateRepository.getById(state.certificateId)
+    if(certificate.isActive) {
+      implicit val dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 
-    })
+      activityGoalStorage.getByCertificateId(state.certificateId).foreach(goal => {
+        val goalData = goalRepository.getById(goal.goalId)
+
+        lazy val dates = Seq(state.userJoinedDate, goalData.modifiedDate)
+        lazy val mostRecentDate = certificate.activationDate match {
+          case Some(d) => (dates :+ d).max
+          case None => dates.max
+        }
+
+        lazy val endDate = PeriodTypes.getEndDate(goalData.periodType, goalData.periodValue, mostRecentDate)
+        lazy val isTimeout = DateTime.now isAfter endDate
+
+        val activitiesCount = if (isCounterActivity(goal)) {
+          SocialActivityCounterLocalServiceHelper
+            .getUserValue(userId, goal.activityName)
+            .getOrElse(0)
+        }
+        else {
+          SocialActivityLocalServiceHelper
+            .getCountActivities(userId, state.userJoinedDate, endDate, goal.activityName)
+        }
+        val status = if (activitiesCount >= goal.count) GoalStatuses.Success
+        else if (isTimeout) GoalStatuses.Failed
+        else GoalStatuses.InProgress
+
+        updateUserGoalState(userId, goalData, status, new DateTime())
+      })
+    }
   }
 
   protected def checkActivityGoal(userId: Long, activities: Seq[LSocialActivity], userJoinedDate: DateTime)
@@ -116,14 +123,7 @@ trait ActivityGoalStatusCheckerComponent extends ActivityGoalStatusChecker {
     else if (isTimeout) GoalStatuses.Failed
     else GoalStatuses.InProgress
 
-    goalStateRepository.create(
-      CertificateGoalState(
-        userId,
-        goal.certificateId,
-        goal.goalId,
-        status,
-        new DateTime(),
-        goalData.isOptional))
+    updateUserGoalState(userId, goalData, status, new DateTime())
 
     status
   }

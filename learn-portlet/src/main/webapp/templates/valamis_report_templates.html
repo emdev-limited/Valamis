@@ -1,0 +1,54 @@
+<script type="text/template" id="ValamisReportLayoutTemplate">
+    <div id="valamisReportPeriodSelector"></div>
+    <div id="valamisReportLoading"></div>
+    <div id="valamisReportRenderer"></div>
+</script>
+
+<script type="text/template" id="loadingTemplate">
+    <div class="loading-message">{{loadingLabel}}...</div>
+</script>
+
+<script type="text/template" id="reportSettingsFieldset">
+
+    <div class="dropdown-selector js-dropdown-selector">
+
+        <div class="current-selection">
+            <strong class="cs-label js-label">{{currentOptionTitle}}</strong>
+            <span class="val-icon-arrow-down val-icon-right" title="{{changeLabel}}"></span>
+        </div>
+
+        {{#options.length}}
+        <div class="dropdown-wrapper">
+            <ul class="dropdown-options"></ul>
+            {{#isDateSelector}}
+            <div class="dates-selector">
+                <form onsubmit="return false;">
+                    <div class="date-inputs">
+                        <input type="text" id="period-selector-start" value="{{startDate}}">
+                        <input type="text" id="period-selector-end" value="{{endDate}}">
+                    </div>
+
+                    <div id="selector-datepicker-wrapper"></div>
+
+                    <div class="submit-button">
+                        <button type="submit" class="button medium neutral js-apply" disabled="disabled">{{applyLabel}}</button>
+                    </div>
+                </form>
+            </div>
+            {{/isDateSelector}}
+        </div>
+        {{/options.length}}
+    </div>
+
+</script>
+
+<script type="text/template" id="reportDropDownSelectorOption">
+    <span data-value="{{id}}">{{optionTitle}}</span>
+</script>
+
+<script type="text/template" id="ValamisReportEmptyListTemplate">
+    <div class="valamis-info-label shifted">
+        <span class="hidden js-no-finished-label">{{noFinishedLessonsLabel}}</span>
+        <span class="hidden js-no-items-label">{{noItemsLabel}}</span>
+    </div>
+</script>

@@ -1,7 +1,7 @@
 package com.arcusys.valamis.lesson.scorm.model.manifest
 
 import com.arcusys.valamis.lesson.model.LessonType.LessonType
-import com.arcusys.valamis.lesson.model.{ BaseManifest, LessonType }
+import com.arcusys.valamis.lesson.model.{BaseManifest, LessonType}
 import com.arcusys.valamis.model.PeriodTypes._
 import com.arcusys.valamis.util.TreeNode
 import org.joda.time.DateTime

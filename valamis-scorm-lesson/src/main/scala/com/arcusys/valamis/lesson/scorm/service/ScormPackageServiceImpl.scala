@@ -44,9 +44,9 @@ abstract class ScormPackageServiceImpl(val db: JdbcBackend#DatabaseDef, val driv
     uriService.getById(lessonId.toString, TincanURIType.Package).map(_.uri).getOrElse(lessonId.toString)
   }
 
-  override def getLessonIdByRootActivityId(activityId: String): Option[Long] = {
+  override def getLessonIdByRootActivityId(activityId: String): Seq[Long] = {
     val uri = s"${uriService.getLocalURL()}${TincanURIType.Package}/${TincanURIType.Package}_"
-    Try(activityId.replaceFirst(uri, "").toLong).toOption
+    Try(activityId.replaceFirst(uri, "").toLong).toOption.toSeq
   }
 
   override def deleteResources(lessonId: Long): Unit = {

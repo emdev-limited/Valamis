@@ -15,9 +15,9 @@ trait CourseGoalStorage {
              isOptional: Boolean = false,
              groupId: Option[Long] = None): CourseGoal
 
-  def get(certificateId: Long, courseId: Long): Option[CourseGoal]
+  def get(certificateId: Long, courseId: Long, isDeleted: Option[Boolean] = Some(false)): Option[CourseGoal]
 
   def getBy(goalId: Long): Option[CourseGoal]
 
-  def getByCertificateId(certificateId: Long): Seq[CourseGoal]
+  def getByCertificateId(certificateId: Long, isDeleted: Option[Boolean] = Some(false)): Seq[CourseGoal]
 }

@@ -1,58 +1,66 @@
 package com.arcusys.valamis.user.service
 
-import com.arcusys.learn.liferay.LiferayClasses._
+import com.arcusys.learn.liferay.LiferayClasses.LUser
 import com.arcusys.learn.liferay.constants.QueryUtilHelper
-import com.arcusys.learn.liferay.services.{GroupLocalServiceHelper, OrganizationLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.learn.liferay.services.dynamicQuery._
+import com.arcusys.learn.liferay.services.{OrganizationLocalServiceHelper, UserLocalServiceHelper}
 import com.arcusys.valamis.model.{Order, SkipTake}
-import com.arcusys.valamis.user.model._
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.arcusys.valamis.user.model.{User, UserFilter, UserSort}
 import com.liferay.portal.kernel.dao.orm._
 import com.liferay.portal.kernel.workflow.WorkflowConstants
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 // TODO: refactor (get by id)
-class UserServiceImpl(implicit val bindingModule: BindingModule)
-  extends UserService
-  with Injectable {
+abstract class UserServiceImpl extends UserService {
 
-  private lazy val userCertificateRepository = inject[UserCertificateRepository]
+  def userCertificateRepository: UserCertificateRepository
   private lazy val userLocalService = UserLocalServiceHelper()
 
-  def all(courseId: Long, nameFilter: Option[String], sortAZ: Boolean): Seq[LUser] =
-    getBy(UserFilter(
-      namePart = nameFilter,
-      groupId = Some(courseId),
-      sortBy = Some(UserSort(UserSortBy.Name, Order.apply(sortAZ)))
-    ))
+  def removedUserPrefix: String
 
-  def getBy(filter: UserFilter, skipTake: Option[SkipTake]) = {
-    val query = getQuery(filter)
+  def getUsersIds(groupId: Long): Seq[Long] = {
+    val groupUsers = userLocalService.getGroupUserIds(groupId)
 
+    val organizationsUsers = OrganizationLocalServiceHelper.getGroupOrganizationsIds(groupId)
+      .flatMap(userLocalService.getOrganizationUserIds)
 
-    filter.sortBy match {
-      case Some(UserSort(_, Order.Asc)) =>
-        query.addOrder(OrderFactoryUtil.asc("firstName"))
-          .addOrder(OrderFactoryUtil.asc("lastName"))
-      case _ =>
-        query.addOrder(OrderFactoryUtil.desc("firstName"))
-          .addOrder(OrderFactoryUtil.desc("lastName"))
-    }
-
-    val result = skipTake match {
-      case Some(SkipTake(skip, take)) if take > 0 =>
-        userLocalService.dynamicQuery(query, skip, skip + take)
-      case _ =>
-        userLocalService.dynamicQuery(query)
-    }
-
-    result.asScala.map(_.asInstanceOf[LUser])
-
+    (groupUsers ++ organizationsUsers).distinct
   }
 
-  def getCountBy(filter: UserFilter) = {
-    val query = getQuery(filter).setProjection(ProjectionFactoryUtil.rowCount())
-    userLocalService.dynamicQueryCount(query)
+  def getBy(filter: UserFilter, skipTake: Option[SkipTake]): Seq[LUser] = {
+    try {
+      val query = getQuery(filter)
+
+      filter.sortBy match {
+        case Some(UserSort(_, Order.Asc)) =>
+          query.addOrder(OrderFactoryUtil.asc("firstName"))
+            .addOrder(OrderFactoryUtil.asc("lastName"))
+        case _ =>
+          query.addOrder(OrderFactoryUtil.desc("firstName"))
+            .addOrder(OrderFactoryUtil.desc("lastName"))
+      }
+
+      val result = skipTake match {
+        case Some(SkipTake(skip, take)) if take > 0 =>
+          userLocalService.dynamicQuery(query, skip, skip + take)
+        case _ =>
+          userLocalService.dynamicQuery(query)
+      }
+
+      result.map(_.asInstanceOf[LUser])
+    } catch {
+      case e: UselessRestrictionException => Nil
+    }
+
+}
+
+  def getCountBy(filter: UserFilter): Long = {
+    try {
+      val query = getQuery(filter).setProjection(ProjectionFactoryUtil.rowCount())
+      userLocalService.dynamicQueryCount(query)
+    } catch {
+      case e: UselessRestrictionException => 0
+    }
   }
 
   private def getQuery(filter: UserFilter): DynamicQuery = {
@@ -71,82 +79,81 @@ class UserServiceImpl(implicit val bindingModule: BindingModule)
     }
 
     for (certificateId <- filter.certificateId) {
-      addFilterByIds(query, userCertificateRepository.getUsersBy(certificateId), filter.isUserJoined)
+      val userIds = userCertificateRepository.getUsersBy(certificateId)
+      query.addFilterByValues("userId", userIds, contains = filter.isUserJoined)
     }
 
-    for (organizationId <- filter.organizationId) {
-      addFilterByIds(query, userLocalService.getOrganizationUserIds(organizationId))
-    }
+    val orgAndGroupUserIds = filter.organizationId.fold(Seq.empty[Long]){ orgId =>
+      userLocalService.getOrganizationUserIds(orgId)
+    } ++ filter.groupId.fold(Seq.empty[Long]){ groupId =>
+      val organizations = OrganizationLocalServiceHelper
+        .getGroupOrganizationsIds(groupId)
 
-    for(groupId <- filter.groupId) {
-      val organizations = OrganizationLocalServiceHelper.getGroupOrganizations(groupId).map(_.getOrganizationId)
-      val userIds = userLocalService.getGroupUserIds(groupId) ++
+      userLocalService.getGroupUserIds(groupId) ++
         organizations.flatMap(userLocalService.getOrganizationUserIds)
-      addFilterByIds(query, userIds.distinct)
     }
-    query
-  }
 
-  private def addFilterByIds(query: DynamicQuery, userIds: Seq[Long], contains: Boolean = true): Unit = {
-    (contains, userIds) match {
-      case (true, Seq()) => query.add(RestrictionsFactoryUtil.eq("userId", null)) // abort query
-      case (false, Seq()) =>
-      case (true, ids:Seq[Long]) => query.add(RestrictionsFactoryUtil.in("userId", userIds))
-      case (false, ids:Seq[Long]) => query.add(RestrictionsFactoryUtil.not(RestrictionsFactoryUtil.in("userId", userIds)))
+    if(filter.withUserIdFilter && filter.userIds.nonEmpty) {
+      query.addFilterByValues("userId", filter.userIds, contains = filter.isUserJoined)
     }
+
+    if(orgAndGroupUserIds.nonEmpty) {
+      query.addFilterByValues("userId", orgAndGroupUserIds, contains = filter.isUserJoined)
+    }
+
+    query
   }
 
   def getById(id: Long): LUser = userLocalService.getUser(id)
 
+  def getWithDeleted(id: Long): User = {
+    userLocalService.fetchUser(id)
+      .map(new User(_))
+      .getOrElse(new User(id, s"$removedUserPrefix $id", isDeleted = true))
+  }
+
   def getByCourses(courseIds: Seq[Long],
                    companyId: Long,
-                   organizationId: Option[Long] = None,
-                   asc: Boolean = false): Seq[LUser] = {
+                   organizationId: Option[Long],
+                   nameFilter: Option[String],
+                   asc: Boolean): Seq[LUser] = {
     val filter = UserFilter(
       companyId = Some(companyId),
-      organizationId = organizationId
+      organizationId = organizationId,
+      namePart = nameFilter
     )
     val query = getQuery(filter)
     val userIds = courseIds.flatMap(userLocalService.getGroupUserIds).distinct
-    addFilterByIds(query, userIds)
+    query.addFilterByValues("userId", userIds, contains = true)
     userLocalService.dynamicQuery(query, asc, None)
   }
 
-  def getByName(name: String, companyId: Long, count: Option[Int] = None) = {
-    val users = all(companyId.toInt)
-      .filter(_.getFullName.toLowerCase.contains(name.toLowerCase))
+  def getByName(name: String, companyId: Long, count: Option[Int] = None): Seq[User] = {
+    userLocalService.searchByName(companyId, name, None, count)
       .map(new User(_))
-
-    count match {
-      case Some(value) => users.take(value)
-      case None => users
-    }
   }
 
-  def getByIds(companyId: Long, ids: Set[Long]): Seq[LUser] =
+  def getByIds(companyId: Long, ids: Set[Long]): Seq[LUser] = {
+    //todo: remove filtering in memory
     userLocalService
       .getCompanyUsers(companyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
       .filter(user => ids.contains(user.getUserId))
-
-  def getOrganizations: Seq[LOrganization] = {
-    OrganizationLocalServiceHelper
-      .getOrganizations(QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
-      .asScala
   }
 
-  override def all(companyId: Long): Seq[LUser] = getBy(UserFilter(Some(companyId)))
+  private def getAll(companyId: Long): Seq[LUser] = {
+    userLocalService.getCompanyUsers(companyId)
+  }
 
-  def getUsersByGroupOrOrganization(companyId: Long, courseId: Long, organizationId: Option[Long]):Seq[LUser]={
-    val filter = UserFilter(
-      companyId = Some(companyId),
-      groupId = Some(courseId),
-      organizationId = organizationId
-    )
-    getBy(filter) match {
-      case seq if seq.size > 0 => seq
-      case _ =>
-        val currentOrgazationId = organizationId.getOrElse(GroupLocalServiceHelper.getGroup(courseId).getOrganizationId())
-        UserLocalServiceHelper().getOrganizationUsers(currentOrgazationId)
+  def getUsersByGroupOrOrganization(companyId: Long,
+                                    courseId: Long,
+                                    organizationId: Option[Long]): Seq[LUser] = {
+    val courseUsersIds = getUsersIds(courseId)
+
+    val usersIds = organizationId match {
+      case None => courseUsersIds
+      case Some(orgId) => courseUsersIds intersect userLocalService.getOrganizationUserIds(orgId)
     }
+
+    usersIds map userLocalService.getUser
   }
 }

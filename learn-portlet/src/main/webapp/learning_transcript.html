@@ -1,150 +1,45 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head>
-<body>
-<div class="projectLearnGeneric">
-    <div id="transcriptWrapper">
-        <div id="userButtons">
-        </div>
-        <div id="transcriptData">
-        </div>
-    </div>
-    <div id="transcript-modals-layout"></div>
 
-    <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
-    <input type="hidden" id="transcriptUserID" value="{{userID}}"/>
-    <input type="hidden" id="transcriptCompanyID" value="{{companyID}}">
-    <input type="hidden" id="transcriptIsTeacher" value="{{viewAllPermission}}">
-</div>
+<div id="learningTranscriptAppRegion"></div>
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
+<script type="text/javascript">
 
-<script type="application/javascript">
-    var jQuery1816User = jQuery.noConflict();
-    var scormLanguageDataUser = {};
-    var userCourses = new UserCoursesCollection();
-    var userCertificates = new UserCertificateCollection();
-    var transcriptCoursesView, transcriptCertificatesView;
+    var Valamis = Valamis || {};
 
-    jQuery1816User(function () {
-        Backbone.emulateJSON = true;
-        Backbone.ajax = window.LearnAjax.ajax;
-        Utils.loadLanguage('curriculum', onUserLanguageLoad);
-    });
+    jQueryValamis(document).ready(function () {
 
-    var EditCertificateLayout = Backbone.Marionette.Layout.extend({
-        template: _.template(Mustache.to_html(jQuery('#certificate-modals-template').html(), scormLanguageDataUser)),
-        regions: {
-            modals: {
-                selector: '.certificate-modals-container',
-                regionType: Backbone.Marionette.Modals
+        if (!valamisApp.started) {
+            valamisApp.start();
+        }
+
+        /**
+         * Mobile IE10 hack
+         */
+        if ("-ms-user-select" in document.documentElement.style && navigator.userAgent.match(/IEMobile\/10\.0/)) {
+            var msViewportStyle = document.createElement("style");
+            msViewportStyle.appendChild(
+                    document.createTextNode("@-ms-viewport{width:auto!important}")
+            );
+            document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
+        }
+        /** Mobile IE10 hack */
+
+        var learningTranscriptPermissions = {
+            'LearningTranscript': {
+                VIEW_ALL: eval('{{viewAllPermission}}')
             }
-        }
-    });
+        };
 
-    var editCertificateLayout = new EditCertificateLayout();
-
-
-    var SelectUserModal = Backbone.Modal.extend({
-        template: function (data) {
-            return Mustache.to_html(jQuery('#certificate-common-modal-template').html(), {certificateModalTitle: scormLanguageDataUser['selectUserLabel'] })
-        },
-        submitEl: '.bbm-button',
-        cancelEl: '.modal-close',
-        className: 'val-modal',
-        onRender: function () {
-            var dialog = new LiferayUserSelectDialog({singleSelect: true, language: scormLanguageDataUser});
-            dialog.on('closeModal', function () {
-                editCertificateLayout.modals.close();
-            });
-            dialog.on('lfUserSelected', this.selectUser, this);
-            this.$('.certificate-modal-content').append(dialog.render().$el);
-        },
-
-        selectUser: function (model) {
-            jQuery('#transcriptUserID').val(model.id);
-            editCertificateLayout.modals.close();
-            model.set({
-                userID: model.id,
-                courseId: Utils.getCourseId(),
-                companyID: '{{companyID}}'
-            });
-            updateUserDetails(model);
-            initUserView();
-        }
-    });
-
-    function initUserDetails () {
-        var UserModel = Backbone.Model.extend({
-            defaults: {}
-        }).extend();
-        var userModel = new UserModel();
-        userModel.set({
-            name: '{{userName}}',
-            picture: '{{{userPicture}}}',
-            pageUrl: '{{{userPageUrl}}}',
-            companyID: '{{companyID}}',
-            userID: '{{userID}}',
-            courseId: Utils.getCourseId()});
-        updateUserDetails(userModel);
-    }
-
-    function updateUserDetails (model) {
-        var template = Mustache.to_html(jQuery('#transcriptUserDetailsTemplate').html(), _.extend(model.toJSON(), scormLanguageDataUser));
-        jQuery('#transcriptSelectedUser').html(template);
-    }
-
-    function onUserLanguageLoad(properties) {
-        scormLanguageDataUser = properties;
-        createModalLayout();
-        initUserDetails();
-        initUserView();
-    }
-
-    function createModalLayout () {
-        jQuery('#transcript-modals-layout').append(editCertificateLayout.render().el);
-
-        var viewAllPermission = JSON.parse("{{viewAllPermission}}");
-
-        var userView = new TranscriptUsersView({el: jQuery1816User('#userButtons'), /*layout: editCertificateLayout, userModal: SelectUserModal,*/
-            language: _.extend(scormLanguageDataUser, {isTeacher: viewAllPermission})});
-
-        userView.on('openSelectUserModal', function () {
-            var selectUserModal = new SelectUserModal();
-            editCertificateLayout.modals.show(selectUserModal);
-        });
-    }
-
-/*TODO: Packages don't fetch (for users who have them) after trying to fetch packages for users who don't have any.    FIX!*/
-    function initUserView() {
-        jQuery('#transcriptData').empty();
-
-        if (typeof transcriptCoursesView !== 'undefined' && transcriptCoursesView !== null) {
-            transcriptCoursesView.undelegateEvents();
-            transcriptCoursesView = undefined;
-        }
-        if (typeof transcriptCertificatesView !== 'undefined' && transcriptCertificatesView !== null) {
-            transcriptCertificatesView.undelegateEvents();
-            transcriptCertificatesView = undefined;
-        }
-
-        userCourses.fetch({
-            success: function () {
-                transcriptCoursesView = new TranscriptCoursesView({el: jQuery1816User('#transcriptData'), collection: userCourses, language: scormLanguageDataUser});
+        var learningTranscriptOptions = {
+            resourceName: 'learningTranscript',
+            permissions: learningTranscriptPermissions,
+            app: learningTranscript,
+            appOptions: {
+                isAssignmentDeployed: eval('{{isAssignmentDeployed}}')
             }
-        });
+        };
 
-        userCertificates.fetch({
-            success: function () {
-                transcriptCertificatesView = new TranscriptCertificatesView({el: jQuery1816User('#transcriptData'), collection: userCertificates, language: scormLanguageDataUser});
-            }
-        });
-    }
+        valamisApp.execute('subapp:start', learningTranscriptOptions);
+    });
 
 </script>
-
-</body>
-</html>

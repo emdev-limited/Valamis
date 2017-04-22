@@ -28,7 +28,7 @@
             text-decoration: underline;
         }
         .closeButton {
-            background: url(/learn-portlet/images/popup-close-white.png) left center;
+            background: url(/learn-portlet/img/icon-close-white.png) left center;
             width: 50px;
             height: 50px;
             position: absolute;

@@ -1,7 +1,7 @@
 package com.arcusys.valamis.lesson.storage.query
 
-import com.arcusys.valamis.lesson.model.LessonType.LessonType
 import com.arcusys.valamis.lesson.model.LessonSortBy
+import com.arcusys.valamis.lesson.model.LessonType.LessonType
 import com.arcusys.valamis.member.model.MemberTypes
 import com.arcusys.valamis.lesson.storage.LessonTableComponent
 import com.arcusys.valamis.model.SkipTake
@@ -16,7 +16,7 @@ trait LessonQueries {
 
   import driver.simple._
 
-  private type LessonQuery = Query[LessonTable, LessonTable#TableElementType, Seq]
+  type LessonQuery = Query[LessonTable, LessonTable#TableElementType, Seq]
 
   implicit class LessonExtensions(q: LessonQuery) {
     def filterById(id: Long): LessonQuery = {
@@ -62,7 +62,7 @@ trait LessonQueries {
       if (!onlyVisible) q else q filter (_.isVisible === true)
     }
 
-    def filterExtraVisisble: LessonQuery = {
+    def filterExtraVisible: LessonQuery = {
       q filter (_.isVisible isEmpty)
     }
 
@@ -89,6 +89,10 @@ trait LessonQueries {
         .filter(l => l.endDate.isEmpty || l.endDate >= now)
     }
 
+    def filterPlayerVisible(playerId: Long): LessonQuery = {
+      val invisIds = invisibleLessonViewers.filter(_.playerId === playerId).map(_.lessonId)
+      q.filterNot(l => l.id.in(invisIds))
+    }
     def sortByDate(ascending: Boolean): LessonQuery = {
       if (ascending) {
         q.sortBy(_.creationDate)

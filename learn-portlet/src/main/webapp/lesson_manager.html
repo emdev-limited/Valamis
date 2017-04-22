@@ -1,19 +1,10 @@
-<html>
-<head>
-    <meta name="viewport" content="width=device-width; initial-scale=1.0;">
-    <!--[if (gte IE 8)&(lt IE 10)]>
-    <script src="{{contextPath}}/js2.0/cors/jquery.xdr-transport.js"></script>
-    <![endif]-->
 
-</head>
-<body>
-<div class="overflow-hidden">
-    <div id="lessonManagerAppRegion"></div>
+<div id="lessonManagerAppRegion"></div>
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
-    <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
-
-</div>
-
+<!--[if (gte IE 8)&(lt IE 10)]>
+<script src="{{contextPath}}/js/cors/jquery.xdr-transport.js"></script>
+<![endif]-->
 
 <script type="text/javascript">
 
@@ -56,6 +47,3 @@
     });
 
 </script>
-
-</body>
-</html>

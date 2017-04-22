@@ -7,16 +7,14 @@ import com.arcusys.valamis.content.model.QuestionType.QuestionType
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.service.{CategoryService, PlainTextService, QuestionService}
 import com.arcusys.valamis.util.export.ImportProcessor
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class QuestionImportProcessor(implicit val bindingModule: BindingModule)
-  extends ImportProcessor[QuestionCategoryExport]
-  with Injectable {
+abstract class QuestionImportProcessor
+  extends ImportProcessor[QuestionCategoryExport] {
 
 
-  private lazy val questionService = inject[QuestionService]
-  private lazy val plainTextService = inject[PlainTextService]
-  private lazy val catService = inject[CategoryService]
+  def questionService: QuestionService
+  def plainTextService: PlainTextService
+  def catService: CategoryService
 
   override def importItems(items: List[QuestionCategoryExport],
                            courseId: Long,

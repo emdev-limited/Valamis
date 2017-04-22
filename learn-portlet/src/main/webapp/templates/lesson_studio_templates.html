@@ -1,0 +1,1505 @@
+<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+<script type="text/template" id="topbarTemplate">
+    <div class="shift-right">
+        <div class="shift-right topbar-buttons">
+            <button class="button medium slides-dark button-transparent no-text valamis-tooltip js-display-grid" title="{{valDisplayGridLabel}}">
+                <span class="icon val-icon-grid"></span>
+            </button>
+            <button class="button medium slides-dark button-transparent no-text valamis-tooltip js-change-theme" title="{{changeThemeLabel}}">
+                <span class="icon val-icon-brush"></span>
+            </button>
+            <button class="button medium slides-dark button-transparent no-text valamis-tooltip js-change-settings" title="{{settingsLabel}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <span class="button-divider-v"></span>
+            <button class="button medium slides-dark button-transparent no-text no-margin valamis-tooltip disabled js-undo" title="{{undoLabel}}">
+                <span class="icon val-icon-undo"></span>
+            </button>
+            <button class="button medium slides-dark button-transparent no-text valamis-tooltip disabled js-redo" title="{{redoLabel}}">
+                <span class="icon val-icon-redo"></span>
+            </button>
+            <button class="button medium slides-gray js-close-version">
+                {{closeVersionLabel}}
+            </button>
+            <div class="slides-editor-save-container js-editor-save-container">
+                <button class="button medium slides-gray no-margin slides-editor-changes-saved js-slides-editor-changes-saved">
+                    {{changesSavedLabel}}
+                </button>
+                <button class="button medium primary no-margin slides-editor-save js-slides-editor-save">
+                    {{saveLabel}}
+                </button>
+            </div>
+            <button class="button medium slides-dark button-transparent no-text js-close-slideset">
+                <span class="icon val-icon-exit"></span>
+            </button>
+        </div>
+    </div>
+    <div class="shift-left">
+        <div class="js-placeholder"></div>
+        <div class="shift-left mode-switcher js-mode-switcher">
+            <div class="button-group">
+                <button class="button big slides-primary active button-tooltip valamis-tooltip js-editor-edit-mode" title="{{editLabel}}">
+                    <span class="val-icon-edit"></span>
+                </button>
+                <button class="button big slides-dark button-tooltip valamis-tooltip js-editor-arrange-mode" title="{{arrangeLabel}}">
+                    <span class="val-icon-arrange"></span>
+                </button>
+                <button class="button big slides-dark button-tooltip valamis-tooltip js-editor-preview-mode" title="{{valBadgePreview}}">
+                    <span class="val-icon-preview"></span>
+                </button>
+            </div>
+        </div>
+        <div class="shift-left lesson-title-container">
+            <span class="lesson-title js-lesson-title"></span>
+            <span class="lesson-unsaved js-presentation-unsaved">&ndash; {{unsavedLabel}}</span>
+            <span class="lesson-unsaved js-presentation-unpublished">&ndash; {{unpublishedLabel}}</span>
+            <span class="versions-history-start cursor-pointer js-versions-history hidden">
+                {{versionHistoryLabel}}
+            </span>
+            <span class="version-label js-version-label">{{versionHistoryLabel}}</span>
+            <span class="button-divider-v"> </span>
+            <span class="js-lock-user lock-user"></span>
+        </div>
+    </div>
+    <div class="topbar-buttons topbar-buttons-center l-only js-buttons-select-layout">
+
+    </div>
+</script>
+<script type="text/html" id="sideBarLayoutTemplate">
+    <div id="toolbar-controls"></div>
+    <div id="toolbar-items"></div>
+</script>
+<script type="text/html" id="versionItemTemplate">
+    <div class="s-6 version-title cursor-pointer
+        {{#isDraft}}
+            ">
+            <span>{{currentVersionLabel}}</span>
+        {{/isDraft}}
+        {{^isDraft}}
+        has-date">
+            <span>{{versionLabel}} {{version}}</span>
+            <span class="modified-date">{{modifiedDate}}</span>
+        {{/isDraft}}
+    </div>
+    <div class="s-4">
+        <span class="val-label {{status}}">
+            {{status}}
+        </span>
+    </div>
+    <div class="s-2 cursor-pointer
+            {{#isDraft}}
+                js-delete-version">
+                <span class="val-icon-trash"></span>
+            {{/isDraft}}
+            {{^isDraft}}
+                js-clone-version">
+                <span class="val-icon-duplicate"></span>
+            {{/isDraft}}
+    </div>
+</script>
+<script type="text/html" id="toolbarItemTemplate">
+    <button class="button slides-big slides-dark button-transparent valamis-tooltip js-hide-if-summary {{classList}}" title="{{label}}">
+        <span class="val-icon-{{titleLower}}"></span>
+    </button>
+</script>
+<script type="text/template" id="galleryItemEmptyTemplate">
+<tr>
+    <td colspan="3">{{title}}</td>
+</tr>
+</script>
+<script type="text/html" id="textElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left">{{{content}}}</div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-open-settings" title="{{valItemSettings}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <div class="text-element-settings slide-popup-panel item-settings js-item-settings">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-item-close-settings">
+                    <span class="val-icon-exit"></span>Exit
+                </button>
+                <p>{{valItemSettings}}</p>
+                <div class="val-row hidden">
+                    <label>{{valBadgeFontSize}}</label>
+                    <select class="element-font-size shift-left js-select-font-size"></select>
+                </div>
+                <div class="val-row">
+                    <label>
+                        {{valLiferayArticle}}
+                    </label>
+                    <button class="button big neutral js-item-select-liferay-article">{{valBadgeSelectLiferayArticle}}</button>
+                </div>
+                <div class="val-row">
+                    <label>
+                        {{valBadgeLinkToAnotherSlide}}
+                    </label>
+                    <button class="button big neutral valamis-tooltip js-item-link" data-placement="bottom" title="{{valBadgeLinkToAnotherSlide}}">{{valBadgeSelectPage}}</button>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="mathElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left math-item">
+        <div class="math-content"></div>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-edit-math-expression" title="{{valBadgeEditMathExpression}}">
+                <span class="val-icon-edit"></span>
+            </button>
+            <div class="math-edit-panel slide-popup-panel">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-close-slide-popup-panel">
+                    <span class="val-icon-exit"></span>{{slideExitLabel}}
+                </button>
+                <div class="val-row">
+                    <label for="math-expr">
+                        {{slideMathTeXLabel}}
+                    </label>
+                    <textarea name="math-expr" class="math-expr">{{content}}</textarea>
+                </div>
+                <div class="val-row">
+                    <button class="button medium primary shift-right js-update-math-expr">
+                        {{OKLabel}}
+                    </button>
+                    <button class="button medium neutral shift-right js-close-slide-popup-panel">
+                        {{cancelLabel}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-open-settings" title="{{valItemSettings}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <div class="math-element-settings slide-popup-panel item-settings js-item-settings">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-item-close-settings">
+                    <span class="val-icon-exit"></span>Exit
+                </button>
+                <div class="val-row">
+                    <p>{{valItemSettings}}</p>
+                    <label for="link-another-slide-math">
+                        {{valBadgeLinkToAnotherSlide}}
+                    </label>
+                    <button class="button big neutral valamis-tooltip js-item-link" data-placement="bottom" title="{{valBadgeLinkToAnotherSlide}}" id="link-another-slide-math">{{valBadgeSelectPage}}</button>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="imageElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left img-item">
+        <div class="content-icon-image">
+            <span class="val-icon-image"></span>
+        </div>
+        <iframe class="no-pointer-events" width="100%" height="100%" style="display: none"></iframe>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-upload-image" title="{{valBadgeUploadImage}}">
+                <span class="val-icon-upload"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-select-from-media-gallery" title="{{valBadgeSelectFromMediaGallery}}">
+                <span class="val-icon-image"></span>
+            </button>
+        </div>
+        {{#googleClientApiAvailable}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-select-google-image" title="{{valBadgeSelectFromDriveSearch}}">
+                <span class="val-icon-globe"></span>
+            </button>
+        </div>
+        {{/googleClientApiAvailable}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-open-settings" title="{{valItemSettings}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <div class="image-element-settings slide-popup-panel item-settings js-item-settings">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-item-close-settings">
+                    <span class="val-icon-exit"></span>Exit
+                </button>
+                <div class="val-row">
+                    <p>{{valItemSettings}}</p>
+                    <label for="link-another-slide-image">
+                        {{valBadgeLinkToAnotherSlide}}
+                    </label>
+                    <button class="button big neutral valamis-tooltip js-item-link" data-placement="bottom" title="{{valBadgeLinkToAnotherSlide}}" id="link-another-slide-image" >{{valBadgeSelectPage}}</button>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="iframeElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left iframe-item">
+        <div class="content-icon-iframe">
+            <span class="val-icon-iframe"></span>
+        </div>
+        <div class="js-content-icon-pdf">
+            <span class="val-icon-pdf"></span>
+        </div>
+        <div class="warning">
+            {{errorIframeLabel}}
+        </div>
+        <div class="warning js-no-lti">
+            {{errorNoLTILabel}}
+        </div>
+        <iframe class="iframe-item no-pointer-events" src="{{contentVal}}" name="iframe-{{guid}}"></iframe>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        {{^noSettings}}
+        <div class="val-row js-valamis-popup">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-open-settings" title="{{valItemSettings}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <div class="iframe-element-settings slide-popup-panel js-valamis-popup-panel item-settings js-item-settings">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-item-close-settings">
+                    <span class="val-icon-exit"></span>Exit
+                </button>
+                <div class="val-row">
+                    <p>{{valItemSettings}}</p>
+                    <label for="iframe-url">
+                        {{valBadgeIframeSource}}
+                    </label>
+                    <textarea id="iframe-url" class="iframe-url">{{contentVal}}</textarea>
+                </div>
+                <div class="val-row">
+                    <button class="button medium primary shift-right js-update-iframe-url">
+                        {{saveLabel}}
+                    </button>
+                    <button class="button medium neutral shift-right js-item-close-settings">
+                        {{cancelLabel}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-thirdparty" title="{{valThirdParty}}">
+                <span class="val-icon-globe"></span>
+            </button>
+        </div>
+        {{/noSettings}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="iframeThirdPartySelector">
+    <div class="thumbnail-container">
+        <div class="js-third-party-list"></div>
+        <div class="js-third-party-frame-area" style="margin-left:auto;margin-right:auto;"></div>
+    </div>
+</script>
+
+<script type="text/template" id="ThirdPartySelectorItem">
+        <div class="thumbnail-item thumbnail-provider-item shift-left clearfix js-select-provider-item">
+        <span class="image-thumbnail image provider cursor-pointer"
+              {{#image}}
+              style="background-image: url('{{image}}')"
+              {{/image}}
+            >
+            </span>
+            <div class="image-title">{{name}}</div>
+            {{#description}}
+            <div class="image-title">{{description}}</div>
+            {{/description}}
+        </div>
+</script>
+
+<script type="text/html" id="videoElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content video-item shift-left">
+        <div class="content-icon-video">
+            <span class="val-icon-video"></span>
+        </div>
+        <div class="warning">
+            {{errorIframeLabel}}
+        </div>
+        <iframe class="no-pointer-events" width="100%" height="100%" style="display: none"></iframe>
+        <video class="video-js vjs-default-skin no-pointer-events" width="100%" height="100%">
+            <source src=""/>
+        </video>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-select-from-media-gallery-video" title="{{valBadgeSelectFromMediaGallery}}">
+                <span class="val-icon-video"></span>
+            </button>
+        </div>
+        {{#googleClientApiAvailable}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-select-google-video" title="{{valBadgeSelectFromDriveYoutubeSearch}}">
+                <span class="val-icon-globe"></span>
+            </button>
+        </div>
+        {{/googleClientApiAvailable}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="webglElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left webgl-item">
+        <div class="content-icon-arrange">
+            <span class="val-icon-arrange"></span>
+        </div>
+        <canvas class="glcanvas" width="{{width}}" height="{{height}}" style="display: none; background-color:black;"></canvas>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-upload-image" title="{{valBadgeUploadWebGLModel}}">
+                <span class="val-icon-upload"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="questionElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left question-item">
+        <span class="removed-question hidden">{{removedQuestionLabel}}</span>
+        <span class="random-question js-random-question hidden">{{randomQuestionLabel}}</span>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-open-settings" title="{{valItemSettings}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <div class="question-element-settings slide-popup-panel item-settings js-item-settings">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-item-close-settings">
+                    <span class="val-icon-exit"></span>Exit
+                </button>
+                <div class="val-row">
+                    <p>{{valItemSettings}}</p>
+                    <div class="js-question-link">
+                        <div class="val-row">
+                            <label for="js-font-size-question">{{valBadgeFontSize}}</label>
+                            <select name="" id="js-font-size-question" class="element-font-size shift-left"></select>
+                        </div>
+                        <label for="link-correct-answer">
+                            {{valBadgeLinkToCorrectAnswer}}
+                        </label>
+                        <button class="button big neutral valamis-tooltip js-item-link" data-placement="bottom" title="{{valBadgeLinkToAnotherSlide}}" id="link-correct-answer">
+                            {{valBadgeSelectPage}}
+                        </button>
+                        <label for="link-incorrect-answer">
+                            {{valBadgeLinkToIncorrectAnswer}}
+                        </label>
+                        <button class="button big neutral valamis-tooltip js-item-link-incorrect" data-placement="bottom" title="{{valBadgeLinkToIncorrectAnswer}}" id="link-incorrect-answer">
+                            {{valBadgeSelectPage}}
+                        </button>
+                    </div>
+                    <input type="checkbox" value="None" id="notify-about-correct-answer{{itemId}}" name="check"
+                           class="val-checkbox js-item-notify-correct">
+                    <label class="shift-left" for="notify-about-correct-answer{{itemId}}">
+                        {{valBadgeNotifyAboutCorrectAnswer}} </label>
+                </div>
+                <div class="val-row">
+                    <button class="button medium primary shift-right js-item-save-settings">
+                        {{saveLabel}}
+                    </button>
+                    <button class="button medium neutral shift-right js-item-close-settings">
+                        {{cancelLabel}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/html" id="audioElementTemplate">
+    <div class="item-border no-pointer-events"></div>
+    <div class="hidden ui-resizable-n"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-e"></div>
+    <div class="hidden ui-resizable-s"></div>
+    <div class="ui-resizable-handle hidden ui-resizable-w"></div>
+    <div class="hidden ui-resizable-ne"></div>
+    <div class="hidden ui-resizable-se"></div>
+    <div class="hidden ui-resizable-sw"></div>
+    <div class="hidden ui-resizable-nw"></div>
+    <div class="item-content shift-left audio-item">
+        <audio src="" controls preload="none" style="width: 100%;" class="no-pointer-events"></audio>
+    </div>
+    <div class="item-controls shift-right">
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-upload-image" title="{{valBadgeUploadAudio}}">
+                <span class="val-icon-upload"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-select-from-media-gallery-audio" title="{{valBadgeSelectFromMediaGallery}}">
+                <span class="val-icon-video"></span>
+            </button>
+        </div>
+        {{#googleClientApiAvailable}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-select-google-audio" title="{{valBadgeSelectFromDriveSearch}}">
+                <span class="val-icon-globe"></span>
+            </button>
+        </div>
+        {{/googleClientApiAvailable}}
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-forward" title="{{valItemForwardLabel}}">
+                <span class="icon val-icon-move-forward"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-backward" title="{{valItemBackwardLabel}}">
+                <span class="icon val-icon-move-backward"></span>
+            </button>
+        </div>
+        <div class="val-row hidden-element-visible">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-hide-for-device" title="{{valItemHideForDeviceLabel}}">
+                <span class="icon val-icon-preview"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-duplicate" title="{{valBadgeDuplicate}}">
+                <span class="val-icon-duplicate"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-item-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="revealControlsTemplate">
+    <button class="button big slides-round slides-gray-opacity no-text js-add-page right"
+            data-value="right" data-placement="left" title="{{valBadgeAddPage}}">
+        <span class="val-icon-plus"></span>
+    </button>
+    <button class="button big slides-round slides-gray-opacity no-text js-add-page down {{^isTopDownEnabled}} hidden {{/isTopDownEnabled}}"
+            data-value="down" data-placement="top" title="{{valBadgeAddPage}}">
+        <span class="val-icon-plus"></span>
+    </button>
+    <div id="slide-controls">
+        <div class="val-row js-valamis-popup">
+            <button class="button slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-valamis-popup-button js-open-page-settings"
+                    title="{{valPageSettings}}">
+                <span class="icon val-icon-settings"></span>
+            </button>
+            <div class="slide-title-edit-panel slide-popup-panel js-valamis-popup-panel">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-valamis-popup-close">
+                    <span class="val-icon-exit"></span>
+                </button>
+                <div class="val-row">
+                    <div class="s-12 m-12 l-12 div-table val-info-table">
+                        <h2>{{valPageSettings}}</h2>
+                        <div class="div-row">
+                            <div class="div-col settings-label">
+                                <label class="div-row" for="js-slide-title">{{valBadgePageTitle}}</label>
+                                <div class="diw-row"></div>
+                            </div>
+                            <div class="div-col">
+                                <input class="div-row slide-title-input" type="text" id="js-slide-title" placeholder="">
+                                <div>{{valBadgePageTitleText}}</div>
+                            </div>
+                        </div>
+
+                        <div class="div-row">
+                            <div class="div-col settings-label">
+                                <label class="div-row" for="page-statement-category-selector">{{valBadgePageTopic}}</label>
+                                <div class="div-row"></div>
+                            </div>
+                            <div class="div-col">
+                                <select class="div-row settings-select" name="" id="page-statement-category-selector"></select>
+                                <div>{{valBadgePageTopicText}}</div>
+                            </div>
+                        </div>
+
+                        <div class="div-row">
+                            <div class="div-col settings-label">
+                                <label class="div-row" for="js-page-player-title">{{valBadgePlayerTitle}}</label>
+                                <div class="div-row"></div>
+                            </div>
+                            <div class="div-col">
+                                <select class="div-row settings-select" name="" id="js-page-player-title"></select>
+                                <div>{{valBadgePlayerTitleText}}</div>
+                            </div>
+                        </div>
+
+                        <div class="div-row settings-learning">
+                            <div class="div-col settings-label">
+                                <label class="div-row" for="page-statement-verb-selector">{{valBadgeLearningLabel}}</label>
+                                <div class="div-row"></div>
+                            </div>
+                            <div class="div-col">
+                                <div class="div-row settings-learning">
+                                    <span class="div-col">
+                                        <span>The User</span>
+                                        <select class="page-statement" name="" id="page-statement-verb-selector"></select>
+                                    </span>
+                                    <input class="div-col statement-object-input" type="text" id="js-slide-statement-object" placeholder="">
+                                </div>
+                                <div>{{valBadgeLearningLabelText}}</div>
+                            </div>
+                        </div>
+
+                        <div class="val-row div-row text-right shift-right">
+                            <button class="button medium neutral js-valamis-popup-close shift-left">
+                                {{cancelLabel}}
+                            </button>
+                            <button class="button medium primary js-save-page-settings">
+                                {{saveLabel}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-change-slide-background"
+                    title="{{valBadgeBackgroundColor}}">
+                <span class="val-icon-drop"></span>
+            </button>
+        </div>
+        <div class="val-row js-valamis-popup">
+            <button class="button slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-valamis-popup-button js-upload-image"
+                    title="{{valBadgeBackgroundImage}}">
+                <span class="val-icon-image-bg"></span>
+            </button>
+            <div class="image-upload-panel slide-popup-panel js-valamis-popup-panel">
+                <div class="arrow-right"></div>
+                <button class="button medium simple no-text no-margin shift-right close-slide-popup-panel js-valamis-popup-close">
+                    <span class="val-icon-exit"></span>{{slideExitLabel}}
+                </button>
+                <div class="val-row">
+                    <div class="s-12 m-12 l-12">
+                        <div class="val-row">
+                            {{slideSlideBackgroundImageLabel}}
+                            <div id="slide-background-image-thumbnail"></div>
+                            <div class="file-uploader-simple js-image-uploader"></div>
+                        </div>
+                        <div class="val-row">
+                            <label for="background-image-selector">{{slideImageSizeLabel}}</label>
+
+                            <div class="val-select">
+                                <select name="" id="background-image-selector">
+                                    <option value="cover">{{slideStretchLabel}}</option>
+                                    <option value="contain">{{slideFitLabel}}</option>
+                                    <option value="initial">{{slideOriginalLabel}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="val-row">
+                            <button class="button medium primary shift-left js-select-from-media-gallery">
+                                <span class="val-icon-image"></span> {{galleryLabel}}
+                            </button>
+                            <button class="button medium danger shift-right js-remove-background-image">
+                                <span class="val-icon-trash"></span> {{valBadgeDelete}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="val-row">
+            <button class="button slide-delete slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-slide-delete"
+                    title="{{valBadgeDeletePage}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="revealTemplate">
+    <div class="slides">
+        <section>
+            <section></section>
+        </section>
+    </div>
+</script>
+<script type="text/html" id="arrangeTemplate">
+<table>
+    <tr></tr>
+</table>
+</script>
+<script type="text/html" id="arrangeListTemplate">
+</script>
+<script type="text/html" id="arrangeTileTemplate">
+    <div class="arrange-tile-controls js-arrange-tile-controls shift-right">
+        <div class="val-row hidden">
+            <button class="button arrange-tile-preview medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-arrange-tile-select" title="{{valBadgeCheck}}">
+                <span class="val-icon-checkmark"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button arrange-tile-preview medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-arrange-tile-edit" title="{{editLabel}}">
+                <span class="val-icon-edit"></span>
+            </button>
+        </div>
+        <div class="val-row">
+            <button class="button arrange-tile-delete medium slides-dark-button medium no-margin slides-square no-text valamis-tooltip js-arrange-tile-delete" title="{{valBadgeDelete}}">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+    <div class="arrange-tile-cover js-arrange-tile-cover"></div>
+</script>
+<script type="text/html" id="slideThumbnailTemplate">
+    <div></div>
+</script>
+<script type="text/template" id="slides-editor-fileupload-modal-template">
+    <div class="bbm-modal__topbar">
+        <h3 class="bbm-modal__title">{{fileUploadModalHeader}}</h3>
+
+        <div class="modal-close"></div>
+    </div>
+    <div class="bbm-modal__section image-uploader-dialog"></div>
+</script>
+<script type="text/template" id="slides-editor-modals-template">
+    <div class="lesson-studio-modals-container"></div>
+</script>
+<script type="text/template" id="image-upload-modal-template">
+    <div class="bbm-modal__topbar" >
+        <h3 class="bbm-modal__title">{{#isWebgl}} {{webglUploadModalHeader}} {{/isWebgl}} {{^isWebgl}} {{imageUploadModalHeader}} {{/isWebgl}}</h3>
+
+        <div class="modal-close val-icon-exit close-button"></div>
+    </div>
+    <div class="bbm-modal__section image-modal-content clearfix" style="position: relative;">
+
+    </div>
+    <div class="bbm-modal__bottombar">
+    </div>
+</script>
+<script type="text/template" id="question-select-modal-template">
+    <div class="js-modal-content"></div>
+</script>
+<script type="text/template" id="content-manager-modal-template">
+    <div class="js-modal-content">
+        <div class="overflow-hidden val-portlet" id="questionBankBody">
+            <div id="contentManagerAppRegion"></div>
+        </div>
+    </div>
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">{{quizCancelUpdateButtonTooltipLabel}}</button>
+        <button class="button big primary js-submit-button">{{selectQuestionLabel}}</button>
+    </div>
+</script>
+<script type="text/template" id="CategorizationQuestionTemplate">
+    <div class="categorization-question">
+        <div class="valamis-question">
+            <div class="question-text">{{{text}}}</div>
+
+            <div class="div-table answers-options">
+                <div class="div-col shift-left">
+                    {{#rowsCategoriesText}}
+                    <div class="div-row">
+                        {{#.}}
+                        <div class="div-col phone-row">
+                            <div class="category-item">
+                                <div class="category-text">{{{.}}}</div>
+                                <ul></ul>
+                            </div>
+                        </div>
+                        {{/.}}
+                    </div>
+                    {{/rowsCategoriesText}}
+                </div>
+                <div class="div-col shift-right">
+                    <ul class="answer-container-source">
+                        {{#answersText}}
+                        <li class="categorization-answer-item">
+                            <span class="invisible-font">Matching element</span>
+                            <span class="js-answer-text">{{{.}}}</span>
+                            {{#autoShowAnswer}}
+                            <div class="val-icon"></div>
+                            {{/autoShowAnswer}}
+                        </li>
+                        {{/answersText}}
+                    </ul>
+                </div>
+            </div>
+
+            {{#autoShowAnswer}}
+            <button class="button big check-answer-button shift-left">{{checkLabel}}</button>
+            {{/autoShowAnswer}}
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="ChoiceQuestionTemplate">
+    <div class="choice-question">
+        <div class="valamis-question">
+            <div class="question-text">{{{text}}}</div>
+
+            <div class="answers-options">
+                {{#answers}}
+                <span class="answer-container">
+                    <span class="invisible-font">{{answerLabel}}</span>
+                    {{#multipleChoice}}
+                        <input type="checkbox" id="resultAnswer{{id}}_{{questionNumber}}" class="checkbox" data-score="{{score}}"/>
+                        <label for="resultAnswer{{id}}_{{questionNumber}}">
+                            <div class="answer-checkbox val-icon-checkmark"></div>
+                            <div class="choice-answer-text">{{{answerText}}}</div>
+                        </label>
+                    {{/multipleChoice}}
+
+                    {{^multipleChoice}}
+                        <input type="radio" id="resultAnswer{{id}}_{{questionNumber}}" class="radio" data-score="{{score}}"/>
+                        <label for="resultAnswer{{id}}_{{questionNumber}}">
+                            <div class="answer-radio val-icon-radio"></div>
+                            <div class="choice-answer-text">{{{answerText}}}</div>
+                        </label>
+                    {{/multipleChoice}}
+                </span>
+                {{/answers}}
+            </div>
+        </div>
+
+        {{#autoShowAnswer}}
+            <button class="button big check-answer-button shift-left">{{checkLabel}}</button>
+        {{/autoShowAnswer}}
+    </div>
+</script>
+
+<script type="text/template" id="EssayQuestionTemplate">
+    <div class="essay-question">
+        <div class="valamis-question js-valamis-question">
+            <div class="question-text">{{{text}}}</div>
+
+            <div class="answers-options js-answers-options">
+                <textarea class="answer-textarea" id="answer{{id}}" rows="15" cols="60" placeholder="{{typeYourAnswerLabel}}"></textarea>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="MatchingQuestionTemplate">
+    <div class="matching-question">
+        <div class="valamis-question">
+            <div class="question-text">{{{text}}}</div>
+
+            <div class="div-table answers-options">
+                <div class="div-col shift-left">
+                    {{#rowsCategoriesText}}
+                    <div class="div-row">
+                        {{#.}}
+                        <div class="div-col phone-row">
+                            <div class="category-item">
+                                <div class="category-text">{{{.}}}</div>
+                                <ul></ul>
+                            </div>
+                        </div>
+                        {{/.}}
+                    </div>
+                    {{/rowsCategoriesText}}
+                </div>
+
+                <div class="div-col shift-right">
+                    <ul class="answer-container-source">
+                        {{#answers}}
+                        <li class="categorization-answer-item">
+                            <span class="invisible-font">Matching element</span>
+                            <span>{{{matchingText}}}</span>
+                            {{#autoShowAnswer}}
+                            <div class="val-icon"></div>
+                            {{/autoShowAnswer}}
+                        </li>
+                        {{/answers}}
+                    </ul>
+                </div>
+            </div>
+
+            {{#autoShowAnswer}}
+            <button class="button big check-answer-button shift-left">{{checkLabel}}</button>
+            {{/autoShowAnswer}}
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="NumericQuestionTemplate">
+    <div class="numeric-question">
+        <div class="valamis-question js-valamis-question content{{id}}">
+            <div class="question-text">{{{text}}}</div>
+
+            <div class="answers-options js-answers-options">
+                <input class="question-short-answers" id="scormNumericAnswer{{id}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
+            </div>
+        </div>
+        <!--{{#autoShowAnswer}} -->
+        <button class="button big check-answer-button" id="checkAnswerButton">{{checkLabel}}</button>
+        <!--{{/autoShowAnswer}} -->
+    </div>
+</script>
+<script type="text/template" id="PlainTextQuestionTemplate">
+    <div class="valamis-question js-valamis-question plaintext-element">
+        <div class="question-text">{{{text}}}</div>
+
+        <div class="answers-options js-answers-options">
+            {{{text}}}
+        </div>
+    </div>
+</script>
+<script type="text/template" id="PositioningQuestionTemplate">
+    <div class="valamis-question js-valamis-question content{{id}}">
+        <div class="question-text">{{{text}}}</div>
+
+        <div class="answers-options js-answers-options">
+            <div class="answer-container">
+                <ul id="sortable{{id}}">
+                    {{#answers}}
+                    <li class="ui-state-default" id="{{answerId}}">
+                        <div class="val-icon-sort"></div>
+                        <div><!--{{{.}}}-->{{{answerText}}}</div></li>
+                    {{/answers}}
+                </ul>
+            </div>
+        </div>
+        <!--{{#autoShowAnswer}} -->
+        <button class="button big check-answer-button shift-left" id="checkAnswerButton">{{checkLabel}}</button>
+        <!--{{/autoShowAnswer}} -->
+    </div>
+</script>
+<script type="text/template" id="PurePlainTextQuestionTemplate">
+    {{{data}}}
+</script>
+<script type="text/template" id="ShortAnswerQuestionTemplate">
+    <div class="short-question">
+        <div class="valamis-question js-valamis-question content{{id}}">
+            <div class="question-text">{{{text}}}</div>
+
+            <div class="answers-options js-answers-options">
+                <input class="question-short-answers" id="scormShortAnswer{{id}}" type="text" value="" placeholder="{{typeYourAnswerLabel}}"/>
+            </div>            
+            <!--{{#autoShowAnswer}} -->
+            <button class="button big check-answer-button shift-left" id="checkAnswerButton">{{checkLabel}}</button>
+            <!--{{/autoShowAnswer}} -->
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="themePreviewItemTemplate">
+    <div class="tile-content {{type}}">
+        <div class="background js-background" style="background-color: {{bgColor}}">
+            <div class="image"
+                 {{#bgImage}}
+                 style="background-image: url('{{srcImage}}');
+                    background-size: contain;
+                    background-position: center;
+                    background-repeat: no-repeat;"
+                 {{/bgImage}} >
+                {{#isButton}}
+                <div class="title">
+                    <div class="plus-icon"><i class="icon val-icon-plus"></i></div>
+                    {{title}}
+                </div>
+                {{/isButton}}
+                {{^isButton}}
+                <div class="title" style="font-family: {{fontFamily}}; font-size: {{fontSize}}; color: {{fontColor}};">
+                    {{title}}
+                </div>
+                {{/isButton}}
+            </div>
+        </div>
+        {{#isSelected}}
+        <span class="text-selected">
+        {{{textThemeSelected}}}
+        </span>
+        {{/isSelected}}
+        <div class="controls">
+            {{#canDelete}}
+            <button class="button slides-dark-button medium slides-small no-text button-delete js-action-delete">
+                <span class="val-icon-trash"></span>
+            </button>
+            {{/canDelete}}
+        </div>
+    </div>
+</script>
+<script type="text/template" id="themePreviewWrapperTemplate">
+    <div class="arrow arrow-up right"></div>
+    <div class="text-center">
+        <div class="button-group button-group-big js-themes-controls">
+            <button class="button big simple active" data-mode="default">
+                {{defaultLabel}}
+            </button>
+            <button class="button big simplet" data-mode="personal">
+                {{personalLabel}}
+            </button>
+            <button class="button big simplet" data-mode="public">
+                {{publicLabel}}
+            </button>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div id="theme-container">
+    </div>
+</script>
+<script type="text/template" id="themeAddViewTemplate">
+    <div class="val-info-table div-table">
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{nameLabel}}:
+            </div>
+            <div class="div-col content-col">
+                <input type="text" id="js-slide-theme-title" value=""/>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col">
+                {{fontLabel}}:
+            </div>
+            <div class="div-col content-col">
+                {{^oneFont}}
+                <div class="val-select">
+                    <select id="js-slide-theme-font">
+                        {{#fonts}}
+                        <option>{{name}}</option>
+                        {{/fonts}}
+                    </select>
+                </div>
+                {{/oneFont}}
+                {{#oneFont}}
+                {{#fonts}}
+                <div class="div-col content-col">{{name}}</div>
+                {{/fonts}}
+                {{/oneFont}}
+            </div>
+        </div>
+    </div>
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">{{cancelLabel}}</button>
+        <button class="button big primary js-save">{{saveLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="slideTemplatesPreviewItemTemplate">
+    <div class="tile-content {{type}}">
+        <div class="image {{bgImageType}}"></div>
+        <div class="title"> {{title}} </div>
+    </div>
+</script>
+
+<script type="text/template" id="slideTemplatesPreviewTemplate">
+    <div id="slide-templates-container"></div>
+</script>
+
+<script type="text/template" id="slideSettingsTemplate">
+    <div class="arrow arrow-up right"></div>
+    <div class="settings-container">
+        <p><b>{{valSelectDeviceSettingsLabel}}</b></p>
+        <div class ="val-row">
+            <ul class="devices-list"></ul>
+        </div>
+        <p><b>{{valGeneralSettings}}</b></p>
+        <div class ="val-row">
+            <div class="val-col shift-left">
+                <input type="checkbox" value="None" id="canPauseOption"
+                {{^hasRandomQuestions}}
+                {{#isSelectedContinuity}}checked{{/isSelectedContinuity}}
+                {{/hasRandomQuestions}}
+                {{#hasRandomQuestions}}
+                disabled
+                {{/hasRandomQuestions}}
+                name="check" class="val-checkbox"
+                >
+                <label class="shift-left" for="canPauseOption"> {{canPauseText}} </label>
+            </div>
+            <div class="val-col shift-right">
+                {{#hasRandomQuestions}}
+                <span>{{cannotPauseHintLabel}}</span>
+                {{/hasRandomQuestions}}
+                {{^hasRandomQuestions}}
+                <span>{{canPauseHintLabel}}</span>
+                {{/hasRandomQuestions}}
+            </div>
+        </div>
+        <div class ="val-row">
+            <input type="checkbox" id="durationOption" class="val-checkbox js-duration-checkbox" {{#isSetDuration}}checked{{/isSetDuration}}>
+            <label class="shift-left" for="durationOption"> {{durationLabel}} </label>
+            <div id="timepicker" {{^isSetDuration}}class="hidden"{{/isSetDuration}}>
+                <div class="input-append bootstrap-timepicker">
+                    <input type="text" class="js-slide-set-duration">
+                    <span class="add-on">
+                        <i class="val-icon-clock"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    <div class ="val-row">
+        <div class="val-col shift-left">
+            <input type="checkbox" id="topDownOption" class="val-checkbox js-topdown-checkbox"
+                   {{#isTopDownEnabled}} checked {{/isTopDownEnabled}}
+                   {{#hasVerticalSlides}} disabled {{/hasVerticalSlides}}
+            >
+            <label class="shift-left" for="topDownOption"> {{enableTopDownLabel}} </label>
+        </div>
+        <div class="val-col shift-right">
+            {{#hasVerticalSlides}}
+            <span>{{cannotChangeTopDownNavigationHintLabel}}</span>
+            {{/hasVerticalSlides}}
+        </div>
+    </div>
+    <div class ="val-row">
+        <div class="val-col shift-left">
+            <input type="checkbox" id="oneAnswerAttempt" class="val-checkbox js-answerAttempt-checkbox"
+                   {{#isOneAnswerAttempt}}checked{{/isOneAnswerAttempt}}>
+            <label class="shift-left no-margin" for="oneAnswerAttempt"> {{oneAnswerAttemptLabel}} </label>
+        </div>
+        <div class="val-col shift-right">
+            {{oneAnswerAttemptHintLabel}}
+        </div>
+    </div>
+    <div class ="val-row">
+        <div class="val-col shift-left">
+            <input type="checkbox" id="requiredReview" class="val-checkbox js-required-review-checkbox"
+                   {{#requiredReview}}checked{{/requiredReview}}>
+            <label class="shift-left no-margin" for="requiredReview"> {{reviewRequiredLabel}} </label>
+        </div>
+        <div class="val-col shift-right">
+            {{reviewRequiredHintLabel}}
+        </div>
+    </div>
+    <div class ="val-row">
+        <div id="scorepicker">
+            <span class = "shift-left"> {{successScore}} </span>
+            <div class="js-plus-minus"></div>
+        </div>
+    </div>
+    <div class="val-row">
+        <label class="shift-left" for="js-player-title">{{valBadgePlayerTitle}}</label>
+        <select name="" id="js-player-title"></select>
+    </div>
+    <div class="bbm-modal__buttonbar">
+        <button class="button big neutral modal-close">{{cancelLabel}}</button>
+        <button class="button big primary js-save-settings">{{saveLabel}}</button>
+    </div>
+</script>
+<script type="text/template" id="fileSelectMethodViewTemplate">
+    <div class="js-upload-hint-label">
+        {{AddPdfPptFileModalHintLabel}}
+    </div>
+    <div class="js-processing-hint-label hidden text-center h2">
+        {{processingWaitLabel}}
+    </div>
+
+    <div class="dropzone-small js-file-uploader"></div>
+
+    <div class="js-converting-hint-label hidden text-center">
+        {{convertingImagesLabel}}
+    </div>
+    <br/>
+    <div class="js-converting-hint-label hidden text-center cursor-pointer modal-close">
+        <b>{{cancelUploadLabel}}</b>
+    </div>
+    {{#googleClientApiAvailable}}
+    <div class="text-center">
+        <button class="button big neutral google-drive-icon js-select-google-file">{{valBadgeSelectFromDrive}}</button>
+    </div>
+    {{/googleClientApiAvailable}}
+</script>
+<script type="text/template" id="selectDisplayFormatViewTemplate">
+    {{#isPdf}}
+    <label class="group-label"> {{selectDisplayFormatLabel}} </label>
+
+    <div class="div-table display-options-table">
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="displayFormat" value="single" id="singleFileFormat">
+            </div>
+            <div class="div-col">
+                <label for="singleFileFormat"> {{singleSlidePdfDisplayLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{singleSlidePdfDisplayHintLabel}}
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="displayFormat" value="split" id="splitFileFormat">
+            </div>
+            <div class="div-col">
+                <label for="splitFileFormat" > {{splitPdfDisplayLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{splitPdfDisplayHintLabel}}
+            </div>
+        </div>
+    </div>
+    {{/isPdf}}
+
+    {{^isPdf}}
+    <div class="hint-layout">
+        {{splitPptDisplayHintLabel}}
+    </div>
+    {{/isPdf}}
+
+    <div class="js-orientation-options hidden">
+        {{#isTopDownEnabled}}
+        <label class="group-label shift-left"> {{selectOrientationLabel}} </label>
+        <span class="valamis-tooltip val-link-help" data-placement="bottom" title="{{selectOrientationTooltipLabel}}">?</span>
+
+        <div class="div-table orientation-options-table">
+            <div class="div-row">
+                <div class="div-col">
+                    <div class="image-selection js-select-orientation" data-value="right">
+                        <span class="val-rounded-icon val-icon-checkmark success"></span>
+                    </div>
+                </div>
+                <div class="div-col">
+                    <div class="image-selection vertical js-select-orientation" data-value="down">
+                        <span class="val-rounded-icon val-icon-checkmark success"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="div-row">
+                <div class="div-col"> {{horizontalOrientationHintLabel}} </div>
+                <div class="div-col"> {{verticalOrientationHintLabel}} </div>
+            </div>
+        </div>
+        {{/isTopDownEnabled}}
+
+        {{^isTopDownEnabled}}
+        <div class="hint-layout js-import-hint">
+            {{orientationTopDownDisabledHintLabel}}
+        </div>
+        {{/isTopDownEnabled}}
+    </div>
+
+    <button class="button big js-import-file" disabled> {{importDocumentLabel}} </button>
+</script>
+<script type="text/template" id="add-article-template">
+    <div class="bbm-modal__topbar" >
+        <h3 class="bbm-modal__title">{{addTextArticleLabel}}</h3>
+
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section js-modal-content">
+        <table class="val-table medium list">
+            <tbody id="articleList">
+            <tr>
+                <th>{{titleLabel}}</th>
+                <th>{{languageLabel}}</th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">{{cancelLabel}}</button>
+        <button class="button big primary bbm-button">{{saveLabel}}</button>
+    </div>
+</script>
+
+<script type="template/mustache" id="articleTemplate">
+<td>
+    {{title}}
+</td>
+<td>
+    <div class="position-relative">
+        <div class="val-select">
+            <select class="article-locale">
+                {{#availableLocales}}
+                <option value="{{id}}"> {{language}} - {{country}}</option>
+                {{/availableLocales}}
+            </select>
+        </div>
+    </div>
+</td>
+</script>
+
+<script type="text/template" id="view-video-template">
+    <div class="bbm-modal__topbar" >
+        <h3 class="bbm-modal__title">{{header}}</h3>
+
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section js-modal-content">
+        <table class="val-table medium list">
+            <tbody>
+            <tr>
+                <td colspan="2">
+                    <div class="val-paginator" id="videoPaginator"></div>
+                    <div id="dlVideoContainer">
+                        <table id="dlvideo" class="val-table small list">
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button big neutral modal-close">{{cancelLabel}}</button>
+        <button class="button big primary bbm-button">{{saveLabel}}</button>
+    </div>
+</script>
+
+<script type="text/template" id="videoTemplate">
+    <td>{{title}}</td>
+    <td>{{mimeType}}</td>
+    <td class="narrow-col">
+        <button class="button medium {{^selected}} neutral {{/selected}} {{#selected}} primary {{/selected}} no-text js-toggleButton">
+            <span class="val-icon-checkmark"></span> Select
+        </button>
+    </td>
+</script>
+
+<script type="text/template" id="selectDeviceModalTemplate">
+    <ul class="devices-list"></ul>
+    <div class="text-center">
+        <button class="button big primary js-button-continue">
+            {{continueLabel}}
+        </button>
+    </div>
+    <div></div>
+</script>
+<script type="text/template" id="deviceItemTemplate">
+    <li class="item{{#selected}} active{{/selected}}" data-id="{{id}}">
+        <a href="#" class="js-button-select">
+            <span class="val-icon val-icon-checkmark"></span>
+            <div class="val-icon-device-{{name}}"></div>
+            <span class="item-label">{{title}}</span>
+        </a>
+    </li>
+</script>
+<script type="text/template" id="deviceItemButtonTemplate">
+<button class="button medium button-dark-blue button-transparent no-text valamis-tooltip
+                {{#active}} active{{/active}} {{^selected}} hidden{{/selected}}
+                val-icon-device-{{name}}" data-value="{{id}}" title="{{title}}">
+</button>
+</script>

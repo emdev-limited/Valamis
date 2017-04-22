@@ -1,7 +1,7 @@
 package com.arcusys.valamis.certificate.service
 
 import com.arcusys.valamis.certificate.model.CertificateState
-import com.arcusys.valamis.certificate.model.goal.{CourseGoal, GoalStatuses}
+import com.arcusys.valamis.certificate.model.goal.{CertificateGoal, CourseGoal, GoalStatuses}
 import com.arcusys.valamis.certificate.storage.{CertificateGoalRepository, CertificateGoalStateRepository, CertificateStateRepository, CourseGoalStorage}
 import com.arcusys.valamis.gradebook.model.CourseGrade
 import com.arcusys.valamis.gradebook.service.TeacherCourseGradeService
@@ -36,6 +36,11 @@ class CourseGoalStatusCheckerComponentTest extends FunSpec {
         when(courseGoalStorage.getByCertificateId(certificateId)).thenReturn(Seq(courseGoalInProgress))
         val goalStateRepository =  mock(classOf[CertificateGoalStateRepository])
         val goalRepository = mock(classOf[CertificateGoalRepository])
+
+        def updateUserGoalState(userId: Long, goal: CertificateGoal, status: GoalStatuses.Value,
+                                date: DateTime): (GoalStatuses.Value, DateTime) = {
+          (GoalStatuses.InProgress, DateTime.now)
+        }
       }
 
       val courseGoalStatuses = checkerComponent.getCourseGoalsStatus(certificateId, userId)
@@ -59,6 +64,11 @@ class CourseGoalStatusCheckerComponentTest extends FunSpec {
         when(courseGoalStorage.getByCertificateId(certificateId)).thenReturn(Seq(courseGoalNotDone))
         val goalStateRepository =  mock(classOf[CertificateGoalStateRepository])
         val goalRepository = mock(classOf[CertificateGoalRepository])
+
+        def updateUserGoalState(userId: Long, goal: CertificateGoal, status: GoalStatuses.Value,
+                                date: DateTime): (GoalStatuses.Value, DateTime) = {
+          (GoalStatuses.InProgress, DateTime.now)
+        }
       }
 
       val courseGoalStatuses = checkerComponent.getCourseGoalsStatus(certificateId, userId)
@@ -86,6 +96,11 @@ class CourseGoalStatusCheckerComponentTest extends FunSpec {
         when(courseGoalStorage.getByCertificateId(certificateId)).thenReturn(Seq(courseGoalDoneAfterDeadline))
         val goalStateRepository =  mock(classOf[CertificateGoalStateRepository])
         val goalRepository = mock(classOf[CertificateGoalRepository])
+
+        def updateUserGoalState(userId: Long, goal: CertificateGoal, status: GoalStatuses.Value,
+                                date: DateTime): (GoalStatuses.Value, DateTime) = {
+          (GoalStatuses.InProgress, DateTime.now)
+        }
       }
 
       val courseGoalStatuses = checkerComponent.getCourseGoalsStatus(certificateId, userId)
@@ -113,6 +128,11 @@ class CourseGoalStatusCheckerComponentTest extends FunSpec {
         when(courseGoalStorage.getByCertificateId(certificateId)).thenReturn(Seq(courseGoalSuccess))
         val goalStateRepository =  mock(classOf[CertificateGoalStateRepository])
         val goalRepository = mock(classOf[CertificateGoalRepository])
+
+        def updateUserGoalState(userId: Long, goal: CertificateGoal, status: GoalStatuses.Value,
+                                date: DateTime): (GoalStatuses.Value, DateTime) = {
+          (GoalStatuses.InProgress, DateTime.now)
+        }
       }
 
       val courseGoalStatuses = checkerComponent.getCourseGoalsStatus(certificateId, userId)

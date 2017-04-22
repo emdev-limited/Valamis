@@ -14,11 +14,14 @@ trait UserPolicy {
       PortletName.CertificateManager,
       PortletName.MyCourses)) {
       PermissionUtil.requirePermissionApi(
-        Permission(ViewPermission, Seq(PortletName.LearningTranscript,
-                                       PortletName.UserPortfolio,
-                                       PortletName.ValamisActivities,
-                                       PortletName.Gradebook)),
-        Permission(ViewAllPermission, Seq()))
+        Permission(
+          ViewPermission, Seq(
+            PortletName.LearningTranscript,
+            PortletName.ValamisActivities,
+            PortletName.Gradebook
+          )
+        )
+      )
     }
   )
 }

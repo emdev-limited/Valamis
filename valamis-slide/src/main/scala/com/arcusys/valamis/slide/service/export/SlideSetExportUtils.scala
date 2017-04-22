@@ -3,9 +3,9 @@ package com.arcusys.valamis.slide.service.export
 import java.io.{ByteArrayInputStream, File, InputStream}
 import java.util.regex.Pattern
 
-import com.arcusys.valamis.content.service.{PlainTextService, QuestionService}
-import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.content.model._
+import com.arcusys.valamis.content.service.{CategoryService, PlainTextService, QuestionService}
+import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.slide.model.{SlideEntityType, _}
 import com.arcusys.valamis.util.FileSystemUtil
 import com.arcusys.valamis.util.serialization.JsonHelper._
@@ -14,11 +14,13 @@ import scala.util.matching.Regex
 
 case class QuestionResponse(tpe: Int, json: String, answersJson:Option[String])
 case class PlainTextResponse(json: String)
+case class CategoryResponse(json: String)
 
 case class ExportFormat(version: Option[String],
-                        questions: List[QuestionResponse],
-                        plaintexts: List[PlainTextResponse],
-                        slideSet: SlideSetModel)
+                        questions: Seq[QuestionResponse],
+                        plaintexts: Seq[PlainTextResponse],
+                        categories: Seq[CategoryResponse],
+                        slideSet: SlideSetExportModel)
 
 object QuestionExternalFormat {
   def exportQuestion(question: Question, answers: Seq[Answer]): QuestionResponse = {
@@ -29,8 +31,15 @@ object QuestionExternalFormat {
     PlainTextResponse(pt.toJson)
   }
 
+  def exportCategory(category: Category): CategoryResponse = {
+    CategoryResponse(category.toJson)
+  }
+
   def importPlainText(ptResponse: PlainTextResponse): PlainText = {
     fromJson[PlainText](ptResponse.json)
+  }
+  def importCategory(categoryResponse: CategoryResponse): Category = {
+    fromJson[Category](categoryResponse.json)
   }
 
   def importPlainTextLast(questionResponse: QuestionResponse): PlainText = {
@@ -202,46 +211,80 @@ object SlideSetHelper {
 
   def getDisplayMode(url: String) = url.reverse.takeWhile(_ != ' ').reverse
 
-  def filePathPrefix(any: Product, version: Option[String] = slidesVersion, id: Long = 0L) =
-    any match {
-      case slideSet: SlideSetModel =>
-        version match {
-          case Some(v) => s"slideset_logo_${slideSet.id.get}/"
-          case _       => s"slide_logo${slideSet.id.get}/"
-        }
-      case slide: SlideModel               => s"slide_${slide.id.get}/"
-      case slideElement: SlideElementModel =>
-        if (slideElement.slideEntityType == SlideEntityType.Pdf) s"slideData${slideElement.id.get}/"
-        else s"slide_item_${slideElement.id.get}/"
-      case slideTheme: SlideThemeModel     =>
-        s"slide_theme_${slideTheme.id.get}/"
+  def filePathPrefix(slideSet: SlideSet, version: Option[String] = slidesVersion): String = {
+    version match {
+      case Some(v) => s"slideset_logo_${slideSet.id}/"
+      case _ => s"slide_logo${slideSet.id}/"
     }
-
-  def slideSetLogoPath(slide: SlideSetModel, version: Option[String] = slidesVersion) = {
-    slide.logo.map(SlideSetHelper.logoPath(slide, _ ))
   }
 
-  def logoPath(any: Product, logo: String, version: Option[String] = slidesVersion) = "files/" + filePathPrefix(any, version) + logo
+  def filePathPrefix(slide: Slide): String = {
+    s"slide_${slide.id}/"
+  }
+
+  def filePathPrefix(slideElement: SlideElement): String = {
+    if (slideElement.slideEntityType == SlideEntityType.Pdf) s"slideData${slideElement.id}/"
+    else s"slide_item_${slideElement.id}/"
+  }
+
+  def filePathPrefix(slideTheme: SlideTheme): String = {
+    s"slide_theme_${slideTheme.id}/"
+  }
+
+  def slideSetLogoPath(slideSet: SlideSet) = {
+    slideSet.logo.map("files/" + filePathPrefix(slideSet) + _)
+  }
+
+  def logoPath(slide: Slide, logo: String): String = {
+    "files/" + filePathPrefix(slide) + logo
+  }
+
+  def logoPath(element: SlideElement, logo: String) = {
+    "files/" + filePathPrefix(element) + logo
+  }
 }
 
 trait SlideSetExportUtils {
+  protected def categoryService: CategoryService
   protected def questionService: QuestionService
   protected def plainTextService: PlainTextService
   protected def fileService: FileService
 
-  protected def getRequiredQuestions(slides: List[SlideModel]):List[(Question,Seq[Answer])] =
+  protected def getQuestions(slides: Seq[Slide]): Seq[(Question,Seq[Answer])] = {
     slides.flatMap { slide =>
-    slide.slideElements.filter { _.slideEntityType == com.arcusys.valamis.slide.model.SlideEntityType.Question }
-      .filter { _.content != "" }
-      .map { question => questionService.getWithAnswers(question.content.toLong)}
+      slide.slideElements
+        .filter { e => e.slideEntityType == SlideEntityType.Question || e.slideEntityType == SlideEntityType.RandomQuestion}
+        .filterNot { _.content.isEmpty }
+        .flatMap {
+          case e if e.slideEntityType == SlideEntityType.Question => Seq(questionService.getWithAnswers(e.content.toLong))
+          case e if e.slideEntityType == SlideEntityType.RandomQuestion =>
+            val qIdList = e.content
+              .split(",")
+              .filter(_.startsWith(SlideConstants.QuestionIdPrefix))
+              .map(_.replace(SlideConstants.QuestionIdPrefix, "").toLong)
+            qIdList.map(questionService.getWithAnswers)
+        }
+    } distinct
   }
 
-  protected def getRequiredPlainTexts(slides: List[SlideModel]):List[PlainText] =
+  protected def getPlainTexts(slides: Seq[Slide]): Seq[PlainText] = {
     slides.flatMap { slide =>
-      slide.slideElements.filter { _.slideEntityType == com.arcusys.valamis.slide.model.SlideEntityType.PlainText }
-        .filter { _.content != "" }
-        .map { pt => plainTextService.getById(pt.content.toLong)}
-    }
+      slide.slideElements
+        .filter { e => e.slideEntityType == SlideEntityType.PlainText || e.slideEntityType == SlideEntityType.RandomQuestion }
+        .filterNot {
+          _.content.isEmpty
+        }
+        .flatMap {
+          case e if e.slideEntityType == SlideEntityType.PlainText => Seq(plainTextService.getById(e.content.toLong))
+          case e if e.slideEntityType == SlideEntityType.RandomQuestion =>
+            val qIdList = e.content
+              .split(",")
+              .filter(_.startsWith(SlideConstants.PlainTextIdPrefix))
+              .map(_.replace(SlideConstants.PlainTextIdPrefix, "").toLong)
+            qIdList.map(plainTextService.getById)
+        }
+    } distinct
+  }
 
   protected def getFromPath(content: String, folderPrefix: String): Option[(String, String)] = {
     if (content.isEmpty || content.contains("http://") || content.contains("https://"))
@@ -278,14 +321,16 @@ trait SlideSetExportUtils {
       case _ => throw new IllegalArgumentException("Content didn't match any of the regular expressions.")
   }
 
-  protected def composeFile(any: Product): Option[(String, InputStream)] = {
-    val fileName: Option[String] = any match {
-      case slide: SlideModel               => slide.bgImage
-      case slideElement: SlideElementModel => Some(slideElement.content)
-    }
-    fileName
+  protected def getSlideFile(slide: Slide): Option[(String, InputStream)] = {
+    slide.bgImage
       .flatMap(filename =>
-        getFromPath(filename.takeWhile(_ != ' '), SlideSetHelper.filePathPrefix(any))
+        getFromPath(filename.takeWhile(_ != ' '), SlideSetHelper.filePathPrefix(slide))
+          .map(getPathAndInputStream))
+  }
+  protected def getElementFile(element: SlideElement): Option[(String, InputStream)] = {
+    Some(element.content)
+      .flatMap(filename =>
+        getFromPath(filename.takeWhile(_ != ' '), SlideSetHelper.filePathPrefix(element))
           .map(getPathAndInputStream))
   }
 
@@ -306,23 +351,31 @@ trait SlideSetExportUtils {
       new ByteArrayInputStream(fileService.getFileContent(folderName, fileName))
   }
 
-  protected def getRequiredFiles(slides: List[SlideModel]) =
-    getRequiredFileModels(slides).flatten
+  protected def getSlidesFiles(slides: Seq[Slide]): Seq[(String, InputStream)] = {
+    val filesFromSlides = slides.flatMap(getSlideFile)
 
-  private def getRequiredFileModels(slides: List[SlideModel]): List[Option[(String, InputStream)]] =
-    slides.flatMap { slide =>
-      val slideResource = composeFile(slide)
-      val slideElementResources =
-        slide
-          .slideElements
-          .filter(x => SlideEntityType.AvailableExternalFileTypes.contains(x.slideEntityType))
-          .map(composeFile)
+    val filesFromElements = slides
+      .flatMap(_.slideElements)
+      .filter(x => SlideEntityType.AvailableExternalFileTypes contains x.slideEntityType)
+      .filterNot(_.content.startsWith("/documents"))
+      .flatMap(getElementFile)
 
-      slideResource :: slideElementResources
-    }
+    filesFromSlides ++ filesFromElements
+  }
 
-  protected def addImageToFileService(any: Product, version: Option[String], fileName: String, path: String, id: Long = 0L): String = {
-    val folder = SlideSetHelper.filePathPrefix(any, SlideSetHelper.slidesVersion, id)
+  protected def addImageToFileService(slideSet: SlideSet, fileName: String, path: String): String = {
+    addFile(SlideSetHelper.filePathPrefix(slideSet), fileName, path)
+  }
+
+  protected def addImageToFileService(slide: Slide, fileName: String, path: String): String = {
+    addFile(SlideSetHelper.filePathPrefix(slide), fileName, path)
+  }
+
+  protected def addImageToFileService(element: SlideElement, fileName: String, path: String): String = {
+    addFile(SlideSetHelper.filePathPrefix(element), fileName, path)
+  }
+
+  private def addFile(folder: String, fileName: String, path: String): String = {
     fileService.setFileContent(
       folder = folder,
       name = fileName.reverse.takeWhile(_ != '/').reverse,
@@ -331,7 +384,7 @@ trait SlideSetExportUtils {
     fileName
   }
 
-  protected def omitFileDuplicates(files: List[(String, InputStream)]): List[(String, InputStream)] = {
+  protected def omitFileDuplicates(files: Seq[(String, InputStream)]): Seq[(String, InputStream)] = {
     files.groupBy(_._1).map(_._2.head).toList
   }
 }

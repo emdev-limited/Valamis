@@ -5,22 +5,22 @@ import java.util.NoSuchElementException
 
 import com.arcusys.valamis.util.export.ImportProcessor
 import com.arcusys.valamis.lesson.model.LessonLimit
-import com.arcusys.valamis.lesson.service.{LessonService, PackageUploadManager}
+import com.arcusys.valamis.lesson.service.{LessonNotificationService, LessonService, PackageUploadManager}
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.util.FileSystemUtil
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class PackageImportProcessor(implicit val bindingModule: BindingModule) extends ImportProcessor[PackageExportModel] with Injectable {
+abstract class PackageImportProcessor extends ImportProcessor[PackageExportModel] {
 
-  private lazy val packageUploader = inject[PackageUploadManager]
-  private lazy val lessonService = inject[LessonService]
+  def packageUploader: PackageUploadManager
+  def lessonService: LessonService
+  def lessonNotificationService: LessonNotificationService
 
   override protected def importItems(packages: List[PackageExportModel],
                                      courseId: Long,
                                      tempDirectory: File,
                                      userId: Long,
                                      data: String): Unit = {
-    packages.foreach(p => {
+    val newLessons = packages.map { p =>
       // new logo name for package logo file
       val newLogo = if (p.logo.nonEmpty) p.logo.substring(Math.max(p.logo.indexOf("_") + 1, 0)) else ""
       val rerunIntervalType = try {
@@ -63,6 +63,10 @@ class PackageImportProcessor(implicit val bindingModule: BindingModule) extends 
           case _: Throwable => // if logo saving failed, no logo in package
         }
       }
-    })
+
+      lesson
+    }
+
+    lessonNotificationService.sendLessonAvailableNotification(newLessons, courseId)
   }
 }

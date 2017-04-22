@@ -13,7 +13,7 @@ trait AssignmentGoalStorage {
              isOptional: Boolean = false,
              groupId: Option[Long] = None): AssignmentGoal
   def getByAssignmentId(assignmentId: Long): Seq[AssignmentGoal]
-  def get(certificateId: Long, assignmentId: Long): Option[AssignmentGoal]
+  def get(certificateId: Long, assignmentId: Long, isDeleted: Option[Boolean] = Some(false)): Option[AssignmentGoal]
   def getBy(goalId: Long): Option[AssignmentGoal]
-  def getByCertificateId(certificateId: Long): Seq[AssignmentGoal]
+  def getByCertificateId(certificateId: Long, isDeleted: Option[Boolean] = Some(false)): Seq[AssignmentGoal]
 }

@@ -192,13 +192,15 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     else {
       var playerLessonsQ = lessons.filterByCourseId(courseId) union lessons.filterByPlayerId(playerId)
 
+      playerLessonsQ = playerLessonsQ.filterPlayerVisible(playerId)
+
       for (ids <- lessonIds) playerLessonsQ = playerLessonsQ.filterByIds(ids)
 
       var lessonQ = playerLessonsQ
         .filterVisible(true)
         .filterByBeginEndDates(DateTime.now.withTimeAtStartOfDay)
 
-      val extraVisibleLessonQ = playerLessonsQ.filterExtraVisisble
+      val extraVisibleLessonQ = playerLessonsQ.filterExtraVisible
 
       lessonQ = lessonQ union extraVisibleLessonQ.filterByViewer(user.getUserId, MemberTypes.User)
 
@@ -231,7 +233,14 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     val externalLessons = lessons.filterByPlayerId(playerId)
 
     db.withSession { implicit s =>
-      (courseLessons union externalLessons).list
+      val invisibleLessons = invisibleLessonViewers.filter(_.playerId === playerId)
+      val lessons = (courseLessons union externalLessons)
+        .leftJoin(invisibleLessons).on((l,p) => l.id === p.lessonId)
+        .map(p => (p._1, p._2.lessonId.?)).list
+
+      lessons.map({
+        case (lesson, visible) => lesson.copy(isVisible = Some(visible.isEmpty))
+      })
     }
   }
 
@@ -342,7 +351,16 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     }
   }
 
-  private def isLessonVisible(user: LUser, lesson: Lesson): Boolean = {
+  override def setLessonVisibilityFromPlayer(playerId: Long, lessonId: Long, hidden: Boolean): Unit = {
+    db.withSession { implicit s =>
+    if(hidden)
+      invisibleLessonViewers += (playerId, lessonId)
+    else
+      invisibleLessonViewers.filter(il => il.playerId === playerId && il.lessonId === lessonId).delete
+    }
+  }
+
+  override def isLessonVisible(user: LUser, lesson: Lesson): Boolean = {
     lazy val viewers = db.withSession { implicit s =>
       lessonViewers.filterByLessonId(lesson.id).list.toStream
     }

@@ -5,29 +5,27 @@ import java.sql.Connection
 import com.arcusys.learn.liferay.update.version260.migrations.StatementToActivityMigration
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.persistence.impl.settings.StatementToActivityTableComponent
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.H2Driver
-import scala.slick.driver.H2Driver.simple._
 import scala.slick.jdbc.JdbcBackend
 
 
-class StatementToActivityMigrationTest extends FunSuite with BeforeAndAfter {
+class StatementToActivityMigrationTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
-  val db = Database.forURL("jdbc:h2:mem:statementtoactivity", driver = "org.h2.Driver")
-  var connection: Connection = _
+  import driver.simple._
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     tables.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val tables = new StatementToActivityTableComponent with SlickProfile {
-    override val driver = H2Driver
-
+    override val driver = StatementToActivityMigrationTest.this.driver
+    import driver.simple._
     def createSchema() {
       db.withSession { implicit s => statementToActivity.ddl.create }
     }
@@ -35,7 +33,7 @@ class StatementToActivityMigrationTest extends FunSuite with BeforeAndAfter {
 
   test("create statementToActivity") {
 
-    val migrator = new StatementToActivityMigration(db, H2Driver) {
+    val migrator = new StatementToActivityMigration(db, driver) {
       override def getOldData(implicit session: JdbcBackend#Session) = List(
         new OldEntity(1L, Some(33L), Some("Migration"), Some("mappedActivity"), Some("mappedVerb"))
       )
@@ -57,7 +55,7 @@ class StatementToActivityMigrationTest extends FunSuite with BeforeAndAfter {
 
   test("create empty statementToActivity") {
 
-    val migrator = new StatementToActivityMigration(db, H2Driver) {
+    val migrator = new StatementToActivityMigration(db, driver) {
       override def getOldData(implicit session: JdbcBackend#Session) = List(
         new OldEntity(2L, None, None, None, None)
       )

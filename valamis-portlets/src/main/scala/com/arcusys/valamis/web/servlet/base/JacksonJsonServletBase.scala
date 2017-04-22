@@ -34,7 +34,7 @@ trait JacksonJsonServletBase extends JacksonJsonSupport {
 
   options() {
     response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,HEAD,DELETE")
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type,Content-Length,Authorization,If-Match,If-None-Match,X-Experience-API-Version,X-Experience-API-Consistent-Through")
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type,Content-Length,Authorization,If-Match,If-None-Match,X-Experience-API-Version,X-Experience-API-Consistent-Through,X-Requested-With")
     response.setHeader("Access-Control-Expose-Headers", "ETag,Last-Modified,Cache-Control,Content-Type,Content-Length,WWW-Authenticate,X-Experience-API-Version,X-Experience-API-Consistent-Through")
   }
 

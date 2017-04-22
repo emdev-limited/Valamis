@@ -9,8 +9,8 @@ class MyLessonsView extends OAuthPortlet with PortletBase {
     implicit val out = response.getWriter
     val securityScope = getSecurityData(request)
 
-    sendTextFile("/templates/2.0/my_lessons_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/my_lessons_templates.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(securityScope.data, "my_lessons.html")
 
   }

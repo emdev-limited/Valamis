@@ -1,0 +1,45 @@
+<div id="learningReportAppRegion"></div>
+
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(document).ready(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var learningReportOptions = {
+            resourceName: 'learningReport',
+            permissions: {},
+            app: learningReport,
+            appOptions: {
+                "reportFilter": {
+                    "lessonsReport" :  {
+                        "reportType": "lessonsReport",
+                        "settingsId": {{settingsId}},
+                        "courseId": {{courseId}},
+                        "onlyLessonsWithQuestions": {{questionOnly}},
+                        "isSummaryVisible": {{hasSummary}}
+                    },
+                    "pathsReport" : {
+                        "reportType": "pathsReport",
+                        "settingsId": {{settingsId}},
+                        "courseId": {{pathsCourseId}},
+                        "pathGoalType": {{pathsGoalType}},
+                        "isSummaryVisible": {{pathsHasSummary}}
+                    }
+                }
+            }
+        };
+
+        valamisApp.execute('subapp:start', learningReportOptions);
+
+        jQueryValamis(this).click(function(event) {
+            if(jQueryValamis(event.target).closest('.js-dropdown-filter').length == 0) {
+                jQueryValamis('.js-dropdown-filter',jQueryValamis('.js-learning-report-filter')).removeClass('show-dropdown-filter');
+            }
+        })
+    });
+</script>

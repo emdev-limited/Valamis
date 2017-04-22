@@ -23,4 +23,5 @@ object PermissionKeys {
   val Order = "ORDER_ACTION"
   val FileAccess = "FILE_ACCESS"
   val DataAccess = "DATA_ACCESS"
+  val UnlockLesson = "UNLOCK_LESSON"
 }

@@ -1,6 +1,5 @@
 package com.arcusys.valamis.lesson.generator.tincan.file.html
 
-import com.arcusys.valamis.lesson.generator.tincan.TinCanPackageGeneratorProperties
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.util.mustache.Mustache
 import com.arcusys.valamis.util.serialization.JsonHelper._
@@ -109,18 +108,29 @@ class TinCanQuestionViewGenerator {
       val answers = qAnswers.map { answer =>
         Map("answerId" -> answer.id,
           "questionNumber" -> questionNumber,
-          "answerText" -> removeLineBreak(answer.asInstanceOf[AnswerKeyValue].key),
+          "text" -> removeLineBreak(answer.asInstanceOf[AnswerKeyValue].key),
           "matchingText" -> removeLineBreak(answer.asInstanceOf[AnswerKeyValue].value.orNull),
           "score" -> answer.score)
       }
+
+      val categoriesName = qAnswers.map(answer => prepareString(answer.asInstanceOf[AnswerKeyValue].key)).distinct
+
+      val categoriesInRow = 3;
+      val categoriesRowsAmount = math.ceil(categoriesName.length / categoriesInRow.toDouble).toInt
+
       val viewModel = Map(
         "id" -> matchingQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(matchingQuestion.title),
         "text" -> prepareStringKeepNewlines(matchingQuestion.text),
-        "answers" -> answers,
-        "answersMatching" -> Random.shuffle(answers),
-        "answerData" -> toJson(answers),
+        "rowsCategoriesText" -> (1 to categoriesRowsAmount).zipWithIndex.map {
+          case (model, index) =>
+            val skip = index * categoriesInRow
+            val take = if (categoriesName.length - skip < categoriesInRow) categoriesName.length % categoriesInRow else categoriesInRow
+            categoriesName.slice(skip, skip + take)
+        },
+        "answersJSON" -> toJson(Random.shuffle(answers)),
+        "answers" -> Random.shuffle(answers),
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> matchingQuestion.explanationText.nonEmpty,
         "explanation" -> matchingQuestion.explanationText,
@@ -135,28 +145,29 @@ class TinCanQuestionViewGenerator {
           "matchingText" -> answer.asInstanceOf[AnswerKeyValue].value.map(prepareString),
           "score" -> answer.score)
       })
-      val answerText = qAnswers.map(answer => prepareString(answer.asInstanceOf[AnswerKeyValue].key)).distinct
-      val matchingText = qAnswers.filter(a => a.asInstanceOf[AnswerKeyValue].value.isDefined && !a.asInstanceOf[AnswerKeyValue].value.get.isEmpty).
+      val categoriesName = qAnswers.map(answer => prepareString(answer.asInstanceOf[AnswerKeyValue].key)).distinct
+      val answersText = qAnswers.filter(a => a.asInstanceOf[AnswerKeyValue].value.isDefined && !a.asInstanceOf[AnswerKeyValue].value.get.isEmpty).
         sortBy(_.asInstanceOf[AnswerKeyValue].value).
         map(answer => Map(
-        "answerId" -> answer.id,
-        "matchingText" -> prepareString(answer.asInstanceOf[AnswerKeyValue].value.getOrElse(""))
-      ))
-      val randomAnswers = Random.shuffle(matchingText)
-      val randomAnswersSize = if (randomAnswers.length % answerText.length == 0) randomAnswers.length / answerText.length else randomAnswers.length / answerText.length + 1
+          "answerId" -> answer.id,
+          "matchingText" -> prepareString(answer.asInstanceOf[AnswerKeyValue].value.getOrElse(""))
+        ))
+
+      val categoriesInRow = 3;
+      val categoriesRowsAmount = math.ceil(categoriesName.length / categoriesInRow.toDouble).toInt
+
       val viewModel = Map(
         "id" -> categorizationQuestion.id.get,
         "questionNumber" -> questionNumber,
         "title" -> removeLineBreak(categorizationQuestion.title),
         "text" -> prepareStringKeepNewlines(categorizationQuestion.text),
-        "answerText" -> answerText,
-        "matchingText" -> matchingText,
-        "randomAnswers" -> (1 to randomAnswersSize).zipWithIndex.map {
+        "rowsCategoriesText" -> (1 to categoriesRowsAmount).zipWithIndex.map {
           case (model, index) =>
-            val skip = index * answerText.length
-            val take = if (randomAnswers.length - skip < answerText.length) randomAnswers.length % answerText.length else answerText.length
-            randomAnswers.slice(skip, skip + take)
+            val skip = index * categoriesInRow
+            val take = if (categoriesName.length - skip < categoriesInRow) categoriesName.length % categoriesInRow else categoriesInRow
+            categoriesName.slice(skip, skip + take)
         },
+        "answersText" -> answersText,
         "answers" -> answerJSON,
         "autoShowAnswer" -> autoShowAnswer,
         "hasExplanation" -> categorizationQuestion.explanationText.nonEmpty,

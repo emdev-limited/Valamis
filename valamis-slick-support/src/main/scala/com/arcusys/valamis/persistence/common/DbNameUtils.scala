@@ -1,6 +1,6 @@
 package com.arcusys.valamis.persistence.common
 
-import com.arcusys.slick.drivers.{OracleDriver, SQLServerDriver}
+import com.arcusys.slick.drivers.{DB2Driver, OracleDriver, SQLServerDriver}
 import slick.ast.ColumnOption
 import slick.driver._
 
@@ -33,6 +33,7 @@ object DbNameUtils {
     case driver: PostgresDriver => "varchar(10485760)"
     case driver: SQLServerDriver => s"varchar(max)"
     case driver: OracleDriver => s"VARCHAR2(4000)"
+    case driver: DB2Driver => "CLOB"
     case _ => "varchar(2147483647)"
   }
 
@@ -48,6 +49,7 @@ object DbNameUtils {
     driver match {
       case MySQLDriver => List(O.SqlType("LONGBLOB"))
       case PostgresDriver => List(O.SqlType("bytea"))
+      case DB2Driver => List(O.SqlType("BLOB(134217728)"))//128MB
       case _ => List()
     }
   }

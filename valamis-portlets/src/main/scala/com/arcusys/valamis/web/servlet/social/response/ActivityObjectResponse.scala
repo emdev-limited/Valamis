@@ -18,8 +18,7 @@ case class ActivityPackageResponse(
   course: Option[CourseResponse],
   comment: Option[String],
   tpe: Activities.Value = Activities.Lesson,
-  override val withImage: Boolean = true,
-  url: Option[String]
+  override val withImage: Boolean = true
 ) extends ActivityObjectResponse
 
 case class ActivityCourseResponse(
@@ -35,8 +34,7 @@ case class ActivityCertificateResponse(
   title: String,
   logo: Option[String],
   tpe: Activities.Value = Activities.Certificate,
-  override val withImage: Boolean = true,
-  url: Option[String]
+  override val withImage: Boolean = true
 ) extends ActivityObjectResponse
 
 case class ActivityUserStatusResponse(

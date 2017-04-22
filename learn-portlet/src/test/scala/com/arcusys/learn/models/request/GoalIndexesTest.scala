@@ -3,43 +3,37 @@ package com.arcusys.learn.models.request
 import java.sql.Connection
 
 import com.arcusys.learn.liferay.update.version300.certificate3004._
-import com.arcusys.valamis.certificate.model.goal.{GoalGroup, GoalType}
-import com.arcusys.valamis.certificate.storage.schema.CertificateGoalGroupTableComponent
+import com.arcusys.valamis.certificate.model.goal.GoalType
 import com.arcusys.valamis.model.PeriodTypes
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import com.arcusys.valamis.certificate.storage.repository.CertificateGoalRepositoryImpl
 import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.arcusys.valamis.util.serialization.JsonHelper
 
-import scala.slick.driver.{H2Driver, JdbcProfile}
+import scala.slick.driver.JdbcProfile
 
-class GoalIndexesTest (val driver: JdbcProfile)
+class GoalIndexesTest
   extends FunSuite
     with BeforeAndAfter
-    with SlickProfile {
-
-  def this() {
-    this(H2Driver)
-  }
+    with SlickProfile
+    with SlickDbTestBase {
 
   import driver.simple._
 
-  val db = Database.forURL("jdbc:h2:mem:goalIndexesTest", driver = "org.h2.Driver")
-  var connection: Connection = _
-
   before {
-    connection = db.source.createConnection()
+    createDB()
     certificateTable.createSchema()
     goalTable.createSchema()
     groupTable.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val certificateTable = new CertificateTableComponent with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = GoalIndexesTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -49,7 +43,7 @@ class GoalIndexesTest (val driver: JdbcProfile)
 
   val goalTable = new CertificateGoalTableComponent
     with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = GoalIndexesTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -59,7 +53,7 @@ class GoalIndexesTest (val driver: JdbcProfile)
 
   val groupTable = new CertificateGoalGroupTableComponent
     with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = GoalIndexesTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -91,7 +85,7 @@ class GoalIndexesTest (val driver: JdbcProfile)
 
     db.withTransaction { implicit s => goalTable.certificateGoals ++= goalRows}
 
-    val groupRow = GoalGroup(1L, 3, certificateId, 0,  PeriodTypes.DAYS, 1)
+    val groupRow = groupTable.GoalGroup(1L, 3, certificateId, 0,  PeriodTypes.DAYS, 1)
 
     db.withTransaction { implicit s => groupTable.certificateGoalGroups += groupRow}
 

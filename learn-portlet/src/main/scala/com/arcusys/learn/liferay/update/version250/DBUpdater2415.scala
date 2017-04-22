@@ -18,7 +18,7 @@ class DBUpdater2415(dbInfo: SlickDBInfo) extends LUpgradeProcess with SlideTable
   def this() = this(Configuration.inject[SlickDBInfo](None))
 
   override def doUpgrade(): Unit = {
-    db.withSession { implicit session =>
+    db.withTransaction { implicit session =>
         val slideSetId = slideSets.filter(_.courseId === 0L).first.id
         val textAndImageSlideId = slides returning slides.map(_.id) +=
           createSlideEntity("Text and image","text-and-image.png",slideSetId.get)

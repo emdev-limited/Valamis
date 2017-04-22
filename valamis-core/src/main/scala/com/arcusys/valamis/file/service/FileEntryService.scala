@@ -11,4 +11,6 @@ trait FileEntryService {
   def getImages(user: LUser, groupID: Int, filter: String, skip: Int, count: Int, isSortDirectionAsc: Boolean): RangeResult[LDLFileEntry]
 
   def getVideo(user: LUser, groupID: Int, skip: Int, count: Int): RangeResult[LDLFileEntry]
+
+  def getAudio(user: LUser, groupID: Int, skip: Int, count: Int): RangeResult[LDLFileEntry]
 }

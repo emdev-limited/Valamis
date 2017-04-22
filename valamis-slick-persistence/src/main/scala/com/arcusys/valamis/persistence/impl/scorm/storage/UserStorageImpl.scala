@@ -34,7 +34,7 @@ class UserStorageImpl(val db: JdbcBackend#DatabaseDef,
   }
 
   override def add(user: ScormUser): Long = db.withSession { implicit s =>
-    val scormUser = new ScormUserModel(
+    val scormUser = ScormUserModel(
       user.id,
       user.name,
       Some(user.preferredAudioLevel),
@@ -66,14 +66,14 @@ class UserStorageImpl(val db: JdbcBackend#DatabaseDef,
   }
 
   override def getUsersWithAttempts: Seq[ScormUser] = db.withSession { implicit s =>
-    val usersIds = attemptTQ.map(_.userId).run
-    val users = scormUsersTQ.filter(_.userId inSet usersIds).run
-    users.map(_.convert)
+    scormUsersTQ.filter(_.userId in attemptTQ.map(_.userId))
+      .run
+      .map(_.convert)
   }
 
   implicit class ScormUserToTincan(s: ScormUserModel) {
     def convert = {
-      new ScormUser(
+      ScormUser(
         s.userId,
         s.name,
         s.preferredAudioLevel.getOrElse(1D).toFloat,

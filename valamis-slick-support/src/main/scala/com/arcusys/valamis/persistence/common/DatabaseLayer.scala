@@ -14,11 +14,24 @@ trait DatabaseLayer { self: SlickProfile =>
 
   import driver.api._
 
-  def execSync[T](action: DBIO[T]): T
+  val dbTimeout = Duration.Inf
+  def db: JdbcBackend#DatabaseDef
 
-  def execAsync[T](action: DBIO[T]): Future[T]
+  def execAsync[T](action: DBIO[T]): Future[T] = {
+    db.run(action)
+  }
 
-  def execSyncInTransaction[T](action: DBIO[T]): T
+  def execAsyncInTransaction[T](action: DBIO[T]): Future[T] = {
+    db.run(action.transactionally)
+  }
+
+  def execSync[T](action: DBIO[T]): T = {
+    Await.result(db.run(action), dbTimeout)
+  }
+
+  def execSyncInTransaction[T](action: DBIO[T]): T = {
+    Await.result(db.run(action.transactionally), dbTimeout)
+  }
 
 }
 
@@ -47,27 +60,12 @@ object DatabaseLayer {
   }
 }
 
+//TODO: remove it
 class Slick3DatabaseLayer(val db: JdbcBackend#DatabaseDef,
                           val driver: JdbcProfile)
   extends DatabaseLayer
-    with SlickProfile {
+    with SlickProfile
 
-  import DatabaseLayer.dbTimeout
-  import driver.api._
-
-  override def execAsync[T](action: DBIO[T]): Future[T] = {
-    db.run(action)
-  }
-
-  override def execSync[T](action: DBIO[T]): T = {
-    Await.result(db.run(action), dbTimeout)
-  }
-
-  override def execSyncInTransaction[T](action: DBIO[T]): T = {
-    Await.result(db.run(action.transactionally), dbTimeout)
-  }
-
-}
 
 
 

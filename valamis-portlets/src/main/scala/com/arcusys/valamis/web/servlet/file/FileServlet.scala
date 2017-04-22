@@ -1,30 +1,36 @@
 package com.arcusys.valamis.web.servlet.file
 
-import java.io.InputStream
+import java.io.{IOException, InputStream}
 import javax.servlet.http._
 
-import com.arcusys.learn.liferay.services.FileEntryServiceHelper
-import com.arcusys.learn.liferay.util.PortalUtilHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, FileEntryServiceHelper, UserLocalServiceHelper}
+import com.arcusys.learn.liferay.util.{MimeTypesHelper, PortalUtilHelper}
 import com.arcusys.valamis.certificate.service.CertificateService
 import com.arcusys.valamis.certificate.service.export.CertificateExportProcessor
 import com.arcusys.valamis.content.export.QuestionExportProcessor
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.lesson.model.LessonType
 import com.arcusys.valamis.lesson.service.export.PackageExportProcessor
 import com.arcusys.valamis.lesson.service.{LessonService, PackageUploadManager}
-import com.arcusys.valamis.slide.service.{SlideElementServiceContract, SlideServiceContract, SlideSetServiceContract}
+import com.arcusys.valamis.model.Context
+import com.arcusys.valamis.slide.service.{SlideElementService, SlideService, SlideSetService, SlideThemeService}
+import com.arcusys.valamis.util.StreamUtil
+import com.arcusys.valamis.utils.ResourceReader
 import com.arcusys.valamis.web.service.{ImageProcessor, Sanitizer}
-import com.arcusys.valamis.web.servlet.base.{BaseApiController, PermissionUtil}
+import com.arcusys.valamis.web.servlet.base.{PartialContentSupport, BaseApiController, PermissionUtil}
 import com.arcusys.valamis.web.servlet.base.exceptions.BadRequestException
 import com.arcusys.valamis.web.servlet.file.request._
 import com.arcusys.valamis.web.servlet.response.CollectionResponse
-import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, Duration}
 import org.scalatra.servlet.MultipartConfig
+import com.liferay.portal.kernel.util.FileUtil
 
 class FileServlet
   extends BaseApiController
-  with FileUploading
-  with FilePolicy {
+    with FileUploading
+    with FilePolicy
+    with PartialContentSupport {
 
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(30 * 1024 * 1024)))
 
@@ -33,23 +39,28 @@ class FileServlet
   private lazy val imageProcessor = inject[ImageProcessor]
 
   private lazy val certificateService = inject[CertificateService]
-  private lazy val slideSetService = inject[SlideSetServiceContract]
+  private lazy val certificateExportProcessor = inject[CertificateExportProcessor]
+  private lazy val packageExportProcessor = inject[PackageExportProcessor]
+  private lazy val questionExportProcessor = inject[QuestionExportProcessor]
+  private lazy val slideSetService = inject[SlideSetService]
   private lazy val courseService = inject[CourseService]
-  private lazy val slideService = inject[SlideServiceContract]
-  private lazy val slideElementService = inject[SlideElementServiceContract]
+  private lazy val slideService = inject[SlideService]
+  private lazy val slideElementService = inject[SlideElementService]
 
   private lazy val lessonService = inject[LessonService]
 
   private lazy val uploadManager = inject[PackageUploadManager]
 
   implicit lazy val sanitizer = inject[Sanitizer]
+  private lazy val slideThemeService = inject[SlideThemeService]
+  private lazy val resourceReader = inject[ResourceReader]
 
-  private lazy val LogoWidth  = 360
+  private lazy val LogoWidth = 360
   private lazy val LogoHeight = 240
   private lazy val ImageWidth = 1024
   private lazy val ImageHeight = 768
 
-  get("/files/images")(action {
+  get("/files/images") {
     response.reset()
     response.setStatus(HttpServletResponse.SC_OK)
     response.setContentType("image/png")
@@ -57,9 +68,9 @@ class FileServlet
     val fileRequest = FileRequest(this)
     val content = fileFacade.getFileContent(fileRequest.folder, fileRequest.file)
     response.getOutputStream.write(content)
-  })
+  }
 
-  get("/files/video")(action {
+  get("/files/video") {
     response.reset()
     response.setStatus(HttpServletResponse.SC_OK)
     response.setContentType("text/html")
@@ -86,9 +97,20 @@ class FileServlet
       </body>
     </html>
 
-  })
+  }
 
-  get("/files/packages/(:" + FileRequest.FileId + ")")(action {
+  get("/files/audio") {
+    response.reset()
+    response.setStatus(HttpServletResponse.SC_OK)
+    response.setContentType("audio/mpeg")
+
+    val fileRequest = FileRequest(this)
+    val file = fileFacade.getFileContent(fileRequest.folder, fileRequest.file)
+    writePartialContent(file)
+
+  }
+
+  get("/files/packages/(:" + FileRequest.FileId + ")") {
     val fileRequest = FileRequest(this)
     fileRequest.action match {
       case FileActionType.All =>
@@ -148,9 +170,9 @@ class FileServlet
             total)
         }
     }
-  })
+  }
 
-  get("/files/export(/)")(action {
+  get("/files/export(/)") {
 
     def getZipStream(fileStream: InputStream, nameOfFile: String) = {
       response.setHeader("Content-Type", "application/zip")
@@ -163,36 +185,44 @@ class FileServlet
       case FileExportRequest.Package =>
         data.action match {
           case FileExportRequest.ExportAll =>
-            val stream = new PackageExportProcessor().exportItems(lessonService.getAllWithLimits(data.courseId))
+            val stream = packageExportProcessor.exportItems(lessonService.getAllWithLimits(data.courseId))
             getZipStream(stream, "exportAllPackages")
 
           case FileExportRequest.Export =>
             val ids = data.ids
-            val stream = new PackageExportProcessor().exportItems(ids.map(lessonService.getWithLimit))
+            val stream = packageExportProcessor.exportItems(ids.map(lessonService.getWithLimit))
             getZipStream(stream, "exportPackages")
+
+          // download the item as SCORM or TinCan package
+          case FileExportRequest.Download =>
+            val id = data.id
+            val lesson = lessonService.getLessonRequired(id)
+            val stream = packageExportProcessor.exportItem(lesson.id)
+            getZipStream(stream, FileUtil.encodeSafeFileName(lesson.title))
+
         }
       case FileExportRequest.Certificate =>
         data.action match {
           case FileExportRequest.ExportAll =>
             getZipStream(
-              new CertificateExportProcessor().export(data.companyId),
+              certificateExportProcessor.export(data.companyId),
               "exportAllCertificates"
             )
 
           case FileExportRequest.Export =>
             getZipStream(
-              new CertificateExportProcessor().export(data.companyId, data.id),
+              certificateExportProcessor.export(data.companyId, data.id),
               "exportCertificates"
             )
         }
       case FileExportRequest.Question =>
         data.action match {
           case FileExportRequest.ExportAll =>
-            getZipStream(new QuestionExportProcessor().exportAll(data.courseId), "exportAllQuestionBase")
+            getZipStream(questionExportProcessor.exportAll(data.courseId), "exportAllQuestionBase")
 
           case FileExportRequest.Export =>
             getZipStream(
-              new QuestionExportProcessor().exportIds(data.categoryIds, data.ids, data.plainTextIds, Some(data.courseId)),
+              questionExportProcessor.exportIds(data.categoryIds, data.ids, data.plainTextIds, Some(data.courseId)),
               "exportQuestions"
             )
         }
@@ -201,7 +231,31 @@ class FileServlet
           case FileExportRequest.Export => getZipStream(slideSetService.exportSlideSet(data.id), "ExportedSlideSet")
         }
     }
-  })
+  }
+
+  get("/files/resources(/)") {
+    val fileRequest = FileRequest(this)
+    val filename = fileRequest.file
+
+    response.reset()
+    response.setStatus(HttpServletResponse.SC_OK)
+    response.setContentType(MimeTypesHelper.getContentType(
+      resourceReader.getResourceAsStream(servletContext, filename),
+      filename))
+
+    val in = resourceReader.getResourceAsStream(servletContext, filename)
+    val out = response.getOutputStream
+
+    var buffer = new Array[Byte](2048)
+    var bytesRead = in.read(buffer)
+    while (bytesRead > -1) {
+      out.write(buffer, 0, bytesRead)
+      bytesRead = in.read(buffer)
+    }
+    in.close()
+    out.close()
+    out.flush()
+  }
 
   post("/files(/)")(jsonAction {
     val fileRequest = FileRequest(this)
@@ -214,7 +268,14 @@ class FileServlet
   post("/files/certificate/:id/logo")(jsonAction {
     val id = params("id").toLong
     val (name, data) = readSendImage
+
+    implicit lazy val context = Context(CompanyHelper.getCompanyId, PermissionUtil.getCourseId, PermissionUtil.getUserId)
     certificateService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+  })
+
+  delete("/files/certificate/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    certificateService.deleteLogo(id)
   })
 
   post("/files/package/:id/logo")(jsonAction {
@@ -223,25 +284,53 @@ class FileServlet
     lessonService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
   })
 
-  post("/files/slideset/:id/logo")(jsonAction {
+  delete("/files/lesson/:id/logo")(jsonAction {
     val id = params("id").toLong
-    val (name, data) = readSendImage
-    slideSetService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+    lessonService.deleteLogo(id)
   })
 
   post("/files/course/:id/logo")(jsonAction {
     val id = params("id").toLong
     val (name, data) = readSendImage
-    courseService.setLogo(id, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+    courseService.setLogo(id, data)
   })
 
-  post("/files/slide/:id/logo")(jsonAction {
+  delete("/files/course/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    courseService.deleteLogo(id)
+  })
+
+  post("/files/slide-set/:id/logo")(jsonAction {
     val id = params("id").toLong
     val (name, data) = readSendImage
-    slideService.setLogo(id, name, data)
+    slideSetService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
   })
 
-  post("/files/slideentity/:id/logo")(jsonAction {
+  delete("/files/slide-set/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    slideSetService.deleteLogo(id)
+  })
+
+  post("/files/slide/:id/bg-image")(jsonAction {
+    val id = params("id").toLong
+    val bgSize = params("bgSize").toString
+    val (name, data) = readSendImage
+    slideService.setBgImage(id, name, bgSize, data)
+  })
+
+  delete("/files/slide/:id/bg-image")(jsonAction {
+    val id = params("id").toLong
+    slideService.deleteBgImage(id)
+  })
+
+  post("/files/slide-theme/:id/bg-image")(jsonAction {
+    val id = params("id").toLong
+    val bgSize = params("bgSize").toString
+    val (name, data) = readSendImage
+    slideThemeService.setBgImage(id, name, bgSize, data)
+  })
+
+  post("/files/slide-element/:id/file")(jsonAction {
     val id = params("id").toLong
     val (name, data) = readSendImage
     slideElementService.setLogo(id, name, data)
@@ -253,15 +342,15 @@ class FileServlet
       case UploadContentType.Icon => (
         fileRequest.fileName,
         fileRequest.fileContent
-      )
+        )
       case UploadContentType.DocLibrary => (
         fileRequest.file,
         FileEntryServiceHelper.getFile(fileRequest.fileEntryId, fileRequest.fileVersion)
-      )
+        )
       case UploadContentType.Base64Icon => (
         FileRequest.DefaultIconName,
         fileRequest.base64Content
-      )
+        )
     }
   }
 
@@ -279,15 +368,9 @@ class FileServlet
           fileRequest.fileName,
           imageProcessor.resizeImage(fileRequest.fileContent, ImageWidth, ImageHeight))
 
-      case UploadContentType.WebGLModel =>
+      case UploadContentType.WebGLModel | UploadContentType.Pdf |  UploadContentType.Audio =>
         fileFacade.saveFile(
           fileRequest.folder,
-          fileRequest.fileName,
-          fileRequest.fileContent)
-
-      case UploadContentType.Pdf =>
-        fileFacade.saveFile(
-          s"slideData${fileRequest.entityId}",
           fileRequest.fileName,
           fileRequest.fileContent)
 
@@ -321,14 +404,14 @@ class FileServlet
           case e: UnsupportedOperationException => throw new BadRequestException(e.getMessage)
         }
 
-     case UploadContentType.ImportMoodleQuestion =>
+      case UploadContentType.ImportMoodleQuestion =>
         fileFacade.importMoodleQuestions(
           fileRequest.courseId,
           fileRequest.stream)
 
       case UploadContentType.ImportCertificate =>
         fileFacade.importCertificates(
-          fileRequest.companyIdRequired,
+          fileRequest.courseId,
           fileRequest.stream)
 
       case UploadContentType.ImportPackage =>

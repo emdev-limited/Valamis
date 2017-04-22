@@ -2,13 +2,8 @@ package com.arcusys.valamis.certificate.service
 
 import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.liferay.AssetHelper
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class CertificateAssetHelper(implicit val bindingModule: BindingModule)
-  extends AssetHelper[Certificate]
-  with Injectable {
-
-  val certificateService = inject[CertificateService]
+class CertificateAssetHelper extends AssetHelper[Certificate] {
 
   def updateCertificateAssetEntry(certificate: Certificate,
                                   userId: Option[Long] = None,

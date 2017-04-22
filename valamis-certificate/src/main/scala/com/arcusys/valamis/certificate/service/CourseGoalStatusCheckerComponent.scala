@@ -15,6 +15,11 @@ trait CourseGoalStatusCheckerComponent extends CourseGoalStatusChecker {
   protected def goalStateRepository: CertificateGoalStateRepository
   protected def goalRepository: CertificateGoalRepository
 
+  protected def updateUserGoalState(userId: Long,
+                                    goal: CertificateGoal,
+                                    status: GoalStatuses.Value,
+                                    date: DateTime): (GoalStatuses.Value, DateTime)
+
   override def getCourseGoalsStatus(certificateId: Long, userId: Long): Seq[GoalStatus[CourseGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
 
@@ -71,17 +76,8 @@ trait CourseGoalStatusCheckerComponent extends CourseGoalStatusChecker {
     else if (isGoalCompleted) GoalStatuses.Success
     else GoalStatuses.InProgress
 
-    goalStateRepository.getBy(userId, goal.goalId) match {
-      case Some(goal) => goalStateRepository.modify(goal.goalId, userId, status, new DateTime())
-      case None => goalStateRepository.create(
-        CertificateGoalState(
-          userId,
-          goal.certificateId,
-          goal.goalId,
-          status,
-          new DateTime(),
-          goalData.isOptional))
-    }
+    updateUserGoalState(userId, goalData, status, new DateTime)
+
     status
   }
 }

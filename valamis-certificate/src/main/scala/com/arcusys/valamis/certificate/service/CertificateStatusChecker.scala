@@ -1,6 +1,6 @@
 package com.arcusys.valamis.certificate.service
 
-import com.arcusys.valamis.certificate.model.{CertificateFilter, CertificateStateFilter, CertificateState, CertificateStatuses}
+import com.arcusys.valamis.certificate.model.{CertificateState, CertificateStateFilter, CertificateStatuses}
 import com.arcusys.valamis.certificate.model.goal._
 import com.arcusys.valamis.lrs.tincan.Statement
 import org.joda.time.DateTime
@@ -12,8 +12,12 @@ trait CertificateStatusChecker
   with PackageGoalStatusChecker
   with AssignmentGoalStatusChecker {
   def checkAndGetStatus(filter: CertificateStateFilter): Seq[CertificateState]
-  def checkAndGetStatus(certificateFilter: CertificateFilter, stateFilter: CertificateStateFilter): Seq[CertificateState]
   def checkAndGetStatus(certificateId: Long, userId: Long): CertificateStatuses.Value
+
+  protected[certificate] def updateUserGoalState(userId: Long,
+                                                 goal: CertificateGoal,
+                                                 status: GoalStatuses.Value,
+                                                 date: DateTime): (GoalStatuses.Value, DateTime)
 }
 
 protected[service] trait CourseGoalStatusChecker{

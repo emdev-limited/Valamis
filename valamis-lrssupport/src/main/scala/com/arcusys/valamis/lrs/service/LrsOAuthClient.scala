@@ -8,7 +8,6 @@ import com.arcusys.valamis.lrsEndpoint.model.LrsToken
 import com.arcusys.valamis.lrsEndpoint.storage.LrsTokenStorage
 import com.arcusys.valamis.oauth.HttpClientPoolImpl
 import com.arcusys.valamis.util.serialization.JsonHelper
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import net.oauth.{OAuth, OAuthAccessor, OAuthException, OAuthProblemException}
 import net.oauth.client.OAuthClient
 import net.oauth.client.httpclient4.HttpClient4
@@ -17,15 +16,13 @@ import org.apache.http.client.RedirectException
 import org.joda.time.DateTime
 import net.oauth.OAuthConsumer
 
-class LrsOAuthClient(consumer: OAuthConsumer)(implicit val bindingModule: BindingModule)
-  extends Injectable
-  with Closeable {
+class LrsOAuthClient(consumer: OAuthConsumer, lrsTokenStorage: LrsTokenStorage)
+  extends Closeable {
 
   private val httpClientPool = new HttpClientPoolImpl
   private val oauthClient = new OAuthClient(new HttpClient4(httpClientPool))
   private val accessor = new OAuthAccessor(consumer)
 
-  private lazy val lrsTokenStorage = inject[LrsTokenStorage]
   private val ScopeParameter = "scope"
 
   def authorize(redirectUrl: Option[String], scope: AuthorizationScope.ValueSet): OAuthAuthInfo = {

@@ -3,19 +3,22 @@ package com.arcusys.valamis.web.servlet.certificate.response
 import com.arcusys.valamis.certificate.model.goal.Goal
 import com.arcusys.valamis.lrs.tincan._
 import com.arcusys.valamis.web.servlet.course.CourseResponse
+import org.joda.time.DateTime
 
 case class PackageGoalShortResponse(goalId: Long,
                                     certificateId: Long,
                                     packageId: Long,
                                     title: String,
                                     course: Option[CourseResponse],
-                                    isDeleted: Boolean = false) extends Goal
+                                    isSubjectDeleted: Boolean = false,
+                                    isDeleted: Boolean) extends Goal
 
 case class StatementGoalShortResponse(goalId: Long,
                                       certificateId: Long,
                                       obj: String,
                                       objName: Option[LanguageMap],
-                                      verb: String) extends Goal
+                                      verb: String,
+                                      isDeleted: Boolean) extends Goal
 
 case class CourseGoalShortResponse(goalId: Long,
                                    certificateId: Long,
@@ -23,10 +26,19 @@ case class CourseGoalShortResponse(goalId: Long,
                                    title: String,
                                    url: String,
                                    lessonsAmount: Int,
-                                   isDeleted: Boolean = false) extends Goal
+                                   isSubjectDeleted: Boolean = false,
+                                   isDeleted: Boolean) extends Goal
 
 case class AssignmentGoalShortResponse(goalId: Long,
                                        certificateId: Long,
                                        assignmentId: Long,
                                        title: String,
-                                       isDeleted: Boolean = false) extends Goal
+                                       isSubjectDeleted: Boolean = false,
+                                       isDeleted: Boolean) extends Goal
+
+case class ActivityGoalShortResponse(goalId: Long,
+                                     certificateId: Long,
+                                     count: Int,
+                                     activityName: String,
+                                     title: String,
+                                     isDeleted: Boolean) extends Goal

@@ -1,27 +1,12 @@
 package com.arcusys.valamis.slide.service
 
-import com.arcusys.valamis.slide.model.SlideThemeModel
-import com.arcusys.valamis.slide.storage.{SlideSetRepository, SlideThemeRepositoryContract}
-import com.escalatesoft.subcut.inject.{Injectable, BindingModule}
+import com.arcusys.valamis.slide.model.SlideTheme
 
-class SlideThemeService(implicit val bindingModule: BindingModule) extends Injectable with SlideThemeServiceContract {
-
-  val slideSetRepository = inject[SlideSetRepository]
-  val slideThemeRepository = inject[SlideThemeRepositoryContract]
-
-  override def create(model: SlideThemeModel): SlideThemeModel = slideThemeRepository.create(model)
-
-  override def update(model: SlideThemeModel): SlideThemeModel = slideThemeRepository.update(model)
-
-  override def delete(id: Long): Unit = {
-    slideSetRepository.updateThemeId(id, None)
-    slideThemeRepository.delete(id)
-  }
-
-  override def getById(id: Long): SlideThemeModel = slideThemeRepository.get(id)
-
-  override def getAll: Seq[SlideThemeModel] = slideThemeRepository.getAll
-
-  override def getBy(userId: Option[Long], isDefault: Boolean): Seq[SlideThemeModel] =
-    slideThemeRepository.getBy(userId, isDefault)
+trait SlideThemeService {
+  def create(theme: SlideTheme): SlideTheme
+  def getBy(userId: Option[Long], isDefault: Boolean): Seq[SlideTheme]
+  def getById(id: Long): SlideTheme
+  def update(theme: SlideTheme): SlideTheme
+  def delete(id: Long)
+  def setBgImage(id: Long, name: String, bgSize: String, content: Array[Byte]): Unit
 }

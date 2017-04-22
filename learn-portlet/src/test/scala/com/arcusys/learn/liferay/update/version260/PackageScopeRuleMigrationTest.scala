@@ -4,28 +4,28 @@ import java.sql.Connection
 
 import com.arcusys.learn.liferay.update.version260.migrations._
 import com.arcusys.valamis.persistence.common.SlickProfile
-
-import scala.slick.driver.H2Driver
-import scala.slick.driver.H2Driver.simple._
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 import scala.slick.jdbc.StaticQuery
 import scala.util.Try
 
-class PackageScopeRuleMigrationTest extends FunSuite with BeforeAndAfter {
+class PackageScopeRuleMigrationTest
+  extends FunSuite
+    with BeforeAndAfter
+    with SlickDbTestBase{
 
-  val db = Database.forURL("jdbc:h2:mem:packagescoperule", driver = "org.h2.Driver")
-  var connection: Connection = _
+  import driver.simple._
 
   before {
-    connection = db.source.createConnection()
+    createDB()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val table = new PackageScopeRuleTableComponent with SlickProfile {
-    override val driver = H2Driver
+    override val driver = PackageScopeRuleMigrationTest.this.driver
   }
 
   private val scopeInstance = "instance"
@@ -70,7 +70,7 @@ class PackageScopeRuleMigrationTest extends FunSuite with BeforeAndAfter {
       insertToOldTable( 1, 2, scopeInstance, None, None, Some(true))
     }
 
-    new PackageScopeRuleMigration(db, H2Driver).migrate()
+    new PackageScopeRuleMigration(db, driver).migrate()
 
     db.withSession { implicit s =>
       val stored = table.packageScopeRule.firstOption getOrElse fail("no packageScopeRule created")
@@ -87,7 +87,7 @@ class PackageScopeRuleMigrationTest extends FunSuite with BeforeAndAfter {
       insertToOldTable( 5, 6, scopePlayer, None, Some(false), Some(true))
     }
 
-    new PackageScopeRuleMigration(db, H2Driver).migrate()
+    new PackageScopeRuleMigration(db, driver).migrate()
 
     db.withSession { implicit s =>
       val newRules = table.packageScopeRule.list
@@ -111,7 +111,7 @@ class PackageScopeRuleMigrationTest extends FunSuite with BeforeAndAfter {
       insertToOldTable(3, 3, "wrong scope", None, None, None)
     }
 
-    Try(new PackageScopeRuleMigration(db, H2Driver).migrate())
+    Try(new PackageScopeRuleMigration(db, driver).migrate())
 
     db.withSession { implicit s =>
       assert(table.packageScopeRule.length.run == 0)

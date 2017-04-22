@@ -10,5 +10,7 @@ object FieldHelper {
   val ENTRY_CLASS_PK = Field.ENTRY_CLASS_PK
   val PORTLET_ID = Field.PORTLET_ID
   val GROUP_ID = Field.GROUP_ID
+  val SCOPE_GROUP_ID = Field.SCOPE_GROUP_ID
   val DESCRIPTION = Field.DESCRIPTION
+  val MODIFIED_DATE = Field.MODIFIED_DATE
 }

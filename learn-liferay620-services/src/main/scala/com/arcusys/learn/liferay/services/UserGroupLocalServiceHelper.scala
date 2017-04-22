@@ -50,7 +50,7 @@ object UserGroupLocalServiceHelper {
     UserGroupLocalServiceUtil.dynamicQuery()
       .add(RestrictionsFactoryUtil.eq("companyId", companyId))
       .addLikeRestriction(NameKey, nameLike)
-      .addInSetRestriction(IdKey, userGroupIds, contains)
+      .addFilterByValues(IdKey, userGroupIds, contains)
   }
 
   def addGroupUserGroups(courseId: Long, userGroupIds: Seq[Long]): Unit = {
@@ -63,5 +63,9 @@ object UserGroupLocalServiceHelper {
 
   def getGroupUserGroups(groupId: Long): Seq[UserGroup] = {
     UserGroupLocalServiceUtil.getGroupUserGroups(groupId).asScala
+  }
+
+  def getGroupUserGroupsIds(groupId: Long): Seq[Long] = {
+    UserGroupLocalServiceUtil.getGroupUserGroups(groupId).asScala.map(_.getUserGroupId)
   }
 }

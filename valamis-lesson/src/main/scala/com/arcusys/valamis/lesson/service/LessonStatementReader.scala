@@ -5,8 +5,9 @@ import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.valamis.lesson.model.Lesson
 import com.arcusys.valamis.lrs.model.StatementFilter
 import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.arcusys.valamis.lrs.service.util.{TinCanVerbs, StatementApiHelpers, TincanHelper}
-import com.arcusys.valamis.lrs.tincan.{Agent, Statement}
+import com.arcusys.valamis.lrs.service.util.{StatementApiHelpers, TinCanVerbs, TincanHelper}
+import com.arcusys.valamis.lrs.service.util.TinCanVerbs.VerbExtension
+import com.arcusys.valamis.lrs.tincan.{Activity, Agent, Statement}
 import StatementApiHelpers._
 import TincanHelper.TincanAgent
 import org.joda.time.DateTime
@@ -21,8 +22,9 @@ abstract class LessonStatementReader {
 
   def getLastAttempted(userId: Long, lesson: Lesson): Option[Statement] = {
     val activityId = getActivityId(lesson)
-    val agent = getAgent(userId)
-    getLastAttempted(agent, activityId)
+    getAgent(userId).flatMap { agent =>
+      getLastAttempted(agent, activityId)
+    }
   }
 
   def getLastAttempted(user: LUser, lesson: Lesson): Option[Statement] = {
@@ -30,7 +32,7 @@ abstract class LessonStatementReader {
     val activityId = lessonService.getRootActivityId(lesson)
     getLastAttempted(agent, activityId)
   }
-  
+
   def getLastAttempted(user: LUser, activityId: String): Option[Statement] = {
     val agent = getAgent(user)
     getLastAttempted(agent, activityId)
@@ -46,12 +48,15 @@ abstract class LessonStatementReader {
   }
 
   def getAllAttempted(userId: Long, limit: Int = 0): Seq[Statement] = {
-    val agent = getAgent(userId)
-    lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
-      verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Attempted)),
-      limit = Some(limit)
-    )))
+    getAgent(userId).map { agent =>
+      lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Attempted)),
+        limit = Some(limit)
+      )))
+    } getOrElse {
+      Nil
+    }
   }
 
   def getAttempted(user: LUser, activityId: String): Seq[Statement] = {
@@ -62,43 +67,105 @@ abstract class LessonStatementReader {
     )))
   }
 
+  def getRelatedActivities(agent: Agent, activityId: String, limit: Int = 100): Seq[Statement] = {
+    lrsClient.statementApi(_.getByFilter(StatementFilter(
+      agent = Some(agent),
+      activity = Some(activityId),
+      relatedActivities = Some(true),
+      limit = Some(limit)
+    )))
+  }
+
   def getCompleted(user: LUser, activityId: String): Seq[Statement] = {
     val agent = getAgent(user)
     getCompleted(agent, activityId)
   }
 
-  def getCompleted(agent: Agent, activityId: String): Seq[Statement] = {
+  def getExperienced(agent: Agent, activityId: String): Seq[Statement] = {
     lrsClient.statementApi(_.getByFilter(StatementFilter(
       agent = Some(agent),
       activity = Some(activityId),
-      verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Completed))
+      verb = Some(TinCanVerbs.Experienced.toUriString),
+      relatedActivities = Some(true)
     )))
   }
 
-  def getCompletedSuccess(userId: Long, lessonId: Long, after: DateTime): Seq[Statement] = {
-    val activityId = getActivityId(lessonId)
-    val agent = getAgent(userId)
+  def getCompleted(agent: Agent, activityId: String): Seq[Statement] = {
+    val verbs = Seq(TinCanVerbs.Completed, TinCanVerbs.Passed)
 
-    val completedStatement = lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
-      activity = Some(activityId),
-      verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Completed)),
-      since = Some(after)
-    )))
-      .filter(s => s.result.exists(r => r.success.contains(true)))
-
-    if (completedStatement.isEmpty){
+    verbs flatMap { verb =>
       lrsClient.statementApi(_.getByFilter(StatementFilter(
         agent = Some(agent),
         activity = Some(activityId),
-        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Passed)),
-        since = Some(after)
+        verb = Some(TinCanVerbs.getVerbURI(verb))
       )))
-        .filter(s => s.result.exists(r => r.success.contains(true)))
     }
-    else completedStatement
   }
-  
+
+  def getCompletedByLesson(lessonId: Long, after: DateTime, before: DateTime): Seq[Statement] = {
+    val activityId = getActivityId(lessonId)
+
+    val verbs = Seq(TinCanVerbs.Completed, TinCanVerbs.Passed)
+
+    verbs flatMap { verb =>
+      lrsClient.statementApi(_.getByFilter(StatementFilter(
+        activity = Some(activityId),
+        verb = Some(TinCanVerbs.getVerbURI(verb)),
+        since = Some(after),
+        until = Some(before)
+      )))
+    }
+  }
+
+  def getCompletedByUser(userId: Long, after: DateTime, before: DateTime): Seq[Statement] = {
+    getAgent(userId).map { agent =>
+
+      val completed = lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Completed)),
+        since = Some(after),
+        until = Some(before)
+      )))
+
+      val passed = lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Passed)),
+        since = Some(after),
+        until = Some(before)
+      )))
+
+      completed ++ passed
+    } getOrElse {
+      Nil
+    }
+  }
+
+  def isCompletedSuccess(userId: Long, lessonId: Long, after: DateTime, before: DateTime): Boolean = {
+    val activityId = getActivityId(lessonId)
+    getAgent(userId).map { agent =>
+
+      val completedStatement = lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        activity = Some(activityId),
+        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Completed)),
+        since = Some(after),
+        until = Some(before)
+      )))
+
+      lazy val passedStatement = lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        activity = Some(activityId),
+        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Passed)),
+        since = Some(after),
+        until = Some(before)
+      )))
+
+      hasFinished(completedStatement) || hasFinished(passedStatement)
+    } getOrElse {
+      false
+    }
+  }
+
   def getCompletedForAttempt(user: LUser, activityId: String, attemptedStatement: Statement): Option[Statement] = {
     val agent = getAgent(user)
     lrsClient.statementApi(_.getByFilter(StatementFilter(
@@ -112,26 +179,31 @@ abstract class LessonStatementReader {
 
   def getAll(userId: Long, packageId: Long, limit: Int = 25): Seq[Statement] = {
     val activityId = getActivityId(packageId)
-    val agent = getAgent(userId)
-    
-    lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
-      activity = Some(activityId),
-      relatedActivities = Some(true),
-      limit = Some(limit)
-    )))
+    getAgent(userId).map { agent =>
+
+      lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        activity = Some(activityId),
+        relatedActivities = Some(true),
+        limit = Some(limit)
+      )))
+    } getOrElse {
+      Nil
+    }
   }
 
   def getAllAttempts(userId: Long, activityId: String, limit: Int = 25, offsest: Int = 0): Seq[Statement] = {
-    val agent = getAgent(userId)
-    lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
-      activity = Some(activityId),
-      verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Attempted)),
-      limit = Some(limit),
-      offset = Some(offsest)
-    ))
-    )
+    getAgent(userId).map { agent =>
+      lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        activity = Some(activityId),
+        verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Attempted)),
+        limit = Some(limit),
+        offset = Some(offsest)
+      )))
+    } getOrElse {
+      Nil
+    }
   }
 
   def getByActivityId(userId: Long,
@@ -146,12 +218,14 @@ abstract class LessonStatementReader {
         .flatMap {
           // complete and passed statements have activityId
           case TinCanVerbs.Completed =>
-            api.getByFilter(getStatementFilter(Some(agent), activityId, TinCanVerbs.Completed))
+            api.getByFilter(getStatementFilter(agent, activityId, TinCanVerbs.Completed))
           case TinCanVerbs.Passed =>
-            api.getByFilter(getStatementFilter(Some(agent), activityId, TinCanVerbs.Passed))
+            api.getByFilter(getStatementFilter(agent, activityId, TinCanVerbs.Passed))
+          case TinCanVerbs.Commented =>
+            api.getByFilter(getStatementFilter(None, activityId, TinCanVerbs.Commented, related = true))
           // other statements have activityId in related statement
           case verb: String =>
-            api.getByFilter(getStatementFilter(Some(agent), activityId, verb, related = true))
+            api.getByFilter(getStatementFilter(agent, activityId, verb, related = true))
         }
         .sortBy { statement =>
           statement.timestamp
@@ -172,9 +246,9 @@ abstract class LessonStatementReader {
   def getAnsweredByPackageId(userId: Long, packageId: Long, limit: Int = 25): Seq[Statement] = {
     val activityId = getActivityId(packageId)
     val agent = getAgent(userId)
-    
+
     lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
+      agent = agent,
       activity = Some(activityId),
       verb = Some(TinCanVerbs.getVerbURI(TinCanVerbs.Answered)),
       relatedActivities = Some(true),
@@ -185,20 +259,20 @@ abstract class LessonStatementReader {
   def getRoot(userId: Long, packageId: Long, limit: Int = 25): Seq[Statement] = {
     val activityId = getActivityId(packageId)
     val agent = getAgent(userId)
-    
+
     lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
+      agent = agent,
       activity = Some(activityId),
       limit = Some(limit)
     )))
   }
 
-  def getLast(userId:Long, lesson: Lesson): Option[Statement] = {
+  def getLast(userId: Long, lesson: Lesson): Option[Statement] = {
     val activityId = getActivityId(lesson)
     val agent = getAgent(userId)
 
     lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
+      agent = agent,
       activity = Some(activityId),
       relatedActivities = Some(true),
       limit = Some(1)
@@ -213,15 +287,15 @@ abstract class LessonStatementReader {
     lessonService.getRootActivityId(lesson)
   }
 
-  private def getAgent(userId: Long): Agent = {
-    UserLocalServiceHelper().getUser(userId).getAgentByUuid
+  private def getAgent(userId: Long): Option[Agent] = {
+    UserLocalServiceHelper().fetchUser(userId).map(_.getAgentByUuid)
   }
 
   private def getAgent(user: LUser): Agent = {
     user.getAgentByUuid
   }
 
-  def getLessonScoreMax(agent: Agent, lesson: Lesson) : Option[Float] = {
+  def getLessonScoreMax(agent: Agent, lesson: Lesson): Option[Float] = {
     val activityId = getActivityId(lesson)
 
     val verbs = Seq(TinCanVerbs.Completed, TinCanVerbs.Passed)
@@ -233,9 +307,15 @@ abstract class LessonStatementReader {
           activity = Some(activityId),
           verb = Some(TinCanVerbs.getVerbURI(verb))
         ))
-        .flatMap(s => s.result.flatMap(_.score).flatMap(_.scaled))
+          .flatMap(s => s.result.flatMap(_.score).flatMap(_.scaled))
       }
-      .reduceOption(Ordering.Float.max)
+        .reduceOption(Ordering.Float.max)
+    }
+  }
+
+  def hasFinished(completedStatements: Seq[Statement]): Boolean = {
+    completedStatements.exists { s =>
+      s.result.exists(r => r.success.contains(true) || r.completion.contains(true))
     }
   }
 }

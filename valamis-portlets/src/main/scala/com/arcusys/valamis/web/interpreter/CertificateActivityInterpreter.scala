@@ -3,10 +3,12 @@ package com.arcusys.valamis.web.interpreter
 import com.arcusys.learn.liferay.LBaseSocialActivityInterpreter
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.constants.StringPoolHelper
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.valamis.certificate.model._
 import com.arcusys.valamis.certificate.storage.CertificateRepository
 import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.escalatesoft.subcut.inject.Injectable
+import com.liferay.portal.kernel.log.LogFactoryUtil
 
 object CertificateActivityInterpreter {
   val className = Array(classOf[Certificate].getName, CertificateActivityType.getClass.getName, CertificateStateType.getClass.getName)
@@ -16,8 +18,13 @@ class CertificateActivityInterpreter extends LBaseSocialActivityInterpreter with
   implicit lazy val bindingModule = Configuration
   lazy val certificateRepository = inject[CertificateRepository]
 
+  val logger = LogFactoryUtil.getLog(getClass)
+
   override protected def doInterpret(activity: LSocialActivity, context: Context): LSocialActivityFeedEntry = {
-    def interpretCertificate = {
+    val activityFeedEntry = if (activity.getCompanyId != CompanyHelper.getCompanyId) {
+      logger.debug(s"companyId mismatch (activity companyId: ${activity.getCompanyId}, current companyId: ${CompanyHelper.getCompanyId})")
+      None
+    } else {
       val creatorUserName = getUserName(activity.getUserId, context)
       val activityType: Int = activity.getType
 
@@ -34,10 +41,12 @@ class CertificateActivityInterpreter extends LBaseSocialActivityInterpreter with
       sb.append(creatorUserName + " ")
       sb.append(title + " ")
       sb.append(certificate.title)
-      new LSocialActivityFeedEntry(StringPoolHelper.BLANK, sb.toString(), StringPoolHelper.BLANK)
+
+      val feedEntry = new LSocialActivityFeedEntry(StringPoolHelper.BLANK, sb.toString(), StringPoolHelper.BLANK)
+      Some(feedEntry)
     }
 
-    interpretCertificate
+    activityFeedEntry orNull
   }
 
   def getClassNames() = CertificateActivityInterpreter.className

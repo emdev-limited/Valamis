@@ -34,6 +34,15 @@
 
         var servletContextPath = '{{servletContextPath}}';
 
+        var ltiVersion = '{{ltiVersion}}',
+            ltiMessageType = '{{ltiMessageType}}',
+            ltiLaunchPresentationReturnUrl = '{{ltiLaunchPresentationReturnUrl}}',
+            ltiOauthVersion = '{{ltiOauthVersion}}',
+            ltiOauthSignatureMethod = '{{ltiOauthSignatureMethod}}',
+            ltiFirstName = '{{ltiFirstName}}',
+            ltiLastName = '{{ltiLastName}}',
+            ltiEmail = '{{ltiEmail}}';
+
         var lessonViewerOptions = {
             resourceName: 'lessonViewer',
             permissions: lessonViewerPermissions,
@@ -45,7 +54,15 @@
                 lessonToStartType: '{{lessonToStartType}}',
                 tincanActor: '{{{tincanActor}}}',
                 endpointData: '{{{endpointData}}}',
-                servletContextPath: (!!servletContextPath) ? servletContextPath + '/' : ''
+                servletContextPath: (!!servletContextPath) ? servletContextPath + '/' : '',
+                ltiVersion: ltiVersion,
+                ltiMessageType: ltiMessageType,
+                ltiLaunchPresentationReturnUrl: ltiLaunchPresentationReturnUrl,
+                ltiOauthVersion: ltiOauthVersion,
+                ltiOauthSignatureMethod: ltiOauthSignatureMethod,
+                ltiFirstName: ltiFirstName,
+                ltiLastName: ltiLastName,
+                ltiEmail: ltiEmail
             }
         };
 

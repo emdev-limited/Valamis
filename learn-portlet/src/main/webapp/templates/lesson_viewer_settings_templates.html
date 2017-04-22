@@ -1,0 +1,42 @@
+<script type="text/template" id="lessonViewerSettingsListTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left h3" style="line-height: 34px;">
+            {{shownLessonsHeaderLabel}}
+        </div>
+
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-add-lesson"> {{addLessonsFromOtherSiteLabel}} </button>
+        </div>
+    </div>
+    <table class="val-table medium list no-out-margin js-list-view">
+        <tr>
+            <th class="text-center narrow-col"> {{packageListIDHeaderLabel}} </th>
+            <th style="width: 30%;"> {{packageListTitleHeaderLabel}} </th>
+            <th> {{packageListSummaryHeaderLabel}} </th>
+            <th class="text-center"> {{hideLabel}} </th>
+            <th class="text-center narrow-col"> {{packageListIsDefaultHeaderLabel}} </th>
+            <th class="text-right"> </th>
+        </tr>
+    </table>
+</script>
+
+<script type="text/template" id="lessonViewerSettingsListItemTemplate">
+    <td class="text-center"> {{id}} </td>
+    <td style="width: 30%;"> {{title}} </td>
+    <td> {{description}} </td>
+    <td class="text-center">
+        <input type="checkbox" id="lesson_v_{{id}}" class="val-checkbox js-is-hidden" {{^isVisible}} checked {{/isVisible}}>
+        <label class="checkbox-label" for="lesson_v_{{id}}"></label>
+    </td>
+    <td class="text-center">
+        <input type="checkbox" id="lesson_{{id}}" class="val-checkbox js-is-default" {{#isDefault}} checked {{/isDefault}}>
+        <label class="checkbox-label" for="lesson_{{id}}"></label>
+    </td>
+    <td class="text-center">
+        {{#isExternal}}
+        <button class="button medium danger no-text js-delete-item">
+            <span class="val-icon-trash"></span> Delete
+        </button>
+        {{/isExternal}}
+    </td>
+</script>

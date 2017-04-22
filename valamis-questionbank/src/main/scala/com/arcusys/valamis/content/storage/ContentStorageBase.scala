@@ -6,6 +6,7 @@ import slick.dbio.DBIO
 trait ContentStorageBase[T/* <: Content*/] {
   def getByCourse(courseId: Long): DBIO[Seq[T]]
   def getCountByCourse(courseId: Long): DBIO[Int]
+  def getByCategory(categoryId: Long): DBIO[Seq[T]]
   def getByCategory(categoryId: Option[Long], courseId: Long): DBIO[Seq[T]]
   def getCountByCategory(categoryId: Option[Long], courseId: Long): DBIO[Int]
 

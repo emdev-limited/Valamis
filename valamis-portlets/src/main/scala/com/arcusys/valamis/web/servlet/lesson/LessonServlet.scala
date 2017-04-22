@@ -3,8 +3,8 @@ package com.arcusys.valamis.web.servlet.lesson
 import javax.servlet.http.HttpServletResponse
 
 import com.arcusys.learn.liferay.constants.QueryUtilHelper
-import com.arcusys.learn.liferay.services.GroupLocalServiceHelper
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.learn.liferay.services.{GroupLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.lesson.model._
 import com.arcusys.valamis.lesson.scorm.service.ActivityServiceContract
 import com.arcusys.valamis.lesson.service._
@@ -43,8 +43,15 @@ class LessonServlet
   get("/packages(/)", request.getParameter("action") == "VISIBLE") {
     def getSuspendedId(userId: Long, lesson: Lesson): Option[String] = {
       lesson.lessonType match {
-        case LessonType.Scorm   => scormActivityService.getSuspendedId(userId, lesson.id)
-        case LessonType.Tincan  => None
+        case LessonType.Tincan => None
+        case LessonType.Scorm => try {
+          scormActivityService.getSuspendedId(userId, lesson.id)
+        } catch {
+          case e: Throwable =>
+            // getSuspended checker must not broke request
+            log.error(e)
+            None
+        }
       }
     }
 
@@ -105,7 +112,7 @@ class LessonServlet
       tagId = req.tagId
     )
 
-    lessonService.getAll(
+    lessonService.getLessonsWithData(
       filter,
       req.ascending,
       req.skipTake
@@ -146,6 +153,14 @@ class LessonServlet
       .setDefaultLessonId(lessonId)
   }
 
+  post("/packages(/)", request.getParameter("action") == "SET_LESSON_VISIBILITY") {
+    val lessonId = req.id
+    val playerId = req.playerId
+    val isHidden = req.isHidden
+
+    lessonPlayerService.setLessonVisibilityFromPlayer(playerId, lessonId, isHidden)
+  }
+
   post("/packages(/)", request.getParameter("action") == "UPDATE") {
     val lessonId = req.id
     val title = req.title
@@ -179,10 +194,17 @@ class LessonServlet
   }
 
   get("/packages(/)", request.getParameter("action") == "MEMBERS") {
-    req.viewerType match  {
+    req.viewerType match {
       case MemberTypes.User =>
         lessonViewersService.getUserMembers(req.id, req.textFilter, req.ascending, req.skipTake, req.organizationId)
-          .map(u => new UserResponse(u))
+          .map { u =>
+            if (u.isDeleted) {
+              new UserResponse(u)
+            } else {
+              val user = UserLocalServiceHelper().getUser(u.id)
+              new UserResponse(user)
+            }
+          }
       case _ =>
         lessonViewersService.getMembers(req.id, req.viewerType, req.textFilter, req.ascending, req.skipTake)
     }

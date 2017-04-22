@@ -4,6 +4,7 @@ import javax.servlet.{ServletContextEvent, ServletContextListener}
 
 import com.arcusys.learn.AdditionalConfiguration
 import com.arcusys.valamis.liferay.CacheUtil
+import com.arcusys.valamis.util.FileSystemUtil
 import com.arcusys.valamis.web.configuration.ioc.Configuration
 
 /**
@@ -11,12 +12,15 @@ import com.arcusys.valamis.web.configuration.ioc.Configuration
  */
 class ContextListener extends ServletContextListener {
   override def contextDestroyed(servletContextEvent: ServletContextEvent): Unit = {
-    updateConfiguration()
-
     cleanCache()
+
+    // Should be called to stop daemon-thread that tracks files to clean.
+    FileSystemUtil.stopDeleteLaterTracking()
   }
 
-  override def contextInitialized(servletContextEvent: ServletContextEvent): Unit = {}
+  override def contextInitialized(servletContextEvent: ServletContextEvent): Unit = {
+    updateConfiguration()
+  }
 
   private def updateConfiguration() : Unit = {
     Configuration <~ new AdditionalConfiguration

@@ -67,6 +67,7 @@
                 });
 
                 uploader.on('fileuploaddone', function (data) {
+                    toastr.success('{{overlayCompleteMessageLabel}}');
                     me.triggerCancel();
                 });
 

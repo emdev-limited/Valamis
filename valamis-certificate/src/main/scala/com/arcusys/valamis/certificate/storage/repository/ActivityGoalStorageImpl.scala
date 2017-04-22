@@ -4,20 +4,30 @@ import com.arcusys.valamis.certificate.model.goal.{ActivityGoal, GoalType}
 import com.arcusys.valamis.certificate.storage.schema.ActivityGoalTableComponent
 import com.arcusys.valamis.certificate.storage.{ActivityGoalStorage, CertificateGoalRepository}
 import com.arcusys.valamis.model.PeriodTypes.PeriodType
-import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 
-abstract class ActivityGoalStorageImpl (val db:     JdbcBackend#DatabaseDef,
-                                        val driver: JdbcProfile)
+abstract class ActivityGoalStorageImpl(val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
   extends ActivityGoalStorage
-  with ActivityGoalTableComponent
-  with SlickProfile {
+    with ActivityGoalTableComponent
+    with SlickProfile
+    with DatabaseLayer
+    with Queries {
 
-  import driver.simple._
+  import driver.api._
 
   def certificateGoalRepository: CertificateGoalRepository
+
+  private def getActivityAction(certificateId: Long, activityName: String, isDeleted: Option[Boolean]) = {
+    activityGoals
+      .filterByCertificateId(certificateId)
+      .filter(_.activityName === activityName)
+      .filterByDeleted(isDeleted)
+      .map(_._1)
+      .result
+  }
 
   def create(certificateId: Long,
              activityName: String,
@@ -26,8 +36,25 @@ abstract class ActivityGoalStorageImpl (val db:     JdbcBackend#DatabaseDef,
              periodType: PeriodType,
              arrangementIndex: Int,
              isOptional: Boolean = false,
-             groupId: Option[Long] = None): ActivityGoal =
-    db.withTransaction { implicit session =>
+             groupId: Option[Long] = None): ActivityGoal = {
+
+    val deletedGoal = get(certificateId, activityName, isDeleted = Some(true))
+
+    val insertOrUpdate = deletedGoal map { goal =>
+      val certificateGoal = certificateGoalRepository.getById(goal.goalId, isDeleted = Some(true))
+      certificateGoalRepository.modify(
+        goal.goalId,
+        certificateGoal.periodValue,
+        certificateGoal.periodType,
+        certificateGoal.arrangementIndex,
+        isOptional = false,
+        groupId = None,
+        oldGroupId = None,
+        userId = None,
+        isDeleted = false
+      )
+      DBIO.successful()
+    } getOrElse {
       val goalId = certificateGoalRepository.create(
         certificateId,
         GoalType.Activity,
@@ -43,33 +70,39 @@ abstract class ActivityGoalStorageImpl (val db:     JdbcBackend#DatabaseDef,
         activityName,
         count)
 
-      activityGoals insert activityGoal
-
-      activityGoals
-        .filter(ag => ag.certificateId === certificateId && ag.activityName === activityName)
-        .first
+      activityGoals += activityGoal
     }
 
-  def modify(goalId: Long, count: Int): ActivityGoal =
-    db.withTransaction{ implicit session =>
-      activityGoals
-        .filter(_.goalId === goalId)
-        .map(_.count)
-        .update(count)
+    val resultAction = getActivityAction(certificateId, activityName, isDeleted = Some(false)).head
 
-      activityGoals
-        .filter(_.goalId === goalId).first
-    }
-
-  override def getBy(goalId: Long): Option[ActivityGoal] = db.withTransaction { implicit session =>
-    activityGoals.filter(_.goalId === goalId).firstOption
+    execSyncInTransaction(insertOrUpdate >> resultAction)
   }
 
-  override def getByCertificateId(certificateId: Long): Seq[ActivityGoal] = db.withTransaction { implicit session =>
-    activityGoals.filter(_.certificateId === certificateId).run
+  def modify(goalId: Long, count: Int): ActivityGoal = {
+    val updateAction = activityGoals
+      .filterByGoalId(goalId)
+      .map(_.count)
+      .update(count)
+
+    val resultAction = activityGoals.filterByGoalId(goalId).result.head
+    execSync(updateAction >> resultAction)
   }
 
-  override def get(certificateId: Long, activityName: String): Option[ActivityGoal] = db.withTransaction { implicit session =>
-    activityGoals.filter(ag => ag.certificateId === certificateId && ag.activityName === activityName).firstOption
+  override def getBy(goalId: Long): Option[ActivityGoal] =
+    execSync(activityGoals.filterByGoalId(goalId).result.headOption)
+
+  override def getByCertificateId(certificateId: Long,
+                                  isDeleted: Option[Boolean]): Seq[ActivityGoal] = execSync {
+    activityGoals
+      .filterByCertificateId(certificateId)
+      .filterByDeleted(isDeleted)
+      .map(_._1)
+      .result
   }
+
+  override def get(certificateId: Long,
+                   activityName: String,
+                   isDeleted: Option[Boolean]): Option[ActivityGoal] =
+
+    execSync(getActivityAction(certificateId, activityName, isDeleted)).headOption
 }

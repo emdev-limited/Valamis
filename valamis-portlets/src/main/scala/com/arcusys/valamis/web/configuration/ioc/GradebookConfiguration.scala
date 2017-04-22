@@ -1,10 +1,9 @@
 package com.arcusys.valamis.web.configuration.ioc
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
-import com.arcusys.valamis.course.CourseService
-import com.arcusys.valamis.gradebook.service.impl.{TeacherCourseGradeServiceImpl, CourseLessonsResultServiceImpl, LessonGradeServiceImpl, UserCourseResultServiceImpl}
+import com.arcusys.valamis.course.api.CourseService
 import com.arcusys.valamis.gradebook.service._
-import com.arcusys.valamis.gradebook.service.impl.{CourseLessonsResultServiceImpl, LessonGradeServiceImpl, UserCourseResultServiceImpl}
+import com.arcusys.valamis.gradebook.service.impl._
 import com.arcusys.valamis.lesson.service._
 import com.arcusys.valamis.lrs.service.LrsClientManager
 import com.arcusys.valamis.persistence.common.SlickDBInfo
@@ -29,11 +28,13 @@ class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: Binding
     lazy val memberService = inject[LessonMembersService](None)
     lazy val userService = inject[UserService](None)
     lazy val membersService = inject[LessonMembersService](None)
+    lazy val teacherCourseGradeService = inject[TeacherCourseGradeService](None)
   }
 
   bind[UserCourseResultService] toSingle new UserCourseResultServiceImpl(db.databaseDef, db.slickProfile) {
     lazy val userCourseResultService = inject[UserCourseResultServiceImpl](None)
     lazy val packageChecker = inject[LessonGradeService](None)
+    lazy val lessonService = inject[LessonService](None)
   }
 
   bind[CourseLessonsResultService] toSingle new CourseLessonsResultServiceImpl(db.databaseDef, db.slickProfile) {

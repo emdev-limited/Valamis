@@ -1,7 +1,8 @@
 package com.arcusys.valamis.web.servlet
 
 import com.arcusys.valamis.exception.EntityNotFoundException
-import com.arcusys.valamis.slide.service.SlideServiceContract
+import com.arcusys.valamis.lrs.service.util.{TinCanVerb, TinCanVerbs}
+import com.arcusys.valamis.slide.service.SlideService
 import com.arcusys.valamis.uri.model.TincanURIType
 import com.arcusys.valamis.uri.service.TincanURIService
 import com.arcusys.valamis.web.servlet.base.BaseApiController
@@ -14,7 +15,7 @@ import com.arcusys.valamis.web.servlet.request.uri.{URIActionType, URIRequest}
 class URIServlet extends BaseApiController {
 
   lazy val uriService = inject[TincanURIService]
-  lazy val slideService = inject[SlideServiceContract]
+  lazy val slideService = inject[SlideService]
 
   get("/uri(/)")(jsonAction {
     val uriRequest = URIRequest(this)
@@ -36,16 +37,16 @@ class URIServlet extends BaseApiController {
   })
 
   get("/uri/verbs(/)")(jsonAction {
-    slideService.getTinCanVerbs
+    TinCanVerbs.all.map(x => TinCanVerb(TinCanVerbs.getVerbURI(x), x))
   })
 
-  get("/uri/:objType/:objName")(action {
+  get("/uri/:objType/:objName") {
     val uri = request.getRequestURL.toString
     val result = uriService.getByURI(uri)
     if (result.isDefined)
       halt(200, result.get.content)
     else
       throw new EntityNotFoundException("Object not found")
-  })
+  }
 
 }

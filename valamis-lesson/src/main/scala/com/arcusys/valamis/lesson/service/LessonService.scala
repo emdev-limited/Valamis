@@ -1,6 +1,6 @@
 package com.arcusys.valamis.lesson.service
 
-import com.arcusys.valamis.lesson.model.LessonType._
+import com.arcusys.valamis.lesson.model.LessonType.LessonType
 import com.arcusys.valamis.lesson.model._
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
 import com.arcusys.valamis.tag.model.ValamisTag
@@ -16,7 +16,8 @@ trait LessonService {
              title: String,
              description: String,
              ownerId: Long,
-             scoreLimit: Option[Double] = None): Lesson
+             scoreLimit: Option[Double] = None,
+             requiredReview: Boolean = false): Lesson
 
   def getLesson(id: Long): Option[Lesson]
 
@@ -27,10 +28,12 @@ trait LessonService {
   def getByCourses(courseIds: Seq[Long]): Seq[Lesson]
 
   def getAllSorted(courseId: Long,
+                   titleFilter: Option[String] = None,
                    ascending: Boolean = true,
                    skipTake: Option[SkipTake] = None): Seq[Lesson]
 
   def getSortedByCourses(courseIds: Seq[Long],
+                         titleFilter: Option[String] = None,
                          ascending: Boolean = true,
                          skipTake: Option[SkipTake] = None): Seq[Lesson]
 
@@ -42,16 +45,22 @@ trait LessonService {
 
   def getWithLimit(lessonId: Long): (Lesson, Option[LessonLimit])
 
-  def getAllVisible(courseId: Long): Seq[Lesson]
+  /**
+    * get all visible lessons
+    * @param courseId scope
+    * @param extraVisible add lessons with external visible configuration to result
+    *                     (isVisible undefined in lesson table)
+    */
+  def getAllVisible(courseId: Long, extraVisible: Boolean = false): Seq[Lesson]
 
-  def getCount(courseId: Long): Int
+  def getCount(courseId: Long, titleFilter: Option[String] = None): Int
 
   def getCountByCourses(courseIds: Seq[Long]): Int
 
-  def getAll(criterion: LessonFilter,
-             ascending: Boolean = true,
-             skipTake: Option[SkipTake] = None
-            ): RangeResult[LessonFull]
+  def getLessonsWithData(criterion: LessonFilter,
+                         ascending: Boolean = true,
+                         skipTake: Option[SkipTake] = None
+                        ): RangeResult[LessonFull]
 
   def getLogo(id: Long): Option[Array[Byte]]
 
@@ -61,9 +70,11 @@ trait LessonService {
 
   def getRootActivityId(lesson: Lesson): String
 
-  def getByRootActivityId(activityId: String): Option[Long]
+  def getByRootActivityId(activityId: String): Seq[Long]
 
   def delete(id: Long): Unit
+
+  def deleteLogo(id: Long): Unit
 
   def update(lesson: Lesson): Unit
 
@@ -84,6 +95,8 @@ trait LessonService {
   def getTagsFromCourse(courseId: Long): Seq[ValamisTag]
 
   def getTagsFromCourses(courseIds: Seq[Long]): Seq[ValamisTag]
+
+  def getLessonURL(lesson: Lesson, companyId: Long, plId: Option[Long] = None): String
 }
 
 

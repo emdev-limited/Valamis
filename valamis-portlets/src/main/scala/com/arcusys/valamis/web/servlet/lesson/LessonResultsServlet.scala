@@ -2,7 +2,7 @@ package com.arcusys.valamis.web.servlet.lesson
 
 import com.arcusys.learn.liferay.services.{GroupLocalServiceHelper, UserLocalServiceHelper}
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.course.util.CourseFriendlyUrlExt
 import com.arcusys.valamis.gradebook.service.{CourseLessonsResultService, StatisticBuilder, TeacherCourseGradeService}
 import com.arcusys.valamis.lesson.service.{LessonService, UserLessonResultService}
@@ -11,7 +11,7 @@ import com.arcusys.valamis.user.model.{UserFilter, UserInfo, UserSort}
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.web.portlet.base.{Permission, ViewAllPermission, ViewPermission}
 import com.arcusys.valamis.web.servlet.base.{BaseJsonApiController, ScalatraPermissionUtil}
-import com.arcusys.valamis.web.servlet.course.CourseResponse
+import com.arcusys.valamis.web.servlet.course.CourseConverter
 import com.arcusys.valamis.web.servlet.lesson.response.RecentLessonResponse
 import com.arcusys.valamis.web.servlet.user.UserWithCourseStatisticResponse
 import org.json4s.ext.JodaTimeSerializers
@@ -34,7 +34,9 @@ class LessonResultsServlet extends BaseJsonApiController {
   get("/lesson-results/recent-lessons(/)") {
     permissionUtil.requirePermissionApi(ViewPermission, PortletName.RecentLessons)
     val user = permissionUtil.getLiferayUser
-    lessonResultService.getLastLessons(user, req.count)
+    val coursesIds = courseService.getByCompanyId(user.getCompanyId).map(_.getGroupId)
+
+    lessonResultService.getLastLessons(user, coursesIds, req.count)
       .map { case (attempt, lesson) => (attempt, lesson, courseService.getById(lesson.courseId)) }
       .collect { case (attempt, lesson, Some(course)) =>
         new RecentLessonResponse(
@@ -54,6 +56,7 @@ class LessonResultsServlet extends BaseJsonApiController {
     )
 
     val filter = UserFilter(
+      namePart = req.textFilter,
       companyId = Some(getCompanyId),
       groupId = Some(req.courseId),
       organizationId = req.organizationId,
@@ -83,15 +86,15 @@ class LessonResultsServlet extends BaseJsonApiController {
 
     val courses = courseService.getSitesByUserId(permissionUtil.getUserId)
     val coursesIds = courses.map(_.getGroupId)
-    val allUsers = userService.getByCourses(coursesIds, getCompanyId, req.organizationId, req.ascending)
+    val allUsers = userService.getByCourses(coursesIds, getCompanyId, req.organizationId, req.textFilter, req.ascending)
 
     val users = req.skipTake match {
       case Some(SkipTake(skip, take)) => allUsers.slice(skip, skip + take)
       case None => allUsers
     }
 
-    val statistic = statisticBuilder.getCoursesLessonStatistic(users.toSeq, coursesIds)
-    val courseStatistic = statisticBuilder.getCoursesStatistic(users.toSeq)
+    val statistic = statisticBuilder.getCoursesLessonStatistic(users, coursesIds)
+    val courseStatistic = statisticBuilder.getCoursesStatistic(users)
     val items = users.map { user =>
       val lastActivityDate = lessonResultService.getLastResult(user.getUserId).flatMap(_.lastAttemptDate)
       UserWithCourseStatisticResponse(
@@ -112,21 +115,15 @@ class LessonResultsServlet extends BaseJsonApiController {
       groupId = Some(req.courseId)
     ))
 
-    val total = lessonService.getCount(req.courseId)
-    val lessons = lessonService.getAllSorted(req.courseId, req.ascending, req.skipTake)
+    val total = lessonService.getCount(req.courseId, req.titleFilter)
+    val lessons = lessonService.getAllSorted(req.courseId, req.titleFilter, req.ascending, req.skipTake)
     val lGroup = GroupLocalServiceHelper.getGroup(req.courseId)
     val statistic = statisticBuilder.getStatisticByLesson(users, lessons)
     val items = courseLessonsResultService.getLessonsAverageGrade(lessons, users)
       .map {item =>
         LessonWithAverageGradeResponse(
           item.lesson,
-          CourseResponse(
-            lGroup.getGroupId,
-            lGroup.getDescriptiveName,
-            lGroup.getCourseFriendlyUrl,
-            lGroup.getDescription.replace("\n", " "),
-            "",
-            lGroup.isActive),
+          CourseConverter.toResponse(lGroup),
           item.users.size,
           item.grade,
           statistic(item.lesson)
@@ -143,20 +140,14 @@ class LessonResultsServlet extends BaseJsonApiController {
     val users = userService.getByCourses(coursesIds, getCompanyId)
     val total = lessonService.getCountByCourses(coursesIds)
 
-    val lessons = lessonService.getSortedByCourses(coursesIds, req.ascending, req.skipTake)
+    val lessons = lessonService.getSortedByCourses(coursesIds, req.titleFilter, req.ascending, req.skipTake)
     val statistic = statisticBuilder.getStatisticByLesson(users, lessons)
     val items = courseLessonsResultService.getLessonsAverageGrade(lessons, users)
       .map {item =>
         val lGroup = GroupLocalServiceHelper.getGroup(item.lesson.courseId)
         LessonWithAverageGradeResponse(
           item.lesson,
-          CourseResponse(
-            lGroup.getGroupId,
-            lGroup.getDescriptiveName,
-            lGroup.getCourseFriendlyUrl,
-            lGroup.getDescription.replace("\n", " "),
-            "",
-            lGroup.isActive),
+          CourseConverter.toResponse(lGroup),
           item.users.size,
           item.grade,
           statistic(item.lesson)
@@ -172,13 +163,7 @@ class LessonResultsServlet extends BaseJsonApiController {
     val statistic = statisticBuilder.getCourseLessonsStatistic(users, req.courseId)
     val lGroup = GroupLocalServiceHelper.getGroup(req.courseId)
     CourseWithStatisticResponse(
-      CourseResponse(
-        lGroup.getGroupId,
-        lGroup.getDescriptiveName,
-        lGroup.getCourseFriendlyUrl,
-        lGroup.getDescription.replace("\n", " "),
-        "",
-        lGroup.isActive),
+      CourseConverter.toResponse(lGroup),
       statistic)
   }
 
@@ -195,13 +180,7 @@ class LessonResultsServlet extends BaseJsonApiController {
       val users = userService.getBy(filter)
       val statistic = statisticBuilder.getCourseLessonsStatistic(users, course.getGroupId)
       CourseWithStatisticResponse(
-        CourseResponse(
-          course.getGroupId,
-          course.getDescriptiveName,
-          course.getCourseFriendlyUrl,
-          course.getDescription.replace("\n", " "),
-          "",
-          course.isActive),
+        CourseConverter.toResponse(course),
         statistic)
     }
 
@@ -239,13 +218,7 @@ class LessonResultsServlet extends BaseJsonApiController {
         courseGrade,
         statistics(course),
         None,
-        Some(CourseResponse(
-          course.getGroupId,
-          course.getDescriptiveName,
-          course.getCourseFriendlyUrl,
-          course.getDescription.replace("\n", " "),
-          "",
-          course.isActive))
+        Some(CourseConverter.toResponse(course))
       )
     }
     RangeResult(items.size, items)

@@ -1,92 +1,70 @@
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-    <script src="{{contextPath}}/js2.0/Urls.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/jquery.min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/jquery-ui-1.10.4.custom.min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/lodash.min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/backbone-min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/mustache.min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/backbone.marionette.min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/backbone.modal-bundled.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/bootstrap.min.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/toastr.min.js"></script>
-    <script src="{{contextPath}}/js2.0/helpers/Utils.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/backbone.model-binder.min.js"></script>
-    <script src="{{contextPath}}/js2.0/file-uploader/model/FileItem.js"></script>
-    <script src="{{contextPath}}/js2.0/file-uploader/view/FileUploader.js"></script>
-    <script src="{{contextPath}}/js2.0/vendor/jquery.fileupload.js"></script>
+<script type="text/template" id="lmsettings-modals-template">
+    <div class="lmsettings-modals-container"></div>
+</script>
 
+<script type="text/template" id="lmsettings-import-modal-template">
+    <div class="bbm-modal__topbar">
+        <h3 class="bbm-modal__title">{{importLabel}}</h3>
 
-    <script src="{{contextPath}}/js2.0/helpers/Utils.js"></script>
-    <script src="{{contextPath}}/js2.0/helpers/SettingsHelper.js"></script>
-
-    <script type="text/template" id="lmsettings-modals-template">
-        <div class="lmsettings-modals-container"></div>
-    </script>
-
-    <script type="text/template" id="lmsettings-import-modal-template">
-        <div class="bbm-modal__topbar">
-            <h3 class="bbm-modal__title">{{importLabel}}</h3>
-
-            <div class="modal-close val-icon-exit">
-            </div>
+        <div class="modal-close val-icon-exit">
         </div>
+    </div>
 
-        <div class="lm-modal-content">
-        </div>
-    </script>
+    <div class="lm-modal-content"></div>
+</script>
 
-    <script type="text/javascript">
-        var PMSettingsLayout = Backbone.Marionette.Layout.extend({
-            template: _.template(Mustache.to_html(jQuery('#lmsettings-modals-template').html())),
-            regions: {
-                modals: {
-                    selector: '.lmsettings-modals-container',
-                    regionType: Backbone.Marionette.Modals
+<script type="text/javascript">
+    var PMSettingsLayout = Backbone.Marionette.LayoutView.extend({
+        template: _.template(Mustache.to_html(jQuery('#lmsettings-modals-template').html())),
+        regions: {
+            modals: {
+                selector: '.lmsettings-modals-container',
+                regionType: Backbone.Marionette.Modals
+            }
+        }
+    });
+
+
+    var pmSettingsLayout = new PMSettingsLayout();
+
+    jQuery(function () { jQuery('#lm-settings-layout').append(pmSettingsLayout.render().el); });
+
+    var UploadPMImportModal = Backbone.Modal.extend({
+        template: _.template(Mustache.to_html(jQuery('#lmsettings-import-modal-template').html())),
+        className: 'val-modal',
+        submitEl: '.bbm-button',
+        cancelEl: '.modal-close',
+        onRender: function () {
+            var that = this;
+            var uploader = new FileUploader({
+                endpoint: path.root + path.api.files + '?action=ADD&contentType=import-package&courseId=' + Utils.getCourseId(),
+                message: '{{importMessageLabel}}',
+                onFailFunction: function (data) {
+                    toastr.error('{{{failedMessageLabel}}}');
                 }
-            }
-        });
+            });
 
+            uploader.on('fileuploaddone', function (data) {
+                toastr.success('{{{overlayCompleteMessageLabel}}}');
+                that.trigger('modal:close');
+                that.triggerCancel();
+            });
 
-        var pmSettingsLayout = new PMSettingsLayout();
-
-        jQuery(function () { jQuery('#lm-settings-layout').append(pmSettingsLayout.render().el); });
-
-        var UploadPMImportModal = Backbone.Modal.extend({
-            template: _.template(Mustache.to_html(jQuery('#lmsettings-import-modal-template').html())),
-            className: 'val-modal',
-            submitEl: '.bbm-button',
-            cancelEl: '.modal-close',
-            onRender: function () {
-                var that = this;
-                var uploader = new FileUploader({
-                    endpoint: path.root + path.api.files + '?action=ADD&contentType=import-package&courseId=' + Utils.getCourseId(),
-                    message: '{{importMessageLabel}}'
-                });
-
-                uploader.on('fileuploaddone', function (data) {
-                    that.trigger('modal:close');
-                    that.close();
-                });
-
-                this.$('.lm-modal-content').append(uploader.render().$el);
-            }
-        });
-
-        function exportPackages() {
-            window.location = path.root + path.api.files + 'export/?action=EXPORTALL&contentType=package'
-                    + '&courseId=' + Utils.getCourseId();
+            this.$('.lm-modal-content').append(uploader.render().$el);
         }
-        function importPackages() {
-            var importModal = new UploadPMImportModal();
-            pmSettingsLayout.modals.show(importModal);
-            importModal.render();
-        }
-    </script>
-</head>
-<body >
+    });
+
+    function exportPackages() {
+        window.location = path.root + path.api.files + 'export/?action=EXPORTALL&contentType=package'
+                + '&courseId=' + Utils.getCourseId();
+    }
+    function importPackages() {
+        var importModal = new UploadPMImportModal();
+        pmSettingsLayout.modals.show(importModal);
+        importModal.render();
+    }
+</script>
 
 <div style="height: 100px; padding: 10px;">
     <button class="button big primary bbm-button val-icon-download-import-down" onclick="exportPackages()">
@@ -96,7 +74,5 @@
         {{importLabel}}
     </button>
 </div>
-<div id="lm-settings-layout"></div>
 
-</body>
-</html>
+<div id="lm-settings-layout"></div>

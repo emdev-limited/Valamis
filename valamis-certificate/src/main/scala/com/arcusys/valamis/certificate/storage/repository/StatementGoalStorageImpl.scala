@@ -4,27 +4,36 @@ import com.arcusys.valamis.certificate.model.goal.{GoalType, StatementGoal}
 import com.arcusys.valamis.certificate.storage.schema.StatementGoalTableComponent
 import com.arcusys.valamis.certificate.storage.{CertificateGoalRepository, StatementGoalStorage}
 import com.arcusys.valamis.model.PeriodTypes
-import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 
-abstract class StatementGoalStorageImpl (val db: JdbcBackend#DatabaseDef,
-                                          val driver: JdbcProfile)
+abstract class StatementGoalStorageImpl (val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
   extends StatementGoalStorage
     with StatementGoalTableComponent
-  with SlickProfile {
+    with SlickProfile
+    with DatabaseLayer
+    with Queries {
 
-  import driver.simple._
+  import driver.api._
 
   def certificateGoalRepository: CertificateGoalRepository
 
-  override def get(certificateId: Long, verb: String, obj: String) = db.withSession { implicit session =>
-    statementGoals.filter(ag => ag.certificateId === certificateId && ag.verb === verb && ag.obj === obj).firstOption
+  private def getStatementAction(certificateId: Long, verb: String, obj: String, isDeleted: Option[Boolean]) = {
+    statementGoals
+      .filterByCertificateId(certificateId)
+      .filter(sg => sg.verb === verb && sg.obj === obj)
+      .filterByDeleted(isDeleted)
+      .map(_._1)
+      .result
   }
 
-  override def getBy(goalId: Long): Option[StatementGoal] = db.withTransaction { implicit session =>
-    statementGoals.filter(_.goalId === goalId).firstOption
+  override def get(certificateId: Long, verb: String, obj: String, isDeleted: Option[Boolean]): Option[StatementGoal] =
+    execSync(getStatementAction(certificateId, verb, obj, isDeleted).headOption)
+
+  override def getBy(goalId: Long): Option[StatementGoal] = execSync {
+    statementGoals.filterByGoalId(goalId).result.headOption
   }
 
   override def create(certificateId: Long,
@@ -35,7 +44,24 @@ abstract class StatementGoalStorageImpl (val db: JdbcBackend#DatabaseDef,
                       arrangementIndex: Int,
                       isOptional: Boolean = false,
                       groupId: Option[Long] = None): StatementGoal = {
-    db.withTransaction { implicit session =>
+
+    val deletedGoal = get(certificateId, verb, obj, isDeleted = Some(true))
+
+    val insertOrUpdate = deletedGoal map { goal =>
+      val certificateGoal = certificateGoalRepository.getById(goal.goalId, isDeleted = Some(true))
+      certificateGoalRepository.modify(
+        goal.goalId,
+        certificateGoal.periodValue,
+        certificateGoal.periodType,
+        certificateGoal.arrangementIndex,
+        isOptional = false,
+        groupId = None,
+        oldGroupId = None,
+        userId = None,
+        isDeleted = false
+      )
+      DBIO.successful()
+    } getOrElse {
       val goalId = certificateGoalRepository.create(
         certificateId,
         GoalType.Statement,
@@ -51,25 +77,27 @@ abstract class StatementGoalStorageImpl (val db: JdbcBackend#DatabaseDef,
         verb,
         obj)
 
-      statementGoals insert statementGoal
-
-      statementGoals
-        .filter(ag => ag.certificateId === statementGoal.certificateId &&
-          ag.verb === statementGoal.verb &&
-          ag.obj === statementGoal.obj)
-        .first
+      statementGoals += statementGoal
     }
+
+    val resultAction = getStatementAction(certificateId, verb, obj, Some(false)).head
+
+    execSyncInTransaction(insertOrUpdate >> resultAction)
   }
 
-  override def getByVerbAndObj(verb: String, obj: String): Seq[StatementGoal] = db.withSession { implicit session =>
+  override def getByVerbAndObj(verb: String, obj: String): Seq[StatementGoal] = execSync {
     statementGoals
       .filter(sg => sg.verb === verb && sg.obj === obj)
-      .run
+      .result
   }
 
-  override def getByCertificateId(certificateId: Long): Seq[StatementGoal] = db.withSession { implicit session =>
-    statementGoals
-      .filter(_.certificateId === certificateId)
-      .run
+  override def getByCertificateId(certificateId: Long, isDeleted: Option[Boolean]): Seq[StatementGoal] = {
+    execSync {
+      statementGoals
+        .filterByCertificateId(certificateId)
+        .filterByDeleted(isDeleted)
+        .map(_._1)
+        .result
+    }
   }
 }

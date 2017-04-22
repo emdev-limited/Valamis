@@ -19,6 +19,6 @@ class OpenCertificateAction extends BaseOpenAction {
 
   override def sendResponse(response: HttpServletResponse, portletURL: PortletURL, assetEntry: Option[LAssetEntry]) = {
     val hash = assetEntry.map(i => "/certificate/" + i.getClassPK).getOrElse("")
-    response.sendRedirect(portletURL.toString + "&hash=" + URLEncoder.encode(hash, "UTF-8"))
+    response.sendRedirect(portletURL.toString + "#" + hash)
   }
 }

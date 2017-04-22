@@ -7,45 +7,39 @@ import com.arcusys.learn.liferay.update.version270.slide.SlideSetTableComponent
 import com.arcusys.learn.liferay.update.version300.lesson.{TincanActivityTableComponent, LessonTableComponent => NewTable}
 import com.arcusys.valamis.lesson.model.LessonType
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 
-class AddScoreAndReviewTest extends FunSuite with BeforeAndAfter {
-
-  val driver = H2Driver
+class AddScoreAndReviewTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
   import driver.simple._
-
-  val db = Database.forURL("jdbc:h2:mem:scopeandreview", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val bindingModule = new NewBindingModule({ implicit module =>
     module.bind[SlickDBInfo] toSingle new SlickDBInfo {
       def databaseDef: JdbcBackend#DatabaseDef = db
-
       def slickDriver: JdbcDriver = driver
-
       def slickProfile: JdbcProfile = driver
     }
   })
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     oldTable.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val oldTable = new OldTable
     with SlideSetTableComponent
     with TincanActivityTableComponent
     with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = AddScoreAndReviewTest.this.driver
 
     import driver.simple._
 
@@ -53,7 +47,7 @@ class AddScoreAndReviewTest extends FunSuite with BeforeAndAfter {
   }
 
   val newTable = new NewTable with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = AddScoreAndReviewTest.this.driver
   }
 
   val updater = new DBUpdater3009(bindingModule)

@@ -1,5 +1,7 @@
 package com.arcusys.valamis.lrs.service.util
 
+import java.net.URI
+
 case class TinCanVerb(uri: String, title: String)
 
 object TinCanVerbs {
@@ -57,8 +59,12 @@ object TinCanVerbs {
       Voided ::
       Nil
 
-  def getVerbURI(verb: String) = {
-    "http://adlnet.gov/expapi/verbs/" + verb
+  def getVerbURI(verb: String): String = {
+    s"http://adlnet.gov/expapi/verbs/$verb"
   }
 
+  implicit class VerbExtension(val verb: String) extends AnyVal {
+    def toUriString: String = getVerbURI(verb)
+    def toUri: URI = URI.create(getVerbURI(verb))
+  }
 }

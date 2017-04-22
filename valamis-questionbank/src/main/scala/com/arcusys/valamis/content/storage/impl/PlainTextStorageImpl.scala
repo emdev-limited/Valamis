@@ -38,6 +38,9 @@ class PlainTextStorageImpl(val db: JdbcBackend#DatabaseDef,
   override def getByCourse(courseId: Long) =
     plainTexts.filter(_.courseId === courseId).result
 
+  override def getByCategory(categoryId: Long) =
+    plainTexts.filter(pt => pt.categoryId === categoryId).result
+
   override def getByCategory(categoryId: Option[Long], courseId: Long) =
     plainTexts.filter(pt => optionFilter(pt.categoryId, categoryId) && pt.courseId === courseId).result
 

@@ -1,46 +1,48 @@
 <section data-state="positioning_{{id}}_{{questionNumber}}" id="task{{id}}_{{questionNumber}}">
-<div class="SCORMPlayerContentDisplay content{{id}}_{{questionNumber}}">
-    <div class="playerHeader">
-        <h2 class="SCORMPlayerQuestionTitle">{{{text}}}</h2>
-    </div>
-    <div class="playerMainArea">
-        <div class="playerPlacingAnswers">
-            <ul id="sortable{{id}}_{{questionNumber}}"></ul>
+    <div class="position-question">
+        <div class="valamis-question js-valamis-question content{{id}}_{{questionNumber}}">
+            <div class="question-text">{{{text}}}</div>
+            <div class="answers-options js-answers-options">
+                <div class="answer-container">
+                    <ul id="sortable{{id}}_{{questionNumber}}"></ul>
+                </div>
+            </div>
+            <!--{{#autoShowAnswer}} -->
+            <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
+                    onclick="TinCanCourseHelpers['positioningShowAnswers_{{id}}_{{questionNumber}}']()">
+            </button>
+            <!--{{/autoShowAnswer}} -->
+        </div>
+        {{#autoShowAnswer}}
+        <div class="valamis-question js-valamis-question js-question-feedback answers answers{{id}}_{{questionNumber}}">
+            <div class="question-text">{{{text}}}</div>
+
+            <div id="usersAnswers{{id}}_{{questionNumber}}" class="answers-options clearfix">
+                <div class="answer-container">
+                    <ul id="usersSortable{{id}}_{{questionNumber}}"></ul>
+                </div>
+            </div>
+            <div class="result-icon shift-left val-icon js-result-icon"></div>
+            <div id="answerCorrectness{{id}}_{{questionNumber}}" class="result-label">
+                <div class="js-right-answer-correctness">{{{rightAnswerText}}}</div>
+                <div class="js-wrong-answer-correctness">{{{wrongAnswerText}}}</div>
+            </div>
+
+            <div class="decorative-line">
+                <div class="choice-line"></div>
+            </div>
+
+            {{#hasExplanation}}
+            <div class="js-localized-label invisible-font" data-value="explanationLabel"></div>
+            <div id="explanation" class="question-explanation js-question-explanation">{{{explanation}}}</div>
+            {{/hasExplanation}}
         </div>
     </div>
-    <!--{{#autoShowAnswer}} -->
-    <button class="button big check-answer-button js-localized-label" id="checkAnswerButton" data-value="checkLabel"
-            onclick="TinCanCourseHelpers['positioningShowAnswers_{{id}}_{{questionNumber}}']()">
-        Check
-    </button>
-    <!--{{/autoShowAnswer}} -->
-</div>
-<!--{{#autoShowAnswer}} -->
-<div class="answers answers{{id}}_{{questionNumber}}">
-    <div class="feedback-block-label">{{{text}}}</div>
-    <div class="feedback-correctness-label" id="answerCorrectness{{id}}_{{questionNumber}}"></div>
-
-    <div class="feedback-block-label js-localized-label" data-value="yourAnswersLabel"></div>
-    <div id="usersAnswers{{id}}_{{questionNumber}}" class="clearfix">
-        <table class="answers-table"></table>
-    </div>
-
-    <div class="js-localized-label js-correct-answers hidden feedback-block-label" data-value="correctAnswersLabel"></div>
-    <div id="correctAnswers{{id}}_{{questionNumber}}" class="clearfix hidden js-correct-answers">
-        <table class="answers-table"></table>
-    </div>
-
-    {{#hasExplanation}}
-    <div class="js-localized-label feedback-block-label" data-value="explanationLabel"></div>
-    <div id="explanation">{{{explanation}}}</div>
-    {{/hasExplanation}}
-</div>
-<!--{{/autoShowAnswer}} -->
+{{/autoShowAnswer}}
 </section>
 <script type="text/javascript">
     jQuery(document).ready(function () {
-        //Replace all tags with /> to >, as we get not closed tags in answer
-        var data = JSON.parse(unescapeElement('{{answers}}').replace(/[\s]+\/>/g, '>'));
+        var data = answersToJSON('{{answers}}');
         var mappedData = [];
 
         var questionId = 'positioning_{{id}}_{{questionNumber}}';
@@ -85,6 +87,10 @@
             }
             if (isPassed) score = ('{{score}}'.length > 0)?JSON.parse('{{score}}'):null;
 
+            var questionId = {{id}};
+            var questionNumber = {{questionNumber}};
+            recalculateFeedbackSlideHeight(questionId, questionNumber);
+
             return {
                 rawLearnerResponse: answerIDs.join("[,]"),
                 learnerResponse: userAnswers.join("[,]"),
@@ -96,42 +102,61 @@
 
         /*{{#autoShowAnswer}}*/
         TinCanCourseHelpers['positioningShowAnswers_{{id}}_{{questionNumber}}'] = function() {
-            function addMatchedLine(target, line) {
-                var elem = jQuery("<td>").append(line);
-                target.append(jQuery("<tr>").append(elem));
-            }
+            var questionContainer = jQuery('#slideEntity_{{questionNumber}}');
+            questionContainer.siblings('.rj-element').hide();
 
-            jQuery('.answers{{id}}_{{questionNumber}}').show();
-            jQuery('.content{{id}}_{{questionNumber}}').hide();
-
-            var parent_el = jQuery('.answers{{id}}_{{questionNumber}}').closest('.rj-element');
+            var questionContent = questionContainer.find('.content{{id}}_{{questionNumber}}');
+            var userAnswers = questionContainer.find('.answers{{id}}_{{questionNumber}}');
+            questionContent.hide();
+            userAnswers.show();
+            var parent_el = questionContent.closest('.rj-element');
             parent_el.siblings('.rj-element').hide();
-
             var answers = TinCanCourseHelpers['collectAnswers_{{id}}_{{questionNumber}}']();
 
             var correct = answers.isPassed;
-            var correctness = (correct) ? "{{rightAnswerText}}" : "{{wrongAnswerText}}";
-            if (correctness === "")
-                correctness = (correct) ? LESSON_LABELS['yourAnswerIsCorrectLabel'] : LESSON_LABELS['yourAnswerIsIncorrectLabel'];
-            jQuery("#answerCorrectness{{id}}_{{questionNumber}}").html(correctness);
+            var rightAnswerCorrectness = userAnswers.find('#answerCorrectness{{id}}_{{questionNumber}} .js-right-answer-correctness');
+            var wrongAnswerCorrectness = userAnswers.find('#answerCorrectness{{id}}_{{questionNumber}} .js-wrong-answer-correctness');
+
+            if (correct) {
+                var rightAnswerCorrectnessText = rightAnswerCorrectness.html();
+                if (rightAnswerCorrectnessText == '') {
+                    rightAnswerCorrectness.html(LESSON_LABELS['yourAnswerIsCorrectLabel']);
+                }
+                rightAnswerCorrectness.show();
+                wrongAnswerCorrectness.hide();
+
+                questionContainer.find('.js-result-icon').addClass('correct');
+            }
+            else {
+                var wrongAnswerCorrectnessText = wrongAnswerCorrectness.html();
+                if (wrongAnswerCorrectnessText == '') {
+                    wrongAnswerCorrectness.html(LESSON_LABELS['yourAnswerIsIncorrectLabel']);
+                }
+                rightAnswerCorrectness.hide();
+                wrongAnswerCorrectness.show();
+
+                questionContainer.find('.js-result-icon').addClass('incorrect');
+            }
 
             var learnerResponse = answers.learnerResponse;
             var learnerResponseLines = learnerResponse.split("[,]");
+            userAnswers.find('.js-correct-answers').removeClass('hidden');
+
+            var correctPattern = answers.correctResponse;
+            var correctPatternLines = correctPattern.split("[,]");
             for (var i = 0; i < learnerResponseLines.length; i++) {
-                addMatchedLine(jQuery("#usersAnswers{{id}}_{{questionNumber}} table"), learnerResponseLines[i]);
+                var elem = jQuery("<div>").append(learnerResponseLines[i]);
+                var correctClass = learnerResponseLines[i] == correctPatternLines[i] ? 'correct' : 'incorrect';
+                var li = jQuery("<li>").addClass('ui-state-default ui-sortable-handle ' + correctClass);
+                var icon = jQuery("<div>").addClass('result-icon shift-left val-icon ' + correctClass);
+                jQuery("#usersSortable{{id}}_{{questionNumber}}").append(li.append(icon, elem));
             }
 
-            if (!correct) {
-                jQuery('.answers{{id}}_{{questionNumber}} .js-correct-answers').removeClass('hidden');
-
-                var correctPattern = answers.correctResponse;
-                var correctPatternLines = correctPattern.split("[,]");
-                for (var i = 0; i < data.length; i++) {
-                    addMatchedLine(jQuery("#correctAnswers{{id}}_{{questionNumber}} table"), data[i].text);
-                }
-            }
             moveAnswers({{questionNumber}});
             doScale();
+
+            /*resfresh div for screen readers*/
+            refreshStatusDiv();
         };
         /*{{/autoShowAnswer}}*/
 

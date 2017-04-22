@@ -1,14 +1,15 @@
 package com.arcusys.learn.liferay.update.version250.cleaner
 
-import com.arcusys.valamis.certificate.storage.CertificateRepository
+import com.arcusys.learn.liferay.update.version240.certificate.CertificateTableComponent
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 
 import scala.slick.jdbc.JdbcBackend
 
-trait CertificateFileCleanerComponent extends FileTableComponent
-  with SlickProfile {
-  protected val certificateRepository: CertificateRepository
+trait CertificateFileCleanerComponent
+  extends FileTableComponent
+    with CertificateTableComponent
+    with SlickProfile {
 
   import driver.simple._
 
@@ -29,11 +30,14 @@ trait CertificateFileCleanerComponent extends FileTableComponent
 
     certificateLogos.foreach { path =>
       val id = getId(path).get
-      val cert = certificateRepository.getByIdOpt(id)
-      if(cert.isEmpty)
+
+      val hasCertificate = certificates.filter(_.id === id).map(_.id).firstOption.isDefined
+
+      if(!hasCertificate) {
         files
           .filter(_.filename === path)
           .delete
+      }
     }
   }
 }

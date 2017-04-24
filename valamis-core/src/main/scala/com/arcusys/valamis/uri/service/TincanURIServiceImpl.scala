@@ -4,7 +4,6 @@ import com.arcusys.valamis.model.SkipTake
 import com.arcusys.valamis.uri.model.TincanURIType.TincanURIType
 import com.arcusys.valamis.uri.model.{TincanURI, TincanURIType}
 import com.arcusys.valamis.uri.storage.TincanURIStorage
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import java.util.UUID
 
 import com.arcusys.learn.liferay.services.{CompanyHelper, CompanyLocalServiceHelper, ServiceContextHelper}
@@ -12,9 +11,9 @@ import com.arcusys.learn.liferay.util.PortalUtilHelper
 
 import scala.util.Try
 
-class TincanURIServiceImpl(implicit val bindingModule: BindingModule) extends TincanURIService with Injectable {
+abstract class TincanURIServiceImpl extends TincanURIService {
 
-  val uriStorage = inject[TincanURIStorage]
+  def uriStorage: TincanURIStorage
 
   override def getByURI(uri: String): Option[TincanURI] = {
     uriStorage.get(uri)

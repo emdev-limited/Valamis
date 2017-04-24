@@ -1,0 +1,30 @@
+<div id="contentProviderManagerAppRegion"></div>
+
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(document).ready(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var contentProviderManagerPermission = {
+            'CONTENT_PROVIDER_MANAGER': {
+                'MODIFY_ACTION': eval('{{canEditProvider}}')
+            }
+        };
+
+        var contentProviderManagerOptions = {
+            language: '{{language}}',
+            resourceName: 'contentProviderManager',
+            permissions: contentProviderManagerPermission,
+            app: contentProviderManager
+        };
+
+        valamisApp.execute('subapp:start', contentProviderManagerOptions);
+
+    });
+
+</script>

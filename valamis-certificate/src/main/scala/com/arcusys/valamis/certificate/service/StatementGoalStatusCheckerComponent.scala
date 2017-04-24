@@ -15,10 +15,19 @@ import StatementApiHelpers._
 
 trait StatementGoalStatusCheckerComponent extends StatementGoalStatusChecker {
   protected def certificateStateRepository: CertificateStateRepository
+
   protected def statementGoalStorage: StatementGoalStorage
+
   protected def lrsClient: LrsClientManager
+
   protected def goalStateRepository: CertificateGoalStateRepository
+
   protected def goalRepository: CertificateGoalRepository
+
+  protected def updateUserGoalState(userId: Long,
+                                    goal: CertificateGoal,
+                                    status: GoalStatuses.Value,
+                                    date: DateTime): (GoalStatuses.Value, DateTime)
 
   override def getStatementGoalsStatus(certificateId: Long, userId: Long): Seq[GoalStatus[StatementGoal]] = {
     PermissionHelper.preparePermissionChecker(userId)
@@ -53,7 +62,7 @@ trait StatementGoalStatusCheckerComponent extends StatementGoalStatusChecker {
       .map { goal =>
         val goalData = goalRepository.getById(goal.goalId)
         GoalDeadline(goal, PeriodTypes.getEndDateOption(goalData.periodType, goalData.periodValue, startDate))
-    }
+      }
   }
 
   override def getStatementGoalsStatistic(certificateId: Long, userId: Long): GoalStatistic = {
@@ -65,26 +74,14 @@ trait StatementGoalStatusCheckerComponent extends StatementGoalStatusChecker {
     statementGoalStorage.get(
       state.certificateId,
       statement.verb.id,
-      statement.obj.asInstanceOf[Activity].id).map(goal => {
+      statement.obj.asInstanceOf[Activity].id).foreach(goal => {
       val goalData = goalRepository.getById(goal.goalId)
       val isTimeOut = PeriodTypes
         .getEndDate(goalData.periodType, goalData.periodValue, state.userJoinedDate)
         .isBefore(statement.timestamp)
       val status = if (isTimeOut) GoalStatuses.Failed else GoalStatuses.Success
-      goalStateRepository.getBy(userId, goal.goalId) match {
-        case Some(goalState) =>
-          if (goalState.status == GoalStatuses.InProgress) {
-            goalStateRepository.modify(goalState.goalId, userId, status, statement.timestamp)
-          }
-        case None => goalStateRepository.create(
-          CertificateGoalState(
-            userId,
-            state.certificateId,
-            goal.goalId,
-            status,
-            statement.timestamp,
-            goalData.isOptional))
-      }
+
+      updateUserGoalState(userId, goalData, status, statement.timestamp)
     })
   }
 
@@ -93,7 +90,7 @@ trait StatementGoalStatusCheckerComponent extends StatementGoalStatusChecker {
     val statement = getFirstStatementAfterDate(goal, userId, userJoinedDate)
     checkStatementGoal(userId, userJoinedDate, statement)(goal, goalData)
   }
-  
+
   protected def checkStatementGoal(userId: Long, userJoinedDate: DateTime, statement: Option[Statement])
                                   (goal: StatementGoal, goalData: CertificateGoal): GoalStatuses.Value = {
     val firstStatementOrNow = statement.map(_.stored).getOrElse(DateTime.now)
@@ -106,31 +103,26 @@ trait StatementGoalStatusCheckerComponent extends StatementGoalStatusChecker {
     else if (isGoalCompleted) GoalStatuses.Success
     else GoalStatuses.InProgress
 
-    goalStateRepository.create(
-      CertificateGoalState(
-        userId,
-        goal.certificateId,
-        goal.goalId,
-        status,
-        firstStatementOrNow,
-        goalData.isOptional))
+    updateUserGoalState(userId, goalData, status, firstStatementOrNow)
 
     status
   }
 
   private def getFirstStatementAfterDate(goal: StatementGoal,
-                            userId: Long,
-                            date: DateTime): Option[Statement] = {
-    val agent = UserLocalServiceHelper().getUser(userId).getAgentByUuid
+                                         userId: Long,
+                                         date: DateTime): Option[Statement] = {
+    UserLocalServiceHelper().fetchUser(userId) flatMap { user =>
+      val agent = user.getAgentByUuid
 
-    lrsClient.statementApi(_.getByFilter(StatementFilter(
-      agent = Some(agent),
-      activity = Some(goal.obj),
-      verb = Some(goal.verb),
-      relatedActivities = Some(true),
-      since = Some(date),
-      limit = Some(1),
-      ascending = Some(true)
-    ))) headOption
+      lrsClient.statementApi(_.getByFilter(StatementFilter(
+        agent = Some(agent),
+        activity = Some(goal.obj),
+        verb = Some(goal.verb),
+        relatedActivities = Some(true),
+        since = Some(date),
+        limit = Some(1),
+        ascending = Some(true)
+      ))) headOption
+    }
   }
 }

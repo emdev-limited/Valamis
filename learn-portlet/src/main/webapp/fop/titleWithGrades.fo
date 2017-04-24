@@ -1,0 +1,28 @@
+<fo:table margin-left="10mm" margin-top="7mm" table-layout="fixed" width="185mm" margin-bottom="2mm">
+    <fo:table-column column-width="proportional-column-width(1)"/>
+    {{#hasAutoGrade}}
+        <fo:table-column column-width="40mm"/>
+    {{/hasAutoGrade}}
+    <fo:table-column column-width="40mm"/>
+    <fo:table-body>
+        <fo:table-row>
+            <fo:table-cell>
+                <fo:block font="8px sans-serif" color="#777777" text-align="left" font-weight="bold">
+                    {{title}}
+                </fo:block>
+            </fo:table-cell>
+            {{#hasAutoGrade}}
+            <fo:table-cell>
+                <fo:block font="8px sans-serif" color="#777777" text-align="right" font-weight="bold">
+                    {{titleAutoGrade}}
+                </fo:block>
+            </fo:table-cell>
+           {{/hasAutoGrade}}
+            <fo:table-cell>
+                <fo:block font="8px sans-serif" color="#777777" text-align="right" font-weight="bold">
+                    {{titleInstrGrade}}
+                </fo:block>
+            </fo:table-cell>
+        </fo:table-row>
+    </fo:table-body>
+</fo:table>

@@ -15,5 +15,6 @@ trait CustomPackageUploader {
              description: String,
              packageFile: File,
              courseId: Long,
-             userId: Long): Lesson
+             userId: Long,
+             fileName: String): Lesson
 }

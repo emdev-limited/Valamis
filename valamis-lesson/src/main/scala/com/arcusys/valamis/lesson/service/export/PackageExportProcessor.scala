@@ -1,6 +1,6 @@
 package com.arcusys.valamis.lesson.service.export
 
-import java.io.File
+import java.io.{File, FileInputStream}
 
 import com.arcusys.valamis.util.export.ExportProcessor
 import com.arcusys.valamis.file.service.FileService
@@ -8,18 +8,17 @@ import com.arcusys.valamis.file.storage.FileStorage
 import com.arcusys.valamis.lesson.model.{Lesson, LessonLimit}
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.util.{FileSystemUtil, ZipBuilder}
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class PackageExportProcessor(implicit val bindingModule: BindingModule)
-  extends ExportProcessor[(Lesson, Option[LessonLimit]), PackageExportModel]
-    with Injectable {
+abstract class PackageExportProcessor
+  extends ExportProcessor[(Lesson, Option[LessonLimit]), PackageExportModel] {
 
-  protected lazy val fileService = inject[FileService]
-  protected lazy val fileStorage = inject[FileStorage]
+  def fileService: FileService
+
+  def fileStorage: FileStorage
 
   override protected def exportItemsImpl(zip: ZipBuilder,
                                          items: Seq[(Lesson, Option[LessonLimit])]): Seq[PackageExportModel] = {
-    items.map{ case (l, limit) =>
+    items.map { case (l, limit) =>
       val logoName = l.logo.filter(!_.isEmpty).map(logo => {
         zip.addFile(l.id + "_" + logo, fileService.getFileContent(s"package_logo_${l.id}", logo))
         l.id + "_" + logo
@@ -32,6 +31,13 @@ class PackageExportProcessor(implicit val bindingModule: BindingModule)
 
       toExportModel(l, limit, logoName, packageFile)
     }
+  }
+
+  def exportItem(lessonId: Long): FileInputStream = {
+    val zipFile = composePackage(lessonId)
+    val stream = new FileInputStream(zipFile)
+    FileSystemUtil.deleteLater(zipFile, stream)
+    stream
   }
 
   private def composePackage(packageId: Long): File = {

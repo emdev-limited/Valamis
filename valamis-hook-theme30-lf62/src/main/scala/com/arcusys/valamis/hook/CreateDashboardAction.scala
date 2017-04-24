@@ -11,7 +11,7 @@ class CreateDashboardAction extends SimpleAction {
 
   private val valamisSiteName = "Liferay"
   private val valamisSiteFriendlyURL = "/guest"
-  private val valamisThemeId = "valamis30themelf62_WAR_valamis30theme"
+  private val valamisThemeId = "valamismoonstonetheme_WAR_valamismoonstonetheme"
 
   private val DashboardTemplateId = "valamisStudentDashboard"
   private val dashboardLayout = PageLayout("Dashboard", templateId = DashboardTemplateId)

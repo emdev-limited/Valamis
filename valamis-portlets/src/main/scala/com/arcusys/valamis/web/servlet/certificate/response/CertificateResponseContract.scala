@@ -9,5 +9,5 @@ trait CertificateResponseContract {
   val shortDescription: String
   val description: String
   val logo: String
-  val isPublished: Boolean
+  val isActive: Boolean
 }

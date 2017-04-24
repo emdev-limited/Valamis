@@ -104,8 +104,20 @@ trait LessonTableComponent extends LongKeyTableComponent with TypeMapper { self:
     def lesson = foreignKey(fkName("USER_ID_TO_LESSON"), lessonId, lessons)(_.id)
   }
 
+  class PlayerInvisibleLessonTable(tag: Tag) extends Table[(Long, Long)](tag, tblName("LESSON_PLAYER_INVIS")) {
+    def playerId = column[Long]("PLAYER_ID")
+    def lessonId = column[Long]("LESSON_ID")
+
+
+    def * = (playerId, lessonId)
+    def pk = primaryKey(pkName("LESSON_TO_PLAYER_V"), (playerId, lessonId))
+
+    def lesson = foreignKey(fkName("PLAYER_TO_LESSON_V"), lessonId, lessons)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
   val lessons = TableQuery[LessonTable]
   val lessonLimits = TableQuery[LessonLimitTable]
   val playerLessons = TableQuery[PlayerLessonTable]
   val lessonViewers = TableQuery[LessonViewerTable]
+  val invisibleLessonViewers = TableQuery[PlayerInvisibleLessonTable]
 }

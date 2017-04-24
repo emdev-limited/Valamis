@@ -5,7 +5,6 @@ import java.io.File
 import com.arcusys.valamis.content.export.model.{ImportResult, MoodleAnswer, MoodleQuestion}
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.service.{CategoryService, PlainTextService, QuestionService}
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 import scala.collection.immutable.HashMap
 import scala.io.Source
@@ -18,13 +17,11 @@ import scala.xml.pull._
  * Created by pkornilov on 12.10.15.
  */
 
-class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit configuration: BindingModule) extends Injectable {
+abstract class QuestionMoodleImportProcessor {
 
-  override implicit def bindingModule: BindingModule = configuration
-
-  private lazy val questionService = inject[QuestionService]
-  private lazy val plaintextService = inject[PlainTextService]
-  private lazy val categoryService = inject[CategoryService]
+  def questionService: QuestionService
+  def plaintextService: PlainTextService
+  def categoryService: CategoryService
 
   private var curCatId: Option[Long] = None
   private var catMap = HashMap[String,Long]()
@@ -38,7 +35,7 @@ class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit c
   var okCount = 0
   var errorCount = 0
 
-  def importItems(file: File): ImportResult = {
+  def importItems(file: File)(implicit courseId: Int): ImportResult = {
 
     moodleRootCategory = categoryService.getByTitle(moodleRootCategoryName)
 
@@ -60,7 +57,7 @@ class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit c
     attrs.get(name).fold("")(_.headOption.fold("")(_.mkString))
   }
 
-  private def importItem(itemType: String, iter: Iterator[XMLEvent]) {
+  private def importItem(itemType: String, iter: Iterator[XMLEvent])(implicit courseId: Int) {
 
     itemType match {
       case str if str.isEmpty => ()
@@ -69,7 +66,7 @@ class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit c
     }
   }
 
-  private def createCatsIfNeed(fullName: String): Unit = {
+  private def createCatsIfNeed(fullName: String)(implicit courseId: Int): Unit = {
     var prevCatId: Option[Long] = None
     fullName.split("/").foreach(catName => {
       var catID = catMap.get(catName)
@@ -96,7 +93,7 @@ class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit c
     )
   }
 
-  private def importCategory(iter: Iterator[XMLEvent]) {
+  private def importCategory(iter: Iterator[XMLEvent])(implicit courseId: Int) {
     var catName: String = ""
     iter.foreach({
       case EvElemStart(_, label, attrs, _) =>
@@ -216,7 +213,7 @@ class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit c
   }
 
 
-  private def importQuestion(itemType: String, iter: Iterator[XMLEvent]) {
+  private def importQuestion(itemType: String, iter: Iterator[XMLEvent])(implicit courseId: Int) {
     allCount += 1
     val qTypeCode = getItemType(itemType)
     if (qTypeCode == -1) {
@@ -270,7 +267,7 @@ class QuestionMoodleImportProcessor(courseId: Int, userId: Long = -1)(implicit c
     }
   }
 
-  private def fromMoodleQuestion(mq: MoodleQuestion): Question = Question.getTypeByCode(mq.qType) match {
+  private def fromMoodleQuestion(mq: MoodleQuestion)(implicit courseId: Int): Question = Question.getTypeByCode(mq.qType) match {
     case QuestionType.Choice => ChoiceQuestion(
       None,
       curCatId,

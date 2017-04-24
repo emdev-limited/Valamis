@@ -17,71 +17,106 @@ abstract class CertificateStatusCheckerImpl
   with ActivityGoalStatusCheckerComponent
   with AssignmentGoalStatusCheckerComponent {
 
-  def certificateStorage: CertificateRepository
+  def certificateRepository: CertificateRepository
   def certificateSocialActivityHelper: SocialActivityHelper[Certificate]
   def certificateGoalGroupRepository: CertificateGoalGroupRepository
   def goalRepository: CertificateGoalRepository
+  def userStatusHistory: UserStatusHistoryService
+  def certificateNotification: CertificateNotificationService
+
+  implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 
   override def checkAndGetStatus(filter: CertificateStateFilter): Seq[CertificateState] = {
 
     certificateStateRepository.getBy(filter)
-      .map(s => (s.certificateId, s.userId))
-      .foreach(s => checkAndGetStatus(s._1, s._2))
+      .foreach(s => checkAndGetStatus(s.certificateId, s.userId))
 
     certificateStateRepository.getBy(filter)
-  }
-
-  override def checkAndGetStatus(certificateFilter: CertificateFilter, stateFilter: CertificateStateFilter): Seq[CertificateState] = {
-    certificateStateRepository.getBy(stateFilter, certificateFilter)
-      .map(s => (s.certificateId, s.userId))
-      .distinct
-      .foreach(s => checkAndGetStatus(s._1, s._2))
-
-    certificateStateRepository.getBy(stateFilter, certificateFilter)
   }
 
   override def checkAndGetStatus(certificateId: Long, userId: Long): CertificateStatuses.Value = {
     PermissionHelper.preparePermissionChecker(userId)
 
-    val certificate = certificateStorage.getById(certificateId)
+    val certificate = certificateRepository.getById(certificateId)
     val certificateState = certificateStateRepository.getBy(userId, certificateId).get
 
-    if(!certificate.isPublished) CertificateStatuses.InProgress
-    else
+    if (!certificate.isActive) {
+      certificateState.status
+    } else {
       certificateState.status match {
         case CertificateStatuses.Failed => CertificateStatuses.Failed
         case CertificateStatuses.Overdue => CertificateStatuses.Overdue
         case CertificateStatuses.InProgress => checkInProgress(certificate, certificateState)
         case CertificateStatuses.Success => checkSuccess(certificate, certificateState)
       }
+    }
   }
 
-  private def checkInProgress(certificate: Certificate, certificateState: CertificateState) = {
-    lazy val socialActivities = SocialActivityLocalServiceHelper.getActivities(certificateState.userId, certificateState.userJoinedDate)
-    statementGoalStorage.getByCertificateId(certificate.id).foreach(stateGoal => {
-      val goalData = goalRepository.getById(stateGoal.goalId)
-      goalStateRepository.getBy(certificateState.userId, stateGoal.goalId) match {
+  /**
+    * Checks all the certificate goals' states and updates if they timed out.
+    * Also updates the certificate's state according to the goals' states.
+    *
+    * @param certificate      The certificate to check states for
+    * @param certificateState Existing certificate state, subject to an update
+    * @return New certificate state
+    */
+  private def checkInProgress(certificate: Certificate,
+                              certificateState: CertificateState): CertificateStatuses.Value = {
+
+    checkStatementGoals(certificate, certificateState)
+    checkPackageGoals(certificate, certificateState)
+    checkActivityGoals(certificate, certificateState)
+    checkCourseGoals(certificate, certificateState)
+    checkAssignmentGoals(certificate, certificateState)
+
+    val reqGoalStatuses = goalStateRepository
+      .getStatusesBy(certificateState.userId, certificate.id, isOptional = false)
+    val groupStatuses = getGroupStatuses(certificate.id, certificateState.userId)
+
+    if ((reqGoalStatuses ++ groupStatuses).contains(GoalStatuses.Failed)) {
+      updateState(certificateState, CertificateStatuses.Failed, certificate.companyId)
+      CertificateStatuses.Failed
+    }
+    else if ((reqGoalStatuses ++ groupStatuses).contains(GoalStatuses.InProgress)) {
+      CertificateStatuses.InProgress
+    }
+    else {
+      updateState(certificateState, CertificateStatuses.Success, certificate.companyId)
+      CertificateStatuses.Success
+    }
+  }
+
+  private def checkStatementGoals(certificate: Certificate, certificateState: CertificateState) = {
+    statementGoalStorage.getByCertificateId(certificate.id) foreach { statementGoal =>
+      val (goalData, mostRecentDate) = getCommonGoalData(statementGoal, certificate, certificateState)
+
+      goalStateRepository.getBy(certificateState.userId, statementGoal.goalId) match {
         case Some(goal) =>
-          if (goal.status == GoalStatuses.InProgress &&
-            PeriodTypes
-              .getEndDate(goalData.periodType, goalData.periodValue, certificateState.userJoinedDate)
-              .isBefore(new DateTime())) {
+          val timeOut = PeriodTypes
+            .getEndDate(goalData.periodType, goalData.periodValue, mostRecentDate)
+            .isBefore(new DateTime())
+          if (goal.status == GoalStatuses.InProgress && timeOut) {
             goalStateRepository.modify(goal.goalId, certificateState.userId, GoalStatuses.Failed, new DateTime())
           }
-        case None => checkStatementGoal(certificateState.userId, certificateState.userJoinedDate)(stateGoal, goalData)
+        case None =>
+          checkStatementGoal(certificateState.userId, mostRecentDate)(statementGoal, goalData)
       }
-    })
+    }
+  }
 
-    packageGoalStorage.getByCertificateId(certificate.id).foreach(packageGoal => {
-      val goalData = goalRepository.getById(packageGoal.goalId)
-      val timeOut = PeriodTypes
-        .getEndDate(goalData.periodType, goalData.periodValue, certificateState.userJoinedDate)
+  private def checkPackageGoals(certificate: Certificate, certificateState: CertificateState) = {
+    packageGoalStorage.getByCertificateId(certificate.id) foreach { packageGoal =>
+      val (goalData, mostRecentDate) = getCommonGoalData(packageGoal, certificate, certificateState)
+
+      lazy val timeOut = PeriodTypes
+        .getEndDate(goalData.periodType, goalData.periodValue, mostRecentDate)
         .isBefore(new DateTime())
+
       goalStateRepository.getBy(certificateState.userId, packageGoal.goalId) match {
         case Some(goal) =>
           if (goal.status == GoalStatuses.InProgress) {
             try {
-                lessonService.getRootActivityId(packageGoal.packageId)
+              lessonService.getRootActivityId(packageGoal.packageId)
               if (timeOut) {
                 goalStateRepository.modify(goal.goalId, certificateState.userId, GoalStatuses.Failed, new DateTime())
               }
@@ -103,32 +138,46 @@ abstract class CertificateStatusCheckerImpl
         case None =>
           createPackageGoalState(certificateState.userId, timeOut)(packageGoal, goalData)
       }
-    })
+    }
+  }
 
-    activityGoalStorage.getByCertificateId(certificate.id).foreach(activityGoal => {
-      val goalData = goalRepository.getById(activityGoal.goalId)
+  private def checkActivityGoals(certificate: Certificate, certificateState: CertificateState) = {
+    lazy val socialActivities = SocialActivityLocalServiceHelper.getActivities(
+      certificateState.userId,
+      (Seq(certificateState.userJoinedDate) ++ certificate.activationDate).max
+    )
+
+    activityGoalStorage.getByCertificateId(certificate.id) foreach { activityGoal =>
+      val (goalData, mostRecentDate) = getCommonGoalData(activityGoal, certificate, certificateState)
+
       goalStateRepository.getBy(certificateState.userId, activityGoal.goalId) match {
         case Some(goal) =>
-          if (goal.status == GoalStatuses.InProgress &&
-            PeriodTypes
-              .getEndDate(goalData.periodType, goalData.periodValue, certificateState.userJoinedDate)
-              .isBefore(new DateTime())) {
+          val timeOut = PeriodTypes
+            .getEndDate(goalData.periodType, goalData.periodValue, mostRecentDate)
+            .isBefore(new DateTime())
+          if (goal.status == GoalStatuses.InProgress && timeOut) {
             goalStateRepository.modify(goal.goalId, certificateState.userId, GoalStatuses.Failed, new DateTime())
           }
-        case None => checkActivityGoal(certificateState.userId, socialActivities, certificateState.userJoinedDate)(activityGoal, goalData)
+        case None => checkActivityGoal(certificateState.userId, socialActivities, mostRecentDate)(activityGoal, goalData)
       }
-    })
+    }
+  }
 
-    courseGoalStorage.getByCertificateId(certificate.id).foreach(courseGoal => {
-      val goalData = goalRepository.getById(courseGoal.goalId)
+  private def checkCourseGoals(certificate: Certificate, certificateState: CertificateState) = {
+    courseGoalStorage.getByCertificateId(certificate.id) foreach { courseGoal =>
+      val (goalData, mostRecentDate) = getCommonGoalData(courseGoal, certificate, certificateState)
       checkCourseGoal(certificateState.userId, certificateState.userJoinedDate)(courseGoal, goalData)
-    })
+    }
+  }
 
-    assignmentGoalStorage.getByCertificateId(certificate.id).foreach(assignmentGoal => {
-      val goalData = goalRepository.getById(assignmentGoal.goalId)
+  private def checkAssignmentGoals(certificate: Certificate, certificateState: CertificateState) = {
+    assignmentGoalStorage.getByCertificateId(certificate.id) foreach { assignmentGoal =>
+      val (goalData, mostRecentDate) = getCommonGoalData(assignmentGoal, certificate, certificateState)
+
       val timeOut = PeriodTypes
-        .getEndDate(goalData.periodType, goalData.periodValue, certificateState.userJoinedDate)
+        .getEndDate(goalData.periodType, goalData.periodValue, mostRecentDate)
         .isBefore(new DateTime())
+
       goalStateRepository.getBy(certificateState.userId, assignmentGoal.goalId) match {
         case Some(goal) =>
           if (goal.status == GoalStatuses.InProgress && timeOut) {
@@ -136,22 +185,24 @@ abstract class CertificateStatusCheckerImpl
           }
         case None => createAssignmentGoalState(certificateState.userId, timeOut)(assignmentGoal, goalData)
       }
-    })
+    }
+  }
 
-    val reqGoalStatuses = goalStateRepository.getStatusesBy(certificateState.userId, certificate.id, false)
-    val groupStatuses = getGroupStatuses(certificate.id, certificateState.userId)
+  private def getCommonGoalData(goal: Goal, certificate: Certificate, certificateState: CertificateState) = {
+    val goalData = goalRepository.getById(goal.goalId)
 
-    if (reqGoalStatuses.contains(GoalStatuses.Failed) || groupStatuses.contains(GoalStatuses.Failed)) {
-      updateState(certificateState, CertificateStatuses.Failed, certificate.companyId)
-      CertificateStatuses.Failed
-    }
-    else if (reqGoalStatuses.contains(GoalStatuses.InProgress) || groupStatuses.contains(GoalStatuses.InProgress)) {
-      CertificateStatuses.InProgress
-    }
-    else {
-      updateState(certificateState, CertificateStatuses.Success, certificate.companyId)
-      CertificateStatuses.Success
-    }
+    val mostRecentDate = getMostRecentDate(
+      certificateState.userJoinedDate,
+      goalData.modifiedDate,
+      certificate.activationDate)
+    (goalData, mostRecentDate)
+  }
+
+  private def getMostRecentDate(userJoinedDate: DateTime,
+                                goalModifiedDate: DateTime,
+                                activationDate: Option[DateTime]): DateTime = {
+
+    (Seq(userJoinedDate, goalModifiedDate) ++ activationDate).max
   }
 
   private def getGroupStatuses(certificateId: Long, userId: Long): Seq[GoalStatuses.Value] = {
@@ -185,8 +236,15 @@ abstract class CertificateStatusCheckerImpl
     }
   }
 
-  private def updateState(certificateState: CertificateState, status: CertificateStatuses.Value, companyId: Long) = {
-    certificateStateRepository.update(certificateState.copy(status = status, statusAcquiredDate = DateTime.now))
+  private def updateState(certificateState: CertificateState,
+                          status: CertificateStatuses.Value,
+                          companyId: Long) = {
+    val state = certificateState.copy(status = status, statusAcquiredDate = DateTime.now)
+    val userStatus = certificateStateRepository.update(state)
+    certificateNotification.sendAchievedNotification(state)
+
+    userStatusHistory.add(userStatus)
+
     certificateSocialActivityHelper.addWithSet(
       companyId,
       certificateState.userId,
@@ -194,5 +252,33 @@ abstract class CertificateStatusCheckerImpl
       `type` = Some(status.id),
       createDate = DateTime.now
     )
+  }
+
+  /**
+    * @return goal status and time of the last change of it
+    */
+  override def updateUserGoalState(userId: Long,
+                                   goal: CertificateGoal,
+                                   status: GoalStatuses.Value,
+                                   date: DateTime): (GoalStatuses.Value, DateTime) = {
+    goalStateRepository.getBy(userId, goal.id) match {
+      case Some(goalState) =>
+        if (goalState.status == GoalStatuses.InProgress) {
+          goalStateRepository.modify(goalState.goalId, userId, status, date)
+          (status, date)
+        } else {
+          (goalState.status, goalState.modifiedDate)
+        }
+      case None =>
+        goalStateRepository.create(CertificateGoalState(
+          userId,
+          goal.certificateId,
+          goal.id,
+          status,
+          date,
+          goal.isOptional
+        ))
+        (status, date)
+    }
   }
 }

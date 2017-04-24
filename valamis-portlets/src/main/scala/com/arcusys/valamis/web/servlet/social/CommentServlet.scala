@@ -39,6 +39,7 @@ class CommentServlet extends BaseApiController with CommentConverter {
         )
         toResponse(commentService.create(commentRequest.comment))
 
+
       case CommentActionType.UpdateContent =>
         toResponse(commentService.updateContent(commentRequest.id, commentRequest.content))
 

@@ -74,7 +74,7 @@ trait FilePolicy {
   before("/files/certificate/:id/logo", request.getMethod == "POST")(
     PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
   )
-  
+
   before("/files/slideset/:id/logo", request.getMethod == "POST")(
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonStudio)
   )

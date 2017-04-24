@@ -20,7 +20,7 @@ class DBUpdater2423(dbInfo: SlickDBInfo) extends LUpgradeProcess with SlideTable
   import driver.simple._
 
   override def doUpgrade(): Unit = {
-    db.withSession { implicit session =>
+    db.withTransaction { implicit session =>
       val lessonSummarySlideId = slides.filter{ slide =>
         slide.isTemplate === true && slide.isLessonSummary === true
       }.first.id

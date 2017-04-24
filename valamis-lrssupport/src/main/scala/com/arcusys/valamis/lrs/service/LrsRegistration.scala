@@ -11,34 +11,35 @@ import com.arcusys.valamis.lrsEndpoint.model._
 import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.lrsEndpoint.storage.LrsTokenStorage
 import com.arcusys.valamis.util.serialization.JsonHelper
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import org.joda.time.DateTime
 
 /**
- * Created by mminin on 29.06.15.
- */
+  * Created by mminin on 29.06.15.
+  */
 trait LrsRegistration {
-  def getLrsSettings: LrsEndpoint
+  def getLrsSettings(implicit companyId: Long): LrsEndpoint
 
   def requestProxyLrsEndpointInfo(params: OAuthParams,
                                   scope: AuthorizationScope.ValueSet,
-                                  hostUrl: String): EndpointInfo
+                                  hostUrl: String)
+                                 (implicit companyId: Long): EndpointInfo
 
   def getLrsEndpointInfo(scope: AuthorizationScope.ValueSet,
-                         request: Option[HttpServletRequest] = None): EndpointInfo
+                         request: Option[HttpServletRequest] = None)
+                        (implicit companyId: Long): EndpointInfo
 
   def getToken(token: String): AuthInfo
 
   def deleteToken(token: String): Unit
 }
 
-class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Injectable with LrsRegistration {
+abstract class LrsRegistrationImpl extends LrsRegistration {
 
-  private lazy val lrsEndpointService = inject[LrsEndpointService]
-  private lazy val lrsTokenStorage = inject[LrsTokenStorage]
-  private lazy val lrsOAuthService = inject[LrsOAuthService]
+  def lrsEndpointService: LrsEndpointService
+  def lrsTokenStorage: LrsTokenStorage
+  def lrsOAuthService: LrsOAuthService
 
-  override def getLrsSettings = {
+  override def getLrsSettings(implicit companyId: Long) = {
     val settings = lrsEndpointService.getEndpoint.getOrElse {
       throw new NoSuchElementException("Tincan Endpoint Settings")
     }
@@ -51,7 +52,8 @@ class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Inj
 
   override def requestProxyLrsEndpointInfo(params: OAuthParams,
                                            scope: AuthorizationScope.ValueSet,
-                                           hostUrl: String): EndpointInfo = {
+                                           hostUrl: String)
+                                          (implicit companyId: Long): EndpointInfo = {
     val settings = getLrsSettings
 
     val auth = settings match {
@@ -68,7 +70,9 @@ class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Inj
   }
 
 
-  override def getLrsEndpointInfo(scope: AuthorizationScope.ValueSet, request: Option[HttpServletRequest]): EndpointInfo = {
+  override def getLrsEndpointInfo(scope: AuthorizationScope.ValueSet,
+                                  request: Option[HttpServletRequest])
+                                 (implicit companyId: Long): EndpointInfo = {
     val settings = getLrsSettings
     val auth = settings match {
       case LrsEndpoint(_, AuthType.BASIC, username, password, _, _) =>
@@ -102,9 +106,9 @@ class LrsRegistrationImpl(implicit val bindingModule: BindingModule) extends Inj
   override def getToken(token: String): AuthInfo = {
     lrsTokenStorage.get(token)
       .map(info => info.authType match {
-      case AuthConstants.Basic => JsonHelper.fromJson[BasicAuthInfo](info.authInfo)
-      case AuthConstants.OAuth => JsonHelper.fromJson[OAuthAuthInfo](info.authInfo)
-    })
+        case AuthConstants.Basic => JsonHelper.fromJson[BasicAuthInfo](info.authInfo)
+        case AuthConstants.OAuth => JsonHelper.fromJson[OAuthAuthInfo](info.authInfo)
+      })
       .getOrElse(throw new NoSuchElementException("Temporary token"))
   }
 

@@ -6,7 +6,7 @@ import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.services._
 import com.arcusys.learn.liferay.util.{PortalUtilHelper, PortletName}
 import com.arcusys.valamis.web.portlet.base.{Permission, PermissionBase}
-import com.arcusys.valamis.web.servlet.base.exceptions.{AccessDeniedException, NotAuthorizedException}
+import com.arcusys.valamis.web.servlet.base.exceptions._
 import org.scalatra._
 import org.slf4j.LoggerFactory
 
@@ -16,8 +16,9 @@ case class PermissionCredentials(groupId: Long, portletId: String, primaryKey: S
 
 class ScalatraPermissionUtil(scalatra: ScalatraBase) extends PermissionUtil {
   def getCourseIdFromRequest(implicit request: HttpServletRequest): Long = {
-    Option(request.getParameter("courseId")).map(_.toLong)
-      .orElse(scalatra.params.get("courseId").map(_.toLong))
+    Option(request.getParameter("courseId"))
+      .orElse(scalatra.params.get("courseId"))
+      .map(parseCourseId)
       .getOrElse(throw AccessDeniedException("courseId is empty"))
   }
 
@@ -25,7 +26,7 @@ class ScalatraPermissionUtil(scalatra: ScalatraBase) extends PermissionUtil {
 
 object PermissionUtil extends PermissionUtil {
   def getCourseIdFromRequest(implicit request: HttpServletRequest): Long = {
-    Option(request.getParameter("courseId")).map(_.toLong)
+    Option(request.getParameter("courseId")).map(parseCourseId)
       .getOrElse(throw AccessDeniedException("courseId is empty"))
   }
 }
@@ -52,7 +53,7 @@ trait PermissionUtil {
       throw new NotAuthorizedException
   }
 
-  def getLiferayUser = UserLocalServiceHelper().fetchUser(PermissionHelper.getPermissionChecker().getUserId)
+  def getLiferayUser = UserLocalServiceHelper().getUser(PermissionHelper.getPermissionChecker().getUserId)
 
   def isAuthenticated: Boolean = PermissionHelper.getPermissionChecker().isSignedIn
 
@@ -91,6 +92,14 @@ trait PermissionUtil {
                           (implicit r: HttpServletRequest): Unit = {
     if (!hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets)) {
       throw AccessDeniedException(s"no ${permission.name} permission for ${portlets.mkString(", ")}")
+    }
+  }
+
+  protected def parseCourseId(raw: String): Long = {
+    try {
+      raw.toLong
+    } catch {
+      case e: NumberFormatException => throw new BadRequestException("courseId is incorrect")
     }
   }
 

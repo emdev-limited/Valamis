@@ -1,9 +1,6 @@
 
-<div class="overflow-hidden">
-    <div id="curriculumManagerAppRegion"></div>
-
-    <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
-</div>
+<div id="curriculumManagerAppRegion"></div>
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
 <script type="text/javascript">
 
@@ -28,7 +25,7 @@
         var curriculumManagerPermissions = {
             'CurriculumManager': {
                 MODIFY: eval("{{permissionToModify}}"),
-                PUBLISH: eval("{{permissionToPublish}}")
+                ACTIVATE: eval("{{permissionToActivate}}")
             }
         };
 
@@ -39,7 +36,8 @@
             appOptions: {
                 curriculumCompanyId: '{{companyID}}',
                 rootUrl: '{{root}}',
-                assignmentDeployed: eval('{{assignmentDeployed}}')
+                assignmentDeployed: eval('{{assignmentDeployed}}'),
+                eventsDeployed: eval('{{trainingEventsDeployed}}')
             }
         };
 

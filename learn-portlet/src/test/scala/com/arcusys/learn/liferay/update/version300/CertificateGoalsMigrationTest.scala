@@ -5,17 +5,15 @@ import java.sql.Connection
 import com.arcusys.learn.liferay.update.version300.migrations.CertificateGoalMigration
 import com.arcusys.learn.liferay.update.version300.{certificate => oldScheme}
 import com.arcusys.learn.liferay.update.version300.{certificate3004 => newScheme}
-import com.arcusys.valamis.certificate.model.CertificateStatuses
 import com.arcusys.valamis.certificate.model.goal.{GoalStatuses, GoalType}
 import com.arcusys.valamis.model.PeriodTypes
-import com.arcusys.valamis.model.PeriodTypes._
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
-import com.arcusys.valamis.web.configuration.ioc.Configuration
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 
 class CertificateGoalsMigrationTest
@@ -27,9 +25,8 @@ class CertificateGoalsMigrationTest
     with newScheme.PackageGoalTableComponent
     with newScheme.CourseGoalTableComponent
     with newScheme.CertificateGoalStateTableComponent
-    with newScheme.CertificateGoalTableComponent {
-
-  val driver = H2Driver
+    with newScheme.CertificateGoalTableComponent
+    with SlickDbTestBase {
 
   import driver.simple._
 
@@ -43,20 +40,18 @@ class CertificateGoalsMigrationTest
     }
   })
 
-  val db = Database.forURL("jdbc:h2:mem:certificategoals", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     certificateTable.createSchema()
     oldTables.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val certificateTable = new oldScheme.CertificateTableComponent with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = CertificateGoalsMigrationTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -70,7 +65,7 @@ class CertificateGoalsMigrationTest
     with oldScheme.CourseGoalTableComponent
     with oldScheme.CertificateGoalStateTableComponent
     with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = CertificateGoalsMigrationTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._

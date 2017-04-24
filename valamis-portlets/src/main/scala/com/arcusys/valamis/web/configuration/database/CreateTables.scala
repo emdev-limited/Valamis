@@ -2,18 +2,18 @@ package com.arcusys.valamis.web.configuration.database
 
 import java.sql.SQLException
 
-import com.arcusys.slick.drivers.{OracleDriver, SQLServerDriver}
+import com.arcusys.slick.drivers.{DB2Driver, OracleDriver, SQLServerDriver}
 import com.arcusys.valamis.certificate.storage.schema.{CertificateGoalGroupTableComponent, _}
 import com.arcusys.valamis.gradebook.storage.{CourseGradeTableComponent, CourseTableComponent}
 import com.arcusys.valamis.lesson.scorm.storage.ScormManifestTableComponent
 import com.arcusys.valamis.lesson.storage.{LessonAttemptsTableComponent, LessonGradeTableComponent, LessonTableComponent}
 import com.arcusys.valamis.lesson.tincan.storage.{LessonCategoryGoalTableComponent, TincanActivityTableComponent}
+import com.arcusys.valamis.log.LogSupport
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.persistence.impl.file.FileTableComponent
 import com.arcusys.valamis.persistence.impl.lrs.{LrsEndpointTableComponent, TokenTableComponent}
 import com.arcusys.valamis.persistence.impl.scorm.schema._
 import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementTableComponent, SettingTableComponent, StatementToActivityTableComponent}
-import com.arcusys.valamis.persistence.impl.slide.SlideTableComponent
 import com.arcusys.valamis.persistence.impl.social.schema.{CommentTableComponent, LikeTableComponent}
 import com.arcusys.valamis.persistence.impl.uri.TincanUriTableComponent
 import slick.driver.HsqldbDriver
@@ -21,10 +21,12 @@ import slick.jdbc._
 import slick.jdbc.meta._
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
 class CreateTables(dbInfo: SlickDBInfo)
   extends SlickProfile
+    with LogSupport
     with LikeTableComponent
     with CommentTableComponent
     with CertificateTableComponent
@@ -37,7 +39,6 @@ class CreateTables(dbInfo: SlickDBInfo)
     with FileTableComponent
     with TokenTableComponent
     with LessonCategoryGoalTableComponent
-    with SlideTableComponent
     with CourseTableComponent
     with SettingTableComponent
     with StatementToActivityTableComponent
@@ -89,11 +90,10 @@ class CreateTables(dbInfo: SlickDBInfo)
     tokens,
     lessonCategoryGoals,
     likes, comments,
-    slideThemes, slideSets, slides, slideElements, devices, slideElementProperties, slideProperties,
     completedCourses,
     settings, statementToActivity, lrsEndpoint,
     tincanUris,
-    lessons, lessonLimits, playerLessons, lessonViewers, lessonAttempts,
+    lessons, lessonLimits, playerLessons, lessonViewers, lessonAttempts, invisibleLessonViewers,
     tincanActivitiesTQ, scormManifestsTQ,
     certificateGoalStates, certificateMembers,
     activityToStatement, lessonGrades, courseGrades,
@@ -137,6 +137,8 @@ class CreateTables(dbInfo: SlickDBInfo)
       case driver: HsqldbDriver =>
         val action = MTable.getTables(Some("PUBLIC"), Some("PUBLIC"), Some(tableName), Some(Seq("TABLE"))).headOption
         Await.result(db.run(action), Duration.Inf).isDefined
+      case DB2Driver =>
+        Await.result(db.run(driver.defaultTables), Duration.Inf).map(_.name.name).contains(tableName)
       case _ => Await.result(db.run(MTable.getTables(tableName).headOption), Duration.Inf).isDefined
     }
   }
@@ -145,7 +147,13 @@ class CreateTables(dbInfo: SlickDBInfo)
     if (!hasTables) {
       // TODO: combine ddl to single query
       db.withTransaction { implicit s =>
-        tables.foreach(_.ddl.create)
+        tables.foreach { table =>
+          try {
+            table.ddl.create
+          } catch {
+            case ex: SQLException => log.error(s"Failed to create table ${table.baseTableRow.tableName}: ${ex.getMessage}")
+          }
+        }
       }
     }
   }

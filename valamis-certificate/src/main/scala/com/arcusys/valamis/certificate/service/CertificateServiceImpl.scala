@@ -1,75 +1,111 @@
 package com.arcusys.valamis.certificate.service
 
-import com.arcusys.learn.liferay.services.{UserLocalServiceHelper, SocialActivityLocalServiceHelper}
+import com.arcusys.learn.liferay.constants.StringPoolHelper
+import com.arcusys.learn.liferay.services._
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.certificate.model._
-import com.arcusys.valamis.certificate.model.goal._
+import com.arcusys.valamis.certificate.model.goal.GoalStatuses
 import com.arcusys.valamis.certificate.storage._
-import com.arcusys.valamis.exception.EntityNotFoundException
 import com.arcusys.valamis.file.service.FileService
-import com.arcusys.valamis.gradebook.service.LessonGradeService
-import com.arcusys.valamis.lesson.service.{TeacherLessonGradeService, LessonService, UserLessonResultService}
-import com.arcusys.valamis.liferay.SocialActivityHelper
-import com.arcusys.valamis.model.PeriodTypes
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.arcusys.valamis.liferay.{AssetHelper, SocialActivityHelper}
+import com.arcusys.valamis.model.{Context, Period}
 import org.joda.time.DateTime
 
 import scala.util._
 
-class CertificateServiceImpl(implicit val bindingModule: BindingModule)
-  extends Injectable
-  with CertificateService
-  with CertificateGoalServiceImpl
-  with CertificateUserServiceImpl {
+abstract class CertificateServiceImpl extends CertificateService {
 
-  private lazy val certificateRepository = inject[CertificateRepository]
-  private lazy val certificateStatusRepository = inject[CertificateStateRepository]
-  private lazy val courseGoalRepository = inject[CourseGoalStorage]
-  private lazy val activityGoalRepository = inject[ActivityGoalStorage]
-  private lazy val statementGoalRepository = inject[StatementGoalStorage]
-  private lazy val packageGoalRepository = inject[PackageGoalStorage]
-  private lazy val assignmentGoalRepository = inject[AssignmentGoalStorage]
-  private lazy val fileService = inject[FileService]
-  private lazy val assetHelper = new CertificateAssetHelper()
   private lazy val className = classOf[Certificate].getName
+
+  private lazy val assetHelper = new AssetHelper[Certificate]
   private lazy val stateSocialActivity = new SocialActivityHelper(CertificateStateType)
-  private lazy val goalStateRepository = inject[CertificateGoalStateRepository]
-  private lazy val certificateMemberService = inject[CertificateMemberService]
-  private lazy val goalRepository = inject[CertificateGoalRepository]
-  private lazy val goalGroupRepository = inject[CertificateGoalGroupRepository]
-  private lazy val lessonService = inject[LessonService]
-  private lazy val teacherGradeService = inject[TeacherLessonGradeService]
-  private lazy val gradeService = inject[LessonGradeService]
-  private lazy val assignmentService = inject[AssignmentService]
+
+  def certificateRepository: CertificateRepository
+
+  def certificateStateRepository: CertificateStateRepository
+
+  def goalStateRepository: CertificateGoalStateRepository
+
+  def fileService: FileService
+
+  def certificateMemberService: CertificateMemberService
+
+  def certificateUserService: CertificateUserService
+
+  def certificateGoalService: CertificateGoalService
+
+  def checker: CertificateStatusChecker
+
+  def certificateHistory: CertificateHistoryService
+
+  def userStatusHistory: UserStatusHistoryService
+
+  def certificateNotification: CertificateNotificationService
 
   private def logoPathPrefix(certificateId: Long) = s"$certificateId/"
 
   private def logoPath(certificateId: Long, logo: String) = "files/" + logoPathPrefix(certificateId) + logo
 
-  def create(companyId: Long, title: String, description: String): Certificate = {
-    certificateRepository.create(new Certificate(
-      0,
+  override def create(title: String, description: String)
+                     (implicit context: Context): Certificate = {
+    create(
       title,
       description,
-      companyId = companyId,
-      createdAt = new DateTime)
+      isPermanent = false,
+      isPublishBadge = false,
+      shortDescription = "",
+      Period.unlimited
     )
   }
 
-  override def getLogo(id: Long) = {
-    def getLogo(certificate: Certificate) = {
+  override def create(title: String,
+                      description: String,
+                      isPermanent: Boolean,
+                      isPublishBadge: Boolean,
+                      shortDescription: String,
+                      period: Period,
+                      scope: Option[Long])
+                     (implicit context: Context): Certificate = {
+
+    val logo: String = ""
+    val createdAt = DateTime.now
+    val isPublished = false
+
+    val certificate = certificateRepository.create(new Certificate(
+      0,
+      title,
+      description,
+      logo,
+      isPermanent,
+      isPublishBadge,
+      shortDescription,
+      context.companyId,
+      period.periodType,
+      period.value,
+      createdAt,
+      None,
+      isPublished,
+      scope)
+    )
+
+    certificateHistory.add(certificate)
+
+    certificate
+  }
+
+  override def getLogo(id: Long): Option[Array[Byte]] = {
+    certificateRepository.getByIdOpt(id).flatMap { certificate =>
       val logoOpt = if (certificate.logo == "") None else Some(certificate.logo)
 
       logoOpt
         .map(logoPath(id, _))
         .flatMap(fileService.getFileContentOption)
-        .get
     }
-
-    certificateRepository.getByIdOpt(id)
-      .map(getLogo)
   }
 
-  override def setLogo(certificateId: Long, name: String, content: Array[Byte]) = {
+  override def setLogo(certificateId: Long,
+                       name: String,
+                       content: Array[Byte]): Unit = {
     val certificate = certificateRepository.getById(certificateId)
     fileService.setFileContent(
       folder = logoPathPrefix(certificateId),
@@ -78,263 +114,213 @@ class CertificateServiceImpl(implicit val bindingModule: BindingModule)
       deleteFolder = true
     )
 
-    certificateRepository.update(certificate.copy(logo = name))
+    certificateRepository.updateLogo(certificate.id, name)
   }
 
-  def update(id: Long,
+  override def deleteLogo(certificateId: Long): Unit = {
+    fileService.deleteByPrefix(logoPathPrefix(certificateId))
+    certificateRepository.updateLogo(certificateId, "")
+  }
+
+  def update(certificateId: Long,
              title: String,
              description: String,
-             periodType: PeriodTypes.PeriodType,
-             periodValue: Int,
+             period: Period,
              isOpenBadgesIntegration: Boolean,
              shortDescription: String = "",
-             companyId: Long,
-             userId: Long,
-             scope: Option[Long],
-             optionGoals: Int): Certificate = {
+             scope: Option[Long])
+            (implicit context: Context): Certificate = {
 
-    val stored = certificateRepository.getById(id)
+    val stored = certificateRepository.getById(certificateId)
 
-    val (period, value) = if (periodValue < 1)
-      (PeriodTypes.UNLIMITED, 0)
+    val newPeriod = if (period.value < 1)
+      Period.unlimited
     else
-      (periodType, periodValue)
+      period
 
     val certificate = certificateRepository.update(new Certificate(
-      id,
+      certificateId,
       title,
       description,
       stored.logo,
       stored.isPermanent,
       isOpenBadgesIntegration,
       shortDescription,
-      companyId,
-      period,
-      value,
+      stored.companyId,
+      newPeriod.periodType,
+      newPeriod.value,
       stored.createdAt,
-      stored.isPublished,
+      stored.activationDate,
+      stored.isActive,
       scope)
     )
 
-    if (certificate.isPublished) {
-      assetHelper.updateCertificateAssetEntry(certificate, Some(userId))
+    certificateHistory.add(certificate)
+
+    if (certificate.isActive) {
+      assetHelper.updateAssetEntry(
+        certificate.id,
+        Some(context.userId),
+        Some(context.courseId),
+        Some(certificate.title),
+        Some(certificate.description),
+        certificate,
+        Some(context.companyId),
+        isVisible = true)
     }
     certificate
   }
 
-  def changeLogo(id: Long, newLogo: String) {
+  def delete(id: Long): Unit = {
     val certificate = certificateRepository.getById(id)
-    certificateRepository.update(certificate.copy(logo = newLogo))
-  }
 
-  def delete(id: Long) = {
     assetHelper.deleteAssetEntry(id)
     SocialActivityLocalServiceHelper.deleteActivities(CertificateStateType.getClass.getName, id)
     SocialActivityLocalServiceHelper.deleteActivities(CertificateActivityType.getClass.getName, id)
     SocialActivityLocalServiceHelper.deleteActivities(className, id)
     certificateMemberService.delete(id)
+
+    certificateHistory.add(certificate, isDelete = true)
     certificateRepository.delete(id)
+
     fileService.deleteByPrefix(logoPathPrefix(id))
   }
 
-  def clone(certificateId: Long): Certificate = {
+  def clone(certificateId: Long)
+           (implicit context: Context): Certificate = {
+
     val certificate = certificateRepository.getById(certificateId)
     val titlePattern = "copy"
     val newTitle = getTitle(certificate, titlePattern)
 
-    val newCertificate =
-      certificateRepository.create(certificate.copy(title = newTitle, isPublished = false))
+    val newCertificate = create(
+      newTitle,
+      certificate.description,
+      certificate.isPermanent,
+      certificate.isPublishBadge,
+      certificate.shortDescription,
+      Period(certificate.validPeriodType, certificate.validPeriod),
+      certificate.scope
+    )
 
-    val groupIds = goalGroupRepository.get(certificateId)
-      .map { gr =>
-        gr.id -> goalGroupRepository.create(gr.count, newCertificate.id, gr.periodValue, gr.periodType, gr.arrangementIndex)
-      }.toMap
+    certificateGoalService.copyGoals(certificate.id, newCertificate.id)
 
-    val goals = goalRepository.getBy(certificateId)
+    getLogo(certificate.id)
+      .foreach { image => setLogo(newCertificate.id, certificate.logo, image) }
 
-    // copy relationships
-    courseGoalRepository
-      .getByCertificateId(certificate.id)
-      .foreach(c => {
-        goals.find(g => g.id == c.goalId).foreach(goalData =>
-          courseGoalRepository.create(
-            newCertificate.id,
-            c.courseId,
-            goalData.periodValue,
-            goalData.periodType,
-            goalData.arrangementIndex,
-            goalData.isOptional,
-            goalData.groupId.map(groupIds(_))))
-      })
-
-    activityGoalRepository
-      .getByCertificateId(certificate.id)
-      .foreach(activity => {
-        goals.find(g => g.id == activity.goalId).foreach(goalData =>
-          activityGoalRepository.create(
-            newCertificate.id,
-            activity.activityName,
-            activity.count,
-            goalData.periodValue,
-            goalData.periodType,
-            goalData.arrangementIndex,
-            goalData.isOptional,
-            goalData.groupId.map(groupIds(_))))
-      })
-
-    statementGoalRepository
-      .getByCertificateId(certificate.id)
-      .foreach(st => {
-        goals.find(g => g.id == st.goalId).foreach(goalData =>
-          statementGoalRepository.create(
-            newCertificate.id,
-            st.verb,
-            st.obj,
-            goalData.periodValue,
-            goalData.periodType,
-            goalData.arrangementIndex,
-            goalData.isOptional,
-            goalData.groupId.map(groupIds(_))))
-      })
-
-    packageGoalRepository
-      .getByCertificateId(certificate.id)
-      .foreach(p => {
-        goals.find(g => g.id == p.goalId).foreach(goalData =>
-          packageGoalRepository.create(
-            newCertificate.id,
-            p.packageId,
-            goalData.periodValue,
-            goalData.periodType,
-            goalData.arrangementIndex,
-            goalData.isOptional,
-            goalData.groupId.map(groupIds(_))))
-      })
-
-    assignmentGoalRepository
-      .getByCertificateId(certificate.id)
-      .foreach(assignment => {
-        goals.find(g => g.id == assignment.goalId).foreach(goalData =>
-          assignmentGoalRepository.create(
-            newCertificate.id,
-            assignment.assignmentId,
-            goalData.periodValue,
-            goalData.periodType,
-            goalData.arrangementIndex,
-            goalData.isOptional,
-            goalData.groupId.map(groupIds(_))))
-      })
-
-    if (certificate.logo.nonEmpty) {
-      val img = fileService.getFileContent(certificate.id.toString, certificate.logo)
-      fileService.setFileContent(newCertificate.id.toString, certificate.logo, img)
-    }
     certificateRepository.getById(newCertificate.id)
   }
 
-  def publish(certificateId: Long, userId: Long, courseId: Long) {
+  override def activate(certificateId: Long)
+                       (implicit context: Context): Unit = {
+
+    if (certificateRepository.getById(certificateId).isActive)
+      throw new Exception("Certificate is already activated")
+
+    certificateRepository.updateIsActive(certificateId, isActive = true)
+
     val now = DateTime.now
-    val (certificate, counts) = certificateRepository.getByIdWithItemsCount(certificateId)
-      .getOrElse(throw new EntityNotFoundException(s"no certificate with id: $certificateId"))
+    val certificate = certificateRepository.getById(certificateId)
 
-    val userStatus = counts match {
-      case CertificateItemsCount(_, 0, 0, 0, 0, 0) => CertificateStatuses.Success
-      case _ => CertificateStatuses.InProgress
-    }
+    assetHelper.updateAssetEntry(
+      certificate.id,
+      userId = None,
+      Some(context.courseId),
+      Some(certificate.title),
+      Some(certificate.description),
+      certificate,
+      Some(context.companyId),
+      isVisible = true)
 
-    assetHelper.updateCertificateAssetEntry(certificate)
+    certificateHistory.add(certificate)
 
-    certificateRepository.update(certificate.copy(isPublished = true))
-    certificateStatusRepository
-      .getByCertificateId(certificateId)
-      .foreach(s => certificateStatusRepository.update(s.copy(
-        status = userStatus,
-        userJoinedDate = now,
-        statusAcquiredDate = now
-      )))
+    // no need to check the certificate if a user has already achieved or failed it
+    val stateFilter = CertificateStateFilter(
+      certificateId = Some(certificateId),
+      statuses = Set(CertificateStatuses.Success, CertificateStatuses.Failed),
+      containsStatuses = false
+    )
+
+    certificateStateRepository
+      .getBy(stateFilter)
+      .foreach { s =>
+        certificateStateRepository.update(s.copy(status = CertificateStatuses.InProgress))
+
+        // remove all "in progress" certificate goal states
+        // and run certificate checker to fill the states again
+        // with respect to the certificate activation date
+        goalStateRepository.deleteBy(s.certificateId, s.userId, GoalStatuses.InProgress)
+
+        val certificateState = updateAndGetCertificateState(s)
+        certificateState.foreach(c => userStatusHistory.add(c))
+      }
 
     stateSocialActivity.addWithSet(
       certificate.companyId,
-      userId,
-      courseId = Some(courseId),
+      context.userId,
+      courseId = Some(context.courseId),
       classPK = Some(certificateId),
       `type` = Some(CertificateStateType.Publish.id),
       createDate = now
     )
-    certificateStatusRepository.getUsersBy(certificateId).foreach { userId =>
-      addPackageGoalState(certificateId, userId)
-      addAssignmentGoalState(certificateId, userId)
+
+    certificateStateRepository.getUsersBy(certificateId).foreach { userId =>
+      certificateGoalService.updatePackageGoalState(certificateId, userId)
+      certificateGoalService.updateAssignmentGoalState(certificateId, userId)
+      certificateNotification.sendUserAddedNotification(false, certificate, userId)
     }
   }
 
-  def addPackageGoalState(certificateId: Long, userId: Long) {
-    goalRepository.getByCertificate(certificateId)
-      .filter(_.goalType == GoalType.Package).foreach { goal =>
-        val state = getPackageGoalStatus(goal, userId)
-        goalStateRepository.create(
-          CertificateGoalState(
-            userId,
-            certificateId,
-            goal.id,
-            state,
-            DateTime.now,
-            goal.isOptional)
-        )
-      }
-  }
+  override def deactivate(certificateId: Long)
+                         (implicit context: Context): Unit = {
 
-  private def getPackageGoalStatus(goal: CertificateGoal, userId: Long): GoalStatuses.Value = {
-    packageGoalRepository.getBy(goal.id).fold(GoalStatuses.InProgress) { packageGoal =>
-      val isFinished = lessonService.getLesson(packageGoal.packageId) map { lesson =>
-        val grade = teacherGradeService.get(userId, lesson.id).flatMap(_.grade)
-        gradeService.isLessonFinished(grade, userId, lesson)
-      }
-      if (isFinished.contains(true)) {
-        GoalStatuses.Success
-      }
-      else {
-        GoalStatuses.InProgress
-      }
-    }
-  }
+    if (!certificateRepository.getById(certificateId).isActive)
+      throw new Exception("Certificate is already deactivated")
 
-  def addAssignmentGoalState(certificateId: Long, userId: Long) {
-    goalRepository.getByCertificate(certificateId)
-      .filter(_.goalType == GoalType.Assignment).foreach { goal =>
-        val state = getAssignmentGoalStatus(goal, userId)
-        goalStateRepository.create(
-          CertificateGoalState(
-            userId,
-            certificateId,
-            goal.id,
-            state,
-            DateTime.now,
-            goal.isOptional)
-        )
-      }
-  }
-
-  private def getAssignmentGoalStatus(goal: CertificateGoal, userId: Long): GoalStatuses.Value = {
-    assignmentGoalRepository.getBy(goal.id).fold(GoalStatuses.InProgress) { assignmentGoal =>
-      val isCompleted = assignmentService.getById(assignmentGoal.assignmentId) map { assignment =>
-        assignmentService.getSubmissionStatus(assignment.id, userId).contains(UserStatuses.Completed)
-      }
-      if (isCompleted.contains(true)) {
-        GoalStatuses.Success
-      }
-      else {
-        GoalStatuses.InProgress
-      }
-    }
-  }
-
-  def unpublish(certificateId: Long) {
     val certificate = certificateRepository.getById(certificateId)
 
-    assetHelper.updateCertificateAssetEntry(certificate, isVisible = false)
+    assetHelper.updateAssetEntry(
+      certificate.id,
+      Some(context.userId),
+      Some(context.courseId),
+      Some(certificate.title),
+      Some(certificate.description),
+      certificate,
+      Some(context.companyId),
+      isVisible = false)
 
-    certificateRepository.update(certificate.copy(isPublished = false))
-    goalStateRepository.deleteBy(certificateId)
+    certificateRepository.updateIsActive(certificateId, isActive = false)
+    certificateHistory.add(certificate)
+
+    certificateStateRepository
+      .getByCertificateId(certificateId)
+      .foreach { s =>
+        val certificateState = updateAndGetCertificateState(s)
+        certificateState.foreach(c => userStatusHistory.add(c))
+      }
+
+    certificateStateRepository.getUsersBy(certificateId).foreach { userId =>
+      certificateNotification.sendCertificateDeactivated(certificate, userId)
+    }
+  }
+
+  private def updateAndGetCertificateState(state: CertificateState): Option[CertificateState] = {
+
+    val hasGoals = certificateGoalService.hasGoals(state.certificateId)
+
+    if (hasGoals) {
+      checker.checkAndGetStatus(state.certificateId, state.userId)
+      certificateStateRepository.getBy(state.userId, state.certificateId)
+    } else {
+
+      val newState = state.copy(
+        status = CertificateStatuses.Success,
+        statusAcquiredDate = new DateTime()
+      )
+      val certificateState = certificateStateRepository.update(newState)
+      certificateNotification.sendAchievedNotification(newState)
+      Some(certificateState)
+    }
   }
 
   private def getIndexInTitle(title: String, titlePattern: String): Int = {
@@ -361,11 +347,54 @@ class CertificateServiceImpl(implicit val bindingModule: BindingModule)
     cleanedTitle + s" $titlePattern " + (maxIndex + 1)
   }
 
-  override def getGoals(certificateId: Long): Seq[CertificateGoal] = {
-    goalRepository.getByCertificate(certificateId)
+  override def getCertificateURL(certificate: Certificate, plId: Option[Long] = None): String = {
+    val assetEntry = AssetEntryLocalServiceHelper.getAssetEntry(certificate.getClass.getName, certificate.id)
+    val sb: StringBuilder = new StringBuilder()
+    val context = Option(ServiceContextHelper.getServiceContext)
+    val url = context.map(c => PortalUtilHelper.getLocalHostUrl(certificate.companyId, c.getRequest))
+      .getOrElse(PortalUtilHelper.getLocalHostUrl(certificate.companyId))
+
+    sb.append(url)
+    sb.append(PortalUtilHelper.getPathMain)
+    sb.append("/portal/learn-portlet/open_certificate")
+    sb.append(StringPoolHelper.QUESTION)
+    sb.append("plid")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(String.valueOf(plId.getOrElse("")))
+    sb.append(StringPoolHelper.AMPERSAND)
+    sb.append("resourcePrimKey")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(String.valueOf(assetEntry.getEntryId))
+
+    sb.toString
   }
 
-  override def getGroups(certificateId: Long): Seq[GoalGroup] = {
-    goalGroupRepository.get(certificateId)
+  override def getCertificatePdfUrl(companyId: Long, userId: Long, certificateId: Long, courseId: Long): String = {
+    val sb: StringBuilder = new StringBuilder()
+    val context = Option(ServiceContextHelper.getServiceContext)
+    val url = context.map(c => PortalUtilHelper.getLocalHostUrl(companyId, c.getRequest))
+      .getOrElse(PortalUtilHelper.getLocalHostUrl(companyId))
+
+    sb.append(url)
+    sb.append(PortalUtilHelper.getPathMain)
+    sb.append("/portal/learn-portlet/open_certificate_pdf")
+    sb.append(StringPoolHelper.QUESTION)
+    sb.append("certificateId")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(certificateId)
+    sb.append(StringPoolHelper.AMPERSAND)
+    sb.append("userId")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(userId)
+    sb.append(StringPoolHelper.AMPERSAND)
+    sb.append("courseId")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(courseId)
+    sb.append(StringPoolHelper.AMPERSAND)
+    sb.append("companyId")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(companyId)
+
+    sb.toString
   }
 }

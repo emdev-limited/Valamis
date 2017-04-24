@@ -17,27 +17,34 @@ trait CertificatePolicy {
       PortletName.LearningPaths)
   )
 
+  before("/certificates/users/:userId", request.getMethod == "GET")(
+    if (params.as[Long]("userId") != PermissionUtil.getUserId) {
+      PermissionUtil.requirePermissionApi(ViewPermission,
+        PortletName.CertificateManager,
+        PortletName.LearningTranscript)
+    }
+  )
+
   before("/certificates/:id/logo", request.getMethod == "GET")(
     PermissionUtil.requirePermissionApi(ViewPermission,
-      PortletName.CertificateManager, PortletName.CertificateViewer,
-      PortletName.AchievedCertificates, PortletName.ValamisActivities, PortletName.LearningPaths,
-      PortletName.LearningTranscript, PortletName.UserPortfolio)
+      PortletName.CertificateManager,
+      PortletName.CertificateViewer,
+      PortletName.AchievedCertificates,
+      PortletName.ValamisActivities,
+      PortletName.LearningPaths,
+      PortletName.LearningTranscript)
   )
 
-  before("/certificates/:id/do/:action(/)", request.getMethod == "GET")(
-    PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager, PortletName.CertificateViewer)
+  before(request.getMethod == "PUT")(
+    PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
   )
 
-  before("/certificates/:id/users(/)")(
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.CertificateManager, PortletName.CertificateViewer)
-  )
-
-  before("/certificates(/)(:id)(/)(:resource)(/)", Set("POST", "PUT", "DELETE").contains(request.getMethod))(
-    Symbol(params.getOrElse("resource", "")) match {
-      case 'user =>
-        PermissionUtil.requireCurrentLoggedInUser(params.getOrElse("userId", "0").toLong)
+  before("/certificates(/)(:id)(/)(:resource)(/)", Set("POST", "DELETE").contains(request.getMethod))(
+    params.get("resource") match {
+      case Some("current-user") =>
+        PermissionUtil.requireLogin()
       case _ =>
-        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager, PortletName.CertificateViewer)
+        PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
     }
   )
 

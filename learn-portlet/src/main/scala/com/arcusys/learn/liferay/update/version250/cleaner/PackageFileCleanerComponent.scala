@@ -22,8 +22,8 @@ trait PackageFileCleanerComponent extends FileTableComponent { self: SlickProfil
 
   private lazy val packageIds = {
     db.withSession { implicit s =>
-      val scormIds = StaticQuery.queryNA[(Long, Option[String])]("select id_ from learn_lfpackage").list
-      val tincanIds = StaticQuery.queryNA[(Long, Option[String])]("select id_ from learn_lftincanpackage").list
+      val scormIds = StaticQuery.queryNA[Long]("select id_ from learn_lfpackage").list
+      val tincanIds = StaticQuery.queryNA[Long]("select id_ from learn_lftincanpackage").list
       scormIds ++ tincanIds
     }
   }

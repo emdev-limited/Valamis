@@ -6,19 +6,23 @@ import com.arcusys.valamis.certificate.model._
 import com.arcusys.valamis.certificate.serializer.AssignmentSerializer
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
 import org.joda.time.DateTime
-
+import com.arcusys.valamis.util.serialization.JsonHelper._
 import scala.util.{Failure, Success, Try}
 
 trait AssignmentService {
   def isAssignmentDeployed: Boolean
   def getBy(filter: AssignmentFilter, skipTake: Option[SkipTake]): RangeResult[Assignment]
   def getById(assignmentId: Long): Option[Assignment]
-  def getAssignmentUsers(assignmentId: Long, skipTake: Option[SkipTake]): RangeResult[AssignmentUserInfo]
+  def getAssignmentUsers(assignmentId: Long,
+                         skipTake: Option[SkipTake],
+                         textFilter: Option[String] = None): RangeResult[AssignmentUserInfo]
   def getUserAssignments(userId: Long,
                          groupId: Option[Long] = None,
                          skipTake: Option[SkipTake] = None,
-                         sortBy: Option[AssignmentSort] = None): RangeResult[Assignment]
+                         sortBy: Option[AssignmentSort] = None,
+                         textFilter: Option[String] = None): RangeResult[Assignment]
   def getSubmissionStatus(assignmentId: Long, userId: Long): Option[UserStatuses.Value]
+  def getUsersToSubmissions(since: DateTime, until: DateTime, courseIds: Seq[Long]): Map[Long, Int]
   def getEvaluationDate(assignmentId: Long, userId: Long): Option[DateTime]
 }
 
@@ -73,7 +77,9 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentSerializer 
     )
   }
 
-  override def getAssignmentUsers(assignmentId: Long, skipTake: Option[SkipTake]): RangeResult[AssignmentUserInfo] = {
+  override def getAssignmentUsers(assignmentId: Long,
+                                  skipTake: Option[SkipTake],
+                                  textFilter: Option[String] = None): RangeResult[AssignmentUserInfo] = {
     val messageValues = prepareMessageData(Map(
       AssignmentMessageFields.Action -> AssignmentMessageActionType.AssignmentUsers.toString,
       AssignmentMessageFields.AssignmentId -> assignmentId.toString
@@ -81,6 +87,9 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentSerializer 
     for(SkipTake(skip, take) <- skipTake) {
       messageValues.put(AssignmentMessageFields.Skip, skip.toString)
       messageValues.put(AssignmentMessageFields.Take, take.toString)
+    }
+    for(pattern <- textFilter) {
+      messageValues.put(AssignmentMessageFields.TitlePattern, pattern)
     }
 
     handleMessageResponse[RangeResult[AssignmentUserInfo]](
@@ -92,13 +101,17 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentSerializer 
   override def getUserAssignments(userId: Long,
                                   groupId: Option[Long] = None,
                                   skipTake: Option[SkipTake] = None,
-                                  sortBy: Option[AssignmentSort] = None): RangeResult[Assignment] = {
+                                  sortBy: Option[AssignmentSort] = None,
+                                  textFilter: Option[String] = None): RangeResult[Assignment] = {
     val messageValues = prepareMessageData(Map(
       AssignmentMessageFields.Action -> AssignmentMessageActionType.UserAssignments.toString,
       AssignmentMessageFields.UserId -> userId.toString
     ))
     for(gId <- groupId) {
       messageValues.put(AssignmentMessageFields.GroupId, gId.toString)
+    }
+    for(pattern <- textFilter) {
+      messageValues.put(AssignmentMessageFields.TitlePattern, pattern)
     }
     for(SkipTake(skip, take) <- skipTake) {
       messageValues.put(AssignmentMessageFields.Skip, skip.toString)
@@ -139,6 +152,21 @@ class AssignmentServiceImpl extends AssignmentService with AssignmentSerializer 
       sendSynchronousMessage(assignmentDestination, assignmentMainDestination, messageValues),
       DateTime.parse
     )
+  }
+
+  override def getUsersToSubmissions(since: DateTime, until: DateTime, courseIds: Seq[Long]): Map[Long, Int] = {
+    val config = SubmissionReportConfig(courseIds, since, until)
+    val messageValues = prepareMessageData(Map(
+      AssignmentMessageFields.Action -> AssignmentMessageActionType.UserSubmissionsByPeriod.toString,
+      AssignmentMessageFields.Json -> config.toJson
+    ))
+
+    val submissions = handleMessageResponse[Seq[UserSubmission]](
+        sendSynchronousMessage(assignmentDestination, assignmentMainDestination, messageValues),
+        deserializeUserSubmissionList
+      ).getOrElse(Seq())
+
+    submissions groupBy (_.userId) mapValues(_.size)
   }
 
   private def prepareMessageData(data: Map[String, String]): java.util.HashMap[String, AnyRef] = {

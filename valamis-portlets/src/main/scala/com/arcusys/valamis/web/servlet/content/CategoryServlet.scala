@@ -2,6 +2,7 @@ package com.arcusys.valamis.web.servlet.content
 
 import com.arcusys.valamis.content.model.Category
 import com.arcusys.valamis.content.service.{CategoryService, ContentService}
+import com.arcusys.valamis.slide.model.SlideConstants
 import com.arcusys.valamis.web.servlet.base.BaseApiController
 import com.arcusys.valamis.web.servlet.base.exceptions.BadRequestException
 import com.arcusys.valamis.web.servlet.content.request.{CategoryActionType, CategoryRequest}
@@ -99,7 +100,7 @@ class CategoryServlet extends BaseApiController with ContentPolicy {
     0, //TODO fix in categoryResponse
     0,
     "category",
-    "q_" + category.id.get,
+    SlideConstants.QuestionIdPrefix + category.id.get,
     Seq(), //TODO fix in categoryResponse
     category.courseId
 

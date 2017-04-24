@@ -29,9 +29,9 @@ class OpenPackageAction extends BaseOpenAction {
                             portletURL: PortletURL,
                             assetEntry: Option[LAssetEntry]): Unit = {
     val hash = assetEntry map { i =>
-      s"""/lesson/${i.getClassPK}/${getType(i.getClassPK)}/${i.getTitle.replace(" ", "%20")}/false"""
+      s"""/lesson/${i.getClassPK}/${getType(i.getClassPK)}/${URLEncoder.encode(i.getTitle.replace(" ", "%20"), "UTF-8")}/false"""
     } getOrElse ""
-    response.sendRedirect(portletURL.toString + "&hash=" + URLEncoder.encode(hash, "UTF-8"))
+    response.sendRedirect(portletURL.toString + "#" + hash)
   }
 
   private def getType(lessonId: Long): String = {

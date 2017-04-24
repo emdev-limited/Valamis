@@ -1,7 +1,7 @@
 package com.arcusys.learn.liferay.update.version300.certificate3004
 
-import com.arcusys.valamis.certificate.model.goal.GoalGroup
 import com.arcusys.valamis.model.PeriodTypes
+import com.arcusys.valamis.model.PeriodTypes.PeriodType
 import com.arcusys.valamis.persistence.common.DbNameUtils._
 import com.arcusys.valamis.persistence.common.{SlickProfile, TypeMapper}
 
@@ -11,6 +11,13 @@ trait CertificateGoalGroupTableComponent
   self: SlickProfile =>
 
   import driver.simple._
+
+  case class GoalGroup(id: Long,
+                       count: Int,
+                       certificateId: Long,
+                       periodValue: Int,
+                       periodType: PeriodType,
+                       arrangementIndex: Int)
 
   implicit val periodTypesMapper = enumerationMapper(PeriodTypes)
 

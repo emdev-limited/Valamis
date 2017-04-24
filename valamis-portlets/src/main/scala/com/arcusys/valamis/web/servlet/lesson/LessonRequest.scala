@@ -15,6 +15,7 @@ object LessonRequest extends BaseRequest {
   val Title = "title"
   val Description = "description"
   val IsVisible = "isVisible"
+  val IsHidden = "isHidden"
   val PackageType = "packageType"
 
   val PackageIds = "packageIds"
@@ -52,6 +53,7 @@ object LessonRequest extends BaseRequest {
     def idOption = Parameter(Id).longOption("undefined")
 
     def isVisible = Parameter(IsVisible).booleanOption("null")
+    def isHidden = Parameter(IsHidden).booleanOption("null").getOrElse(false)
 
     def viewerIds = Parameter("viewerIds").multiLongRequired
     def viewerType = Parameter("viewerType").required match {
@@ -82,8 +84,8 @@ object LessonRequest extends BaseRequest {
 
     def tagId = Parameter(TagId).longOption
     def tags = Parameter(Tags).multiWithEmpty.filter(!_.isEmpty)
-    def beginDate = Parameter(BeginDate).dateTimeOption("")
-    def endDate = Parameter(EndDate).dateTimeOption("")
+    def beginDate = Parameter(BeginDate).dateOption
+    def endDate = Parameter(EndDate).dateOption
     def companyId = PortalUtilHelper.getCompanyId(scalatra.request)
 
     private def toPackageType(lessonType:String) = lessonType match {

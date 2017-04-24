@@ -35,6 +35,7 @@ class StatementActivityInterpreter extends LBaseSocialActivityInterpreter with I
 
     //activity extra data contains statementId or statement json
     val statementOpt: Option[Statement] = if (isUUID(activity.getExtraData)) {
+      implicit val companyId = context.getCompanyId
       getStatementById(UUID.fromString(activity.getExtraData))
     } else {
       Some(JsonHelper.fromJson[Statement](activity.getExtraData, new StatementSerializer))
@@ -72,7 +73,7 @@ class StatementActivityInterpreter extends LBaseSocialActivityInterpreter with I
     text.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
   }
 
-  private def getStatementById(statementId: UUID) = {
+  private def getStatementById(statementId: UUID)(implicit companyId: Long) = {
     val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All).auth
 
     lrsReader.statementApi(_.getStatementById(statementId), Some(lrsAuth)) match {

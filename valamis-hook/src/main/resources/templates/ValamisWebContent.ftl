@@ -1,5 +1,5 @@
 ${Content.getData()}
-<script src="/learn-portlet/js2.0/vendor/tincan-min.js"> </script>
+<script src="/learn-portlet/js/vendor/tincan-min.js"> </script>
 <script type="text/javascript">
     (function() {
         var hostUrl = document.location.protocol + "//" + document.location.host;
@@ -66,7 +66,7 @@ ${Content.getData()}
 
         var readTincanLrsSettings = function(callback){
             var request = new XMLHttpRequest();
-            request.open('GET', '/delegate/administering/TincanLrsSettings', true);
+            request.open('GET', '/delegate/administering/settings/lrs', true);
 
             request.onreadystatechange = function() {
                 if (this.readyState === 4){

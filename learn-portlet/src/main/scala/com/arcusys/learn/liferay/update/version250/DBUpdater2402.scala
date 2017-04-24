@@ -23,7 +23,7 @@ class DBUpdater2402 extends LUpgradeProcess
   import driver.simple._
 
   override def doUpgrade(): Unit = {
-      db.withSession { implicit session =>
+      db.withTransaction { implicit session =>
         slideThemes.ddl.create
       }
   }

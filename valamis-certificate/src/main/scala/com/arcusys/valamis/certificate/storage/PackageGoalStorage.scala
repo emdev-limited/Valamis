@@ -16,7 +16,7 @@ trait PackageGoalStorage {
              isOptional: Boolean = false,
              groupId: Option[Long] = None): PackageGoal
   def getByPackageId(packageId: Long): Seq[PackageGoal]
-  def get(certificateId: Long, packageId: Long): Option[PackageGoal]
+  def get(certificateId: Long, packageId: Long, isDeleted: Option[Boolean] = Some(false)): Option[PackageGoal]
   def getBy(goalId: Long): Option[PackageGoal]
-  def getByCertificateId(certificateId: Long): Seq[PackageGoal]
+  def getByCertificateId(certificateId: Long, isDeleted: Option[Boolean] = Some(false)): Seq[PackageGoal]
 }

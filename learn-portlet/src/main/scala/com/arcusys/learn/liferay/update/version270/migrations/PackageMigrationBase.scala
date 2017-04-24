@@ -103,7 +103,7 @@ trait PackageMigrationBase
   }
 
   protected def getDefaultUserIdFromCourse(courseId: Long): Option[Long] = {
-    Option(GroupLocalServiceHelper.fetchGroup(courseId))
+    GroupLocalServiceHelper.fetchGroup(courseId)
       .map(g => UserLocalServiceHelper().getDefaultUserId(g.getCompanyId))
   }
 

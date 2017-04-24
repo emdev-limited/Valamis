@@ -9,6 +9,8 @@ import com.arcusys.valamis.tag.model.ValamisTag
   * Created by mminin on 11.02.16.
   */
 trait LessonPlayerService {
+  def setLessonVisibilityFromPlayer(playerId: Long, lessonId: Long, hidden: Boolean): Unit
+
 
   def getAll(playerId: Long, courseId: Long): Seq[Lesson]
 
@@ -42,4 +44,5 @@ trait LessonPlayerService {
 
   def getLessonIfAvailable(lessonId: Long, user: LUser): Option[Lesson]
 
+  def isLessonVisible(user: LUser, lesson: Lesson): Boolean
 }

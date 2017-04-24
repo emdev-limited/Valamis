@@ -1,34 +1,40 @@
 <section>
     <div id="lesson-summary">
-        <div class="js-complete-title js-localized-label" data-value="lessonCompleteLabel"> You have successfully passed the lesson! </div>
-        <div class="js-failed-title js-localized-label" data-value="lessonFailedLabel"> This time you did not pass the lesson. </div>
-        <br/><br/>
-        <!--<div class="lesson-summary-results">-->
-            <div class="val-progress-bar">
-                <b class="js-localized-label" data-value="lessonProgressLabel">Progress:</b>
-                <div class="val-progress js-progress-percent">
-                    <span></span>
-                </div>
-                <span class="val-percentage prompt-small js-lesson-progress"></span>
-            </div>
-            <br/>
-            <span class="prompt-small js-localized-label" data-value="lessonOpenedPagesLabel">(Opened pages)</span>
-            <br/><br/>
+        <span class="complete-title">
+            <span class="js-complete-title js-localized-label" data-value="lessonCongratulationsLabel"></span>
+            <span class="js-complete-title js-localized-label" data-value="lessonCompleteLabel"></span>
+        </span>
 
-            <div class="val-progress-bar js-hide-progress">
-                <b class="js-localized-label" data-value="lessonCorrectlyAnsweredLabel">Correctly answered:</b>
-                <div class="val-progress js-results-percent">
-                    <span></span>
-                </div>
-                <span class="val-percentage prompt-small js-lesson-result"></span>
-            </div>
-            <br/>
+        <span class="failed-title">
+            <span class="js-failed-title js-localized-label" data-value="lessonUnfortunatelyLabel"></span>
+            <span class="js-failed-title js-localized-label" data-value="lessonFailedLabel"></span>
+        </span>
 
-        <!--</div>-->
-        <br/><br/>
-        <span class="js-hide-progress prompt-bold js-localized-label" data-value="lessonYourResultsLabel">Your results:</span>
+        <div class="decorative-line">
+            <div class="summary-line"></div>
+        </div>
+        <div class="lesson-statistic div-table">
+            <div class="pages-statistic div-col">
+                <div class="pages-pie-graphic js-pages-pie-graphic"></div>
+                <div class="pie-legend">
+                    <span class="ratio-label js-localized-label" data-value="lessonOpenedPagesLabel"></span>
+                    <span class="pages-ratio js-pages-ratio"></span>
+                </div>
+            </div>
+            <div class="questions-statistic div-col">
+                <div class="questions-pie-graphic js-questions-pie-graphic js-hide-questions-progress"></div>
+                <div class="pie-legend js-hide-questions-progress">
+                    <span class="ratio-label js-localized-label" data-value="lessonCorrectlyAnsweredLabel"></span>
+                    <span class="answers-ratio js-answers-ratio"></span>
+                </div>
+            </div>
+        </div>
+        <div class="decorative-line">
+            <div class="summary-line"></div>
+        </div>
+
         <div class="lesson-questions">
-            <table class="prompt-bold js-hide-progress">
+            <table class="js-hide-questions-progress">
                 <tbody class="js-lesson-questions">
                 </tbody>
             </table>
@@ -39,31 +45,23 @@
 <script>
 
     ComposeLessonSummarySlide = function() {
+        var lessonSuccess = getLessonSuccess();
+        var lessonQuestionStatistic = getLessonQuestionsStatistic();
+        var lessonPagesStatistic = getLessonPagesStatistic();
+
         var slideElement = jQuery('#lesson-summary', Reveal.getCurrentSlide());
-        var summary  = prepareLessonSummary();
-        var progressPercent, lessonPercent, progressResultColor, lessonResultColor;
 
-        jQuery('.js-hide-progress', slideElement).toggleClass('hidden', !summary.hasQuestion);
-        jQuery('.js-complete-title', slideElement).toggleClass('hidden', !summary.success);
-        jQuery('.js-failed-title', slideElement).toggleClass('hidden', summary.success);
+        jQuery('.js-hide-questions-progress', slideElement).toggleClass('hidden', !lessonQuestionStatistic.hasQuestion);
+        jQuery('.js-complete-title', slideElement).toggleClass('hidden', !lessonSuccess);
+        jQuery('.js-failed-title', slideElement).toggleClass('hidden', lessonSuccess);
 
-        progressPercent = summary.progress*100|0;
-        if (progressPercent == 100)
-            progressResultColor = 'success';
-        else if (progressPercent > 0)
-                progressResultColor = 'failed';
-        if (progressPercent >= 0)
-            jQuery('.js-progress-percent').addClass(progressResultColor).find('span').css('width', progressPercent + '%');
+        jQuery('.js-pages-ratio', slideElement).text(lessonPagesStatistic.viewedPages + '/' + lessonPagesStatistic.totalPages);
+        jQuery('.js-answers-ratio', slideElement).text(lessonQuestionStatistic.numberOfCorrectAnswers + '/' + lessonQuestionStatistic.totalQuestions);
 
-        jQuery('.js-lesson-progress', slideElement).text(progressPercent + '%');
-
-        lessonPercent = summary.score*100|0;
-        lessonResultColor = (summary.success) ? 'success' : 'failed';
-
-        if (lessonPercent >= 0)
-            jQuery('.js-results-percent').addClass(lessonResultColor).find('span').css('width', lessonPercent + '%');
-
-        jQuery('.js-lesson-result', slideElement).text(lessonPercent + '%');
+        cretePagesStatiticPie(lessonPagesStatistic.pagesProgressPercent);
+        if (lessonQuestionStatistic.hasQuestion) {
+            createQuestionsStatisticPie(lessonQuestionStatistic.questionsProgressPercent);
+        }
 
         var target = jQuery('.js-lesson-questions', slideElement);
         target.html('');

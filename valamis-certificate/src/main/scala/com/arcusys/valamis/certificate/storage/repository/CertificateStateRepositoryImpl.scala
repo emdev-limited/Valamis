@@ -1,6 +1,7 @@
 package com.arcusys.valamis.certificate.storage.repository
 
-import com.arcusys.valamis.certificate.model._
+import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.valamis.certificate.model.{CertificateState, CertificateStateFilter, CertificateStatuses}
 import com.arcusys.valamis.certificate.storage.CertificateStateRepository
 import com.arcusys.valamis.certificate.storage.schema.{CertificateStateTableComponent, CertificateTableComponent}
 import com.arcusys.valamis.persistence.common.SlickProfile
@@ -11,10 +12,10 @@ import scala.slick.jdbc.JdbcBackend
 class CertificateStateRepositoryImpl(val db: JdbcBackend#DatabaseDef,
                                      val driver: JdbcProfile)
   extends CertificateStateTableComponent
-  with CertificateStateRepository
-  with SlickProfile
-  with CertificateTableComponent
-  with Queries {
+    with CertificateStateRepository
+    with SlickProfile
+    with CertificateTableComponent
+    with Queries {
 
   import driver.simple._
 
@@ -22,31 +23,34 @@ class CertificateStateRepositoryImpl(val db: JdbcBackend#DatabaseDef,
     db.withSession { implicit session =>
       certificateStates.insert(state)
       certificateStates
-        .filter(cs => cs.userId === state.userId && cs.certificateId === state.certificateId)
+        .filterByCertificateId(state.certificateId)
+        .filterByUserId(state.userId)
         .first
     }
 
-  override def getBy(userId: Long, certificateId: Long): Option[CertificateState] =
-    db.withSession { implicit session =>
-      certificateStates
-        .filter(ca => ca.userId === userId && ca.certificateId === certificateId)
-        .firstOption
-    }
+  override def getBy(userId: Long, certificateId: Long): Option[CertificateState] = {
+    if (hasUserForState(userId, Seq(certificateId))) {
+      db.withSession { implicit session =>
+        certificateStates
+          .filterByCertificateId(certificateId)
+          .filterByUserId(userId)
+          .firstOption
+      }
+    } else None
+  }
 
   override def getBy(filter: CertificateStateFilter): Seq[CertificateState] =
     db.withSession { implicit session =>
       certificateStates.filterBy(filter).run
     }
 
-  override def getBy(filter: CertificateStateFilter, certificateFilter: CertificateFilter): Seq[CertificateState] = {
+  override def getBy(userId: Long, certificateIds: Seq[Long]): Seq[CertificateState] =
     db.withSession { implicit session =>
-      val stateQuery = certificateStates.filterBy(filter)
-      certificates.filterBy(certificateFilter)
-        .join(stateQuery).on(_.id === _.certificateId)
-        .map(_._2)
+      certificateStates
+        .filterByUserId(userId)
+        .filter(_.certificateId inSet certificateIds)
         .list
     }
-  }
 
   override def getByCertificateId(id: Long): Seq[CertificateState] =
     getBy(CertificateStateFilter(certificateId = Some(id)))
@@ -58,18 +62,26 @@ class CertificateStateRepositoryImpl(val db: JdbcBackend#DatabaseDef,
     db.withSession { implicit session =>
       val filter = CertificateStateFilter(certificateId = Some(certificateId))
       certificateStates.filterBy(filter).map(_.userId).run
+    } filter { id =>
+      hasUserForState(id, Seq(certificateId))
     }
+
 
   override def update(state: CertificateState): CertificateState =
     db.withSession { implicit session =>
-      val filtered = certificateStates.filter(entity => entity.certificateId === state.certificateId && entity.userId === state.userId)
+      val filtered = certificateStates
+        .filterByCertificateId(state.certificateId)
+        .filterByUserId(state.userId)
       filtered.update(state)
       filtered.first
     }
 
   override def delete(userId: Long, certificateId: Long): Unit =
     db.withSession { implicit session =>
-      certificateStates.filter(ca => ca.userId === userId && ca.certificateId === certificateId).delete
+      certificateStates
+        .filterByCertificateId(certificateId)
+        .filterByUserId(userId)
+        .delete
     }
 
   override def getBy(userId: Long, status: CertificateStatuses.Value): Seq[CertificateState] =
@@ -77,4 +89,13 @@ class CertificateStateRepositoryImpl(val db: JdbcBackend#DatabaseDef,
       val filter = CertificateStateFilter(userId = Some(userId), statuses = Set(status))
       certificateStates.filterBy(filter).list
     }
+
+  // Decided delete info for user which was delete from LF
+  private def hasUserForState(userId: Long, certificateIds: Seq[Long]): Boolean ={
+    val hasUser = UserLocalServiceHelper().hasUser(userId)
+    if (!hasUser) {
+      certificateIds.foreach(id => delete(userId, id))
+    }
+    hasUser
+  }
 }

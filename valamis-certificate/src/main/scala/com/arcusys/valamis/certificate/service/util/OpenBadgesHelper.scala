@@ -48,6 +48,7 @@ object OpenBadgesHelper {
     } catch {
       case e: Exception => {
         System.out.println("Problem on getting UserID from Mozzila Open Badges " + e.toString)
+        e.printStackTrace()
         null
       }
     }
@@ -77,6 +78,7 @@ object OpenBadgesHelper {
     } catch {
       case e: Exception => {
         System.out.println("Problem on getting valamis group from Mozzila Open Badges " + e.toString)
+        e.printStackTrace()
         null
       }
     }
@@ -113,6 +115,7 @@ object OpenBadgesHelper {
     } catch {
       case e: Exception => {
         System.out.println("Problem on getting valamis certificates from Mozzila Open Badges " + e.toString)
+        e.printStackTrace()
         Nil
       }
     }

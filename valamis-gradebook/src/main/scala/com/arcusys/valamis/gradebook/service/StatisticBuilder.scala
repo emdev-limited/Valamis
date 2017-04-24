@@ -1,10 +1,10 @@
 package com.arcusys.valamis.gradebook.service
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.api.CourseService
 import com.arcusys.valamis.gradebook.model.Statistic
 import com.arcusys.valamis.lesson.model._
-import com.arcusys.valamis.lesson.service.{LessonMembersService, UserLessonResultService, TeacherLessonGradeService, LessonService}
+import com.arcusys.valamis.lesson.service.{LessonMembersService, LessonService, TeacherLessonGradeService, UserLessonResultService}
 
 abstract class StatisticBuilder {
 

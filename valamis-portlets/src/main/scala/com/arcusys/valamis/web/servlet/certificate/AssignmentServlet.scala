@@ -2,7 +2,7 @@ package com.arcusys.valamis.web.servlet.certificate
 
 import com.arcusys.valamis.certificate.model.{AssignmentFilter, AssignmentStatuses, UserStatuses}
 import com.arcusys.valamis.certificate.service.AssignmentService
-import com.arcusys.valamis.lrs.serializer.DateTimeSerializer
+import com.arcusys.valamis.util.serialization.DateTimeSerializer
 import com.arcusys.valamis.web.servlet.base.BaseJsonApiController
 import com.arcusys.valamis.web.servlet.certificate.request.AssignmentRequest
 import org.json4s.ext.EnumNameSerializer
@@ -26,14 +26,14 @@ class AssignmentServlet extends BaseJsonApiController {
   }
 
   get("/assignments/:id/users(/)") {
-    assignmentService.getAssignmentUsers(req.id, req.skipTake)
+    assignmentService.getAssignmentUsers(req.id, req.skipTake, req.textFilter)
   }
 
   get("/assignments/course/:groupId/user/:userId(/)") {
-    assignmentService.getUserAssignments(req.userId, req.groupId, req.skipTake, req.sort)
+    assignmentService.getUserAssignments(req.userId, req.groupId, req.skipTake, req.sort, req.textFilter)
   }
 
   get("/assignments/all-courses/user/:userId(/)") {
-    assignmentService.getUserAssignments(req.userId, skipTake = req.skipTake, sortBy = req.sort)
+    assignmentService.getUserAssignments(req.userId, skipTake = req.skipTake, sortBy = req.sort, textFilter = req.textFilter)
   }
 }

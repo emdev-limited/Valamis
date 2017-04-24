@@ -17,6 +17,6 @@ trait ActivityGoalStorage {
              groupId: Option[Long] = None): ActivityGoal
   def modify(goalId: Long, count: Int): ActivityGoal
   def getBy(goalId: Long): Option[ActivityGoal]
-  def get(certificateId: Long, activityName: String): Option[ActivityGoal]
-  def getByCertificateId(certificateId: Long): Seq[ActivityGoal]
+  def get(certificateId: Long, activityName: String, isDeleted: Option[Boolean] = Some(false)): Option[ActivityGoal]
+  def getByCertificateId(certificateId: Long, isDeleted: Option[Boolean] = Some(false)): Seq[ActivityGoal]
 }

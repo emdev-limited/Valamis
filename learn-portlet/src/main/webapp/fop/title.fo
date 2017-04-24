@@ -1,0 +1,6 @@
+  <fo:block-container width="100%" page-break-inside="avoid" background-color="#dedede" height="32px" margin-top="5mm" margin-bottom="5mm">
+    <fo:block font="10px sans-serif" color="#2c2c2c" text-align="left" font-weight="bold" margin-left="20mm" margin-top="4mm">
+      {{{title}}}
+    </fo:block>
+
+  </fo:block-container>

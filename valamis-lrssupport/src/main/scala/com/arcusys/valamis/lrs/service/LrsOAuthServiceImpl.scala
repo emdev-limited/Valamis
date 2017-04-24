@@ -4,13 +4,15 @@ import java.net.ConnectException
 
 import com.arcusys.valamis.lrs.model.{OAuthAuthInfo, OAuthParams}
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+import com.arcusys.valamis.lrsEndpoint.storage.LrsTokenStorage
 import com.liferay.portal.kernel.log.LogFactoryUtil
 import net.oauth.{OAuthConsumer, OAuthServiceProvider}
 
 
-class LrsOAuthServiceImpl(implicit val bindingModule: BindingModule) extends LrsOAuthService with Injectable {
+abstract class LrsOAuthServiceImpl extends LrsOAuthService {
   val logger = LogFactoryUtil.getLog(getClass)
+
+  def lrsTokenStorage: LrsTokenStorage
 
   override def authorize(endpoint: String,
                          clientId: String,
@@ -19,7 +21,7 @@ class LrsOAuthServiceImpl(implicit val bindingModule: BindingModule) extends Lrs
                          redirectUrl: Option[String]): OAuthAuthInfo = {
     val provider = getServiceProvider(endpoint)
     val consumer = new OAuthConsumer(null, clientId, clientSecret, provider)
-    val client = new LrsOAuthClient(consumer)
+    val client = new LrsOAuthClient(consumer, lrsTokenStorage)
 
     try {
       client.authorize(redirectUrl, scope)
@@ -40,7 +42,7 @@ class LrsOAuthServiceImpl(implicit val bindingModule: BindingModule) extends Lrs
                               params: OAuthParams): OAuthAuthInfo = {
     val provider = getServiceProvider(endpoint)
     val consumer = new OAuthConsumer(null, clientId, clientSecret, provider)
-    val client = new LrsOAuthClient(consumer)
+    val client = new LrsOAuthClient(consumer, lrsTokenStorage)
     try {
       client.getAccessToken(params)
     } finally {

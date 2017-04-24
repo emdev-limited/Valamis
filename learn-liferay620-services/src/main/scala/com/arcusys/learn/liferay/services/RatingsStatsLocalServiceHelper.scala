@@ -1,33 +1,38 @@
 package com.arcusys.learn.liferay.services
 
-import com.liferay.portal.kernel.dao.orm.DynamicQuery
-import com.liferay.portlet.ratings.model.RatingsStats
+import com.arcusys.learn.liferay.LiferayClasses.{LDynamicQuery, LRatingsStats}
 import com.liferay.portlet.ratings.service.RatingsStatsLocalServiceUtil
 
 import scala.collection.JavaConverters._
 
 object RatingsStatsLocalServiceHelper {
 
-  def deleteRatingsStats(statsId: Long) = RatingsStatsLocalServiceUtil.deleteRatingsStats(statsId)
+  def deleteRatingsStats(statsId: Long): Unit = {
+    RatingsStatsLocalServiceUtil.deleteRatingsStats(statsId)
+  }
 
-  def getStats(className: String, classPK: Long) = RatingsStatsLocalServiceUtil.getStats(className, classPK)
-
-
-  def updateRatingsStats(ratingsStats: RatingsStats): RatingsStats = RatingsStatsLocalServiceUtil.updateRatingsStats(ratingsStats)
-
-  def dynamicQuery(query: DynamicQuery): Seq[RatingsStats] = RatingsStatsLocalServiceUtil.dynamicQuery(query).asScala.map(_.asInstanceOf[RatingsStats])
-
-  def dynamicQuery(): DynamicQuery = RatingsStatsLocalServiceUtil.dynamicQuery()
-  
-  def getRatingStats(className: String, classPK: Long) = {
+  def getStats(className: String, classPK: Long): LRatingsStats = {
     RatingsStatsLocalServiceUtil.getStats(className, classPK)
   }
 
-  def getRatingStats(statsId: Long) = {
-    RatingsStatsLocalServiceUtil.getStats(statsId)
+  def updateRatingsStats(ratingsStats: LRatingsStats): LRatingsStats = {
+    RatingsStatsLocalServiceUtil.updateRatingsStats(ratingsStats)
   }
 
-  def deleteRatingStats(className: String, classPK: Long) = {
+  def dynamicQuery(query: LDynamicQuery): Seq[LRatingsStats] = {
+    RatingsStatsLocalServiceUtil.dynamicQuery(query).asScala
+      .map(_.asInstanceOf[LRatingsStats])
+  }
+
+  def dynamicQuery(): LDynamicQuery = {
+    RatingsStatsLocalServiceUtil.dynamicQuery()
+  }
+  
+  def getRatingStats(className: String, classPK: Long): LRatingsStats = {
+    RatingsStatsLocalServiceUtil.getStats(className, classPK)
+  }
+  
+  def deleteRatingStats(className: String, classPK: Long): Unit = {
     RatingsStatsLocalServiceUtil.deleteStats(className, classPK)
   }
 }

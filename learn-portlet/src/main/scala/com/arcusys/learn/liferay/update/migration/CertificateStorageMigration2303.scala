@@ -93,23 +93,23 @@ class CertificateStorageMigration2303(
         val newDescription = URLDecoder.decode(certificate._3, "UTF-8")
         val newCertificateId = (certificates returning certificates.map(_.id)).insert(certificate.copy(_3 = newDescription))
 
-        StaticQuery.queryNA[ActivityGoal]("SELECT certificateID, activityName, datacount, periodType, period FROM Learn_LFCertificateActivity WHERE certificateID=${certificate.id}")
+        StaticQuery.queryNA[ActivityGoal](s"SELECT certificateID, activityName, datacount, periodType, period FROM Learn_LFCertificateActivity WHERE certificateID=${certificate._1}")
           .list
           .map { aG => activityGoals.insert(aG.copy(_1 = newCertificateId)) }
 
-        StaticQuery.queryNA[CourseGoal]("SELECT certificateID, courseID, period, periodType, arrangementIndex FROM Learn_LFCertificateCourse  WHERE certificateID=${certificate.id}")
+        StaticQuery.queryNA[CourseGoal](s"SELECT certificateID, courseID, period, periodType, arrangementIndex FROM Learn_LFCertificateCourse  WHERE certificateID=${certificate._1}")
           .list
           .map { cG => courseGoals.insert(cG.copy(_1 = newCertificateId)) }
 
-        StaticQuery.queryNA[PackageGoal]("SELECT certificateID, packageID, period, periodType FROM Learn_LFCertificatePackageGoal WHERE certificateID=${certificate.id}")
+        StaticQuery.queryNA[PackageGoal](s"SELECT certificateID, packageID, period, periodType FROM Learn_LFCertificatePackageGoal WHERE certificateID=${certificate._1}")
           .list
           .map { pG => packageGoals.insert(pG.copy(_1 = newCertificateId)) }
 
-        StaticQuery.queryNA[StatementGoal]("SELECT certificateID, verb, object, period, periodType FROM Learn_LFCertTCStmnt WHERE certificateID=${certificate.id}")
+        StaticQuery.queryNA[StatementGoal](s"SELECT certificateID, verb, object, period, periodType FROM Learn_LFCertTCStmnt WHERE certificateID=${certificate._1}")
           .list
           .map { sG => statementGoals.insert(sG.copy(_1 = newCertificateId)) }
 
-        StaticQuery.queryNA[CertificateState]("SELECT certificateID, userID, attachedDate FROM Learn_LFCertificateUser WHERE certificateID=${certificate.id}")
+        StaticQuery.queryNA[CertificateState](s"SELECT certificateID, userID, attachedDate FROM Learn_LFCertificateUser WHERE certificateID=${certificate._1}")
           .list
           .map { cS => certificateStates.insert(cS.copy(_1 = newCertificateId)) }
 

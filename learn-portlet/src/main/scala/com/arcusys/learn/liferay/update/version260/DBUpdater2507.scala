@@ -17,8 +17,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class DBUpdater2507(dbInfo: SlickDBInfo) extends LUpgradeProcess
-with ActorsSchema
-with AccountsSchema {
+  with ActorsSchema
+  with AccountsSchema {
 
   override def getThreshold = 2507
 
@@ -31,8 +31,6 @@ with AccountsSchema {
   import driver.simple._
 
   override def doUpgrade(): Unit = {
-    val lrsType = LrsType.Simple
-
     val tableActorsName = "lrs_actors"
     val tableAccountsName = "lrs_accounts"
 
@@ -49,7 +47,7 @@ with AccountsSchema {
         val actorsWithEmail = actors.filterNot(a => a.mBox === "").list
 
         actorsWithEmail.foreach { a =>
-          updateActor(companies.asScala.toList, a._3.get)
+          updateActor(companies.toList, a._3.get)
         }
       }
     }

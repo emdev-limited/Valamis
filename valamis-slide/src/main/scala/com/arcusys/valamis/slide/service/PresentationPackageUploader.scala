@@ -19,12 +19,12 @@ abstract class PresentationPackageUploader extends CustomPackageUploader {
     fileName.toLowerCase.endsWith(".pptx")
   }
 
-  override def upload(title: String, description: String, packageFile: File, courseId: Long, userId: Long): Lesson = {
-    val name = packageFile.getName.split(".", 1).head
+  override def upload(title: String, description: String, packageFile: File, courseId: Long, userId: Long, fileName: String): Lesson = {
+    val name = fileName.split(".", 1).head
     val stream = new FileInputStream(packageFile)
 
-    val tincanPackageFile: File = presentationProcessor.processPresentation(name, stream, title, description, packageFile.getName)
+    val tincanPackageFile: File = presentationProcessor.processPresentation(name, stream, title, description, fileName)
 
-    tincanPackageUploader.upload(title, description, tincanPackageFile, courseId, userId)
+    tincanPackageUploader.upload(title, description, tincanPackageFile, courseId, userId, fileName)
   }
 }

@@ -2,21 +2,20 @@ package com.arcusys.valamis.lrsEndpoint.service
 
 import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
 import com.arcusys.valamis.lrsEndpoint.storage.LrsEndpointStorage
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 // TODO refactor with lesson package
-class LrsEndpointServiceImpl(implicit val bindingModule: BindingModule) extends LrsEndpointService with Injectable {
-  private val settings = inject[LrsEndpointStorage]
+abstract class LrsEndpointServiceImpl extends LrsEndpointService {
+  def endpointStorage: LrsEndpointStorage
 
-  override def setEndpoint(newEndpoint: LrsEndpoint): Unit = {
-    if (newEndpoint.auth == AuthType.INTERNAL) settings.deleteAll()
-    else settings.deleteExternal()
+  override def setEndpoint(newEndpoint: LrsEndpoint)(implicit companyId: Long): Unit = {
+    if (newEndpoint.auth == AuthType.INTERNAL) endpointStorage.deleteAll(companyId)
+    else endpointStorage.deleteExternal(companyId)
 
-    settings.create(newEndpoint)
+    endpointStorage.create(newEndpoint, companyId)
   }
 
-  override def getEndpoint: Option[LrsEndpoint] = {
-    val all = settings.getAll
+  override def getEndpoint(implicit companyId: Long): Option[LrsEndpoint] = {
+    val all = endpointStorage.getAll(companyId)
 
     lazy val external = all.find(_.auth != AuthType.INTERNAL)
     lazy val internal = all.find(_.auth == AuthType.INTERNAL)
@@ -24,8 +23,8 @@ class LrsEndpointServiceImpl(implicit val bindingModule: BindingModule) extends 
     external orElse internal
   }
 
-  override def switchToInternal(customHost: Option[String]): Unit = {
-    settings.get(AuthType.INTERNAL) match {
+  override def switchToInternal(customHost: Option[String])(implicit companyId: Long): Unit = {
+    endpointStorage.get(AuthType.INTERNAL, companyId) match {
       case Some(internal) => setEndpoint(internal.copy(customHost = customHost))
       case None =>
     }

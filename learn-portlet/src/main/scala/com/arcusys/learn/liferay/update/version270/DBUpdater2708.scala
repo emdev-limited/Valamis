@@ -5,7 +5,7 @@ import java.util.UUID
 import com.arcusys.learn.liferay.LiferayClasses.{LNoSuchCompanyException, LUpgradeProcess}
 import com.arcusys.learn.liferay.update.SlickDBContext
 import com.arcusys.learn.liferay.update.version270.slide.SlideSetTableComponent
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.persistence.impl.uri.TincanUriTableComponent
 import com.arcusys.valamis.uri.model.TincanURIType
 import com.arcusys.valamis.uri.service.TincanURIService

@@ -1,0 +1,145 @@
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-box {
+    border-radius: 3px;
+    border: 1px solid #c1c1c1;
+    background: #fff;
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-bottom .tooltipster-box {
+    margin-top: 4px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-top .tooltipster-box {
+    margin-bottom: 4px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content {
+    color: #555;
+    font-size: 15px;
+    line-height: 20px;
+    padding: 18px 20px 16px 22px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content p {
+    margin: 0 0 10px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content p.info {
+    margin-bottom: 0;
+    font-size: 13px;
+    color: #777;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content p.info span {
+    display: inline-block;
+    margin-right: 20px;
+    text-transform: capitalize;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .total-bar-detailed {
+    border-collapse: collapse;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .total-bar-detailed td {
+    vertical-align: top;
+    padding: 1px 0;
+    border: none;
+    text-align: left;
+    text-transform: lowercase;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .total-bar-detailed td:first-child {
+    padding-right: 5px;
+    text-align: right;
+    min-width: 15px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .lesson-state-finished td:first-child,
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .certificate-state-achieved td:first-child {
+    color: #6a8e22;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .lesson-state-in-progress td:first-child,
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .certificate-state-expiring td:first-child {
+    color: #f9b334;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .lesson-state-failed td:first-child,
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .certificate-state-failed td:first-child,
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .certificate-state-expired td:first-child {
+    color: #cb4a41;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .lesson-state-attempted td:first-child,
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .certificate-state-in-progress td:first-child {
+    color: #aaa;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-content .lesson-state-not-started td:first-child {
+    color: #555;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-arrow {
+    height: 5px;
+    margin-left: -4px;
+    width: 10px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-left .tooltipster-arrow, .tooltipster-sidetip.tooltipster-valamis.tooltipster-right .tooltipster-arrow {
+    height: 10px;
+    margin-left: 0;
+    margin-top: -5px;
+    width: 5px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-arrow-background {
+    border: 5px solid transparent;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-bottom .tooltipster-arrow-background {
+    border-bottom-color: #fff;
+    top: 1px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-left .tooltipster-arrow-background {
+    border-left-color: #fff;
+    left: -1px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-right .tooltipster-arrow-background {
+    border-right-color: #fff;
+    left: 1px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-top .tooltipster-arrow-background {
+    border-top-color: #fff;
+    top: -1px;
+}
+
+.tooltipster-sidetip.tooltipster-valamis .tooltipster-arrow-border {
+    border: 5px solid transparent;
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-bottom .tooltipster-arrow-border {
+    border-bottom-color: #c1c1c1
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-left .tooltipster-arrow-border {
+    border-left-color: #c1c1c1
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-right .tooltipster-arrow-border {
+    border-right-color: #c1c1c1
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-top .tooltipster-arrow-border {
+    border-top-color: #c1c1c1
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-bottom .tooltipster-arrow-uncropped {
+    top: -5px
+}
+
+.tooltipster-sidetip.tooltipster-valamis.tooltipster-right .tooltipster-arrow-uncropped {
+    left: -5px
+}

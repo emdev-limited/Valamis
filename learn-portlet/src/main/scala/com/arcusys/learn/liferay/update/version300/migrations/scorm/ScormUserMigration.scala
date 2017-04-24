@@ -20,7 +20,7 @@ class ScormUserMigration(val db: JdbcBackend#DatabaseDef,
 
 
     if (users.nonEmpty) {
-      scormUsersTQ ++= users
+      scormUsersTQ ++= users.distinct
     }
 
   }

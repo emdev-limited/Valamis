@@ -8,7 +8,7 @@ import com.arcusys.valamis.web.servlet.request.Parameter
 
 class OrganizationsServlet extends BaseApiController {
 
-  val activityManager = inject[ActivityServiceContract]
+  private lazy val activityManager = inject[ActivityServiceContract]
 
   private def transform(organization: Organization) = Map("id" -> organization.id, "title" -> organization.title)
 
@@ -17,7 +17,7 @@ class OrganizationsServlet extends BaseApiController {
     response.setHeader("Expires", "-1")
   }
 
-  get("/package/:packageID") {
+  get("/scormorganizations/package/:packageID") {
     val packageID = Parameter("packageID")(this).intRequired
     JsonHelper.toJson(activityManager.getAllOrganizations(packageID).map(transform))
   }

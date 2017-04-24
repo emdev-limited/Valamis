@@ -22,7 +22,7 @@ class DBUpdater2323 extends LUpgradeProcess
   override def doUpgrade(): Unit = {
       import driver.simple._
 
-      db.withSession { implicit session =>
+      db.withTransaction { implicit session =>
         (likes.ddl ++ comments.ddl).create
       }
   }

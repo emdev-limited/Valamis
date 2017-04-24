@@ -1,0 +1,25 @@
+<fo:table table-layout="fixed" width = "175mm">
+    <fo:table-column column-width="proportional-column-width(1)"/>
+        <fo:table-column column-width="40mm"/>
+    <fo:table-column column-width="40mm"/>
+    <fo:table-body>
+        <fo:table-row  border-top-style="solid" border-top-width="1pt" border-top-color="#dedede"
+        border-bottom-style="solid" border-bottom-width="1pt" border-bottom-color="#dedede">
+            <fo:table-cell  margin-left="0mm">
+                <fo:block font="11px sans-serif" color="#2c2c2c" text-align="left" margin-top="2mm" margin-bottom="2mm">
+                    {{lessonName}}
+                </fo:block>
+            </fo:table-cell>
+            <fo:table-cell>
+                <fo:block font="11px sans-serif" color="#2c2c2c" text-align="right" font-weight="bold" margin-top="2mm">
+                    {{gradeAuto}}
+                </fo:block>
+            </fo:table-cell>
+            <fo:table-cell>
+                <fo:block font="11px sans-serif" color="#2c2c2c" text-align="right" font-weight="bold" margin-top="2mm">
+                    {{gradeTeacher}}
+                </fo:block>
+            </fo:table-cell>
+        </fo:table-row>
+    </fo:table-body>
+</fo:table>

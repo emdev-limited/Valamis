@@ -1,7 +1,6 @@
 package com.arcusys.valamis.web.servlet.certificate.facade
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
-import com.arcusys.learn.liferay.util.CourseUtilHelper
 import com.arcusys.valamis.certificate.model.goal.GoalStatuses
 import com.arcusys.valamis.certificate.service.CertificateStatusChecker
 import com.arcusys.valamis.lesson.service.LessonService
@@ -12,6 +11,7 @@ import com.escalatesoft.subcut.inject.Injectable
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
 
+@deprecated
 trait CertificateGoals extends Injectable with CertificateFacadeContract with CertificateResponseFactory {
 
   private lazy val certificateChecker = inject[CertificateStatusChecker]
@@ -19,7 +19,7 @@ trait CertificateGoals extends Injectable with CertificateFacadeContract with Ce
   private lazy val courseFacade = inject[CourseFacadeContract]
 
   def getGoalsStatuses(certificateId: Long, userId: Long): GoalsStatusResponse = {
-    val user = UserLocalServiceHelper().getUserById(userId)
+    val user = UserLocalServiceHelper().getUser(userId)
     val format = DateTimeFormat.forPattern(DateTimeFormat.patternForStyle("SS", user.getLocale))
       .withZone(DateTimeZone.forTimeZone(user.getTimeZone))
 
@@ -33,10 +33,10 @@ trait CertificateGoals extends Injectable with CertificateFacadeContract with Ce
 
     //TODO delete taking name in lrs
     def getObjName(activityId: String) =
-      lrsReader
-        .activityApi(_.getActivity(activityId))
-        .toOption
-        .flatMap(_.name)
+    lrsReader
+      .activityApi(_.getActivity(activityId))
+      .toOption
+      .flatMap(_.name)
     lazy val lessonService = inject[LessonService]
 
     GoalsStatusResponse(
@@ -50,10 +50,15 @@ trait CertificateGoals extends Injectable with CertificateFacadeContract with Ce
           dateToString(x.finishDate),
           courseTitle)
       },
-      activities.map(x => ActivityStatusResponse(x.goal.goalId,
+      activities.map { x => ActivityStatusResponse(x.goal.goalId,
         x.goal.activityName,
         x.status.toString,
-        dateToString(x.finishDate))),
+        dateToString(x.finishDate),
+        LiferayActivity.activities
+          .filter(_.activityId == x.goal.activityName)
+          .map(_.title).headOption.getOrElse("")
+      )
+      },
       statements.map(x => StatementStatusResponse(x.goal.goalId, x.goal.obj, getObjName(x.goal.obj),
         x.goal.verb,
         x.status.toString,

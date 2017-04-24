@@ -10,7 +10,8 @@ case class UserInfo(id: Long,
                     picture: String = "",
                     pageUrl: String = "",
                     organizations: Set[String] = Set(),
-                    roles: Set[String] = Set()) {
+                    roles: Set[String] = Set(),
+                    isDeleted: Boolean = false) {
 
   def this(lUser: LUser) = this(
     id = lUser.getUserId,
@@ -19,6 +20,13 @@ case class UserInfo(id: Long,
     picture = lUser.getPortraitUrl,
     pageUrl = lUser.getPublicUrl,
     organizations = lUser.getOrganizationNames
+  )
+
+  def this(user: User) = this(
+    id = user.id,
+    name = user.name,
+    email = "",
+    isDeleted = true
   )
 
   def this(lUser: LUser, groupId: Long) = this(

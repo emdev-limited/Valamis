@@ -1,8 +1,8 @@
 package com.arcusys.valamis.certificate.serializer
 
 import com.arcusys.valamis.certificate.model._
-import com.arcusys.valamis.lrs.serializer.DateTimeSerializer
 import com.arcusys.valamis.model.RangeResult
+import com.arcusys.valamis.util.serialization.DateTimeSerializer
 import org.joda.time.format.ISODateTimeFormat
 import org.json4s._
 import org.json4s.jackson.JsonMethods.parse
@@ -47,6 +47,13 @@ trait AssignmentSerializer {
     RangeResult(count, userSubmissions)
   }
 
+  def deserializeUserSubmissionList(json: String): List[UserSubmission] = {
+    val jsonValue = parse(json)
+    for {
+      submission <- (jsonValue \ AssignmentJsonFields.Submissions).children
+    } yield extractUserSubmissionFields(submission)
+  }
+
   private def extractAssignmentFields(jValue: JValue): Assignment = {
     val id = (jValue \ AssignmentJsonFields.Id).extractLong
     val title = (jValue \ AssignmentJsonFields.Title).extract[String]
@@ -88,16 +95,8 @@ trait AssignmentSerializer {
       yield extractUserInfoFields(jValue)
   }
 
-  private def extractUserInfoFields(jValue: JValue): AssignmentUserInfo = {
+  private def extractUserSubmissionFields(jValue: JValue): UserSubmission = {
     val id = (jValue \ AssignmentJsonFields.Id).extractLong
-    val name = (jValue \ AssignmentJsonFields.Name).extract[String]
-    val email = (jValue \ AssignmentJsonFields.Email).extract[String]
-    val picture = (jValue \ AssignmentJsonFields.Picture).extract[String]
-    val pageUrl = (jValue \ AssignmentJsonFields.Url).extract[String]
-    val organizations = for {
-      org <- (jValue \ AssignmentJsonFields.Organizations).children
-    } yield (org \ AssignmentJsonFields.Name).extract[String]
-
     val date = ISODateTimeFormat.dateTimeNoMillis()
       .parseDateTime((jValue \ AssignmentJsonFields.Date).extract[String])
     val status = jValue \ AssignmentJsonFields.Status match {
@@ -109,10 +108,22 @@ trait AssignmentSerializer {
       case value: JValue => Option(value.extract[Float])
       case _ => throw new IllegalArgumentException(AssignmentJsonFields.Grade)
     }
+    UserSubmission(id, date, status, grade.map(g => Math.floor(g * 100).toInt))
+  }
+
+  private def extractUserInfoFields(jValue: JValue): AssignmentUserInfo = {
+    val id = (jValue \ AssignmentJsonFields.Id).extractLong
+    val name = (jValue \ AssignmentJsonFields.Name).extract[String]
+    val email = (jValue \ AssignmentJsonFields.Email).extract[String]
+    val picture = (jValue \ AssignmentJsonFields.Picture).extract[String]
+    val pageUrl = (jValue \ AssignmentJsonFields.Url).extract[String]
+    val organizations = for {
+      org <- (jValue \ AssignmentJsonFields.Organizations).children
+    } yield (org \ AssignmentJsonFields.Name).extract[String]
 
     AssignmentUserInfo(
       UserInfo(id, name, email, picture, pageUrl, organizations.toSet),
-      UserSubmission(id, date, status, grade.map(g => Math.floor(g * 100).toInt))
+      extractUserSubmissionFields(jValue)
     )
   }
 }

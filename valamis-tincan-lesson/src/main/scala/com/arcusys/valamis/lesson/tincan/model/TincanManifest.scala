@@ -1,6 +1,6 @@
 package com.arcusys.valamis.lesson.tincan.model
 
-import com.arcusys.valamis.lesson.model.{ BaseManifest, LessonType }
+import com.arcusys.valamis.lesson.model.{BaseManifest, LessonType}
 import com.arcusys.valamis.lesson.model.LessonType.LessonType
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes.PeriodType

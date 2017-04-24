@@ -12,7 +12,7 @@ class TinCanStatementViewerView extends OAuthPortlet with PortletBase {
     implicit val out = response.getWriter
 
     val contextPath = getContextPath(request)
-    val endpoint = getLrsEndpointInfo
+    val endpoint = getLrsEndpointInfo(request)
     val companyId = PortalUtilHelper.getCompanyId(request)
 
     val language = LiferayHelpers.getLanguage(request)

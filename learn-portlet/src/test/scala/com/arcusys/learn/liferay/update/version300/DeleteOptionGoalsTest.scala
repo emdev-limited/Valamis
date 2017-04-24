@@ -5,20 +5,18 @@ import java.sql.Connection
 import com.arcusys.learn.liferay.update.version300.certificate.{CertificateTableComponent => OldTableComponent}
 import com.arcusys.learn.liferay.update.version300.certificate3004.{CertificateTableComponent => NewableComponent}
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 
 
-class DeleteOptionGoalsTest extends FunSuite with BeforeAndAfter {
+class DeleteOptionGoalsTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
-  val driver = H2Driver
   import driver.simple._
-  val db = Database.forURL("jdbc:h2:mem:deleteelementattributes", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val bindingModule = new NewBindingModule({ implicit module =>
     module.bind[SlickDBInfo] toSingle new SlickDBInfo {
@@ -29,15 +27,15 @@ class DeleteOptionGoalsTest extends FunSuite with BeforeAndAfter {
   })
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     oldTable.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val oldTable = new OldTableComponent with SlickProfile{
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = DeleteOptionGoalsTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -45,7 +43,7 @@ class DeleteOptionGoalsTest extends FunSuite with BeforeAndAfter {
   }
 
   val newTable = new NewableComponent with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = DeleteOptionGoalsTest.this.driver
   }
 
   val updater = new DBUpdater3007(bindingModule)

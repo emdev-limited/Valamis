@@ -1,11 +1,16 @@
 package com.arcusys.valamis.web.portlet
 
-import javax.portlet.{GenericPortlet, RenderRequest, RenderResponse}
+import java.util.Locale
+import javax.portlet.{GenericPortlet, PortletRequest, RenderRequest, RenderResponse}
 
+import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
 import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.settings.service.SettingService
 import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, PortletBase}
+import org.joda.time.{DateTime, Duration}
+import org.joda.time.format.DateTimeFormat
 
 class AdminView extends GenericPortlet with PortletBase {
   private lazy val settingManager = inject[SettingService]
@@ -21,37 +26,49 @@ class AdminView extends GenericPortlet with PortletBase {
 
     val scope = getSecurityData(request)
 
-    val issuerName = settingManager.getIssuerName()
-    val issuerOrganization = settingManager.getIssuerOrganization()
-    val issuerURL = settingManager.getIssuerURL()
-    val sendMessages = settingManager.getSendMessages()
-    val googleClientId = settingManager.getGoogleClientId()
-    val googleAppId = settingManager.getGoogleAppId()
-    val googleApiKey = settingManager.getGoogleApiKey()
-    val issuerEmail = settingManager.getIssuerEmail()
+    implicit val companyId = PortalUtilHelper.getCompanyId(request)
+
+    val issuerName = settingManager.getIssuerName
+    val issuerOrganization = settingManager.getIssuerOrganization
+    val issuerURL = settingManager.getIssuerURL
+    val googleClientId = settingManager.getGoogleClientId
+    val googleAppId = settingManager.getGoogleAppId
+    val googleApiKey = settingManager.getGoogleApiKey
+    val issuerEmail = settingManager.getIssuerEmail
+
+    val ltiLaunchPresentationReturnUrl = settingManager.getLtiLaunchPresentationReturnUrl
+    val ltiMessageType = settingManager.getLtiMessageType
+    val ltiVersion = settingManager.getLtiVersion
+    val ltiOauthVersion = settingManager.getLtiOauthVersion
+    val ltiOauthSignatureMethod = settingManager.getLtiOauthSignatureMethod
 
     val data = Map(
+      "isDefaultInstance" -> (companyId == PortalUtilHelper.getDefaultCompanyId),
       "isAdmin" -> true,
       "isPortlet" -> true,
       "issuerName" -> issuerName,
       "issuerURL" -> issuerURL,
       "issuerEmail" -> issuerEmail,
-      "sendMessages" -> sendMessages,
       "issuerOrganization" -> issuerOrganization,
       "googleClientId" -> googleClientId,
       "googleAppId" -> googleAppId,
-      "googleApiKey" -> googleApiKey) ++
+      "googleApiKey" -> googleApiKey,
+      "ltiLaunchPresentationReturnUrl" -> ltiLaunchPresentationReturnUrl,
+      "ltiMessageType" -> ltiMessageType,
+      "ltiVersion" -> ltiVersion,
+      "ltiOauthVersion" -> ltiOauthVersion,
+      "ltiOauthSignatureMethod" -> ltiOauthSignatureMethod) ++
       translations ++
       scope.data ++
-      getTincanEndpointData()
+      getTincanEndpointData
 
-    sendTextFile("/templates/2.0/admin_templates.html")
-    sendTextFile("/templates/2.0/file_uploader.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/admin_templates.html")
+    sendTextFile("/templates/file_uploader.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(data, "admin.html")
   }
 
-  private def getTincanEndpointData() = {
+  private def getTincanEndpointData(implicit companyId: Long) = {
     val settings = endpointService.getEndpoint
 
     settings match {

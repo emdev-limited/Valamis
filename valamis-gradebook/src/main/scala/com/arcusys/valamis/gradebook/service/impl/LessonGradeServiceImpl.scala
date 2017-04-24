@@ -4,29 +4,29 @@ import java.net.URI
 
 import com.arcusys.learn.liferay.LiferayClasses.{LGroup, LUser}
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
-import com.arcusys.valamis.course.CourseService
-import com.arcusys.valamis.gradebook.model.LessonWithGrades
-import com.arcusys.valamis.gradebook.service.LessonGradeService
-import com.arcusys.valamis.lesson.model.{LessonSortBy, LessonSort, LessonStates, Lesson}
+import com.arcusys.valamis.course.api.CourseService
+import com.arcusys.valamis.gradebook.model.{LessonWithGrades, UserCoursesWithGrade}
+import com.arcusys.valamis.gradebook.service.{LessonGradeService, TeacherCourseGradeService}
+import com.arcusys.valamis.gradebook.utils.LessonWithGradesSortExtension
+import com.arcusys.valamis.lesson.model.{Lesson, LessonSort, LessonSortBy, LessonStates}
 import com.arcusys.valamis.lesson.service._
-import com.arcusys.valamis.lrs.service.LrsClientManager
 import com.arcusys.valamis.lrs.service.util.TinCanVerbs
 import com.arcusys.valamis.model.{Order, RangeResult, SkipTake}
-import com.arcusys.valamis.user.model.{UserSortBy, UserSort, UserFilter}
+import com.arcusys.valamis.user.model.{UserSort, UserSortBy}
 import com.arcusys.valamis.user.service.UserService
+import com.arcusys.valamis.utils.SeqCutExtension
 import org.joda.time.DateTime
 
 abstract class LessonGradeServiceImpl extends LessonGradeService {
 
   def teacherGradeService: TeacherLessonGradeService
-  def userServiceHelper: UserLocalServiceHelper
   def lessonService: LessonService
   def lessonResultService: UserLessonResultService
   def courseService: CourseService
-  def lrsClient: LrsClientManager
-  def memberService: LessonMembersService
   def userService: UserService
   def membersService: LessonMembersService
+  def teacherCourseGradeService: TeacherCourseGradeService
+
 
   lazy val completeVerbs = Seq(
     new URI(TinCanVerbs.getVerbURI(TinCanVerbs.Completed)),
@@ -37,13 +37,6 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     lessonService.getAll(courseId) count { lesson =>
       val teacherGrade = teacherGradeService.get(userId, lesson.id).flatMap(_.grade)
       isLessonFinished(teacherGrade, userId, lesson)
-    }
-  }
-
-  def isLessonFinished(lesson: Lesson, user: LUser): Boolean = {
-    teacherGradeService.get(user.getUserId, lesson.id).flatMap(_.grade) match {
-      case Some(teacherGrade) => isGradeMoreSuccessLimit(teacherGrade, lesson.scoreLimit)
-      case None => lessonResultService.get(lesson, user).isFinished
     }
   }
 
@@ -67,6 +60,23 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     lessonsCount == completedLessonsCount
   }
 
+  def getCoursesCompletedWithGrade(userId: Long): Seq[UserCoursesWithGrade] = {
+
+    val courses = courseService.getSitesByUserId(userId)
+    val grades = teacherCourseGradeService.get(courses.map(_.getGroupId), userId)
+
+    val coursesWithGrade: Seq[UserCoursesWithGrade] = grades.map { g =>
+      val course = courses.filter(g.courseId == _.getGroupId).head
+      UserCoursesWithGrade(course, g.grade)
+    }
+
+    val coursesWithCompletedLessons: Seq[UserCoursesWithGrade] = courses.filterNot(c => grades.map(_.courseId).contains(c.getGroupId))
+      .filter(c => getCompletedLessonsCount(c.getGroupId, userId) > 0)
+      .map(UserCoursesWithGrade(_, None))
+
+    coursesWithGrade ++ coursesWithCompletedLessons
+  }
+
   def getFinishedLessonsGradesByUser(user: LUser,
                                      coursesIds: Seq[Long],
                                      isFinished: Boolean,
@@ -85,7 +95,9 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     val lessons = members.filter(_.user == user).map(_.lesson)
     val allItems = getUsersGradesByLessons(Seq(user), lessons)
       .filter(_.lastAttemptedDate.isDefined)
-    val items = getSortedLessonGrades(allItems, Some(UserSort(UserSortBy.LastAttempted, Order.Desc)), skipTake)
+    val items = allItems
+      .sort(UserSort(UserSortBy.LastAttempted, Order.Desc))
+      .skip(skipTake)
 
     RangeResult(allItems.size, items)
   }
@@ -130,10 +142,11 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
                               lessonId: Long,
                               companyId: Long,
                               organizationId: Option[Long],
+                              userNameFilter: Option[String],
                               sortBy: Option[UserSort],
                               skipTake: Option[SkipTake]): RangeResult[LessonWithGrades] = {
 
-    val users = userService.getUsersByGroupOrOrganization(companyId, courseId, organizationId)
+    val users = userService.getByCourses(Seq(courseId), companyId, organizationId, userNameFilter)
     val lesson = lessonService.getLessonRequired(lessonId)
     getLessonsWithGradesByLesson(lesson, users, sortBy, skipTake)
   }
@@ -142,84 +155,85 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
                                lessonId: Long,
                                companyId: Long,
                                organizationId: Option[Long],
+                               userNameFilter: Option[String],
                                sortBy: Option[UserSort],
                                skipTake: Option[SkipTake]): RangeResult[LessonWithGrades] = {
 
     val coursesIds = courses.map(_.getGroupId)
-    val users = userService.getByCourses(coursesIds, companyId, organizationId)
+    val users = userService.getByCourses(coursesIds, companyId, organizationId, userNameFilter)
     val lesson = lessonService.getLessonRequired(lessonId)
     getLessonsWithGradesByLesson(lesson, users, sortBy, skipTake)
   }
 
   def getUserGradesByCourse(courseId: Long,
                             user: LUser,
+                            lessonTitleFilter: Option[String],
                             sortBy: Option[LessonSort],
                             skipTake: Option[SkipTake]): RangeResult[LessonWithGrades] = {
 
-    val allLessons = lessonService.getAll(courseId)
+    val allLessons = lessonService.getAllSorted(courseId, lessonTitleFilter)
     getLessonsWithGradesByUser(user, allLessons, sortBy, skipTake)
   }
 
   def getUserGradesByCourses(courses: Seq[LGroup],
                              user: LUser,
+                             lessonTitleFilter: Option[String],
                              sortBy: Option[LessonSort],
                              skipTake: Option[SkipTake]): RangeResult[LessonWithGrades] = {
 
     val coursesIds = courses.map(_.getGroupId)
-    val allLessons = lessonService.getByCourses(coursesIds)
+    val allLessons = lessonService.getSortedByCourses(coursesIds, lessonTitleFilter)
     getLessonsWithGradesByUser(user, allLessons, sortBy, skipTake)
   }
 
-  def getUsersGradesByCourse(courseId: Long,
-                             users: Seq[LUser],
-                             sortBy: Option[UserSort],
-                             skipTake: Option[SkipTake],
-                             inReview: Boolean = false): RangeResult[LessonWithGrades] = {
+  def getInReviewByCourse(courseId: Long,
+                          users: Seq[LUser],
+                          nameFilter: Option[String],
+                          sortBy: Option[UserSort],
+                          skipTake: Option[SkipTake]): RangeResult[LessonWithGrades] = {
 
-    val (total, allItems) = if (inReview) {
-      val lessons = lessonService.getInReview(courseId)
-      val items = getUsersGradesByLessons(users, lessons)
-        .filter(item => item.lastAttemptedDate.isDefined && item.teacherGrade.isEmpty)
-      (items.size, items)
+    val lessons = lessonService.getInReview(courseId)
+    val allItems = getUsersGradesByLessons(users, lessons)
+      .filter(item => item.lastAttemptedDate.isDefined && item.teacherGrade.flatMap(_.grade).isEmpty)
+      .filter(containsName(nameFilter))
 
-    }
-    else {
-      val total = lessonService.getCount(courseId)
-      val lessons = lessonService.getAll(courseId)
-      (total, getUsersGradesByLessons(users, lessons))
-    }
+    val items = allItems
+      .sort(sortBy)
+      .skip(skipTake)
 
-    val items = getSortedLessonGrades(allItems, sortBy, skipTake)
-
-    RangeResult(total, items)
+    RangeResult(allItems.size, items)
   }
 
-  def getUsersGradesByCourses(courses: Seq[LGroup],
-                              companyId: Long,
-                              organizationId: Option[Long],
-                              sortBy: Option[UserSort],
-                              skipTake: Option[SkipTake],
-                              inReview: Boolean = false): RangeResult[LessonWithGrades] = {
+  def getInReviewByCourses(courses: Seq[LGroup],
+                           companyId: Long,
+                           organizationId: Option[Long],
+                           nameFilter: Option[String],
+                           sortBy: Option[UserSort],
+                           skipTake: Option[SkipTake]): RangeResult[LessonWithGrades] = {
 
     val coursesIds = courses.map(_.getGroupId)
     val users = userService.getByCourses(coursesIds, companyId, organizationId)
 
-    val (total, allItems) = if (inReview) {
-      val lessons = lessonService.getInReviewByCourses(coursesIds)
-      val items = getUsersGradesByLessons(users, lessons)
-        .filter(item => item.lastAttemptedDate.isDefined && item.teacherGrade.isEmpty)
-      (items.size, items)
+    val lessons = lessonService.getInReviewByCourses(coursesIds)
+    val allItems = getUsersGradesByLessons(users, lessons)
+      .filter(item => item.lastAttemptedDate.isDefined && item.teacherGrade.isEmpty)
+      .filter(containsName(nameFilter))
 
+    val items = allItems
+      .sort(sortBy)
+      .skip(skipTake)
+
+    RangeResult(allItems.size, items)
+  }
+
+  private def containsName(nameFilter: Option[String]): (LessonWithGrades => Boolean) = {
+    nameFilter.map(_.toLowerCase) match {
+      case Some(filter) => g =>
+        g.lesson.title.toLowerCase.contains(filter) ||
+          g.user.getFullName.toLowerCase.contains(filter)
+
+      case None => g => true
     }
-    else {
-      val total = lessonService.getCountByCourses(coursesIds)
-      val lessons = lessonService.getByCourses(coursesIds)
-      (total, getUsersGradesByLessons(users, lessons))
-    }
-
-    val items = getSortedLessonGrades(allItems, sortBy, skipTake)
-
-    RangeResult(total, items)
   }
 
   private def getFinishedLessonsGrades(user: LUser,
@@ -245,7 +259,7 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
       case None => allItems
     }
 
-    val items = getSkipped(sortedItems, skipTake)
+    val items = sortedItems.skip(skipTake)
 
     RangeResult(allItems.size, items)
   }
@@ -278,23 +292,6 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     RangeResult(lessons.size, items)
   }
 
-  private def getSortedLessonGrades(allItems: Seq[LessonWithGrades],
-                                    sortBy: Option[UserSort],
-                                    skipTake: Option[SkipTake]): Seq[LessonWithGrades] = {
-
-    implicit val dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
-
-    val sortedItems = sortBy match {
-      case Some(UserSort(UserSortBy.LastAttempted, Order.Asc)) => allItems.sortBy(_.lastAttemptedDate)
-      case Some(UserSort(UserSortBy.LastAttempted, Order.Desc)) => allItems.sortBy(_.lastAttemptedDate).reverse
-      case Some(UserSort(_, Order.Asc)) => allItems.sortBy(_.user.getFullName)
-      case Some(UserSort(_, Order.Desc)) => allItems.sortBy(_.user.getFullName).reverse
-      case None => allItems
-    }
-
-    getSkipped(sortedItems, skipTake)
-  }
-
   private def getSortedLessons(allItems: Seq[Lesson],
                                sortBy: Option[LessonSort],
                                skipTake: Option[SkipTake]): Seq[Lesson] = {
@@ -302,10 +299,10 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     val sortedItems = sortBy match {
       case Some(LessonSort(LessonSortBy.Name, Order.Asc)) => allItems.sortBy(_.title)
       case Some(LessonSort(LessonSortBy.Name, Order.Desc)) => allItems.sortBy(_.title).reverse
-      case None => allItems
+      case _ => allItems
     }
 
-    getSkipped(sortedItems, skipTake)
+    sortedItems.skip(skipTake)
   }
 
   private def getSortedUsers(allItems: Seq[LUser],
@@ -315,17 +312,9 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     val sortedItems = sortBy match {
       case Some(UserSort(UserSortBy.Name, Order.Asc)) => allItems.sortBy(_.getFullName)
       case Some(UserSort(UserSortBy.Name, Order.Desc)) => allItems.sortBy(_.getFullName).reverse
-      case None => allItems
+      case _ => allItems
     }
 
-    getSkipped(sortedItems, skipTake)
-
-  }
-
-  private def getSkipped[T](allItems: Seq[T], skipTake: Option[SkipTake]): Seq[T] = {
-    skipTake match {
-      case Some(SkipTake(skip, take)) => allItems.slice(skip, skip + take)
-      case None => allItems
-    }
+    sortedItems.skip(skipTake)
   }
 }

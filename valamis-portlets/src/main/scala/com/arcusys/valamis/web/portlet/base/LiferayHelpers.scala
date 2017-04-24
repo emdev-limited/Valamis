@@ -1,9 +1,9 @@
 package com.arcusys.valamis.web.portlet.base
 
 import java.util.Locale
-import javax.portlet.RenderRequest
+import javax.portlet.{PortletRequest, RenderRequest}
 
-import com.arcusys.learn.liferay.LiferayClasses._
+import com.arcusys.learn.liferay.LiferayClasses.{LThemeDisplay, LUser}
 import com.arcusys.learn.liferay.constants.WebKeysHelper
 
 object LiferayHelpers {
@@ -23,7 +23,7 @@ object LiferayHelpers {
     else ""
   }
 
-  def getThemeDisplay(request: RenderRequest): LThemeDisplay = {
+  def getThemeDisplay(request: PortletRequest): LThemeDisplay = {
     request.getAttribute(WebKeysHelper.THEME_DISPLAY).asInstanceOf[LThemeDisplay]
   }
 

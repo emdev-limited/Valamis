@@ -10,12 +10,14 @@ import com.arcusys.valamis.web.servlet.grade.request.NotificationRequest
 
 class NotificationServlet extends BaseJsonApiController {
 
+  lazy val gradebookNotification = inject[GradebookNotificationHelper]
+
   post("/notifications/gradebook(/)") {
     val notificationRequest = NotificationRequest(this)
 
     PermissionUtil.requirePermissionApi(ViewAllPermission, PortletName.Gradebook)
 
-    GradebookNotificationHelper.sendStatementCommentNotification(
+    gradebookNotification.sendStatementCommentNotification(
       notificationRequest.courseId,
       PermissionUtil.getUserId,
       notificationRequest.targetId,

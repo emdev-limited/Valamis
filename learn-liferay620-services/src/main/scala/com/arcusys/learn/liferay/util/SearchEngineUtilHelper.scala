@@ -1,6 +1,6 @@
 package com.arcusys.learn.liferay.util
 
-import com.liferay.portal.kernel.search.{ SearchEngineUtil, Document }
+import com.liferay.portal.kernel.search.{Document, SearchEngineUtil}
 
 object SearchEngineUtilHelper {
 

@@ -23,7 +23,7 @@ trait PortletBase
   override def destroy() {}
 
   override def doDispatch(request: RenderRequest, response: RenderResponse): Unit = {
-     self.doDispatch(request, response)
+    self.doDispatch(request, response)
   }
 
   protected def getTranslation(view: String, language: String): Map[String, String] = {

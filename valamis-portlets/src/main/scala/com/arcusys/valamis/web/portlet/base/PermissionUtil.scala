@@ -44,6 +44,8 @@ object ShowAllActivities extends PermissionBase("SHOW_ALL")
 
 object EditThemePermission extends PermissionBase("EDIT_THEME")
 
+object UnlockLessonPermission extends PermissionBase("UNLOCK_LESSON")
+
 object OrderPermission extends PermissionBase("ORDER_ACTION")
 
 object FileAccessPermission extends PermissionBase("FILE_ACCESS")

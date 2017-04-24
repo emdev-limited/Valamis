@@ -6,6 +6,7 @@ import com.liferay.portal.kernel.language.LanguageUtil
 import com.liferay.portal.kernel.log.LogFactoryUtil
 import com.liferay.portal.kernel.template.TemplateConstants._
 import com.liferay.portal.kernel.util.{FileUtil, LocaleUtil}
+import com.liferay.portal.kernel.xml.SAXReaderUtil
 import com.liferay.portal.model._
 import com.liferay.portal.service._
 import com.liferay.portal.service.permission.PortletPermissionUtil
@@ -35,15 +36,18 @@ object Utils {
                                 structureInfo: StructureInfo,
                                 templates: Array[TemplateInfo]): Unit = {
 
-    val defaultLocale = LocaleUtil.getDefault
+    val xsd = getFileAsString(s"structures/${structureInfo.key}.xml")
+
+    // locale from xsd should be in the name/description map
+    val locales = Seq(LocaleUtil.getDefault, getDefaultLocale(xsd)).distinct
 
     val structureId = addStructure(
       groupId,
       userId,
       structureInfo.key,
-      Map(defaultLocale -> LanguageUtil.get(defaultLocale, structureInfo.name)),
-      Map(defaultLocale -> LanguageUtil.get(defaultLocale, structureInfo.description)),
-      getFileAsString(s"structures/${structureInfo.key}.xml")
+      locales.map(l => (l, LanguageUtil.get(l, structureInfo.name))).toMap,
+      locales.map(l => (l, LanguageUtil.get(l, structureInfo.description))).toMap,
+      xsd
     )
 
     templates.foreach { template =>
@@ -52,8 +56,8 @@ object Utils {
         userId,
         structureId,
         template.key,
-        Map(defaultLocale -> LanguageUtil.get(defaultLocale, template.name)),
-        Map(defaultLocale -> LanguageUtil.get(defaultLocale, template.description)),
+        locales.map(l => (l, LanguageUtil.get(l, template.name))).toMap,
+        locales.map(l => (l, LanguageUtil.get(l, template.description))).toMap,
         getFileAsString(s"templates/${template.key}.ftl"),
         LANG_TYPE_FTL
       )
@@ -82,6 +86,14 @@ object Utils {
       body,
       langType,
       templateClassNameId)
+  }
+
+  private def getDefaultLocale(xsd: String) = {
+    val document = SAXReaderUtil.read(xsd)
+
+    val rootElement = document.getRootElement
+
+    LocaleUtil.fromLanguageId(rootElement.attributeValue("default-locale"))
   }
 
   def addTemplate(

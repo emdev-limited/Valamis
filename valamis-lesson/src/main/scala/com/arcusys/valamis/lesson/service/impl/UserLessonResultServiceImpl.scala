@@ -1,7 +1,6 @@
 package com.arcusys.valamis.lesson.service.impl
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.valamis.course.CourseService
 import com.arcusys.valamis.lesson.model.{UserLessonResult, Lesson}
 import com.arcusys.valamis.lesson.service.{LessonService, LessonStatementReader, UserLessonResultService}
 import com.arcusys.valamis.lesson.storage.query.LessonAttemptsQueries
@@ -11,6 +10,7 @@ import com.arcusys.valamis.lrs.tincan.Statement
 import TincanHelper.TincanAgent
 import com.arcusys.valamis.persistence.common.SlickProfile
 import org.joda.time.DateTime
+
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.JdbcBackend
 
@@ -33,7 +33,6 @@ abstract class UserLessonResultServiceImpl(val db: JdbcBackend#DatabaseDef,
 
   def lessonService: LessonService
   def statementReader: LessonStatementReader
-  def courseService: CourseService
   def lessonResultCalculate: LessonResultCalculate
 
   def get(lesson: Lesson, user: LUser): UserLessonResult = {
@@ -80,31 +79,32 @@ abstract class UserLessonResultServiceImpl(val db: JdbcBackend#DatabaseDef,
 
     val lessonToStatements = lessonResultCalculate.getLessonToStatements(newStatements)
 
-    lessonToStatements.foreach { case (Some(lessonId), statements) =>
+    lessonToStatements.foreach { case (lessonIds, statements) =>
+      lessonIds foreach { lessonId =>
+        val newAttempt = lessonResultCalculate.calculateLessonResult(lessonId, user.getUserId, statements)
+        val attemptQuery = lessonAttempts.filterBy(lessonId, user.getUserId)
 
-      val newAttempt = lessonResultCalculate.calculateLessonResult(lessonId, user.getUserId, statements)
-      val attemptQuery = lessonAttempts.filterBy(lessonId, user.getUserId)
+        db.withSession { s => attemptQuery.firstOption(s) } match {
+          case Some(attempt) =>
+            val score = if (attempt.score.isEmpty && attempt.lastAttemptDate.isDefined) {
+              val lesson = lessonService.getLessonRequired(attempt.lessonId)
+              statementReader.getLessonScoreMax(user.getAgentByUuid, lesson)
+            }
+            else {
+              attempt.score
+            }
+            db.withTransaction { implicit s =>
+              attemptQuery.update(foldAttempts(attempt.copy(score = score), newAttempt))
+            }
+            if (!attempt.isFinished && newAttempt.isFinished) onLessonFinished(newAttempt)
 
-      db.withSession{ s => attemptQuery.firstOption(s) } match {
-        case Some(attempt) =>
-          val score = if (attempt.score.isEmpty && attempt.lastAttemptDate.isDefined) {
-            val lesson = lessonService.getLessonRequired(attempt.lessonId)
-            statementReader.getLessonScoreMax(user.getAgentByUuid, lesson)
-          }
-          else {
-            attempt.score
-          }
-          db.withTransaction { implicit s =>
-            attemptQuery.update( foldAttempts(attempt.copy(score = score), newAttempt) )
-          }
-          if (!attempt.isFinished && newAttempt.isFinished) onLessonFinished(newAttempt)
-
-        case None =>
-          val state = calculateLessonResult(lessonId, user)
-          db.withTransaction { implicit s =>
-            lessonAttempts += state
-          }
-          if (newAttempt.isFinished) onLessonFinished(newAttempt)
+          case None =>
+            val state = calculateLessonResult(lessonId, user)
+            db.withTransaction { implicit s =>
+              lessonAttempts += state
+            }
+            if (newAttempt.isFinished) onLessonFinished(newAttempt)
+        }
       }
     }
   }
@@ -135,8 +135,7 @@ abstract class UserLessonResultServiceImpl(val db: JdbcBackend#DatabaseDef,
     get(lesson: Lesson, user: LUser).isFinished
   }
 
-  def getLastLessons(user: LUser, count: Int): Seq[(UserLessonResult, Lesson)] = {
-    val coursesIds = courseService.getByCompanyId(user.getCompanyId).map(_.getGroupId)
+  def getLastLessons(user: LUser, coursesIds: Seq[Long], count: Int): Seq[(UserLessonResult, Lesson)] = {
     val lessonsQ = lessons.filter(_.courseId inSet coursesIds)
 
     db.withSession { implicit s =>
@@ -201,7 +200,7 @@ abstract class UserLessonResultServiceImpl(val db: JdbcBackend#DatabaseDef,
 
       val results = db.withSession { implicit  s =>
         lessonAttempts
-          .filter(_.userId inSet usersIds)
+          .filterByUsersIds(usersIds)
           .filter(_.lessonId inSet lessonsIds)
           .list
       }

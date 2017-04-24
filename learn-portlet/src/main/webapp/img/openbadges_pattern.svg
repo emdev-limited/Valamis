@@ -1,0 +1,843 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="296px" height="54px" viewBox="0 0 296 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39 (31667) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 12</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="296" height="54"></rect>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-3-Copy-5" transform="translate(-2.000000, -2.000000)">
+            <g id="Group-2-Copy-5">
+                <g id="Group-12" transform="translate(2.000000, 2.000000)">
+                    <mask id="mask-2" fill="white">
+                        <use xlink:href="#path-1"></use>
+                    </mask>
+                    <use id="Mask" fill-opacity="0.699999988" fill="#F2F2F2" xlink:href="#path-1"></use>
+                    <g id="Group-10" opacity="0.522154851" mask="url(#mask-2)">
+                        <g transform="translate(-24.000000, -24.000000)">
+                            <g id="Group-9" transform="translate(0.000000, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy" transform="translate(23.077810, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-3" transform="translate(46.155620, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-5" transform="translate(69.233429, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-6" transform="translate(92.311239, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-7" transform="translate(115.389049, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-8" transform="translate(138.466859, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-9" transform="translate(161.544669, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-10" transform="translate(184.622478, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-11" transform="translate(207.700288, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-12" transform="translate(230.778098, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-13" transform="translate(253.855908, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-14" transform="translate(276.933718, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-15" transform="translate(300.011527, 39.861671)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-29" transform="translate(11.538905, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(11.674659, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(23.213564, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-30" transform="translate(0.135754, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-28" transform="translate(46.155620, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-27" transform="translate(69.233429, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-26" transform="translate(92.311239, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-25" transform="translate(115.389049, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-24" transform="translate(138.466859, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-23" transform="translate(161.544669, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-22" transform="translate(184.622478, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-21" transform="translate(207.700288, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-20" transform="translate(230.778098, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-19" transform="translate(253.855908, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-18" transform="translate(276.933718, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-1.58691632e-12 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -1.58691632e-12 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-1.34933499e-12 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -1.34933499e-12 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-1.06376643e-13 5.69187642 9.49351236 -3.74633146e-12 9.49351236 2.64265691 -1.06376643e-13 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                            <g id="Group-9-Copy-17" transform="translate(300.011527, 0.000000)">
+                                <g id="Group-9-Copy-2" transform="translate(0.135754, 0.047817)" fill="#D8D8D8">
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                                <g id="Group-9-Copy-4" transform="translate(11.674659, 19.978653)" fill="#D8D8D8">
+                                    <g id="Group-8" transform="translate(1.048991, 1.342354)">
+                                        <polygon id="Rectangle-639" points="0 5.69187642 9.49351236 0 9.49351236 2.64265691 0 8.33453333"></polygon>
+                                        <polygon id="Rectangle-639-Copy" points="0 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 0 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-2" points="0 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 0 16.872348"></polygon>
+                                    </g>
+                                    <g id="Group-4" transform="translate(17.115925, 9.515860) rotate(-60.000000) translate(-17.115925, -9.515860) translate(11.870968, 0.599434)">
+                                        <polygon id="Rectangle-639-Copy-5" points="-2.98141275e-13 5.69187642 9.49351236 -9.82002824e-13 9.49351236 2.64265691 -2.98141275e-13 8.33453333"></polygon>
+                                    </g>
+                                    <g id="Group-4-Copy" transform="translate(11.072512, 19.883195) rotate(-300.000000) translate(-11.072512, -19.883195) translate(5.827555, 10.966768)">
+                                        <polygon id="Rectangle-639-Copy-4" points="-5.90692401e-13 9.96078373 9.49351236 4.26890731 9.49351236 6.91156422 -5.90692401e-13 12.6034406"></polygon>
+                                        <polygon id="Rectangle-639-Copy-3" points="-4.17223732e-13 14.229691 9.49351236 8.53781463 9.49351236 11.1804715 -4.17223732e-13 16.872348"></polygon>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

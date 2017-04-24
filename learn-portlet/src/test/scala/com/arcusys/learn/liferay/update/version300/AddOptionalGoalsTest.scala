@@ -8,7 +8,7 @@ import com.escalatesoft.subcut.inject.NewBindingModule
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 import com.arcusys.learn.liferay.update.version270.certificate.{ActivityGoalTableComponent => OldActivityGoal}
 import com.arcusys.learn.liferay.update.version300.certificate.{ActivityGoalTableComponent => NewActivityGoal}
@@ -23,38 +23,32 @@ import com.arcusys.learn.liferay.update.version300.certificate.{PackageGoalTable
 import com.arcusys.learn.liferay.update.version270.certificate.{CertificateGoalStateTableComponent => OldGoalState}
 import com.arcusys.learn.liferay.update.version300.certificate.{CertificateGoalStateTableComponent => NewGoalState}
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 
 
-class AddOptionalGoalsTest extends FunSuite with BeforeAndAfter {
-
-  val driver = H2Driver
+class AddOptionalGoalsTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
   import driver.simple._
-
-  val db = Database.forURL("jdbc:h2:mem:optionalGoals", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val bindingModule = new NewBindingModule({ implicit module =>
     module.bind[SlickDBInfo] toSingle new SlickDBInfo {
       def databaseDef: JdbcBackend#DatabaseDef = db
-
       def slickDriver: JdbcDriver = driver
-
       def slickProfile: JdbcProfile = driver
     }
   })
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     oldCertificate.createSchema()
     oldTables.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val oldCertificate = new OldCertificate with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = AddOptionalGoalsTest.this.driver
 
     import driver.simple._
 
@@ -67,7 +61,7 @@ class AddOptionalGoalsTest extends FunSuite with BeforeAndAfter {
     with OldCourseGoal
     with OldPackageGoal
     with OldGoalState {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = AddOptionalGoalsTest.this.driver
 
     import driver.simple._
 
@@ -81,11 +75,11 @@ class AddOptionalGoalsTest extends FunSuite with BeforeAndAfter {
     with NewCourseGoal
     with NewPackageGoal
     with NewGoalState {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = AddOptionalGoalsTest.this.driver
   }
 
   val newCertificate = new NewCertificate with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = AddOptionalGoalsTest.this.driver
   }
 
   val updater = new DBUpdater3001(bindingModule)

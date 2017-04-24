@@ -4,7 +4,6 @@ import com.arcusys.valamis.content.exceptions.NoCategoryException
 import com.arcusys.valamis.content.model._
 import com.arcusys.valamis.content.storage.{CategoryStorage, PlainTextStorage, QuestionStorage}
 import com.arcusys.valamis.persistence.common.DatabaseLayer
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,18 +32,16 @@ trait CategoryService {
 
 }
 
-class CategoryServiceImpl(implicit val bindingModule: BindingModule)
-  extends CategoryService
-    with Injectable {
+abstract class CategoryServiceImpl extends CategoryService {
 
-  lazy val categories = inject[CategoryStorage]
-  lazy val questionStorage = inject[QuestionStorage]
-  lazy val plainTextStorage = inject[PlainTextStorage]
+  def categories: CategoryStorage
+  def questionStorage: QuestionStorage
+  def plainTextStorage: PlainTextStorage
 
-  lazy val plainTextService = inject[PlainTextService]
-  lazy val questionService = inject[QuestionService]
+  def plainTextService: PlainTextService
+  def questionService: QuestionService
 
-  lazy val dbLayer = inject[DatabaseLayer]
+  def dbLayer: DatabaseLayer
 
   import DatabaseLayer._
 
@@ -117,13 +114,13 @@ class CategoryServiceImpl(implicit val bindingModule: BindingModule)
 
   private def moveRelatedContentToCourseAction(categoryId: Long, oldCourseId: Long, newCourseId: Long) =
     for {
-      questions <- questionStorage.getByCategory(Some(categoryId), oldCourseId)
+      questions <- questionStorage.getByCategory(categoryId)
       _ <- sequence(questions.map {q => questionService.moveToCourseAction(q.id.get, newCourseId, moveToRoot = false) })
 
-      plainTexts <- plainTextStorage.getByCategory(Some(categoryId), oldCourseId)
+      plainTexts <- plainTextStorage.getByCategory(categoryId)
       _ <- sequence(plainTexts.map { pt => plainTextService.moveToCourseAction(pt.id.get, newCourseId, moveToRoot = false) })
 
-      cats <- categories.getByCategory(Some(categoryId), oldCourseId)
+      cats <- categories.getByCategory(categoryId)
       _ <- sequence(cats.map { cat => moveToCourseAction(cat.id.get, newCourseId, moveToRoot = false) })
     } yield ()
 

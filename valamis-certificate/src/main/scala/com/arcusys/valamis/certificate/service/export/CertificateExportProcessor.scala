@@ -5,25 +5,22 @@ import java.io.FileInputStream
 import com.arcusys.valamis.certificate.model.{Certificate, CertificateFilter}
 import com.arcusys.valamis.certificate.model.goal._
 import com.arcusys.valamis.certificate.storage._
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.api.CourseService
 import com.arcusys.valamis.util.export.ExportProcessor
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.util.ZipBuilder
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class CertificateExportProcessor(
-    implicit val bindingModule: BindingModule)
-  extends ExportProcessor[Certificate, CertificateExportModel]
-  with Injectable {
+abstract class CertificateExportProcessor extends ExportProcessor[Certificate, CertificateExportModel] {
 
-  private lazy val fileFacade = inject[FileService]
-  private lazy val courseService = inject[CourseService]
-  private lazy val courseGoalStorage = inject[CourseGoalStorage]
-  private lazy val activityGoalStorage = inject[ActivityGoalStorage]
-  private lazy val statementGoalStorage = inject[StatementGoalStorage]
-  private lazy val packageGoalStorage = inject[PackageGoalStorage]
-  private lazy val goalRepository = inject[CertificateGoalRepository]
-  private lazy val certificateRepository = inject[CertificateRepository]
+  //TODO: remove fileService, use certificateService.getLogo
+  def fileService: FileService
+  def courseService: CourseService
+  def courseGoalStorage: CourseGoalStorage
+  def activityGoalStorage: ActivityGoalStorage
+  def statementGoalStorage: StatementGoalStorage
+  def packageGoalStorage: PackageGoalStorage
+  def goalRepository: CertificateGoalRepository
+  def certificateRepository: CertificateRepository
 
   def export(companyId: Long, certificateId: Long): FileInputStream = {
     exportItems(Seq(certificateRepository.getById(certificateId)))
@@ -46,7 +43,7 @@ class CertificateExportProcessor(
     } else {
       val logo = c.id.toString + "_" + c.logo
       try {
-        zip.addFile(logo, fileFacade.getFileContent(c.id.toString, c.logo))
+        zip.addFile(logo, fileService.getFileContent(c.id.toString, c.logo))
         logo
       } catch {
         case _: Throwable => null

@@ -32,19 +32,25 @@ class CertificateIndexer extends ValamisBaseIndexer with InjectableFactory {
   }
 
   protected def doGetDocument(obj: Object) = {
-    val cert = toCertificate(obj)
-    val asset = AssetEntryLocalServiceHelper.getAssetEntry(getClassName, cert.id)
+    val certificate = toCertificate(obj)
+    val asset = AssetEntryLocalServiceHelper.getAssetEntry(getClassName, certificate.id)
 
+    getDocument(asset, certificate)
+  }
+
+  private def getDocument(asset: LAssetEntry, c: Certificate): LDocument = {
     val document = new LDocumentImpl
     document.addUID(CertificateIndexer.PortletId, asset.getPrimaryKey)
     document.addKeyword(FieldHelper.COMPANY_ID, asset.getCompanyId)
-    document.addKeyword(FieldHelper.ENTRY_CLASS_NAME, cert.getClass.getName)
-    document.addKeyword(FieldHelper.ENTRY_CLASS_PK, cert.id)
+    document.addKeyword(FieldHelper.ENTRY_CLASS_NAME, c.getClass.getName)
+    document.addKeyword(FieldHelper.ENTRY_CLASS_PK, asset.getClassPK)
     document.addKeyword(FieldHelper.PORTLET_ID, CertificateIndexer.PortletId)
     document.addKeyword(FieldHelper.GROUP_ID, asset.getGroupId)
+    document.addKeyword(FieldHelper.SCOPE_GROUP_ID, asset.getGroupId)
+    document.addDate(FieldHelper.MODIFIED_DATE, asset.getModifiedDate)    // Should be set for LR7 (check in OpenSearch while searching).
     // cert.summary.foreach( summary => document.addText(FieldHelper.CONTENT, HtmlUtil.extractText(summary)))
-    document.addText(FieldHelper.DESCRIPTION, cert.description)
-    document.addText(FieldHelper.TITLE, cert.title)
+    document.addText(FieldHelper.DESCRIPTION, c.description)
+    document.addText(FieldHelper.TITLE, c.title)
     document
   }
 
@@ -79,8 +85,11 @@ class CertificateIndexer extends ValamisBaseIndexer with InjectableFactory {
 
   protected def reindexKBArticles(companyId: Long, startKBArticleId: Long, endKBArticleId: Long) {
     val documents = new java.util.ArrayList[LDocument]
-    for (cert <- certificateRepository.getBy(new CertificateFilter(companyId))) {
-      val document = doGetDocument(cert)
+    for {
+      certificate <- certificateRepository.getBy(new CertificateFilter(companyId))
+      asset <- AssetEntryLocalServiceHelper.fetchAssetEntry(getClassName, certificate.id)
+    } {
+      val document = getDocument(asset, certificate)
       documents.add(document)
     }
     SearchEngineUtilHelper.updateDocuments(getSearchEngineId, companyId, documents)

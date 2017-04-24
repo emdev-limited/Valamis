@@ -2,23 +2,27 @@ package com.arcusys.learn.liferay.update.version260
 
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
 import com.arcusys.learn.liferay.update.SlickDBContext
-import com.arcusys.valamis.certificate.service.CertificateService
+import com.arcusys.learn.liferay.update.version260.storyTree.StoryTreeTableComponent
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
-import com.arcusys.valamis.certificate.storage.schema.CertificateTableComponent
+import com.arcusys.learn.liferay.update.version260.update2511.CertificateTableComponent
 import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.arcusys.valamis.web.service.ImageProcessor
 import com.escalatesoft.subcut.inject.BindingModule
 
 import scala.slick.jdbc.StaticQuery
 
-class DBUpdater2511(val bindingModule: BindingModule) extends LUpgradeProcess with SlideTableComponent
-with CertificateTableComponent with SlickDBContext {
+class DBUpdater2511(val bindingModule: BindingModule)
+  extends LUpgradeProcess
+    with SlideTableComponent
+    with StoryTreeTableComponent
+    with CertificateTableComponent
+    with SlickDBContext {
 
   def this() = this(Configuration)
 
-  private lazy val imageProcessor     = inject[ImageProcessor]
-  private lazy val certificateService = inject[CertificateService]
+  private lazy val imageProcessor = inject[ImageProcessor]
+  //TODO: remove FileService using, it can be changed in new versions (after 2.5)
   private lazy val fileService = inject[FileService]
 
   private val LogoWidth = 360
@@ -30,6 +34,7 @@ with CertificateTableComponent with SlickDBContext {
 
   override def doUpgrade(): Unit = {
     resizeSlideSetsLogo()
+    resizeTreesLogo()
     resizeCertificatesLogo()
     resizePackagesLogo()
   }
@@ -53,17 +58,39 @@ with CertificateTableComponent with SlickDBContext {
     )
   }
 
+  private def resizeTreesLogo() = dbInfo.databaseDef.withTransaction { implicit session =>
+    trees.filter(_.logo.isDefined).list
+      .foreach { t =>
+        val logoPath = s"files/StoryTree/${t.id.get}/"
+        t.logo
+          .map(logoPath + _ )
+          .flatMap(fileService.getFileContentOption)
+          .map(imageProcessor.resizeImage(_, LogoWidth, LogoHeight))
+          .foreach(setTreeLogo(t, _))
+      }
+  }
+
+  private def setTreeLogo(tree: Story, content: Array[Byte]) = dbInfo.databaseDef.withTransaction { implicit session =>
+    fileService.setFileContent(
+      folder = s"StoryTree/${tree.id.get}/",
+      name = tree.logo.get,
+      content = content,
+      deleteFolder = true
+    )
+  }
+
   private def resizeCertificatesLogo() = dbInfo.databaseDef.withTransaction { implicit session =>
+
     certificates.filterNot(_.logo === "").list
       .foreach { c =>
-        certificateService.getLogo(c.id)
-          .map(imageProcessor.resizeImage(_, LogoWidth, LogoHeight))
-          .foreach(certificateService.setLogo(c.id, c.logo, _))
+        fileService.getFileContentOption(s"files/${c.id}/${c.logo}")
+          .map { image => imageProcessor.resizeImage(image, LogoWidth, LogoHeight)}
+          .foreach { image => fileService.setFileContent( s"${c.id}/", c.logo, image, deleteFolder = true ) }
       }
   }
 
   private def resizePackagesLogo() = {
-    val packagesInfos = dbInfo.databaseDef.withSession{ implicit s =>
+    val packagesInfos = dbInfo.databaseDef.withTransaction{ implicit s =>
       val scorm = StaticQuery.queryNA[(Long, Option[String])]("select id_, logo from learn_lfpackage").list
       val tincan = StaticQuery.queryNA[(Long, Option[String])]("select id_, logo from learn_lftincanpackage").list
       scorm ++ tincan

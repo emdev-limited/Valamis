@@ -8,8 +8,6 @@ import com.arcusys.valamis.lesson.scorm.storage.tracking.{ActivityStateTreeStora
 import com.arcusys.valamis.lesson.scorm.storage.{ActivityStorage, ResourcesStorage, ScormUserStorage}
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-import scala.util.Try
-
 // TODO refactor
 class ActivityService(implicit val bindingModule: BindingModule) extends Injectable with ActivityServiceContract {
 
@@ -39,7 +37,7 @@ class ActivityService(implicit val bindingModule: BindingModule) extends Injecta
     attemptStorage.getActive(userId, packageId) match {
       case Some(attempt) => attempt
       case None =>
-        val name = Try(UserLocalServiceHelper().getUserById(userId)).map(_.getFullName).getOrElse("Anonymous")
+        val name = UserLocalServiceHelper().fetchUser(userId).map(_.getFullName).getOrElse("Anonymous")
         if (scormUserStorage.getById(userId).isEmpty) scormUserStorage.add(ScormUser(userId, name))
         attemptStorage.createAndGetID(userId, packageId, organizationId)
         attemptStorage.getActive(userId, packageId).get

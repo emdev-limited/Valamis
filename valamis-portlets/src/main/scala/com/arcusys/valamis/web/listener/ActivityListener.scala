@@ -46,10 +46,14 @@ class ActivityListener extends LBaseModelListener[LSocialActivity] with Injectab
 
     if (!unsupportedForChecking.contains(socialActivity.getClassName)) {
       try {
-        certificateStateRepository.getBy(userId, CertificateStatuses.InProgress).foreach (
-          certificateStatusChecker.updateActivityGoalState(_, userId)
-        )
-        certificateStatusChecker.checkAndGetStatus(new CertificateStateFilter(Some(userId), statuses = Set(CertificateStatuses.InProgress)))
+        certificateStateRepository
+          .getBy(userId, CertificateStatuses.InProgress)
+          .foreach(certificateStatusChecker.updateActivityGoalState(_, userId))
+
+        certificateStatusChecker.checkAndGetStatus(new CertificateStateFilter(
+          userId = Some(userId),
+          statuses = Set(CertificateStatuses.InProgress)
+        ))
       }
       catch {
         case e: Throwable => logger.error(e)
@@ -76,7 +80,6 @@ class ActivityListener extends LBaseModelListener[LSocialActivity] with Injectab
 
   def sendStatement(socialActivity: LSocialActivity, userId: Long, companyId: Long)
   {
-    val user = UserLocalServiceHelper().getUser(userId)
     val courseId = socialActivity.getGroupId
 
     val verbName = activityToStatementStorage
@@ -101,7 +104,7 @@ class ActivityListener extends LBaseModelListener[LSocialActivity] with Injectab
       val descriptionMap = socialActivity.getAssetEntry.getDescriptionMap.asScala.filter(!_._2.isEmpty)
         .map(titleTuple => (titleTuple._1.getLanguage, titleTuple._2)).toMap[String, String]
 
-      val url = PortalUtilHelper.getLocalHostUrl(companyId, false)
+      val url = PortalUtilHelper.getLocalHostUrlForCompany(companyId)
       val statement = Statement(
         Option(UUID.randomUUID),
         UserLocalServiceHelper().getUser(userId).getAgentByUuid,
@@ -113,7 +116,7 @@ class ActivityListener extends LBaseModelListener[LSocialActivity] with Injectab
         timestamp = DateTime.now,
         stored = DateTime.now
       )
-      val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All).auth
+      val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All)(companyId).auth
       lrsReader.statementApi(_.addStatement(statement), Some(lrsAuth), Seq(statement))
     }
   }

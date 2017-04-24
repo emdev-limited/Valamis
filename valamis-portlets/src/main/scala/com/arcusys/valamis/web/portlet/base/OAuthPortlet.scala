@@ -19,16 +19,17 @@ import scala.collection.JavaConverters._
 object OAuthPortlet {
   private val lock: AnyRef = new Object()
 }
+
 abstract class OAuthPortlet extends GenericPortlet with Injectable {
 
   protected lazy val lrsRegistration = inject[LrsRegistration]
   protected lazy val authCredentials = inject[UserCredentialsStorage]
 
 
-  override def doDispatch(request: RenderRequest, response: RenderResponse) : Unit = {
-
-     try {
-        if (authCredentials.get(request).isEmpty) {
+  override def doDispatch(request: RenderRequest, response: RenderResponse): Unit = {
+    implicit val companyId = PortalUtilHelper.getCompanyId(request)
+    try {
+      if (authCredentials.get(request).isEmpty) {
         OAuthPortlet.lock.synchronized {
 
           if (authCredentials.get(request).isEmpty) {
@@ -45,9 +46,9 @@ abstract class OAuthPortlet extends GenericPortlet with Injectable {
 
             response.getWriter.println(
               s"""<script type="text/javascript"> 
-                  |jQueryValamis = null; 
-                  |window.location.replace("$url"); 
-                  |</script>"""
+                 |jQueryValamis = null; 
+                 |window.location.replace("$url"); 
+                 |</script>"""
                 .stripMargin
             )
           }
@@ -57,6 +58,7 @@ abstract class OAuthPortlet extends GenericPortlet with Injectable {
       super.doDispatch(request, response)
     } catch {
       case e: NoSuchElementException =>
+        e.printStackTrace()
         response.getWriter.println(s"<h2>No such element found: ${e.getMessage}</h2>")
 
       case e: OAuthException =>
@@ -118,12 +120,13 @@ abstract class OAuthPortlet extends GenericPortlet with Injectable {
 
     val themeDisplay = LiferayHelpers.getThemeDisplay(request)
 
-    val url = themeDisplay.getPortalURL+themeDisplay.getURLCurrent split '?' take 1 head
+    val url = themeDisplay.getPortalURL + themeDisplay.getURLCurrent split '?' take 1 head
     val names = httpRequest.getParameterNames.asScala
 
     "%s?%s".format(url, names.filter(n => n != OAuth.OAUTH_TOKEN && n != OAuth.OAUTH_VERIFIER)
-      .map(n => (n.toString, httpRequest.getParameter(n.toString))).foldLeft("") {(s: String, k: (String, String)) =>
-       s + k._1 + "=" + URLEncoder.encode(k._2, "UTF-8") + "&" }).dropRight(1)
+      .map(n => (n.toString, httpRequest.getParameter(n.toString))).foldLeft("") { (s: String, k: (String, String)) =>
+      s + k._1 + "=" + URLEncoder.encode(k._2, "UTF-8") + "&"
+    }).dropRight(1)
   }
 
   private def getURLFromRequest(request: HttpServletRequest, themeDisplay: LThemeDisplay): String = {
@@ -131,12 +134,13 @@ abstract class OAuthPortlet extends GenericPortlet with Injectable {
     val url = themeDisplay.getPortalURL + themeDisplay.getURLCurrent split '?' take 1 head
 
     "%s?%s".format(url, request.getParameterNames.asScala
-      .map(n => (n.toString, request.getParameter(n.toString))).foldLeft("") {(s: String, k: (String, String)) =>
-      s + k._1 + "=" + URLEncoder.encode(k._2, "UTF-8") + "&" }).dropRight(1)
+      .map(n => (n.toString, request.getParameter(n.toString))).foldLeft("") { (s: String, k: (String, String)) =>
+      s + k._1 + "=" + URLEncoder.encode(k._2, "UTF-8") + "&"
+    }).dropRight(1)
   }
 
-  def getLrsEndpointInfo: EndpointInfo = {
-    authCredentials.get match {
+  def getLrsEndpointInfo(r: RenderRequest): EndpointInfo = {
+    authCredentials.get(r) match {
       case Some(e) => e
       case _ => throw new NoSuchElementException("Endpoint Data")
     }

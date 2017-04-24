@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <fo:layout-master-set>
+    <fo:simple-page-master master-name="content"
+        page-height="210mm" page-width="297mm">
+      <fo:region-body/>
+    </fo:simple-page-master>
+  </fo:layout-master-set>
+  <fo:page-sequence master-reference="content">
+    <fo:flow flow-name="xsl-region-body">
+      {{^isOpenBadges}}
+      <fo:table table-layout="fixed" width="100%"  height="100%" background-image="certificate/background.png"
+      background-repeat="no-repeat">
+      {{/isOpenBadges}}
+      {{#isOpenBadges}}
+            <fo:table table-layout="fixed" width="100%"  height="100%" background-image="certificate/backgroundOB.png"
+            background-repeat="no-repeat">
+       {{/isOpenBadges}}
+        <fo:table-column column-width="proportional-column-width(1)"/>
+        <fo:table-body>
+          <fo:table-row height="210mm">
+            <fo:table-cell display-align="before" padding-top="10mm">
+
+              <fo:block-container width="237mm" margin-top="40mm" margin-left="30mm" margin-right="30mm">
+                <fo:block font="54px TimesNewRomanPS-BoldMT" color="#2C2C2C" text-align="center" font-weight="bold">
+                    CERTIFICATE
+                </fo:block>
+                <fo:block font="18px sans-serif" color="#b9b9b9" text-align="center" space-before="10mm">
+                   This certifies that
+
+                 </fo:block>
+		        <fo:block font="26px sans-serif" color="#2c2c2c" text-align="center" space-before="10mm" font-weight="bold">
+	                {{username}}
+                </fo:block>
+                <fo:block text-align="center" space-after="2mm">
+                      <fo:leader color="#2c2c2c" leader-pattern="rule" rule-thickness="2px" leader-length="130mm" text-align="center"/>
+                    </fo:block>
+                <fo:block font="18px sans-serif" color="#2c2c2c" text-align="center" margin-top="2mm" >
+                                     <fo:inline>achieved</fo:inline>
+                                     <fo:inline font-weight="bold"> {{certificateTitle}}</fo:inline>
+                 </fo:block>
+              </fo:block-container>
+
+		    <fo:block-container width="237mm" position="absolute" left="30mm" top="180mm">
+		    {{#isOpenBadges}}
+		        <fo:block font="11px sans-serif" color="#2c2c2c" text-align="center" margin-top="2mm" >
+                      OPENBADGES
+                </fo:block>
+             {{/isOpenBadges}}
+		     {{^isOpenBadges}}
+		                <fo:block font="11px sans-serif" color="#2c2c2c" text-align="center" margin-top="2mm" >
+                              <fo:inline font-weight="bold">Issue on </fo:inline> {{achievementDate}}
+                       </fo:block>
+
+                        <fo:block font="11px sans-serif" color="#2c2c2c" text-align="center" margin-top="2mm" >
+                                              <fo:inline font-weight="bold">Valid throught</fo:inline> {{expirationDate}}
+                        </fo:block>
+               {{/isOpenBadges}}
+		      </fo:block-container>
+            </fo:table-cell>
+          </fo:table-row>
+        </fo:table-body>
+      </fo:table>
+    </fo:flow>
+  </fo:page-sequence>
+</fo:root>

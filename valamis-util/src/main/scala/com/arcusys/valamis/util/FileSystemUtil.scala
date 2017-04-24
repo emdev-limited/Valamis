@@ -3,6 +3,7 @@ package com.arcusys.valamis.util
 import java.io.{File, FileInputStream, FileOutputStream, InputStream}
 import java.security.SecureRandom
 import javax.activation.MimetypesFileTypeMap
+import org.apache.commons.io.FileCleaningTracker
 
 object FileSystemUtil {
 
@@ -10,6 +11,14 @@ object FileSystemUtil {
   valamisTempDirectory.mkdirs()
 
   private val random = new SecureRandom
+
+  /**
+    * FileCleaningTracker starts daemon thread to check files for cleaning.
+    * This thread should be stopped when the application/portlet is unloaded.
+    * Now the #ContextListener called #stopCleaninTrack to stop thread
+    * on contextDestroyed event.
+    */
+  private var fileCleaner = new FileCleaningTracker
 
   private def getRandomName: String = {
     val n = random.nextLong
@@ -85,5 +94,26 @@ object FileSystemUtil {
   def getMimeType(fileUrl: String) = {
     val file = new File(fileUrl)
     new MimetypesFileTypeMap().getContentType(file)
+  }
+
+  /**
+    * Sets file that will be removed after marker will be collected by GC.
+    * If this method was used then #stopDeleteLaterTracking should be called
+    * when deleting tracking is no longer needed
+    * @param file to track.
+    * @param marker is an object that notifies that file should be removed.
+    */
+  def deleteLater(file : File, marker: AnyRef): Unit = {
+    fileCleaner.track(file, marker)
+  }
+
+  /**
+    * Sets flag to exit for thread.
+    * Daemon thread stops working after removing files.
+    * This method should be called on unload stage
+    * or when the cleaning tracking is no longer needed.
+    */
+  def stopDeleteLaterTracking(): Unit = {
+    fileCleaner.exitWhenFinished()
   }
 }

@@ -7,6 +7,8 @@ case class UserFilter(companyId: Option[Long] = None,
                       certificateId: Option[Long] = None,
                       groupId: Option[Long] = None,
                       organizationId: Option[Long] = None,
+                      userIds: Seq[Long] = Seq(),
+                      withUserIdFilter: Boolean = false,
                       isUserJoined: Boolean = true, // take users joined / not-joined to the certificate
                       sortBy: Option[UserSort] = None)
 

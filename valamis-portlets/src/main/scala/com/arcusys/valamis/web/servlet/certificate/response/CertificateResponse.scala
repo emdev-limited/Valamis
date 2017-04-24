@@ -10,7 +10,7 @@ case class CertificateResponse(id: Long,
                                shortDescription: String,
                                description: String,
                                logo: String,
-                               isPublished: Boolean,
+                               isActive: Boolean,
                                periodType: PeriodTypes.PeriodType,
                                periodValue: Int,
                                createdAt: DateTime,
@@ -24,6 +24,6 @@ case class CertificateResponse(id: Long,
                                scope: Option[CourseResponse],
                                isJoint: Option[Boolean] = None,
                                userStatus: Option[String] = None,
-                               goalGroup: Seq[GoalGroupResponse]) extends CertificateResponseContract {
+                               goalGroups: Seq[GoalGroupResponse]) extends CertificateResponseContract {
   def expirationDate = PeriodTypes.getEndDate(periodType, periodValue, createdAt)
 }

@@ -7,7 +7,7 @@ import com.arcusys.learn.liferay.constants.FieldHelper
 import com.arcusys.learn.liferay.model.ValamisBaseIndexer
 import com.arcusys.learn.liferay.services.AssetEntryLocalServiceHelper
 import com.arcusys.learn.liferay.util.{GetterUtilHelper, PortletName, SearchEngineUtilHelper}
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lesson.model.Lesson
 import com.arcusys.valamis.lesson.service.LessonService
@@ -40,6 +40,7 @@ class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
 
     for (asset <- AssetEntryLocalServiceHelper.fetchAssetEntry(LessonIndexer.LessonClassName, lessonId))
       deleteDocument(asset.getCompanyId, asset.getPrimaryKey)
+
   }
 
   private def getSearchContentForPackage(lessonId: Long): String = {
@@ -58,7 +59,9 @@ class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
     document.addKeyword(FieldHelper.ENTRY_CLASS_NAME, LessonIndexer.LessonClassName)
     document.addKeyword(FieldHelper.ENTRY_CLASS_PK, lessonId)
     document.addKeyword(FieldHelper.PORTLET_ID, LessonIndexer.PortletId)
+    document.addDate(FieldHelper.MODIFIED_DATE, asset.getModifiedDate)    // Should be set for LR7 (check in OpenSearch while searching).
     document.addKeyword(FieldHelper.GROUP_ID, asset.getGroupId)
+    document.addKeyword(FieldHelper.SCOPE_GROUP_ID, asset.getGroupId)
     document.addKeyword(FieldHelper.CONTENT, getSearchContentForPackage(lessonId))
     document.addText(FieldHelper.DESCRIPTION, lesson.description)
     document.addText(FieldHelper.TITLE, lesson.title)
@@ -111,5 +114,4 @@ class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
       case a: LAssetEntry => a.getClassPK
     }
   }
-
 }

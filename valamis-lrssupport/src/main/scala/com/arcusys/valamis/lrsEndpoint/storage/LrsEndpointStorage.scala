@@ -4,9 +4,9 @@ import com.arcusys.valamis.lrsEndpoint.model.AuthType.AuthType
 import com.arcusys.valamis.lrsEndpoint.model.LrsEndpoint
 
 trait LrsEndpointStorage {
-  def getAll: Seq[LrsEndpoint]
-  def get(auth: AuthType): Option[LrsEndpoint]
-  def deleteAll(): Unit
-  def deleteExternal(): Unit
-  def create(entity: LrsEndpoint): LrsEndpoint
+  def getAll(companyId: Long): Seq[LrsEndpoint]
+  def get(auth: AuthType, companyId: Long): Option[LrsEndpoint]
+  def deleteAll(companyId: Long): Int
+  def deleteExternal(companyId: Long): Int
+  def create(entity: LrsEndpoint, companyId: Long): Unit
 }

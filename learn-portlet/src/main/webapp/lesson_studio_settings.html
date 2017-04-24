@@ -33,7 +33,10 @@
         onRender: function () {
             var me = this;
             var uploader = new FileUploader({
-                endpoint: path.root + path.api.files + '?action=ADD&contentType=import-slide-set&courseId=' + Utils.getCourseId()
+                endpoint: path.root + path.api.files + '?action=ADD&contentType=import-slide-set&courseId=' + Utils.getCourseId(),
+                onFailFunction: function (data) {
+                    toastr.error('{{{failedStatusLabel}}}');
+                }
             });
 
             uploader.on('fileuploaddone', function (data) {

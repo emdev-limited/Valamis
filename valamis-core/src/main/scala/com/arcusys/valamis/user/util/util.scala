@@ -19,7 +19,7 @@ package object util {
     }
 
     def getPublicUrl: String = {
-      Try(if (user.getGroup().getPublicLayoutsPageCount() > 0) "/web/" + user.getScreenName else "").getOrElse("")
+      Try(if (new LGroup(user.getGroup).getPublicLayoutsPageCount > 0) "/web/" + user.getScreenName else "").getOrElse("")
     }
 
     def getOrganizationNames: Set[String] = {

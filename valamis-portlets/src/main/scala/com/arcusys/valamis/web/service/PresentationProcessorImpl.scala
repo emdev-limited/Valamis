@@ -5,15 +5,18 @@ import java.awt.image.BufferedImage
 import java.awt.{Color, RenderingHints}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, InputStream}
 
-import com.arcusys.learn.liferay.util.Base64Helper
-import com.arcusys.valamis.lesson.generator.tincan.file.TinCanRevealJSPackageGenerator
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.learn.liferay.util.{Base64Helper, PortalUtilHelper}
 import com.arcusys.valamis.slide.convert.PresentationProcessor
 import com.arcusys.valamis.util.mustache.Mustache
+import com.arcusys.valamis.util.{FileSystemUtil, ZipBuilder}
+import org.apache.commons.validator.routines.UrlValidator
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.sl.usermodel.Slide
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 
 import scala.collection.JavaConverters._
+import scala.xml.Elem
 
 class PresentationProcessorImpl extends PresentationProcessor {
 
@@ -23,6 +26,8 @@ class PresentationProcessorImpl extends PresentationProcessor {
     new Mustache(scala.io.Source.fromInputStream(getResourceInputStream("tincan/pptx.html")).mkString)
   private lazy val indexTemplate =
     new Mustache(scala.io.Source.fromInputStream(getResourceInputStream("tincan/revealjs.html")).mkString)
+  private lazy val urlValidator = new UrlValidator
+  private lazy val domainValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS)
 
   private def getResourceInputStream(name: String) = Thread.currentThread.getContextClassLoader.getResourceAsStream(name)
 
@@ -101,6 +106,49 @@ class PresentationProcessorImpl extends PresentationProcessor {
 
     val index = new ByteArrayInputStream(indexTemplate.render(Map("sections" -> imageSections, "title" -> name)).getBytes)
 
-    TinCanRevealJSPackageGenerator.composePackage(("index.html" -> index) :: imageSupplementaries, s"http://valamislearning.com/presentation/${name}", name, packageDescription)
+    val url = getCorrectUrl(PortalUtilHelper.getLocalHostUrlForCompany(CompanyHelper.getCompanyId))
+
+
+    composePackage(("index.html" -> index) :: imageSupplementaries,
+      getDefaultManifest(s"$url/presentation/$name", name, packageDescription))
+  }
+
+  private def composePackage(filesToAdd: Seq[(String, InputStream)], manifest: Elem): File = {
+    val zipFile = FileSystemUtil.getTempFile("Package", "zip")
+    val zip = new ZipBuilder(zipFile)
+    zip.addEntry("tincan.xml", manifest.toString())
+    filesToAdd.foreach { case (fileName, is) => zip.addFile(is, "data/" + fileName) }
+    zip.close()
+    zipFile
+  }
+
+  private def getDefaultManifest(rootActivityId: String, title: String, description: String) = {
+    <tincan xmlns="http://projecttincan.com/tincan.xsd">
+      <activities>
+        <activity id={ rootActivityId } type="http://adlnet.gov/expapi/activities/course">
+          <name>
+            { title }
+          </name>
+          <description lang="en-US">
+            { description }
+          </description>
+          <launch lang="en-us">data/index.html</launch>
+        </activity>
+      </activities>
+    </tincan>
+  }
+
+  private def getCorrectUrl(url: String): String = {
+    if (urlValidator.isValid(url)) {
+      url
+    }
+    else {
+      if (domainValidator.isValid(url)) {
+        "http://valamis.arcusys.com"
+      }
+      else {
+        throw new IllegalArgumentException("Incorrect URL")
+      }
+    }
   }
 }

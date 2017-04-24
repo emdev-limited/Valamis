@@ -1,13 +1,12 @@
 package com.arcusys.valamis.slide.storage
 
-import com.arcusys.valamis.slide.model.{SlideElementModel, SlideElementEntity}
+import com.arcusys.valamis.slide.model.SlideElement
 
 trait SlideElementRepository {
-  def getCount: Int
-  def create(slideElementModel: SlideElementModel): SlideElementEntity
-  def getAll: List[SlideElementEntity]
-  def getById(id: Long): Option[SlideElementEntity]
-  def getBySlideId(id: Long): List[SlideElementEntity]
-  def update(slideElementModel: SlideElementModel): SlideElementEntity
+  def create(element: SlideElement): SlideElement
+  def getById(id: Long): Option[SlideElement]
+  def getBySlideId(slideId: Long): Seq[SlideElement]
+  def update(element: SlideElement): SlideElement
   def delete(id: Long)
+  def updateContent(id: Long, content: String): Unit
 }

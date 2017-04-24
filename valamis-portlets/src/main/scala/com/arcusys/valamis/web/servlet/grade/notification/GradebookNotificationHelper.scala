@@ -2,46 +2,105 @@ package com.arcusys.valamis.web.servlet.grade.notification
 
 import javax.servlet.http.HttpServletRequest
 
-import com.arcusys.learn.liferay.util.{PortletName, ServiceContextFactoryHelper, UserNotificationEventLocalServiceHelper}
+import com.arcusys.learn.liferay.services._
+import com.arcusys.learn.liferay.util.{PortalUtilHelper, PortletName, ServiceContextFactoryHelper, UserNotificationEventLocalServiceHelper}
 import com.arcusys.valamis.util.serialization.JsonHelper
 import org.joda.time.DateTime
+import com.arcusys.valamis.course.util.CourseFriendlyUrlExt
+import com.arcusys.valamis.lesson.model.Lesson
+import com.arcusys.valamis.lesson.service.LessonService
+import com.liferay.portal.kernel.log.{Log, LogFactoryUtil}
+import com.liferay.portal.kernel.util.PrefsPropsUtil
 
-object GradebookNotificationHelper {
+abstract class GradebookNotificationHelper{
+
+  def lessonService: LessonService
 
   val NotificationType = PortletName.Gradebook.key
+
+  private val log: Log = LogFactoryUtil.getLog(this.getClass)
 
   def sendTotalGradeNotification (courseId: Long,
                         userId: Long,
                         studentId: Long,
-                        grade: Option[Float],
+                        grade: Float,
                         httpRequest: HttpServletRequest ): Unit = {
 
-    val notification = GradebookNotificationModel (
-      "grade",
-      courseId,
-      userId,
-      grade.map(_*100).map(_.toInt.toString).getOrElse("0") // *100 because grade is sent in range between 0 and 1
-    )
+    try {
+      val course = GroupLocalServiceHelper.getGroup(courseId)
+      val gradePercent = (grade * 100).toInt.toString
+      val context = ServiceContextHelper.getServiceContext
+      val user = UserLocalServiceHelper().getUser(studentId)
+      val company = CompanyLocalServiceHelper.getCompany(course.getCompanyId)
+      if (PrefsPropsUtil.getBoolean(company.getCompanyId, "valamis.grade.lesson.enable")) {
+        EmailNotificationHelper.sendNotification(course.getCompanyId,
+          studentId,
+          "valamisGradeCourseBody",
+          "valamisGradeCourseSubject",
+          Map(
+            "[$COURSE_LINK$]" -> getLink(PortalUtilHelper.getPortalURL(
+              context.getRequest).concat(course.getCourseFriendlyUrl),
+              course.getDescriptiveName),
+            "[$GRADE$]" -> gradePercent,
+            "[$USER_SCREENNAME$]" -> user.getFullName,
+            "[$PORTAL_URL$]" -> company.getVirtualHostname
+          )
+        )
+      }
 
-    sendNotification(userId, studentId, notification, httpRequest)
+      val notification = GradebookNotificationModel(
+        "grade",
+        courseId,
+        userId,
+        (grade * 100).toInt.toString // *100 because grade is sent in range between 0 and 1
+      )
+
+      sendNotification(userId, studentId, notification, httpRequest)
+    } catch {
+      case e: Exception => log.error(e)
+    }
   }
 
   def sendPackageGradeNotification (courseId: Long,
                                     userId: Long,
                                     studentId: Long,
-                                    grade: Option[Float],
-                                    packageTitle: String,
+                                    grade: Float,
+                                    lesson: Lesson,
                                     httpRequest: HttpServletRequest) : Unit = {
 
-    val notification = GradebookNotificationModel (
-      "package_grade",
-      courseId,
-      userId,
-      grade.map(_*100).map(_.toInt.toString).getOrElse("0"), // *100 because grade is sent in range between 0 and 1
-      packageTitle
-    )
+    try {
+      val course = GroupLocalServiceHelper.getGroup(courseId)
+      val gradePercent = (grade * 100).toInt.toString
+      val user = UserLocalServiceHelper().getUser(studentId)
+      val company = CompanyLocalServiceHelper.getCompany(course.getCompanyId)
+      getLink(lessonService.getLessonURL(lesson, company.getCompanyId), lesson.title)
+      if (PrefsPropsUtil.getBoolean(company.getCompanyId, "valamis.grade.lesson.enable")) {
 
-    sendNotification(userId, studentId, notification, httpRequest)
+        EmailNotificationHelper.sendNotification(course.getCompanyId,
+          studentId,
+          "valamisGradeLessonBody",
+          "valamisGradeLessonSubject",
+          Map(
+            "[$LESSON_LINK$]" -> getLink(lessonService.getLessonURL(lesson,
+              company.getCompanyId), lesson.title),
+            "[$GRADE$]" -> gradePercent,
+            "[$USER_SCREENNAME$]" -> user.getFullName,
+            "[$PORTAL_URL$]" -> company.getVirtualHostname
+          )
+        )
+      }
+      val notification = GradebookNotificationModel(
+        "package_grade",
+        courseId,
+        userId,
+        gradePercent, // *100 because grade is sent in range between 0 and 1
+        lesson.title
+      )
+
+      sendNotification(userId, studentId, notification, httpRequest)
+    } catch {
+      case e: Exception => log.error(e)
+    }
   }
 
   def sendStatementCommentNotification (courseId: Long,
@@ -78,4 +137,6 @@ object GradebookNotificationHelper {
       )
     }
   }
+
+  private def getLink(link: String, name: String): String = s"""<a href="$link">$name</a>"""
 }

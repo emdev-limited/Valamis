@@ -1,7 +1,7 @@
 package com.arcusys.valamis.certificate.service
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.valamis.certificate.model.CertificateState
+import com.arcusys.valamis.certificate.model.{CertificateState, CertificateUserStatus}
 import com.arcusys.valamis.member.model.{Member, MemberTypes}
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
 
@@ -21,7 +21,7 @@ trait CertificateMemberService {
                      nameFilter: Option[String],
                      ascending: Boolean,
                      skipTake: Option[SkipTake],
-                     organizationId: Option[Long]): RangeResult[(LUser, CertificateState)]
+                     organizationId: Option[Long]):  RangeResult[CertificateUserStatus]
 
   def getAvailableMembers(certificateId: Long,
                           viewerType: MemberTypes.Value,

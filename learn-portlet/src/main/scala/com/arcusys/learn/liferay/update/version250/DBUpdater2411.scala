@@ -18,7 +18,7 @@ class DBUpdater2411 extends LUpgradeProcess with Injectable with SlideTableCompo
   override def getThreshold = 2411
 
   override def doUpgrade(): Unit = {
-      dbInfo.databaseDef.withSession { implicit session =>
+      dbInfo.databaseDef.withTransaction { implicit session =>
         val template = new SlideSet(None, "", "", 0L, None)
         val hasTemplate = slideSets.filter { e =>
           e.title === template.title &&

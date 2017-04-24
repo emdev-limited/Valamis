@@ -2,6 +2,12 @@ package com.arcusys.valamis.model
 
 import org.joda.time.DateTime
 
+case class Period(periodType: PeriodTypes.Value, value: Int)
+
+object Period{
+  def unlimited: Period = Period(PeriodTypes.UNLIMITED, 0)
+}
+
 object PeriodTypes extends Enumeration {
   type PeriodType = Value
 

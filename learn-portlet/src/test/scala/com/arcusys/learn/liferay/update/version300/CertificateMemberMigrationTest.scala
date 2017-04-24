@@ -1,7 +1,5 @@
 package com.arcusys.learn.liferay.update.version300
 
-import java.sql.Connection
-
 import com.arcusys.learn.liferay.update.version240.certificate.CertificateTableComponent
 import com.arcusys.learn.liferay.update.version300.certificate.{CertificateMemberTableComponent, CertificateStateTableComponent}
 import com.arcusys.learn.liferay.update.version300.migrations.CertificateMemberMigration
@@ -9,38 +7,33 @@ import com.arcusys.valamis.certificate.model.CertificateStatuses
 import com.arcusys.valamis.member.model.MemberTypes
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcProfile}
+import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.JdbcBackend
 
-class CertificateMemberMigrationTest (val driver: JdbcProfile)
+class CertificateMemberMigrationTest
   extends FunSuite
     with BeforeAndAfter
     with SlickProfile
-    with CertificateMemberTableComponent {
-
-  def this() {
-    this(H2Driver)
-  }
+    with CertificateMemberTableComponent
+    with SlickDbTestBase {
 
   import driver.simple._
 
-  val db = Database.forURL("jdbc:h2:mem:certificatemember", driver = "org.h2.Driver")
-  var connection: Connection = _
-
   before {
-    connection = db.source.createConnection()
+    createDB()
     certificateTable.createSchema()
     table.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val certificateTable = new CertificateTableComponent with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = CertificateMemberMigrationTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -49,7 +42,7 @@ class CertificateMemberMigrationTest (val driver: JdbcProfile)
   }
 
   val table = new CertificateStateTableComponent with SlickProfile {
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = CertificateMemberMigrationTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._

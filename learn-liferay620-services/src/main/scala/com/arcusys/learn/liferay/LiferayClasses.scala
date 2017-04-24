@@ -2,6 +2,7 @@ package com.arcusys.learn.liferay
 
 import java.util.ResourceBundle
 
+import com.liferay.calendar.model.CalendarBooking
 import com.liferay.portal.kernel.bean.BeanLocator
 import com.liferay.portal.kernel.dao.orm.DynamicQuery
 import com.liferay.portal.kernel.portlet.{LiferayPortletRequest, LiferayPortletResponse, LiferayPortletSession}
@@ -18,6 +19,7 @@ import com.liferay.portal.kernel.events.SimpleAction
 import com.liferay.portal.kernel.mail.MailMessage
 import com.liferay.portal.kernel.messaging.{Message, MessageListener}
 import com.liferay.portal.kernel.notifications.BaseUserNotificationHandler
+import com.liferay.portal.security.auth.PrincipalException
 import com.liferay.portal.util.PortletKeys
 import com.liferay.portlet.asset.model._
 import com.liferay.portlet.asset.{NoSuchEntryException, NoSuchVocabularyException}
@@ -25,9 +27,11 @@ import com.liferay.portlet.blogs.model.BlogsEntry
 import com.liferay.portlet.bookmarks.model.BookmarksEntry
 import com.liferay.portlet.documentlibrary.model.DLFileEntry
 import com.liferay.portlet.journal.model.JournalArticle
-import com.liferay.portlet.ratings.model.RatingsEntry
+import com.liferay.portlet.messageboards.model.MBMessage
+import com.liferay.portlet.ratings.model.{RatingsEntry, RatingsStats}
 import com.liferay.portlet.social.model.{SocialActivity, SocialActivityFeedEntry}
 import com.liferay.portlet.trash.DuplicateEntryException
+import com.liferay.portlet.wiki.model.WikiPage
 
 object LiferayClasses {
   type LAssetEntry = AssetEntry
@@ -44,11 +48,13 @@ object LiferayClasses {
   type LDocument = Document
   type LDocumentImpl = DocumentImpl
   type LDynamicQuery = DynamicQuery
-  type LGroup = Group
+  type LGroup = com.arcusys.learn.liferay.model.LGroup
+  type LAssetVocabulary = AssetVocabulary
   type LHits = Hits
   type LHitsOpenSearchImpl = HitsOpenSearchImpl
   type LJournalArticle = JournalArticle
   type LLayout = Layout
+  type LLayoutSetPrototype = LayoutSetPrototype
   type LLayoutTypePortlet = LayoutTypePortlet
   type LLiferayPortletRequest = LiferayPortletRequest
   type LLiferayPortletResponse = LiferayPortletResponse
@@ -61,15 +67,14 @@ object LiferayClasses {
   type LSimpleAction = SimpleAction
   type LSummary = Summary
   type LThemeDisplay = ThemeDisplay
+  type LTheme = Theme
   type LUnicodeProperties = UnicodeProperties
   type LUpgradeProcess = UpgradeProcess
   type LUser = User
-  type LDLFileEntry = DLFileEntry
   type LRatingsEntry = RatingsEntry
+  type LRatingsStats = RatingsStats
   type LAssetCategory = AssetCategory
   type LOrganization = Organization
-  type LBookmarksEntry = BookmarksEntry
-  type LBlogsEntry = BlogsEntry
   type LAddress = Address
   type LCompany = Company
   type LMailMessage = MailMessage
@@ -80,6 +85,14 @@ object LiferayClasses {
   type LMessage = Message
   type LMessageListener = MessageListener
   type LRole = Role
+
+  //Liferay Activities
+  type LBlogsEntry = BlogsEntry
+  type LDLFileEntry = DLFileEntry
+  type LWikiPage = WikiPage
+  type LMBMessage = MBMessage
+  type LCalendarBooking = CalendarBooking
+  type LBookmarksEntry = BookmarksEntry
 
 
   // Exceptions
@@ -97,6 +110,7 @@ object LiferayClasses {
   type LGroupNameException = GroupNameException
   type LGroupFriendlyURLException = GroupFriendlyURLException
   type LNoSuchResourcePermissionException = NoSuchResourcePermissionException
+  type LMustBeAuthenticatedException = PrincipalException
 
   /// mock impl, UTF8Control not implemented in LR620
   type LUTF8Control = ResourceBundle.Control

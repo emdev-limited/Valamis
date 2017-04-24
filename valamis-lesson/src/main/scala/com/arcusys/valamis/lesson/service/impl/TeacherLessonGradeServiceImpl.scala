@@ -1,8 +1,8 @@
 package com.arcusys.valamis.lesson.service.impl
 
-import com.arcusys.valamis.course.CourseService
-import com.arcusys.valamis.lesson.model.{LessonGrade, UserLessonResult}
+import com.arcusys.valamis.lesson.model.LessonGrade
 import com.arcusys.valamis.lesson.service.{LessonService, TeacherLessonGradeService}
+import com.arcusys.valamis.lesson.storage.query.LessonGradesQueries
 import com.arcusys.valamis.lesson.storage.{LessonGradeTableComponent, LessonTableComponent}
 import com.arcusys.valamis.lrs.service.LrsClientManager
 import com.arcusys.valamis.persistence.common.SlickProfile
@@ -18,12 +18,12 @@ abstract class TeacherLessonGradeServiceImpl(val db: JdbcBackend#DatabaseDef, va
   extends TeacherLessonGradeService
     with LessonGradeTableComponent
     with SlickProfile
-    with LessonTableComponent {
+    with LessonTableComponent
+    with LessonGradesQueries {
 
   import driver.simple._
 
   def lrsClient: LrsClientManager
-  def courseService: CourseService
   def lessonService: LessonService
 
   def get(userId: Long, lessonId: Long): Option[LessonGrade] = {
@@ -55,18 +55,31 @@ abstract class TeacherLessonGradeServiceImpl(val db: JdbcBackend#DatabaseDef, va
     }
   }
 
-  def set(userId: Long, lessonId: Long, grade: Option[Float], comment: Option[String]): Unit = {
+  def set(userId: Long, lessonId: Long, grade: Float, comment: Option[String]): Unit = {
 
     db.withTransaction { implicit s =>
       val updatedCount = lessonGrades.filter(x => x.lessonId === lessonId && x.userId === userId)
         .map(x => (x.grade, x.comment))
-        .update((grade, comment))
+        .update((Some(grade), comment))
 
       if (updatedCount == 0) {
-        lessonGrades.insert(new LessonGrade(lessonId, userId, grade, DateTime.now, comment))
+        lessonGrades.insert(new LessonGrade(lessonId, userId, Some(grade), DateTime.now, comment))
       }
     }
-    onLessonGraded(userId, lessonId, grade)
+    onLessonGraded(userId, lessonId, Some(grade))
+  }
+
+  def setComment(userId: Long, lessonId: Long, comment: String): Unit = {
+
+    db.withTransaction { implicit s =>
+      val updatedCount = lessonGrades.filter(x => x.lessonId === lessonId && x.userId === userId)
+        .map(x => x.comment)
+        .update(Some(comment))
+
+      if (updatedCount == 0) {
+        lessonGrades.insert(new LessonGrade(lessonId, userId, None, DateTime.now, Some(comment)))
+      }
+    }
   }
 
   def get(userIds: Seq[Long], lessonIds: Seq[Long]): Seq[LessonGrade] = {
@@ -77,7 +90,7 @@ abstract class TeacherLessonGradeServiceImpl(val db: JdbcBackend#DatabaseDef, va
       db.withSession { implicit s =>
         lessonGrades
           .filter(_.lessonId inSet lessonIds)
-          .filter(_.userId inSet userIds)
+          .filterByUsersIds(userIds)
           .list
       }
     }
@@ -91,7 +104,7 @@ abstract class TeacherLessonGradeServiceImpl(val db: JdbcBackend#DatabaseDef, va
       db.withSession { implicit s =>
         lessonGrades
           .filter(_.lessonId === lessonId)
-          .filter(_.userId inSet userIds)
+          .filterByUsersIds(userIds)
           .list
       }
     }

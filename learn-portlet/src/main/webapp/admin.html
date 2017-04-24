@@ -27,7 +27,6 @@
         }
 
         function initAdminView() {
-
             tincanLrsTypeChanged();
             updateTabs()
         }
@@ -97,7 +96,7 @@
                 passwordValue = jQueryValamis('#tincanLrsOAuthCredentialsPassword').val();
             }
 
-            window.LearnAjax.post(path.root + path.api.administrering + 'TincanLrsSettings',
+            window.LearnAjax.post(path.root + path.api.administering + 'settings/lrs',
                     {
                         'isExternalLrs': jQueryValamis('#lrsExternal').is(':checked'),
                         'endpoint': jQueryValamis('#tincanEndpoint').val(),
@@ -119,38 +118,24 @@
                     });
         }
 
-        function sendEmailChanged() {
-            window.LearnAjax.post(path.root + path.api.administrering,
-                    {
-                        'courseId': Utils.getCourseId(),
-                        'action': 'UPDATEEMAILSETTINGS',
-                        'sendMessages': jQueryValamis('#sendEmail').is(':checked')
-                    }).done(function () {
-                        toastr.success('{{emailSettingsCompleteLabel}}');
-                    }).fail(function () {
-                        toastr.error('{{overlayFailedMessageLabel}}');
-                    });
-
-        }
 
         function saveIssuerSettings() {
             if (validateURL(jQueryValamis('#issuerUrl').val())) {
 
-                window.LearnAjax.post(path.root + path.api.administrering,
-                        {
-                            'courseId': Utils.getCourseId(),
-                            'action': 'UPDATEISSUERSETTINGS',
-                            'issuerName': jQueryValamis('#issuerName').val(),
-                            'issuerUrl': jQueryValamis('#issuerUrl').val(),
-                            'issuerEmail': jQueryValamis('#issuerEmail').val()
-                        },
-                        jQueryValamis.proxy(function () {
-                        }, this)
+                window.LearnAjax.post(path.root + path.api.administering + 'settings/issuer',
+                    {
+                        'courseId': Utils.getCourseId(),
+                        'issuerName': jQueryValamis('#issuerName').val(),
+                        'issuerUrl': jQueryValamis('#issuerUrl').val(),
+                        'issuerEmail': jQueryValamis('#issuerEmail').val()
+                    },
+                    jQueryValamis.proxy(function () {
+                    }, this)
                 ).done(function () {
-                            toastr.success('{{overlayCompleteMessageLabel}}');
-                        }).fail(function () {
-                            toastr.error('{{overlayFailedMessageLabel}}');
-                        });
+                    toastr.success('{{overlayCompleteMessageLabel}}');
+                }).fail(function () {
+                    toastr.error('{{overlayFailedMessageLabel}}');
+                });
             }
             else {
                 jQueryValamis('#issuerUrlError').show();
@@ -160,9 +145,8 @@
         function saveGoogleApiSettings() {
             if(validateGoogleClientId() && validateGoogleAppId()) {
                 jQueryValamis('#googleClientIdError,#googleAppIdError').hide();
-                window.LearnAjax.post(path.root + path.api.administrering, {
+                window.LearnAjax.post(path.root + path.api.administering + 'settings/google-api', {
                         'courseId': Utils.getCourseId(),
-                        'action': 'UPDATEGOOGLEAPISETTINGS',
                         'googleApiKey': jQueryValamis('#googleApiKey').val(),
                         'googleAppId': jQueryValamis('#googleAppId').val(),
                         'googleClientId': jQueryValamis('#googleClientId').val()
@@ -178,6 +162,23 @@
                 if(!validateGoogleAppId()) jQueryValamis('#googleAppIdError').show();
             }
         }
+
+        function saveLtiSettings() {
+            window.LearnAjax.post(path.root + path.api.administering + 'settings/lti', {
+                        'courseId': Utils.getCourseId(),
+                        'ltiVersion': jQueryValamis('#ltiVersion').val(),
+                        'ltiMessageType': jQueryValamis('#ltiMessageType').val(),
+                        'ltiLaunchPresentationReturnUrl': jQueryValamis('#ltiLaunchPresentationReturnUrl').val(),
+                        'ltiOauthVersion': jQueryValamis('#ltiOauthVersion').val(),
+                        'ltiOauthSignatureMethod': jQueryValamis('#ltiOauthSignatureMethod').val()
+                    }, jQueryValamis.proxy(function () {}, this)
+            ).done(function () {
+                toastr.success('{{overlayCompleteMessageLabel}}');
+            }).fail(function () {
+                toastr.error('{{overlayFailedMessageLabel}}');
+            });
+        }
+
 
         function validateURL(textval) {
             var urlregex = new RegExp(
@@ -210,9 +211,11 @@
             else jQueryValamis('#googleAppIdError').show();
         }
 
+
         var updateTabs = function() {
-                jQueryValamis('.nav-tabs > li').show();
+            jQueryValamis('.nav-tabs > li').show();
         };
+
 
     </script>
 
@@ -222,61 +225,13 @@
 
     <div id="adminTabs" class="val-tabs">
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#badgesTabMenu" data-toggle="tab">{{openBadgesTooltipLabel}}</a></li>
-            <li><a href="#tincanTabMenu" data-toggle="tab">{{tincanTooltipLabel}}</a></li>
+            <li class="active"><a href="#generalTabMenu" data-toggle="tab">{{generalTooltipLabel}}</a></li>
             <li><a href="#googleAPITabMenu" data-toggle="tab">{{googleAPITooltipLabel}}</a></li>
-            <li><a href="#settingsTabMenu" data-toggle="tab">{{optionalTooltipLabel}}</a></li>
+            <li><a href="#LtiSettingsTabMenu" data-toggle="tab">{{ltiSettingsTooltipLabel}}</a></li>
+            <li><a href="#badgesTabMenu" data-toggle="tab">{{openBadgesTooltipLabel}}</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane active" id="badgesTabMenu">
-                <div class="filters-row">
-                    <h4 id="issuerSettingsTitle">{{issuerSettingsHeaderLabel}}</h4>
-                </div>
-
-                <div class="div-table val-info-table settings-table">
-                    <div class="div-row">
-                        <div class="div-col name-col">
-                            <label for="issuerName">{{issuerNameLabel}}</label>
-                        </div>
-                        <div class="div-col content-col">
-                            <input class="fixed-width" type="text" id="issuerName" value="{{issuerName}}"/>
-                        </div>
-                    </div>
-
-                    <div class="div-row">
-                        <div class="div-col name-col">
-                            <label for="issuerUrl">{{issuerUrlLabel}}</label>
-                        </div>
-                        <div class="div-col content-col">
-                            <input class="fixed-width" type="text" id="issuerUrl" value="{{{issuerURL}}}"
-                                   onblur="onUrlChanged()"/>
-                            <label id="issuerUrlError" style="display: none; color: red;">{{invalidUrl}}</label>
-                        </div>
-                    </div>
-
-                    <div class="div-row">
-                        <div class="div-col name-col">
-                            <label for="issuerEmail">{{issuerEmailLabel}}</label>
-                        </div>
-                        <div class="div-col content-col">
-                            <input class="fixed-width" type="text" id="issuerEmail" value="{{issuerEmail}}"/>
-                        </div>
-                    </div>
-
-                    <div class="div-row">
-                        <div class="div-col name-col">
-                            <button onclick="saveIssuerSettings()" class="button big primary">
-                                {{adminDialogSaveButtonLabel}}
-                            </button>
-                        </div>
-                        <div class="div-col content-col">
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="tab-pane" id="tincanTabMenu">
+            <div class="tab-pane active" id="generalTabMenu">
                 <div class="filters-row">
                     <h4 class="valamis">{{adminSettingsTincanLrsEndpointSectionLabel}}</h4>
                 </div>
@@ -390,7 +345,6 @@
                     </div>
                 </form>
             </div>
-
             <div class="tab-pane" id="googleAPITabMenu">
                 <div class="filters-row">
                     <h4 id="googleAPISettingsTitle">{{googleApiSettingsHeaderLabel}}</h4>
@@ -403,7 +357,7 @@
                         </div>
                         <div class="div-col content-col">
                             <input class="fixed-width" type="text" id="googleClientId" value="{{{googleClientId}}}"
-                                onblur="onGoogleClientIdChanged()"/>
+                                   onblur="onGoogleClientIdChanged()"/>
                             <label id="googleClientIdNote">{{googleClientIdNote}}</label>
                             <label id="googleClientIdError" style="display: none; color: red;">{{invalidGoogleClientId}}</label>
                         </div>
@@ -415,7 +369,7 @@
                         </div>
                         <div class="div-col content-col">
                             <input class="fixed-width" type="text" id="googleAppId" value="{{googleAppId}}"
-                                onblur="onGoogleAppIdChanged()"/>
+                                   onblur="onGoogleAppIdChanged()"/>
                             <label id="googleAppIdNote">{{googleAppIdNote}}</label>
                             <label id="googleAppIdError" style="display: none; color: red;">{{invalidGoogleAppId}}</label>
                         </div>
@@ -444,21 +398,118 @@
                 </div>
             </div>
 
-            <div class="tab-pane" id="settingsTabMenu">
+            <div class="tab-pane" id="LtiSettingsTabMenu">
+                <div class="filters-row">
+                    <h4 id="LtiSettingsTitle">{{ltiSettingsHeaderLabel}}</h4>
+                </div>
+
                 <div class="div-table val-info-table settings-table">
                     <div class="div-row">
                         <div class="div-col name-col">
-                            <label for="sendEmail">{{sendEmailLabel}}</label>
+                            <label for="ltiVersion">{{ltiVersionLabel}}</label>
                         </div>
                         <div class="div-col content-col">
-                            <input id="sendEmail" type="checkbox" value="None" class="val-checkbox"
-                                   onchange="sendEmailChanged()" {{#sendMessages}}checked{{/sendMessages}}/>
-                            <label class="checkbox-label" for="sendEmail"></label>
+                            <input class="fixed-width" type="text" id="ltiVersion" value="{{{ltiVersion}}}"/>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="ltiMessageType">{{ltiMessageTypeLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="ltiMessageType" value="{{{ltiMessageType}}}"/>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="ltiLaunchPresentationReturnUrl">{{ltiLaunchPresentationReturnUrlLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="ltiLaunchPresentationReturnUrl" value="{{ltiLaunchPresentationReturnUrl}}"/>
+                            <label id="ltiLaunchPresentationReturnUrlNote">{{ltiLaunchPresentationReturnUrlNote}}</label>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="ltiOauthVersion">{{ltiOauthVersionLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="ltiOauthVersion" value="{{{ltiOauthVersion}}}"/>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="ltiOauthSignatureMethod">{{ltiOauthSignatureMethodLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="ltiOauthSignatureMethod" value="{{{ltiOauthSignatureMethod}}}"/>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <button onclick="saveLtiSettings()" class="button big primary">
+                                {{adminDialogSaveButtonLabel}}
+                            </button>
+                        </div>
+                        <div class="div-col content-col">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="tab-pane" id="badgesTabMenu">
+                <div class="filters-row">
+                    <h4 id="issuerSettingsTitle">{{issuerSettingsHeaderLabel}}</h4>
+                </div>
+
+                <div class="div-table val-info-table settings-table">
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="issuerName">{{issuerNameLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="issuerName" value="{{issuerName}}"/>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="issuerUrl">{{issuerUrlLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="issuerUrl" value="{{{issuerURL}}}"
+                                   onblur="onUrlChanged()"/>
+                            <label id="issuerUrlError" style="display: none; color: red;">{{invalidUrl}}</label>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <label for="issuerEmail">{{issuerEmailLabel}}</label>
+                        </div>
+                        <div class="div-col content-col">
+                            <input class="fixed-width" type="text" id="issuerEmail" value="{{issuerEmail}}"/>
+                        </div>
+                    </div>
+
+                    <div class="div-row">
+                        <div class="div-col name-col">
+                            <button onclick="saveIssuerSettings()" class="button big primary">
+                                {{adminDialogSaveButtonLabel}}
+                            </button>
+                        </div>
+                        <div class="div-col content-col">
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
             <input type="hidden" id="companyID" value="{{companyID}}">
         </div>

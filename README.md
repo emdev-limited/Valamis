@@ -47,7 +47,7 @@ Go to Settings.scala and change the line #10
 `val liferay = Liferay620`
 
 Run
-`sbt -J-Xss8M -mem 4096 clean package'`
+`sbt -J-Xss8M -mem 4096 clean package`
 
 Deploy to the running Liferay instance
 `sbt deploy`
@@ -59,7 +59,7 @@ Go to Settings.scala and change the line #10
 
 Run
 
-`sbt -J-Xss8M -mem 4096 clean osgiFullPackage'`
+`sbt -J-Xss8M -mem 4096 clean osgiFullPackage`
 
 Deploy the package and all dependencies to the running Liferay instance
 

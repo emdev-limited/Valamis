@@ -23,14 +23,14 @@ The targeted version of SCORM is 2004 4th edition with support of SCORM 1.2.
 All server-side code is written using the Scala programming language for the JVM.
 
 The current implementation is able to display SCORM and Tin Can content with respect towards the different content organizations and the activity structure in each organization.
-Application includes a question editor for creating quizes with different types of questions (single-/multi-choice, matching, short answer, etc.)
+Application includes a Lesson Studio editor for creating lessons with different types of questions (single-/multi-choice, matching, short answer, etc.)
 
-Administrative features let you manage SCORM packages, uploading them in the standard zipped format.
-The user interface is available as JSR-compliant portlets, which may be deployed into Liferay portal. The portlet version has been tested on Liferay 6.1.1 and 6.1.2 and depends on its specific features.
+Administrative features let you manage Tin Can and SCORM packages, uploading them in the standard zipped format.
+The user interface is available as JSR-compliant portlets, which may be deployed into Liferay portal.
 
 The solution uses Liferay database, so no there is need to install an additional database.
 
-If deployed against a portlet container, the end-user features are available via the portlet's standard View mode, while administrative features are available via the Edit mode. There are also separate portlets for question editor, quiz editor and gradebook.
+If deployed against a portlet container, the end-user features are available via the portlet's standard View mode, while administrative features are available via the Edit mode. 
 
 ### NOTE
 Since version 3.4.1, Valamis Community Edition is separated into three packages on GitHub: Valamis LRS (Learning Record Store, https://github.com/arcusys/valamis-lrs),

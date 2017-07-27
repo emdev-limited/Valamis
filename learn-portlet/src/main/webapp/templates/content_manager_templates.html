@@ -71,8 +71,8 @@
         <div class="content-controls clearfix">
             <div class="val-icon-menu js-toggle-sidebar val-icon-with-label"></div>
             <div>
-            <div class="val-search">
-                <input type="text" class="js-filter-by-title js-search" placeholder="{{searchPlaceholderLabel}}">
+            <div class="val-search js-search">
+                <input type="text" class="js-filter-by-title" placeholder="{{searchPlaceholderLabel}}">
             </div>
             </div>
 
@@ -292,9 +292,9 @@
 <script type="text/html" id="contentManagerPreviewLayoutTemplate">
     {{#ContentManager.MODIFY}}
     <div class="preview-controls">
-        <button class="js-edit button medium neutral">Edit</button>
-        <button class="js-clone button medium neutral">Duplicate</button>
-        <button class="js-delete button medium   danger shift-right">Delete</button>
+        <button class="js-edit button medium neutral" title="{{editLabel}}">{{editLabel}}</button>
+        <button class="js-clone button medium neutral" title="{{duplicateLabel}}">{{duplicateLabel}}</button>
+        <button class="js-delete button medium   danger shift-right" title="{{deleteLabel}}">{{deleteLabel}}</button>
     </div>
     {{/ContentManager.MODIFY}}
     <div id="contentPreviewRegion"></div>
@@ -310,7 +310,7 @@
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
 
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -339,7 +339,7 @@
 
     <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
+    <table class="js-answers val-table preview-content-text ellipsis">
     </table>
 
     {{#forceCorrectCount}}
@@ -356,7 +356,7 @@
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
 
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -385,7 +385,7 @@
 
     <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
+    <table class="js-answers val-table preview-content-text ellipsis">
     </table>
 
     {{#isCaseSensitive}}
@@ -404,7 +404,7 @@
 <script type="text/template" id="numericQuestionPreviewTemplate">
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -432,7 +432,7 @@
     </table>
 
     <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
-    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
+    <table class="js-answers val-table preview-content-text ellipsis">
     </table>
 </script>
 
@@ -442,7 +442,7 @@
 <script type="text/template" id="positioningQuestionPreviewTemplate">
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -485,7 +485,7 @@
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
 
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -514,14 +514,14 @@
 
     <h5 class="preview-normal-text preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
+    <table class="js-answers val-table preview-content-text ellipsis">
     </table>
 </script>
 
 <script type="text/template" id="essayQuestionPreviewTemplate">
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -545,7 +545,7 @@
 <script type="text/template" id="plainTextQuestionPreviewTemplate">
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -570,14 +570,14 @@
 <script type="text/template" id="categorizationQuestionPreviewAnswerTemplate">
     <td class="ellipsis">{{{optionKey}}}</td>
     <td>
-        <table class="js-answer-options val-table no-border small list"></table>
+        <table class="js-answer-options preview-content-text val-table"></table>
     </td>
 </script>
 <script type="text/template" id="categorizationQuestionPreviewTemplate">
     <h3>{{title}}</h3>
     <h5 class="preview-normal-text"> {{questionPreviewDetails}} </h5>
 
-    <table class="val-table no-border small list preview-content-text">
+    <table class="val-table preview-content-text">
         <tr>
             <td>{{questionPreviewType}}</td>
             <td class="preview-normal-text">{{type}}</td>
@@ -606,7 +606,7 @@
 
     <h5 class="preview-normal-text  preview-options"> {{questionPreviewOptions}} </h5>
 
-    <table class="js-answers val-table no-border small list preview-content-text ellipsis">
+    <table class="js-answers val-table preview-content-text ellipsis">
     </table>
 </script>
 
@@ -634,8 +634,8 @@
     </div>
 
     <div class="bbm-modal__bottombar clearfix">
-        <button class="button big neutral bbm-button modal-close ">{{buttonCancelSaveTooltipLabel}}</button>
-        <button class="button big primary bbm-button js-submit-button js-saveQuestion">{{overlayQuestionSaveMessageLabel}}</button>
+        <button class="button medium primary js-submit-button js-saveQuestion">{{overlayQuestionSaveMessageLabel}}</button>
+        <button class="button medium simple modal-close ">{{buttonCancelSaveTooltipLabel}}</button>
     </div>
 </script>
 
@@ -692,7 +692,7 @@
     </div>
 
     <div class="div-row bank-answers-dialog">
-        <div class="div-col name-col valamis">Options</div>
+        <div class="div-col name-col valamis">{{questionPreviewOptions}}</div>
         <div class="div-col content-col" id="contentManagerQuestionAnswerOptionsRegion">
         </div>
     </div>
@@ -751,7 +751,7 @@
     </div>
 
     <div class="div-row bank-answers-dialog">
-        <div class="div-col name-col valamis">Options</div>
+        <div class="div-col name-col valamis">{{questionPreviewOptions}}</div>
         <div class="div-col content-col" id="contentManagerQuestionAnswerOptionsRegion">
         </div>
     </div>
@@ -802,7 +802,7 @@
     </div>
 
     <div class="div-row bank-answers-dialog">
-        <div class="div-col name-col valamis">Options</div>
+        <div class="div-col name-col valamis">{{questionPreviewOptions}}</div>
         <div class="div-col content-col" id="contentManagerQuestionAnswerOptionsRegion"></div>
     </div>
 
@@ -851,7 +851,7 @@
     </div>
 
     <div class="div-row bank-answers-dialog">
-        <div class="div-col name-col valamis">Options</div>
+        <div class="div-col name-col valamis">{{questionPreviewOptions}}</div>
         <div class="div-col content-col" id="contentManagerQuestionAnswerOptionsRegion"></div>
     </div>
 
@@ -906,7 +906,7 @@
     </div>
 
     <div class="div-row bank-answers-dialog">
-        <div class="div-col name-col valamis">Options</div>
+        <div class="div-col name-col valamis">{{questionPreviewOptions}}</div>
         <div class="div-col content-col" id="contentManagerQuestionAnswerOptionsRegion"></div>
     </div>
 </script>
@@ -980,7 +980,7 @@
     </div>
 
     <div class="div-row bank-answers-dialog">
-        <div class="div-col name-col valamis">Options</div>
+        <div class="div-col name-col valamis">{{questionPreviewOptions}}</div>
         <div class="div-col content-col" id="contentManagerQuestionAnswerOptionsRegion">
         </div>
     </div>
@@ -1008,8 +1008,8 @@
     </div>
 
     <div class="bbm-modal__bottombar clearfix">
-        <button class="button big neutral bbm-button modal-close ">{{buttonCancelSaveTooltipLabel}}</button>
-        <button class="button big primary bbm-button js-saveContent js-submit-button">{{overlayQuestionSaveMessageLabel}}</button>
+        <button class="button medium primary js-saveContent js-submit-button">{{overlayQuestionSaveMessageLabel}}</button>
+        <button class="button medium simple modal-close">{{buttonCancelSaveTooltipLabel}}</button>
     </div>
 </script>
 
@@ -1024,11 +1024,11 @@
         <input type="checkbox" value="None" id="SCORMAnswerIsCorrect_{{position}}" class="js-answerIsCorrect val-checkbox">
         <label class="checkbox-label" for="SCORMAnswerIsCorrect_{{position}}"></label>
     </td>
-    <td class="text-center">
+    <td class="text-center thin">
         <div class="js-plus-minus js-score"></div>
     </td>
     <td class="narrow-col">
-        <button id="SCORMAnswerRemove"  class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
+        <button id="SCORMAnswerRemove"  class="js-delete button medium danger simple no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
 
@@ -1044,7 +1044,7 @@
         <div class="js-plus-minus js-score"></div>
     </td>
     <td class="narrow-col">
-        <button class="button medium danger no-text js-delete"> <span class="val-icon-trash"></span> Delete </button>
+        <button class="button medium danger simple no-text js-delete"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
 
@@ -1064,7 +1064,7 @@
     </td>
 
     <td class="narrow-col">
-        <button class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
+        <button class="js-delete button medium danger simple no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
 
@@ -1077,7 +1077,7 @@
         <textarea type="text" id="answerText_{{position}}">{{answerText}}</textarea>
     </td>
     <td class="narrow-col">
-        <button class="button medium danger no-text js-delete"> <span class="val-icon-trash"></span> Delete </button>
+        <button class="button medium danger simple no-text js-delete"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
 
@@ -1092,7 +1092,7 @@
         <div class="js-score js-plus-minus"></div>
     </td>
     <td class="narrow-col">
-        <button class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
+        <button class="js-delete button medium danger simple no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
 
@@ -1117,7 +1117,7 @@
             <div style="float: left;" class="answerSectionTitle">{{categorizationMatchingElementsLabel}}</div>
 
         </div>
-        <table class="js-answer-options val-table medium list">
+        <table class="js-answer-options val-table answers-table">
 
         </table>
 
@@ -1126,14 +1126,14 @@
         </button>
     </td>
     <td class="narrow-col">
-        <button class="js-delete button medium danger no-text"> <span class="val-icon-trash"></span> Delete </button>
+        <button class="js-delete button medium danger simple no-text"> <span class="val-icon-trash"></span> Delete </button>
     </td>
 </script>
 
 <!-- AnswerCollections -->
 <!-- Choice Answer Collection  -->
 <script type="text/html" id="choiseAnswerCollectionView">
-    <table class="val-table medium list">
+    <table class="val-table answers-table">
         <thead>
         <tr>
             <th colspan="2">{{optionLabel}}</th>
@@ -1155,7 +1155,7 @@
 
 <!-- Short Answer Collection -->
 <script type="text/html" id="shortAnswerCollectionView">
-    <table class="val-table medium list">
+    <table class="val-table answers-table">
         <thead>
         <tr>
             <th colspan="2">{{optionLabel}}</th>
@@ -1175,7 +1175,7 @@
 
 <!-- Numeric Answer Collection -->
 <script type="text/html" id="numericAnswerCollectionView">
-    <table class="val-table medium list">
+    <table class="val-table answers-table">
         <thead>
         <tr>
             <th></th>
@@ -1197,7 +1197,7 @@
 
 <!-- Positioning Answer Collection -->
 <script type="text/html" id="positionAnswerCollectionView">
-    <table class="val-table medium list">
+    <table class="val-table answers-table">
         <thead>
         <tr>
             <th colspan="3">{{optionLabel}}</th>
@@ -1215,7 +1215,7 @@
 
 <!-- Matching Answer Collection -->
 <script type="text/html" id="matchingAnswerCollectionView">
-    <table class="val-table medium list">
+    <table class="val-table answers-table">
         <thead>
         <tr>
             <th>{{optionLabel}}</th>
@@ -1235,7 +1235,7 @@
 
 <!-- Categorization Answer Collection -->
 <script type="text/html" id="categorizationCollectionView">
-    <table class="val-table medium list">
+    <table class="val-table answers-table">
         <thead>
         <tr>
             <th colspan="2">{{optionLabel}}</th>

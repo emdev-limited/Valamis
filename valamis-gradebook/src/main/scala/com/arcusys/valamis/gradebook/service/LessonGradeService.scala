@@ -30,6 +30,9 @@ trait LessonGradeService {
 
   def getLessonAverageGrades(lesson: Lesson, users: Seq[LUser]): Float
 
+  def getLessonAverageGradesForReport(lesson: Lesson,
+                                      users: Seq[LUser]): Option[Float]
+
   def getLessonGradesByCourse(courseId: Long,
                               lessonId: Long,
                               companyId: Long,

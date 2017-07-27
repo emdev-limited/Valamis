@@ -1,5 +1,7 @@
 package com.arcusys.valamis.lesson.service
 
+import java.util.Locale
+
 import com.arcusys.learn.liferay.LiferayClasses.LUser
 import com.arcusys.valamis.lesson.model.{Lesson, LessonUser, LessonViewer}
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
@@ -25,7 +27,8 @@ trait LessonMembersService {
                      nameFilter: Option[String],
                      ascending: Boolean,
                      skipTake: Option[SkipTake],
-                     organizationId: Option[Long]): RangeResult[User]
+                     organizationId: Option[Long])
+                    (implicit locale: Locale): RangeResult[User]
 
   def getAvailableMembers(lessonId: Long,
                           viewerType: MemberTypes.Value,

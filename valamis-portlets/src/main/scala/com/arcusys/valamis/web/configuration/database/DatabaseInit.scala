@@ -6,6 +6,7 @@ class DatabaseInit(dbInfo: SlickDBInfo) {
   def init(): Unit = {
     new CreateTables(dbInfo).create()
     new CreateTablesNew(dbInfo).create()
+    new CreateTablesLrsSupport(dbInfo.slickDriver, dbInfo.databaseDef).create()
 
     new CreateDefaultDevices(dbInfo.slickDriver, dbInfo.databaseDef).create()
 

@@ -1,12 +1,12 @@
 package com.arcusys.valamis.certificate.service.util
 
-import java.io.{ BufferedReader, InputStreamReader }
+import java.io.{BufferedReader, InputStreamReader}
 import java.util
 
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.{ HttpGet, HttpPost }
-import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.client.methods.{HttpGet, HttpPost}
+import org.apache.http.impl.client.HttpClients
 import org.apache.http.message.BasicNameValuePair
 
 import scala.util.parsing.json.JSON
@@ -23,9 +23,9 @@ object OpenBadgesHelper {
   }
 
   private def getOpenBadgesUserId(email: String): String = {
+    val client = HttpClients.createDefault()
     try {
       val url = openBadgesUrl + "convert/email"
-      val client = new DefaultHttpClient
       val post = new HttpPost(url)
 
       val nameValuePairs = new util.ArrayList[NameValuePair]()
@@ -51,13 +51,15 @@ object OpenBadgesHelper {
         e.printStackTrace()
         null
       }
+    } finally {
+      client.close();
     }
   }
 
   private def getOpenBadgesValamisGroup(userId: String): String = {
+    val client = HttpClients.createDefault()
     try {
       val url = openBadgesUrl + userId + "/groups.json"
-      val client = new DefaultHttpClient
       val request = new HttpGet(url)
       val resp = client.execute(request)
 
@@ -81,13 +83,15 @@ object OpenBadgesHelper {
         e.printStackTrace()
         null
       }
+    } finally {
+      client.close();
     }
   }
 
   private def getOpenBadges(userId: String, groupId: String): List[Map[String, Any]] = {
+    val client = HttpClients.createDefault()
     try {
       val url = openBadgesUrl + userId + "/group/" + groupId + ".json"
-      val client = new DefaultHttpClient
       val request = new HttpGet(url)
       val resp = client.execute(request)
 
@@ -100,7 +104,7 @@ object OpenBadgesHelper {
 
           val badges = m("badges").asInstanceOf[List[Map[String, Any]]]
           return badges.map(i => {
-            val badge = (i("assertion").asInstanceOf[Map[String, Any]])("badge").asInstanceOf[Map[String, Any]]
+            val badge = (i("assertion").asInstanceOf[Map[String, Any]]) ("badge").asInstanceOf[Map[String, Any]]
             Map(
               "title" -> badge("name"),
               "description" -> badge("description"),
@@ -118,6 +122,8 @@ object OpenBadgesHelper {
         e.printStackTrace()
         Nil
       }
+    } finally {
+      client.close();
     }
   }
 }

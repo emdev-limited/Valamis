@@ -1,20 +1,17 @@
+
 package com.arcusys.valamis.web.servlet.transcript
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.certificate.AssignmentSort
-import com.arcusys.valamis.certificate.model.{UserStatuses, AssignmentSortBy}
-import com.arcusys.valamis.certificate.service.{CertificateUserService, AssignmentService}
+import com.arcusys.valamis.certificate.service.{CertificateUserService}
 import com.arcusys.valamis.gradebook.service.LessonGradeService
 import com.arcusys.valamis.lesson.model.LessonSortBy
-import com.arcusys.valamis.model.{RangeResult, Order}
+import com.arcusys.valamis.model.Order
 import com.arcusys.valamis.user.model.UserInfo
-import com.arcusys.valamis.web.configuration.ioc.{TranscriptConfiguration, Configuration}
 import com.arcusys.valamis.web.portlet.base.ViewPermission
-import com.arcusys.valamis.web.servlet.base.{PermissionUtil, BaseJsonApiController}
-import com.arcusys.valamis.web.servlet.course.{CourseResponseWithGrade, CourseConverter}
+import com.arcusys.valamis.web.servlet.base.{BaseJsonApiController, PermissionUtil}
+import com.arcusys.valamis.web.servlet.course.{CourseConverter, CourseResponseWithGrade}
 import com.arcusys.valamis.web.servlet.grade.response.LessonWithGradesResponse
-import org.joda.time.DateTime
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}
 
@@ -22,7 +19,6 @@ class TranscriptServlet extends BaseJsonApiController {
   private lazy val req = TranscriptRequest(this)
 
   private lazy val lessonGradeService = inject[LessonGradeService]
-  private lazy val assignmentService = inject[AssignmentService]
   private lazy val certificateUserService = inject[CertificateUserService]
   private lazy val pdfBuilder = inject[TranscriptPdfBuilder]
   override val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
@@ -34,6 +30,7 @@ class TranscriptServlet extends BaseJsonApiController {
     response.setContentType("application/pdf")
     response.setCharacterEncoding("UTF-8")
   }
+
   before("/transcript/course/:courseId/user/:userId/printTranscriptAll(/)") {
     setResponseForPdf
     response.setHeader("Content-Disposition", "attachment; filename=\"transcript.pdf\"")
@@ -78,28 +75,18 @@ class TranscriptServlet extends BaseJsonApiController {
       }
   }
 
-  get("/transcript/course/:groupId/user/:userId/assignments(/)") {
+  // todo refactor and move to open badges servlet
+  get("/transcript/user/:userId/open-badges(/)") {
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LearningTranscript)
 
-    val userId = req.requestedUserId
-    val sort = AssignmentSort(AssignmentSortBy.apply(params.as[String]("sortBy")), Order(true))
-    val assignments = assignmentService.getUserAssignments(req.requestedUserId, req.groupId, None, Some(sort))
-
-    assignments.records.filter(r => r.users.count(u => u.userInfo.id == userId && u.submission.status == UserStatuses.Completed) > 0)
-  }
-
-  get("/transcript/user/:userId/certificates(/)") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LearningTranscript)
-
-    certificateUserService.getCertificatesByUserWithOpenBadgesAndDates(getCompanyId, req.requestedUserId)
-      .map { case (c, s) => UserStatusResponse(c, s) }
+    certificateUserService.getUserOpenBadges(getCompanyId, req.requestedUserId)
   }
 
   get("/transcript/course/:courseId/user/:userId/printTranscriptAll(/)") {
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LearningTranscript)
     val userId = req.requestedUserId
 
-    val out = pdfBuilder.build(getCompanyId, userId, servletContext)
+    val out = pdfBuilder.build(getCompanyId, userId, servletContext, request.getLocale)
 
     response.setContentLength(out.size())
     response.getOutputStream.write(out.toByteArray)
@@ -113,7 +100,9 @@ class TranscriptServlet extends BaseJsonApiController {
     val out = pdfBuilder.buildCertificate(req.requestedUserId,
       servletContext,
       req.certificateId,
-      getCompanyId)
+      getCompanyId,
+      request.getLocale
+    )
 
 
     response.setContentLength(out.size())

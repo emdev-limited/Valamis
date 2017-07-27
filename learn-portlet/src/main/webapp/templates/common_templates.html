@@ -45,8 +45,8 @@
 <script type="text/html" id="liferayImageGalleryDialogView">
     <div class="val-row filters-row js-gallery-filter-toolbar">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" placeholder="{{searchPlaceholderLabel}}" id="gallerySearch" class="js-search"/>
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}" id="gallerySearch"/>
             </div>
         </div>
         <div class="filter-element paging-showing-label shift-left" id="galeryPagingShowing"></div>
@@ -63,25 +63,24 @@
     </div>
 
     <div id="galleryContainer" class="thumbnail-container clearfix js-gallery-modal-container"></div>
-    <div class="val-paginator text-center" id="galleryPaginator"></div>
+    <div class="val-paginator" id="galleryPaginator"></div>
 </script>
 
 <!-- liferay site select dialog templates -->
 
 <script type="text/html" id="liferaySiteElementView">
-    <td>{{title}}</td>
-    <td class="text-right">
-        <button class="button medium neutral no-text js-toggle-site-button">
-            <span class="val-icon-checkmark"></span> Add
-        </button>
+    <td class="narrow-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
     </td>
+    <td class="title">{{title}}</td>
 </script>
 
 <script type="text/html" id="liferaySiteDialogToolbar">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" id="siteSearch" class="js-site-search js-search" placeholder="{{searchPlaceholderLabel}}" />
+            <div class="val-search js-search">
+                <input type="text" id="siteSearch" class="js-site-search" placeholder="{{searchPlaceholderLabel}}" />
             </div>
         </div>
         <div class="filter-element paging-showing-label shift-left" id="siteListPagingShowing"></div>
@@ -101,16 +100,18 @@
 
     <div id="liferaySiteSelectToolbarRegion"></div>
 
-    <table class="val-table medium list no-out-margin" id="liferaySiteSelectListRegion">
-        <tbody id="siteList" class="js-site-list"></tbody>
-    </table>
+    <div class="val-table-wrapper">
+        <table class="val-table" id="liferaySiteSelectListRegion">
+            <tbody id="siteList" class="js-site-list"></tbody>
+        </table>
+    </div>
 
-    <div class="val-paginator text-center top-shifted" id="siteListPaginator"></div>
+    <div class="val-paginator" id="siteListPaginator"></div>
 
     {{^singleSelect}}
     <div class="bbm-modal__bottombar">
-        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
-        <button class="button big primary js-addCourses">{{addCoursesLabel}}</button>
+        <button class="button medium primary js-addCourses">{{addCoursesLabel}}</button>
+        <button class="button medium simple modal-close">{{cancelLabel}}</button>
     </div>
     {{/singleSelect}}
 </script>
@@ -120,19 +121,19 @@
 <script type="text/template" id="lessonSelectLayoutViewTemplate">
     <div id="lessonsListToolbar"></div>
     <div id="lessonsList"></div>
-    <div id="lessonsListPaginator" class="val-paginator text-center top-shifted"></div>
+    <div id="lessonsListPaginator" class="val-paginator"></div>
 
     <div class="bbm-modal__bottombar">
-        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
-        <button class="button big primary js-submit-button">{{addLessonsLabel}}</button>
+        <button class="button medium primary js-submit-button">{{addLessonsLabel}}</button>
+        <button class="button medium simple modal-close">{{cancelLabel}}</button>
     </div>
 </script>
 
 <script type="text/template" id="lessonSelectToolbarViewTemplate">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}">
             </div>
         </div>
         <div class="filter-element shift-left dropdown js-categories-filter" data-value="">
@@ -161,19 +162,20 @@
 </script>
 
 <script type="text/template" id="lessonSelectListViewTemplate">
-    <label class="valamis-info-label shifted hidden js-no-lessons-label"> {{noAvailableLessonsLabel}}</label>
-    <table class="val-table medium list no-out-margin">
-        <tbody class="js-lessons-list"></tbody>
-    </table>
+    <label class="valamis-info-label no-items hidden js-no-lessons-label"> {{noAvailableLessonsLabel}}</label>
+    <div class="val-table-wrapper">
+        <table class="val-table">
+            <tbody class="js-lessons-list"></tbody>
+        </table>
+    </div>
 </script>
 
 <script type="text/template" id="lessonSelectListItemViewTemplate">
-    <td> {{title}} </td>
-    <td class="text-right">
-        <button class="button medium neutral no-text js-select-lesson">
-            <span class="val-icon-checkmark"></span> Add
-        </button>
+    <td class="narrow-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-lesson"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
     </td>
+    <td class="title"> {{title}} </td>
 </script>
 
 <!-- base layout view -->
@@ -181,12 +183,12 @@
 <script type="text/template" id="valamisBaseLayoutViewTemplate">
     <div id="valamisBaseToolbar"></div>
     <div id="valamisBaseList"></div>
-    <div id="valamisBaseListPaginator" class="val-paginator text-center top-shifted"></div>
+    <div id="valamisBaseListPaginator" class="val-paginator"></div>
 
     {{^hideFooter}}
     <div class="bbm-modal__bottombar">
-        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
-        <button class="button big primary js-submit-button">{{addLabel}}</button>
+        <button class="button medium primary js-submit-button">{{addLabel}}</button>
+        <button class="button medium simple modal-close">{{cancelLabel}}</button>
     </div>
     {{/hideFooter}}
 </script>
@@ -194,8 +196,8 @@
 <script type="text/template" id="valamisBaseToolbarViewTemplate">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" placeholder="{{searchPlaceholderLabel}}" class="js-search">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchPlaceholderLabel}}">
             </div>
         </div>
 
@@ -224,14 +226,14 @@
 </script>
 
 <script type="text/template" id="valamisBaseListViewTemplate">
-    <label class="valamis-info-label shifted hidden js-no-items-label"> {{noItemsLabel}} </label>
-    <table class="val-table medium list no-out-margin">
+    <label class="valamis-info-label no-items hidden js-no-items-label"> {{noItemsLabel}} </label>
+    <table class="val-table">
         <tbody class="js-items-list"></tbody>
     </table>
 </script>
 
 <script type="text/template" id="valamisBaseListItemViewTemplate">
-    <td class="checkbox-col">
+    <td class="narrow-col">
         <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
         <label class="checkbox-label" for="toggleItem_{{id}}"></label>
     </td>
@@ -244,28 +246,26 @@
     </td>
     {{/isUser}}
 
-
-
-    <td> {{name}} </td>
+    <td class="title"> {{name}} </td>
 
     <td class="narrow-col">
-        <button class="button medium danger no-text js-delete-item">
+        <button class="button medium danger simple no-text js-delete-item">
             <span class="val-icon-trash"></span> Delete
         </button>
     </td>
 </script>
 
 <script type="text/template" id="valamisBaseSelectListItemViewTemplate">
+    <td class="narrow-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
+    </td>
+
     {{#picture}}
     <td class="narrow-col">
         <img src="{{picture}}" alt="{{name}}" class="img-circle">
     </td>
     {{/picture}}
 
-    <td> {{name}} </td>
-    <td class="text-right">
-        <button class="button medium {{^itemSelected}}neutral{{/itemSelected}}{{#itemSelected}}primary{{/itemSelected}} no-text js-select-item">
-            <span class="val-icon-checkmark"></span> Add
-        </button>
-    </td>
+    <td class="title"> {{name}} </td>
 </script>

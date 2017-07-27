@@ -1,6 +1,6 @@
 package com.arcusys.valamis.slick.util
 
-import com.arcusys.slick.drivers.{SQLServerDriver, DB2Driver}
+import com.arcusys.slick.drivers.{DB2Driver, OracleDriver, SQLServerDriver}
 import slick.driver.{H2Driver, JdbcDriver, MySQLDriver, PostgresDriver}
 
 object SlickHelper {
@@ -15,6 +15,7 @@ object SlickHelper {
       case "com.ibm.db2.jcc.DB2Driver" => DB2Driver
       case "com.mysql.jdbc.Driver" => MySQLDriver
       case "net.sourceforge.jtds.jdbc.Driver" => SQLServerDriver
+      case "oracle.jdbc.driver.OracleDriver" => OracleDriver
     }
   }
 }

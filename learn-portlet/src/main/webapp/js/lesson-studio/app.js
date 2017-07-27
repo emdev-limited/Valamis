@@ -126,7 +126,7 @@ lessonStudio.commands.setHandler('editor-ready', function (slideSetModel) {
 
     var lockDate = slidesApp.slideSetModel.get("lockDate")
     if((!lockDate || lockDate && Utils.getUserId() === slidesApp.slideSetModel.get("lockUserId")) &&
-        slidesApp.slideCollection.size() == 1 && slidesApp.slideElementCollection.size() === 0 ) {
+        slidesApp.slideCollection.length == 1 && slidesApp.slideElementCollection.length === 0 ) {
         slidesApp.topbar.currentView.showDeviceSelectModal();
     }
     slidesApp.historyManager.start();

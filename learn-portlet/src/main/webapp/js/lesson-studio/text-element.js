@@ -15,9 +15,10 @@ var textElementModule = slidesApp.module('TextElementModule', {
                 this.model.on('change', function(model){
                     var that = this;
                     var changed_keys = _.keys(model.changedAttributes());
-                    if(_.intersection(['content','fontSize'], changed_keys).length > 0){
+                    if(_.intersection(['content','fontSize','width'], changed_keys).length > 0){
                         _.defer(function(){
                             that.ui.content.html(that.model.get('content'));
+                            that.resizeElementHeight();
                         });
                     }
                 }, this);
@@ -25,7 +26,6 @@ var textElementModule = slidesApp.module('TextElementModule', {
             },
             updateEl: function() {
                 this.constructor.__super__.updateEl.apply(this, arguments);
-                this.displayIconPlus();
                 if (this.editor) this.destroyEditor();
             },
             onRender: function() {
@@ -43,11 +43,16 @@ var textElementModule = slidesApp.module('TextElementModule', {
                     extraPlugins: 'contextmenu,table,tabletools,lineheight',
                     enterMode: CKEDITOR.ENTER_P,
                     forcePasteAsPlainText: true,
+                    allowedContent: true,
                     line_height: '0.8;1;1.25;1.5;1.75;2;3;4;5;6;7;8;9;10',
                     fontSize_sizes: _.map([9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72], function(val){
                         return val + '/' + (val / baseFontSize).toFixed(3) + 'em';
                     }).join(';'),
                     fontSize_defaultLabel: '',
+                    colorButton_foreStyle: {
+                        element: 'p',
+                        styles: { color: '#(color)' }
+                    },
                     on:{
                         focus: function(){
                             if( this.getData() == '<p>' + Valamis.language['newTextElementLabel'] + '</p>' ){
@@ -106,7 +111,7 @@ var textElementModule = slidesApp.module('TextElementModule', {
                                 iframeContent = ev.data._.iframe.$.contentWindow.document,
                                 fontSizePanel = jQueryValamis(iframeContent).find('.cke_panel_block[title="' + editor.lang.font.fontSize.panelTitle + '"]');
                             //Set base font to preview
-                            if(fontSizePanel.size() > 0){
+                            if(fontSizePanel.length > 0){
                                 fontSizePanel.find('ul.cke_panel_list > li').each(function(){
                                     var value = jQueryValamis('a', this).attr('title');
                                     jQueryValamis(this).css({ fontSize: baseFontSize, lineHeight: value + 'px' });
@@ -191,7 +196,6 @@ var textElementModule = slidesApp.module('TextElementModule', {
                 this.delegateEvents();
                 slidesApp.isEditing = false;
                 slidesApp.vent.trigger('editorModeChanged');
-                this.displayIconPlus();
             },
             onSettingsOpen: function(){
                 var that = this;
@@ -266,10 +270,20 @@ var textElementModule = slidesApp.module('TextElementModule', {
                     editor.getSelection().selectRanges( [ range ] );
                 }
             },
-            displayIconPlus: function() {
-                var height = Math.round(this.$el.innerHeight());
-                var realHeight = this.getContentHeight();
-                this.$el.find('.ui-resizable-s').toggleClass('val-rounded-icon val-icon-plus', height < realHeight);
+            resizeElementHeight: function () {
+                slidesApp.historyManager.skipActions(true);
+                var realHeight = this.getContentHeight() != 0 ? this.getContentHeight()
+                    : this.model.get('height');
+                var slideHeight = $(lessonStudio.slidesWrapper + ' .slides').height();
+                var minHeight = slideHeight - this.model.get('top');
+                var elHeight = this.$el.offset().top + realHeight;
+                if (slideHeight > elHeight) {
+                    realHeight = Math.min((minHeight), realHeight);
+                }
+                if (this.model.get('height') !==  realHeight) {
+                    this.model.updateProperties({height: realHeight});
+                }
+                slidesApp.historyManager.skipActions(false);
             },
             changeWrapperVisibility: function() {
                 var slideHeight = $(lessonStudio.slidesWrapper + ' .slides').height();
@@ -287,7 +301,7 @@ var textElementModule = slidesApp.module('TextElementModule', {
             var deviceLayoutCurrent = slidesApp.devicesCollection.getCurrent();
             //for mobile device text element should be smaller
             if (deviceLayoutCurrent.get('id') == 3){
-                height = 180;
+                height = 360;
                 width = 300;
             }
             var slidesEl = $(lessonStudio.slidesWrapper + ' .slides');
@@ -297,7 +311,7 @@ var textElementModule = slidesApp.module('TextElementModule', {
                 'content': Valamis.language['newTextElementLabel'],
                 'slideEntityType': 'text',
                 'width': width,
-                'height': height,
+                'height': 29,
                 'top': topIndent,
                 'left': leftIndent
             });

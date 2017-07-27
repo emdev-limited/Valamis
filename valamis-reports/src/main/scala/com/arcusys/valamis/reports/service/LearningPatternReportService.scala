@@ -5,8 +5,8 @@ import com.arcusys.valamis.lesson.model.{Lesson, LessonExt, LessonStates, Lesson
 import com.arcusys.valamis.lesson.service._
 import com.arcusys.valamis.lesson.tincan.model.TincanActivity
 import com.arcusys.valamis.lesson.tincan.service.TincanPackageService
-import com.arcusys.valamis.lrs.service.util.TinCanActivityType
-import com.arcusys.valamis.lrs.service.util.TincanHelper.TincanAgent
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanActivityType
+import com.arcusys.valamis.utils.TincanHelper.TincanAgent
 import com.arcusys.valamis.lrs.tincan.{Activity, Statement, StatementObject}
 import com.arcusys.valamis.reports.model.{ActivitiesStatuses, ActivityStatus, LessonStatus, PatternReportStatus}
 import org.joda.time.DateTime

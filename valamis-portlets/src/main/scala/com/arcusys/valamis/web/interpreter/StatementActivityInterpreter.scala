@@ -4,10 +4,12 @@ import java.util.UUID
 
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.constants.StringPoolHelper
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.learn.liferay.{LBaseSocialActivityInterpreter, LogFactoryHelper}
 import com.arcusys.valamis.lrs.api.FailureRequestException
 import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.service.{LrsClientManager, LrsRegistration}
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.lrs.tincan.{Activity, AuthorizationScope, Statement}
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.configuration.ioc.Configuration
@@ -74,7 +76,8 @@ class StatementActivityInterpreter extends LBaseSocialActivityInterpreter with I
   }
 
   private def getStatementById(statementId: UUID)(implicit companyId: Long) = {
-    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All).auth
+    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+      host = PortalUtilHelper.getLocalHostUrl).auth
 
     lrsReader.statementApi(_.getStatementById(statementId), Some(lrsAuth)) match {
       case Failure(e: FailureRequestException) if e.responseCode == 404 =>

@@ -3,7 +3,7 @@ package com.arcusys.valamis.social.service
 import com.arcusys.learn.liferay.LiferayClasses.{LSocialActivity, LThemeDisplay, LUser}
 import com.arcusys.learn.liferay.model.Activity
 import com.arcusys.learn.liferay.services.{ServiceContextHelper, SocialActivityLocalServiceHelper, UserLocalServiceHelper}
-import com.arcusys.valamis.certificate.model.{Certificate, CertificateActivityType, CertificateStateType}
+import com.arcusys.valamis.certificate.model.{Certificate, CertificateActivityType, CertificateStateType, LearningPath}
 import com.arcusys.valamis.gradebook.model.{CourseActivityType, CourseGrade}
 import com.arcusys.valamis.lesson.model.{Lesson, PackageActivityType}
 import com.arcusys.valamis.lesson.service.LessonService
@@ -23,7 +23,8 @@ class ActivityServiceImpl(implicit val bindingModule: BindingModule)
     CertificateActivityType.getClass.getName,
     classOf[CourseGrade].getName,
     CourseActivityType.getClass.getName,
-    classOf[UserStatus].getName)
+    classOf[UserStatus].getName,
+    "com.arcusys.valamis.learningpath.models.LearningPath")
 
   lazy val lessonService = inject[LessonService]
   lazy val userSocialActivityHelper = new SocialActivityHelper[UserStatus]

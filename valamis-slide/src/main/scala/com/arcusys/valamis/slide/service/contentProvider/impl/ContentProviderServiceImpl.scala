@@ -14,9 +14,10 @@ abstract class ContentProviderServiceImpl extends ContentProviderService {
 
   override def getAll(skipTake: Option[SkipTake],
                       namePattern: Option[String],
-                      sortAscDirection: Boolean): RangeResult[ContentProvider] = {
+                      sortAscDirection: Boolean,
+                      companyId: Long): RangeResult[ContentProvider] = {
 
-    val providers = contentProviderRepository.getAll(skipTake, namePattern, sortAscDirection)
+    val providers = contentProviderRepository.getAll(skipTake, namePattern, sortAscDirection, companyId)
     val total = providers.size
 
     RangeResult(total, providers)

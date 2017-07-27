@@ -161,9 +161,10 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
                     $bottomSlide.parent().prepend($newSlide);
                 }else {
                     var firstSlide = slidesApp.slideCollection.find(function (model) {
-                        return (model.get('leftSlideId') == slideModel.getId()
+                        return (!model.get('leftSlideId') && slideModel.getId() != model.getId()
                         && !model.get('toBeRemoved'));
                     });
+                    firstSlide.set('leftSlideId', slideModel.getId());
                     var $firstSlide = $('#slide_' + firstSlide.getId());
                     var $wrapper = $('<section/>');
                     $wrapper.append($newSlide);
@@ -186,10 +187,10 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
 
             slidesApp.execute('reveal:page:updateRefs', $newSlide, 'add');
 
-            if (slidesApp.slideSetModel.get('themeId')) {
-                _.defer(function () {
-                    slidesApp.execute('reveal:page:applyTheme', slideModel);
-                });
+            if(!slideModel.get('isSlideCopy') && slidesApp.slideSetModel.get('themeId')) {
+              _.defer(function () {
+                slidesApp.execute('reveal:page:applyTheme', slideModel, !!slideModel.has('bgPdf'));
+              });
             }
         },
         onSlideAdd: function(model){
@@ -214,10 +215,11 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
             }
             $('.sidebar').find('.question-element').first().remove();
             var currentSlideId = slideModel.getId();
-            var currentPage = $(' #slide_' + currentSlideId);
+            var currentPage = slidesApp.mode == 'edit' ? $(' #slide_' + currentSlideId) : $(' #slidesArrangeTile_' + currentSlideId);
 
             if(!slidesApp.initializing) {
-                slidesApp.historyManager.groupOpenNext();
+                if(slidesApp.mode == 'edit')
+                   slidesApp.historyManager.groupOpenNext();
 
                 var correctLinkedSlideElements = slidesApp.slideElementCollection.where({ correctLinkedSlideId: currentSlideId });
                 var incorrectLinkedSlideElements = slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: currentSlideId });
@@ -268,9 +270,9 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
                 return;
             }
             var $slideElement = $(' #slide_' + slideId);
-            if( $slideElement.size() > 0 ){
-                if($slideElement.parent('section').size() > 0
-                    && $slideElement.parent('section').children('section').size() == 1){
+            if( $slideElement.length > 0 ){
+                if($slideElement.parent('section').length > 0
+                    && $slideElement.parent('section').children('section').length == 1){
                         $slideElement.parent('section').remove();
                 } else {
                     $slideElement.remove();
@@ -446,6 +448,11 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
                     });
                 }
                 else {
+                    if(!!slideModel.get('bgImage')){
+                        slideModel.set('bgImageChange', true);
+                        slideModel.unset('formData');
+                        slideModel.unset('fileModel');
+                    }
                     slideModel.set({bgImage: ''});
                     deferred.resolve();
                 }
@@ -541,10 +548,10 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
     RevealModule.onStart = function(options) {
         options = options || {};
         this.slideSetModel = options.slideSetModel || slidesApp.slideSetModel;
-        if( $(lessonStudio.slidesWrapper + ' #arrangeContainer').size() == 0 ) {
+        if( $(lessonStudio.slidesWrapper + ' #arrangeContainer').length == 0 ) {
             $(lessonStudio.slidesWrapper + ' #revealEditor').append('<div id="arrangeContainer"></div>');
         }
-        if( $(lessonStudio.slidesWrapper + ' #versionContainer').size() == 0 ) {
+        if( $(lessonStudio.slidesWrapper + ' #versionContainer').length == 0 ) {
             $(lessonStudio.slidesWrapper + ' #revealEditor').append('<div id="versionContainer"></div>');
         }
         slidesApp.editorArea.$el.closest('.slides-editor-main-wrapper').show();
@@ -592,7 +599,9 @@ var revealModule = slidesApp.module('RevealModule', function (RevealModule, App,
             revealModule.view.applyTheme(slideModel, skipBackgroundChange)
         });
         slidesApp.commands.setHandler('reveal:page:updateRefs', function(currentPage, actionType) {
-            revealModule.view.updateSlideRefs(currentPage, actionType)
+            if (slidesApp.mode == 'edit') {
+                revealModule.view.updateSlideRefs(currentPage, actionType);
+            }
         });
         slidesApp.commands.setHandler('reveal:page:makeActive', function() {
             if(!slidesApp.initializing) {

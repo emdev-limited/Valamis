@@ -5,62 +5,118 @@
 [![build status](https://api.travis-ci.org/arcusys/Valamis.png)](http://travis-ci.org/arcusys/Valamis)
 
 ### This is Valamis CE version - No support - No warranty
-To get supported Valamis Enterprise Edition contact us in http://valamis.arcusys.com/get-valamis
-or buy straight from Liferay Marketplace http://www.liferay.com/marketplace/-/mp/application/35268197
+To get supported Valamis Enterprise Edition contact us by http://valamis.arcusys.com/get-valamis
+or purchase it straight from Liferay Marketplace http://www.liferay.com/marketplace/-/mp/application/35268197
 
-#### The following features are not supported in the CE version
+#### The following features are not supported in the CE version:
 * Competences
-* Phenomenizer
+* Knowledge Map
 * Mobile application
 * Assignments
 * Training Events
-* Liferay DXP
+* Lesson Studio Beta
 
-Valamis is a social learning environment for sharing and receiving knowledge. We want to help people to share knowledge and learn. You can use Valamis as your organization's social learning environment.
+Valamis is a social learning environment for sharing and receiving knowledge. We want to enable people to share their knowledge and learn through digital technologies and user interaction. You can use Valamis as your organization's social learning environment.
 
-Supported Liferay version is currently 6.2.
+Supported Liferay version is currently 6.2 and DXP 7.0 SP3.
 The targeted version of SCORM is 2004 4th edition with support of SCORM 1.2.
 All server-side code is written using the Scala programming language for the JVM.
 
 The current implementation is able to display SCORM and Tin Can content with respect towards the different content organizations and the activity structure in each organization.
 Application includes a question editor for creating quizes with different types of questions (single-/multi-choice, matching, short answer, etc.)
 
-Administrative features let you manage SCORM packages, uploading the them in standard zipped format.
-The user interface is available as a JSR-compliant portlets, which may be deployed into Liferay portal. The portlet version has been tested on Liferay 6.1.1 and 6.1.2, and depend on its specific features.
+Administrative features let you manage SCORM packages, uploading them in the standard zipped format.
+The user interface is available as JSR-compliant portlets, which may be deployed into Liferay portal. The portlet version has been tested on Liferay 6.1.1 and 6.1.2 and depends on its specific features.
 
-The solution uses Liferay database, so no need to install additional database.
+The solution uses Liferay database, so no there is need to install an additional database.
 
-If deployed against a portlet container, the end-user features are available via the portlet's standard View mode, while administrative features are available via the Edit mode. Also there is another portlet for question editor, quiz editor and gradebook.
+If deployed against a portlet container, the end-user features are available via the portlet's standard View mode, while administrative features are available via the Edit mode. There are also separate portlets for question editor, quiz editor and gradebook.
 
 ### NOTE
-Since version 2.4 Valamis Community Edition is separated into two packages in GitHub: Valamis LRS (Learning Record Store, https://github.com/arcusys/valamis-lrs) and Valamis components (this repository). You need to compile both of these.
+Since version 3.4.1, Valamis Community Edition is separated into three packages on GitHub: Valamis LRS (Learning Record Store, https://github.com/arcusys/valamis-lrs),
+Learning Paths (https://github.com/arcusys/learning-paths), Valamis components (this repository). You need to compile all of these.
 
 ### Download 
-Download Valamis CE source code from this repository and compile the application yourself
+Download Valamis CE source code from this repository and compile the application yourself.
+
+### Building
+This is an sbt project.
+
+#### Liferay 6.2
+Go to Settings.scala and change the line #10   
+`val liferay = Liferay620`
+
+Run
+`sbt -J-Xss8M -mem 4096 clean package`
+
+Deploy to the running Liferay instance
+`sbt deploy`
+
+#### Liferay DXP
+Go to Settings.scala and change the line #10   
+
+`val liferay = Liferay700`
+
+Run
+
+`sbt -J-Xss8M -mem 4096 clean osgiFullPackage`
+
+Deploy the package and all dependencies to the running Liferay instance
+
+`sbt osgiFullDeploy`
 
 ### Known issues
 **PermGen issue**: Valamis requires 512Mb of PermGen size. This is default size in Liferay bundled with glassfish, but permgen in Tomcat and jBoss bundles should be increased.
 
-Liferay 6.1 EE bundled with Tomcat 7 can throw errors while accessing uploaded content. To avoid this problems just turn off GZip conmpression:
+Liferay 6.1 EE bundled with Tomcat 7 can throw errors while accessing uploaded content. To avoid this problem, just turn off the GZip conmpression:
 `com.liferay.portal.servlet.filters.gzip.GZipFilter=false`
 
+If you change Settings.scala, you must run **clean** command!
+
+If you have several tomcat instances running, specify liferay home dir in deploy and osgiFullDeploy commands:
+
+`sbt deploy /opt/liferay-portal-6.2-ce-ga6`
+
+`sbt osgiFullDeploy /opt/liferay-dxp-digital-enterprise-7.0-sp4`
+
+## Version 3.4 Update 27.07.2017
+ - A new portlet, called Certificate Expiration Tracker, gives the instructor new tools for notifying the users about expiring and expired certificates
+ - Curriculum Manager and Viewer were merged into the Learning Paths portlet. This new logic implies that a learning path is a set of learning goals that you achieve in order to get a certificate. Some goals, like lessons, can be completed straight from the UI of the relevant learning path
+ - It is now possible to export the Report data into JSON or CSV
+ - New Report types: average passing grade and lesson attempts and completions
+ - Valamis Administration portlet improvements: settings are saved for each instance separately, except for the license, which is saved in the main instance
+ - Course manager site template option
+ - Liferay DXP support for Valamis CE version
+ - Dashboard improvements: links to Training Events and Assignments in Learning Paths, and possibility to go back to original page after viewing a goal
+ - Lesson viewer: option to limit visible categories
+ - New email notifications: training event start in one week, user added to training event
+ - Valamis API
+ 
 ## Version 3.2 Update 21.04.2017
-The new portlet, called Learning Report, gathers data on learning patterns in a specific course, and then displays them in an interactive table.  This matrix shows the overall progress of every user in the course for every lesson and learning path.
-Course portlets have been upgraded, allowing for more details and settings in your courses, e.g. maximum amount of participants, availability time, etc.
-E-mail notifications have been introduced in order to keep users informed about relevant things that happen in the course.
+ - New Learning Pattern Report portlet that shows an interactive table with full learning data in a selected course
+ - New Report Portlet that allows for different types of learning data reports: certificate report, lesson report, user report
+ - New Learning Transcript portlet, that describes the overall learning progress of a student. It is possible to print out the transcript
+ - Lesson auto-locking in Lesson Studio implemented to prevent simultaneous work on the same lesson
+ - Improved design for questions and lesson summary in Lesson viewer
+ - More details for Course portlets, like maximum number of participants, availability time, etc.
+ - Email notifications for various actions and events
 
 ## Version 3.0 Update 02.08.2016
-The biggest new feature of Valamis 3.0 is the updated Gradebook portlet. The upgraded user interface places all courses, lessons and user information in a single place, allowing instructors to easily oversee all aspects of learning - from general data to specific activity details. It is designed to be more intuitive than ever before, providing clear access to all necessary information with a single click.
-Also, this update includes additional features such as Course-related portlets, improvements on the UX, UI and accessibility components.
-A detailed overview of each new feature of Valamis 3.0 is provided in the official release notes.
+ - Improved Gradebook portlet UI and features
+ - New Course Browser and Course Manager portlets
+ - Curriculum Management improvements: grouped goals, optional goals
+ - Initial Liferay DXP support and theme
+ - Lesson viewer accessibility improvements
+ - Lesson Studio UI: Grid option, Undo/Redo button, Font size for questions and text elements, vertical navigation setting.
+ - Lesson versioning and visibility
+ - Liferay activities show up in Valamis Activities portlet (configurable in Preferences)
 
 ## Version 2.6 Update 3.2.2016
-
-The new release includes new features, especially for Lesson Studio, and general UX improvement. One of the biggest changes has been done to Lesson Studio, which now enables responsive content design for three device types: mobile, tablet and desktop. 
-
-Other features and improvements include, for example, managing studio elements and slide titles, using Liferay articles as text element and arranging lessons manually. Moreover, importing questions from Moodle to Valamis environment is now possible.
-
-Check full release notes for 2.6 version on Valamis website: [http://docs.valamis.arcusys.com/valamis-2.6-enterprise-edition](http://docs.valamis.arcusys.com/valamis-2.6-enterprise-edition)
+ - Responsive content capabilites for three device types: mobile, tablet and desktop.
+ - Liferay articles as text elements
+ - Slide title and studio element management
+ - Lesson manual arrangement
+ - Import questions from Moodle to Valamis
 
 ## Version 2.4 Update 26.6.2015
  - New Valamis login page with new design
@@ -207,5 +263,3 @@ Fixed problems:
  - Added drag-n-dropfor question and category in TreeView
  - A lot of small improvements regarding to UI
  
-### Building
-This is SBT project.

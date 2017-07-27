@@ -164,6 +164,9 @@ if(window.location.hash == "" && hash) window.location.hash = hash;
         if (cssRules == null) {
             setCssRules();
         }
+
+        try { styleSheet[cssRules].length; } catch(err) { return; }
+
         if (styleSheet[cssRules] && styleSheet[cssRules].length > 0) {
 
             var ownerNode = styleSheet.ownerNode || styleSheet.owningElement;

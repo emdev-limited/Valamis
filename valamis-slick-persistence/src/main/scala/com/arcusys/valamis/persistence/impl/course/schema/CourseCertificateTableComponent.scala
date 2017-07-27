@@ -24,8 +24,6 @@ trait CourseCertificateTableComponent extends TypeMapper
 
     def pk = primaryKey(pkName("COURSE_CERTIFICATE"), (courseId, certificateId))
 
-    def certificateFK = foreignKey(fkName("COURSE_TO_CERT"), certificateId, certificates)(x => x.id, onDelete = ForeignKeyAction.Cascade)
-
   }
 
   val courseCertificates = TableQuery[CourseCertificateTable]

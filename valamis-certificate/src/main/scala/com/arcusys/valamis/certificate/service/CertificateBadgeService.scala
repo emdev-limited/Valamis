@@ -4,9 +4,9 @@ import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.certificate.model.badge.{BadgeModel, BadgeResponse, IssuerModel}
 
 trait CertificateBadgeService {
-  def getBadgeModel(certificateId: Long, rootUrl: String): BadgeModel
+  def getBadgeModel(certificateId: Long, companyId: Long, rootUrl: String): Option[BadgeModel]
 
-  def getIssuerModel(rootUrl: String): IssuerModel
+  def getIssuerModel(rootUrl: String, companyId: Long): IssuerModel
 
   def getIssuerBadge(certificateId: Long, liferayUserId: Long, rootUrl: String): BadgeResponse
 

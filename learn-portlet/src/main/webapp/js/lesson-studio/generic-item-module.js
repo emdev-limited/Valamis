@@ -139,7 +139,9 @@ var GenericEditorItemModule = Marionette.Module.extend({
             this.$el.css('top', this.model.get('top'));
             this.$el.css('left', this.model.get('left'));
             this.$el.attr('id').replace(/_.*/, '_' + this.model.getId());
-
+            if (this.model.has('min-height')) {
+                this.$el.css('min-height', this.model.get('min-height'));
+            }
             this.ui.content.css('z-index', this.model.get('zIndex'));
             // update resizable handles with element: otherwise can't resize element
             // with bigger z-index in case of overlapping elements
@@ -156,8 +158,11 @@ var GenericEditorItemModule = Marionette.Module.extend({
                 this.$('div[class*="content-icon-' + this.model.get('slideEntityType') + '"]')
                     .css('font-size', Math.min(this.model.get('width') / 2, this.model.get('height') / 2) + 'px');
             }
-            if (_.contains(['content', 'question', 'plaintext', 'audio'], this.model.get('slideEntityType')) || !(this.model.get('content') === '')){
-                this.ui.content.css('background-color', 'transparent');
+            if (_.contains(['content', 'audio'], this.model.get('slideEntityType')) || !(this.model.get('content') === '')){
+                if (!_.contains(['question', 'plaintext'], this.model.get('slideEntityType'))
+                    || !this.ui.content.find('.removed-question').length){
+                    this.ui.content.css('background-color', 'transparent');
+                }
             }
             if (this.model.get('slideEntityType') == 'randomquestion') {
                 this.ui.content.css('background-color', '');
@@ -165,7 +170,7 @@ var GenericEditorItemModule = Marionette.Module.extend({
             this.$el.toggleClass('active', this.model.get('active') || this.model.get('selected'));
             this.ui.border.toggle((this.model.get('active') || this.model.get('selected')));
             // base has #lesson-summary-header and #lesson-summary-table for summary page elements
-            this.ui.controls.toggle(this.model.get('active') && !this.model.get('selected') && this.$el.find('[id^=lesson-summary-]').size() == 0);
+            this.ui.controls.toggle(this.model.get('active') && !this.model.get('selected') && this.$el.find('[id^=lesson-summary-]').length == 0);
             if (this.ui.content.find('#lesson-summary-table').html() == '') {
                 this.ui.content.addClass('lesson-summary-block');
             }
@@ -208,8 +213,14 @@ var GenericEditorItemModule = Marionette.Module.extend({
         },
         resizableInit: function(){
             var that = this, isHidden, aspectRatio, direction;
-            this.$el.resizable({
-                handles: {
+            var handles = {};
+            if (that.model.get('slideEntityType') == 'text') {
+                handles = {
+                    'e': '.ui-resizable-e',
+                    'w': '.ui-resizable-w',
+                };
+            } else {
+                handles = {
                     'n': '.ui-resizable-n',
                     'e': '.ui-resizable-e',
                     's': '.ui-resizable-s',
@@ -218,17 +229,16 @@ var GenericEditorItemModule = Marionette.Module.extend({
                     'se': '.ui-resizable-se',
                     'sw': '.ui-resizable-sw',
                     'nw': '.ui-resizable-nw'
-                },
+                };
+            }
+            this.$el.resizable({
+                handles: handles,
                 start: function (event, ui) {
                     direction = jQueryValamis(this).data('ui-resizable').axis;
                     isHidden = !!that.model.get('classHidden');
 
                     // Keep aspect ratio if resized with corner handles, don't keep otherwise.
                     aspectRatio = false;
-                    if (that.model.get('slideEntityType') === 'image') {
-                        aspectRatio = direction.length !== 1;
-                        jQueryValamis(this).resizable("option", "aspectRatio", 'se').data('ui-resizable').aspectRatio = aspectRatio;
-                    }
 
                     if (!slidesApp.activeElement.view)
                         slidesApp.execute('item:focus', that);
@@ -392,7 +402,7 @@ var GenericEditorItemModule = Marionette.Module.extend({
         applyLinkedType: function() {
             this.$el.toggleClass( 'linked', ( this.model.get('correctLinkedSlideId') || this.model.get('incorrectLinkedSlideId') ) );
             var button = this.controls.find('.js-item-link');
-            if(button.size() == 0){
+            if(button.length == 0){
                 return;
             }
 

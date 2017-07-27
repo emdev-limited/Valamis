@@ -35,10 +35,13 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
         },
         onRender: function() {
             this.collection.on('sync', function() {
+                this.ui.noItemsLabel.removeClass('shifted no-items');
                 this.ui.noItemsLabel.toggleClass('hidden', this.collection.length !== 0);
                 this.ui.noItemsLabel.text(Valamis.language['noItemsLabel']);
                 if (!this.options.courseModel.hasFreePlaces() && this.collection.length !== 0) {
                     this.ui.noItemsLabel.toggleClass('hidden', false);
+                    this.ui.noItemsLabel.removeClass('no-items');
+                    this.ui.noItemsLabel.addClass('shifted');
                     this.ui.noItemsLabel.text(Valamis.language['notEnoughPlacesError']);
                 }
             }, this);

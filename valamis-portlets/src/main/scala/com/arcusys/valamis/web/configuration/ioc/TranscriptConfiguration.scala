@@ -1,7 +1,6 @@
 package com.arcusys.valamis.web.configuration.ioc
 
-import com.arcusys.valamis.certificate.service.{AssignmentService, CertificateUserService}
-import com.arcusys.valamis.certificate.storage.{CertificateRepository, CertificateStateRepository}
+import com.arcusys.valamis.certificate.service.{CertificateUserService, LearningPathService}
 import com.arcusys.valamis.gradebook.service.{GradeBookService, LessonGradeService}
 import com.arcusys.valamis.uri.service.TincanURIService
 import com.arcusys.valamis.user.service.UserService
@@ -20,12 +19,10 @@ class TranscriptConfiguration(implicit configuration: BindingModule) extends New
     lazy val certificateUserService = inject[CertificateUserService](None)
     lazy val courseFacade = inject[CourseFacadeContract](None)
     lazy val userService = inject[UserService](None)
-    lazy val certificateStateRepository = inject[CertificateStateRepository](None)
     lazy val uriService = inject[TincanURIService](None)
     lazy val lessonGradeService = inject[LessonGradeService](None)
-    lazy val assignmentService = inject[AssignmentService](None)
     lazy val resourceReader = Configuration.inject[ResourceReader](None)
-    lazy val certificateRepository = inject[CertificateRepository](None)
+    lazy val learningPathService = inject[LearningPathService](None)
   }
 
 })

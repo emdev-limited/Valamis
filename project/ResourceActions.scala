@@ -68,7 +68,72 @@ object ResourceActions {
 
   // prepare separate resources for OSGI bundle
   def prepareResources(webappDir: File): Unit = {
-    fillAggregateFile(webappDir, "META-INF/resources/js/lesson-studio.js", "META-INF/resources/", "/js/lesson-studio.js")
+    val resoursePath = "META-INF/resources/"
+    val configPath = "META-INF/resources/js/"
+    val resources = Seq(
+      "vendors.js",
+      "file-upload.js",
+      "valamis-common.js",
+      "vendors-lesson-studio.js",
+      //dashboard
+      "lesson-studio.js",
+      "lesson-viewer.js",
+      "content-provider.js",
+      "valamis-study-summary.js",
+      "valamis-activities.js",
+      "recent-lessons.js",
+      "my-lessons.js",
+      "my-courses.js",
+      "my-certificates.js",
+      "achieved-certificates.js",
+      "learning-paths.js",
+      //lesson tools
+      "lesson-manager.js",
+      "content-manager.js",
+      "all-courses.js",
+      //reports
+      "valamis-report.js",
+      "learning-pattern-report.js",
+
+      //analytics
+      "statement-viewer.js",
+      "gradebook.js",
+      "learning-transcript.js",
+      "certificate-expiration-tracker.js",
+
+      // ckeditor resource container
+      "ckeditor-all.js",
+
+      // portlets resource containers
+      "achieved-certificates-all.js",
+      "admin-all.js",
+      "all-courses-all.js",
+      "all-courses-student-all.js",
+      "certificate-expiration-tracker-all.js",
+      "content-manager-all.js",
+      "content-provider-all.js",
+      "gradebook-all.js",
+      "learning-paths-all.js",
+      "learning-pattern-report-all.js",
+      "learning-transcript-all.js",
+      "lesson-manager-all.js",
+      "lesson-studio-all.js",
+      "lesson-viewer-all.js",
+      "my-certificates-all.js",
+      "my-courses-all.js",
+      "my-lessons-all.js",
+      "recent-lessons-all.js",
+      "statement-viewer-all.js",
+      "valamis-activities-all.js",
+      "valamis-report-all.js",
+      "valamis-study-summary-all.js"
+
+    )
+
+    resources.foreach(fileName => {
+      fillAggregateFile(webappDir, configPath + fileName, resoursePath, "/js/" + fileName)
+    })
+
   }
 
   private def fillAggregateFile(webappDir: File, configFile: String, filesPath: String, outputName: String): Unit = {
@@ -80,8 +145,9 @@ object ResourceActions {
 
     IO.write(out, "") // clear output infile
 
-    files foreach { f =>
-      IO.append(out, IO.readBytes(valamisJsAppPath / f))
+    files foreach { file =>
+      IO.append(out, "\r\n;")
+      IO.append(out, IO.readBytes(valamisJsAppPath / file))
       IO.append(out, "\r\n\r\n")
     }
   }

@@ -38,6 +38,9 @@
 </div>
 
 <script type="text/javascript">
+
+    CKEDITOR_BASEPATH = "{{contextPath}}/js/vendor/ckeditor/";
+
     Backbone.emulateJSON = true;
 
     function onGoogleClientAPIReady() {
@@ -46,8 +49,6 @@
     function onYouTubeIframeAPIReady() {
         lessonStudio.youtubeIframeApiReady = true;
     }
-
-    CKEDITOR_BASEPATH = Utils.getContextPath() + "/js/vendor/ckeditor/";
 
     jQueryValamis(function () {
 
@@ -90,7 +91,7 @@
 
         var googleApiConfigured = !!(googleClientId && googleAppId && googleApiKey);
         var lessonStudioOptions = {
-            resourceName: 'lessonStudio',
+            resourceName: ['lessonStudio', 'common'],
             permissions: permissionActionsLessonStudio,
             app: lessonStudio,
             appOptions: {
@@ -113,7 +114,8 @@
                 eventAggregator: new Backbone.Wreqr.EventAggregator(),
                 googleClientAPILoadTryCount: 0,
                 youtubeIframeAPILoadTryCount: 0,
-                cmShowGlobalBase: false
+                cmShowGlobalBase: false,
+                betaStudioUrl: '{{{betaStudioUrl}}}'
             }
         };
 

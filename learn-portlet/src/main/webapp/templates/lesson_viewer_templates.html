@@ -1,14 +1,14 @@
 <script type="text/template" id="lessonViewerLayoutTemplate">
     <div id="lessonViewerToolbar"></div>
     <div id="lessonViewerPackages"></div>
-    <div id="lessonViewerPaginator" class="val-paginator text-center js-lesson-viewer-paginator"></div>
+    <div id="lessonViewerPaginator" class="val-paginator js-lesson-viewer-paginator"></div>
 </script>
 
 <script type="text/template" id="lessonViewerToolbarTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input class="js-search" type="text" id="playerPackageFilter" placeholder="{{searchLabel}}">
+            <div class="val-search js-search">
+                <input type="text" id="playerPackageFilter" placeholder="{{searchLabel}}">
             </div>
         </div>
         <div class="dropdown filter-element shift-left js-category-filter" data-value="">
@@ -78,14 +78,14 @@
             <li> {{packageAuthor}} {{dateString}} </li>
             <li class="categories">{{categories}}</li>
             <li class="description">{{description}}</li>
-            <li class="status">
+            <li>
                 {{#LessonViewer.LV_SHARE}}
-                <button class="button small simple no-text hide-s shift-left js-share-package">
+                <button class="button small simple no-text display-inline-block js-share-package">
                     <span class="val-icon-share">{{508ShareLabel}}</span>
                 </button>
                 {{/LessonViewer.LV_SHARE}}
 
-                <span class="val-label">
+                <span class="val-label {{statusClass}}">
                     {{packageStatusLabel}}
                 </span>
                 {{#remain}} {{remain}} {{remainLabel}} {{/remain}}
@@ -246,11 +246,11 @@
         </div>
     </div>
     <div class="bbm-modal__bottombar">
-        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
 
-        <button class="button big primary js-post-share-package js-submit-button">
+        <button class="button medium primary js-post-share-package js-submit-button">
             {{shareLabel}}
         </button>
+        <button class="button medium simple modal-close">{{cancelLabel}}</button>
     </div>
 </script>
 

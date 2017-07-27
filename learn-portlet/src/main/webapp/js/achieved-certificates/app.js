@@ -6,13 +6,12 @@ var AchievedCertificates = Marionette.Application.extend({
     });
   },
   onStart: function(options){
-    this.certificates = new achievedCertificates.Entities.CertificateCollection();
-    this.certificates.on('sync', this.showContent, this);
-    this.certificates.fetch();
-  },
-  showContent: function() {
+    this.certificates = new achievedCertificates.Entities.CertificateCollection([], {
+        useSkipTake: true
+    });
     var layoutView = new achievedCertificates.Views.AppLayoutView({collection: this.certificates});
     this.mainRegion.show(layoutView);
+    this.certificates.fetchMore();
   }
 });
 

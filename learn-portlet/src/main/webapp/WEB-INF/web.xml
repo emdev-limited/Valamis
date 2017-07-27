@@ -219,24 +219,6 @@
         <url-pattern>/certificates/*</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>certificate-states</servlet-name>
-        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
-        <init-param>
-            <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.valamis.web.servlet.certificate.CertificateStateServlet</param-value>
-        </init-param>
-        <init-param>
-            <param-name>sub-context</param-name>
-            <param-value>certificate-states</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>certificate-states</servlet-name>
-        <url-pattern>/certificate-states/*</url-pattern>
-    </servlet-mapping>
-
     <!--SlideSet api endpoint-->
     <servlet>
         <servlet-name>slide-sets</servlet-name>
@@ -484,10 +466,6 @@
         <url-pattern>/manifestactivities/*</url-pattern>
     </servlet-mapping>
 
-
-    <!--Api endpoints-->
-    <!--NB: Api endpoint url start with '/delegate' prefix-->
-    <!--Mobile api endpoint-->
     <servlet>
         <servlet-name>tags</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
@@ -552,7 +530,7 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>learning-report</servlet-name>
+        <servlet-name>learning-pattern-report</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
         <init-param>
             <param-name>servlet-class</param-name>
@@ -560,13 +538,13 @@
         </init-param>
         <init-param>
             <param-name>sub-context</param-name>
-            <param-value>learning-report</param-value>
+            <param-value>learning-pattern-report</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>learning-report</servlet-name>
-        <url-pattern>/learningReport/*</url-pattern>
+        <servlet-name>learning-pattern-report</servlet-name>
+        <url-pattern>/learning-pattern-report/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -622,6 +600,7 @@
         <servlet-name>statements-api-controller</servlet-name>
         <url-pattern>/statements/*</url-pattern>
     </servlet-mapping>
+
 
     <servlet>
         <servlet-name>activityToStatement</servlet-name>
@@ -805,45 +784,91 @@
         <url-pattern>/url/*</url-pattern>
     </servlet-mapping>
 
-    <!--Url check api endpoint-->
-    <servlet>
-        <servlet-name>assignments</servlet-name>
-        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
-        <init-param>
-            <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.valamis.web.servlet.certificate.AssignmentServlet</param-value>
-        </init-param>
-        <init-param>
-            <param-name>sub-context</param-name>
-            <param-value>assignments</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>assignments</servlet-name>
-        <url-pattern>/assignments/*</url-pattern>
-    </servlet-mapping>
-
-    <!--Certificate goals api endpoint-->
-    <servlet>
-        <servlet-name>certificate-goals</servlet-name>
-        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
-        <init-param>
-            <param-name>servlet-class</param-name>
-            <param-value>com.arcusys.valamis.web.servlet.certificate.CertificateGoalServlet</param-value>
-        </init-param>
-        <init-param>
-            <param-name>sub-context</param-name>
-            <param-value>certificate-goals</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>certificate-goals</servlet-name>
-        <url-pattern>/certificate-goals/*</url-pattern>
-    </servlet-mapping>
-
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
+
+    <!--public apis-->
+    <servlet>
+        <servlet-name>lessons</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.valamis.web.servlet.public.LessonServlet</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>lessons</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>lessons</servlet-name>
+        <url-pattern>/lessons/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+    <servlet-name>LTIPublic</servlet-name>
+        <servlet-class>com.arcusys.valamis.web.servlet.lti.LTIPublicServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LTIPublic</servlet-name>
+        <url-pattern>/lti-public/*</url-pattern>
+    </servlet-mapping>
+
+
+    <!--Url lti endpoint-->
+    <servlet>
+        <servlet-name>lti</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.valamis.web.servlet.lti.LTIServlet</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>lti</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>lti</servlet-name>
+        <url-pattern>/lti/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>lessons-settings</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.valamis.web.servlet.lesson.LessonsSettingsServlet</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>lessons-settings</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>lessons-settings</servlet-name>
+        <url-pattern>/lessons-settings/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>versions</servlet-name>
+        <servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
+        <init-param>
+            <param-name>servlet-class</param-name>
+            <param-value>com.arcusys.valamis.web.servlet.VersionsServlet</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sub-context</param-name>
+            <param-value>versions</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>versions</servlet-name>
+        <url-pattern>/versions/*</url-pattern>
+    </servlet-mapping>
 </web-app>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<component name="com.arcusys.valamis.web.notification.CourseNotificationHandler" immediate="true">
+    <implementation class="com.arcusys.valamis.web.notification.CourseNotificationHandler"/>
+    <service>
+        <provide interface="com.liferay.portal.kernel.notifications.UserNotificationHandler"/>
+    </service>
+    <property name="javax.portlet.name" type="String" value="com_arcusys_valamis_web_portlet_MyCoursesView"/>
+</component>

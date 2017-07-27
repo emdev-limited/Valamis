@@ -4,7 +4,7 @@ import com.arcusys.valamis.lesson.model.LessonGrade
 import com.arcusys.valamis.lesson.service.{LessonService, TeacherLessonGradeService}
 import com.arcusys.valamis.lesson.storage.query.LessonGradesQueries
 import com.arcusys.valamis.lesson.storage.{LessonGradeTableComponent, LessonTableComponent}
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
 import com.arcusys.valamis.persistence.common.SlickProfile
 import org.joda.time.DateTime
 

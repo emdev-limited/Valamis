@@ -7,11 +7,11 @@ import com.arcusys.learn.liferay.services._
 import com.arcusys.learn.liferay.util.{PortalUtilHelper, PortletName}
 import com.arcusys.valamis.web.portlet.base.{Permission, PermissionBase}
 import com.arcusys.valamis.web.servlet.base.exceptions._
+import org.apache.http.ParseException
 import org.scalatra._
 import org.slf4j.LoggerFactory
 
 case class PermissionCredentials(groupId: Long, portletId: String, primaryKey: String)
-
 
 
 class ScalatraPermissionUtil(scalatra: ScalatraBase) extends PermissionUtil {
@@ -70,7 +70,7 @@ trait PermissionUtil {
     hasPermissionApiSeq(PermissionHelper.getPermissionChecker(user), permission, portlets, courseId)
   }
 
-  def requirePermissionApi(permission: PermissionBase, portlets: PortletName*)(implicit r: HttpServletRequest):Unit = {
+  def requirePermissionApi(permission: PermissionBase, portlets: PortletName*)(implicit r: HttpServletRequest): Unit = {
     val companyId = PortalUtilHelper.getCompanyId(r)
 
     val user = Option(PortalUtilHelper.getUser(r)).getOrElse {
@@ -109,53 +109,38 @@ trait PermissionUtil {
                                  (implicit r: HttpServletRequest): Boolean = {
 
     val keys = portlets.map(_.key)
-    val courseId = getCourseIdFromRequest
-    val plidLayouts = getPlid.map(LayoutLocalServiceHelper.getLayout)
 
-    // getGroupId uses Liferay session attribute USER_ID,
-    // this attribute exists after login.
-    val groupId = if (checker.isSignedIn) Some(getGroupId) else None
+    getCurrentLayout match {
+      case Some(layout) =>
+        check(checker, permission, keys, Seq(layout))
+      case None =>
+        val courseId = getCourseIdFromRequest
+        hasPermissionApiSeq(checker, permission, portlets, courseId)
+    }
 
-    hasPermissionApiSeq(checker, permission, portlets, courseId) || plidLayouts.fold(false)(l => check(checker, permission, keys, Seq(l), groupId))
   }
 
   private def hasPermissionApiSeq(checker: LPermissionChecker,
                                   permission: PermissionBase,
                                   portlets: Seq[PortletName],
                                   courseId: Long): Boolean = {
+    val portletIds = portlets.map(_.key)
 
-    val keys = portlets.map(_.key)
-    lazy val privateLayouts = LayoutLocalServiceHelper.getLayouts(courseId, true)
-    lazy val publicLayouts = LayoutLocalServiceHelper.getLayouts(courseId, false)
-
-    checker.isGroupAdmin(courseId) ||
-      check(checker, permission, keys, privateLayouts) ||
-      check(checker, permission, keys, publicLayouts)
-
+    //at first, check the permission at group/company scope
+    if (portletIds.exists(hasPermission(checker, courseId, _, None, permission))) {
+      true
+    } else {//then look for the permission on any page of the site
+      lazy val privateLayouts = LayoutLocalServiceHelper.getLayouts(courseId, privateLayout = true)
+      lazy val publicLayouts = LayoutLocalServiceHelper.getLayouts(courseId, privateLayout = false)
+      //TODO get rid of it - we don't need this actually, because we
+      //we can use current layout. And if there is no current layout, then
+      //checking by group/company can be used
+      check(checker, permission, portletIds, privateLayouts) ||
+        check(checker, permission, portletIds, publicLayouts)
+    }
   }
 
-  /**
-    * Returns true, if the user is admin, or if he/she has the desired permission
-    * on the given portlet on any page of the given group.
-    * */
-  private def hasGroupPermissionApiSeq(checker: LPermissionChecker,
-                                       permission: PermissionBase,
-                                       portlets: Seq[PortletName],
-                                       courseId: Option[Int] = None): Boolean = {
-    val keys = portlets.map(_.key)
-
-    val groupId = courseId.getOrElse(0)
-
-    lazy val privateLayouts = LayoutLocalServiceHelper.getLayouts(groupId, true)
-    lazy val publicLayouts = LayoutLocalServiceHelper.getLayouts(groupId, false)
-
-    checker.isGroupAdmin(groupId) ||
-      check(checker, permission, keys, privateLayouts) ||
-      check(checker, permission, keys, publicLayouts)
-  }
-
-  private def check(checker: LPermissionChecker, permission: PermissionBase, keys: Seq[String], allLayouts: Seq[LLayout], groupId: Option[Long] = None): Boolean = {
-
+  private def check(checker: LPermissionChecker, permission: PermissionBase, keys: Seq[String], allLayouts: Seq[LLayout]): Boolean = {
     for (
       layout <- allLayouts;
       plid = layout.getPlid;
@@ -163,8 +148,7 @@ trait PermissionUtil {
     ) {
       if (keys.contains(portletId)) {
         val primaryKey = plid + LLiferayPortletSession.LayoutSeparator + portletId
-        val groupIdnew = groupId.getOrElse(layout.getGroupId)
-        if (hasPermission(checker, groupIdnew, portletId, primaryKey, permission)) {
+        if (hasPermission(checker, layout.getGroupId, portletId, Some(primaryKey), permission)) {
           return true
         }
       }
@@ -172,30 +156,33 @@ trait PermissionUtil {
     false
   }
 
-  def hasPermission(groupId: Long, portletId: String, primaryKey: String, action: PermissionBase): Boolean = {
-    hasPermission(PermissionHelper.getPermissionChecker(), groupId, portletId, primaryKey, action)
-  }
-
-  def hasPermission(checker: LPermissionChecker, groupId: Long, portletId: String, primaryKey: String, action: PermissionBase): Boolean = {
+  def hasPermission(checker: LPermissionChecker, groupId: Long, portletId: String, primaryKey: Option[String],
+                    action: PermissionBase): Boolean = {
     try {
       ResourceActionLocalServiceHelper.getResourceAction(portletId, action.name)
-      checker.hasPermission(groupId, portletId, primaryKey, action.name)
+      //if primaryKey == portletId, then it means that we want to check permission
+      //in group/company scope (figured out empirically)
+      checker.hasPermission(groupId, portletId, primaryKey.getOrElse(portletId), action.name)
     } catch {
-      // TODO: init resource permission on deploy, LR7(servlet)
-      case e: IllegalArgumentException => false
-      case _: LNoSuchResourceActionException => false
+      case ex: IllegalArgumentException =>
+        logger.debug("Failed to check permission", ex)
+        false
+      case _: LNoSuchResourceActionException =>
+        false
     }
 
   }
 
-  private def getPlid(implicit request: HttpServletRequest): Option[Long] = {
+  private def getCurrentLayout(implicit request: HttpServletRequest): Option[LLayout] = {
     val plid = request.getParameter("plid")
-      Option(plid).filter(_.nonEmpty).map(_.toLong)
+    Option(plid).filter(_.nonEmpty) flatMap { id =>
+      try {
+        LayoutLocalServiceHelper.fetchLayout(id.toLong)
+      } catch {
+        case _: NumberFormatException => throw new ParseException("Bad plid value: " + id)
+      }
     }
-
-  private def getGroupId(implicit request: HttpServletRequest) = {
-    val user =  request.getAttribute("USER_ID")
-    UserLocalServiceHelper().getUser(user.asInstanceOf[Long]).getGroupId
   }
+
 }
 

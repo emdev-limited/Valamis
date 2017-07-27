@@ -8,6 +8,8 @@ import org.joda.time.DateTime
 import slick.driver.JdbcProfile
 import slick.jdbc.JdbcBackend
 
+import scala.language.postfixOps
+
 class CourseCertificateRepositoryImpl(val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
   extends CourseCertificateRepository
     with CourseCertificateTableComponent
@@ -36,16 +38,16 @@ class CourseCertificateRepositoryImpl(val db: JdbcBackend#DatabaseDef, val drive
   }
 
   override def isExist(courseId: Long, certificateId: Long): Boolean = execSync {
-    courseCertificates.filter {
-      _.courseId === courseId
-    }.filter {
-      _.certificateId === certificateId
+    courseCertificates.filter { ct =>
+      ct.courseId === courseId && ct.certificateId === certificateId
     }.exists.result
   }
 
   override def deleteCertificates(courseId: Long): Unit = execSync {
-    courseCertificates.filter {
-      _.courseId === courseId
-    } delete
+    courseCertificates filter (_.courseId === courseId) delete
+  }
+
+  override def deleteByCertificateId(certificateId: Long): Unit = execSync {
+    courseCertificates filter (_.certificateId === certificateId) delete
   }
 }

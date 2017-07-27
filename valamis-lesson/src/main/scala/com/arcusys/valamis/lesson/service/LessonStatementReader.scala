@@ -1,21 +1,25 @@
 package com.arcusys.valamis.lesson.service
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, UserLocalServiceHelper}
 import com.arcusys.valamis.lesson.model.Lesson
-import com.arcusys.valamis.lrs.model.StatementFilter
-import com.arcusys.valamis.lrs.service.LrsClientManager
-import com.arcusys.valamis.lrs.service.util.{StatementApiHelpers, TinCanVerbs, TincanHelper}
-import com.arcusys.valamis.lrs.service.util.TinCanVerbs.VerbExtension
+import com.arcusys.valamis.lrssupport.lrs.model.StatementFilter
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.util.{StatementApiHelpers, TinCanVerbs}
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanVerbs.VerbExtension
 import com.arcusys.valamis.lrs.tincan.{Activity, Agent, Statement}
+import com.arcusys.valamis.utils.TincanHelper
 import StatementApiHelpers._
 import TincanHelper.TincanAgent
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import org.joda.time.DateTime
 
 /**
  * Created by mminin on 22.09.15.
  */
 abstract class LessonStatementReader {
+
+  implicit def companyId = CompanyHelper.getCompanyId
 
   def lrsClient: LrsClientManager
   def lessonService: LessonService

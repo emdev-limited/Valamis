@@ -5,9 +5,10 @@ import com.arcusys.valamis.course.api.CourseService
 import com.arcusys.valamis.gradebook.service._
 import com.arcusys.valamis.gradebook.service.impl._
 import com.arcusys.valamis.lesson.service._
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.persistence.common.SlickDBInfo
 import com.arcusys.valamis.user.service.UserService
+import com.arcusys.valamis.web.util.ForkJoinPoolWithLRCompany
 import com.escalatesoft.subcut.inject.{BindingModule, NewBindingModule}
 
 class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: BindingModule) extends NewBindingModule(fn = module => {
@@ -15,7 +16,8 @@ class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: Binding
   import module.bind
 
   bind[TeacherCourseGradeService] toSingle {
-    new TeacherCourseGradeServiceImpl(db.databaseDef, db.slickProfile)
+    new TeacherCourseGradeServiceImpl(db.databaseDef, db.slickProfile,
+      ForkJoinPoolWithLRCompany.ExecutionContext)
   }
 
   bind[LessonGradeService] toSingle new LessonGradeServiceImpl {
@@ -55,5 +57,11 @@ class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: Binding
   bind[GradeBookService] toSingle new GradeBookServiceImpl {
     lazy val statementReader = inject[LessonStatementReader](None)
     lazy val lessonService = inject[LessonService](None)
+  }
+
+  bind[StatementService] toSingle new StatementServiceImpl {
+    lazy val lrsClientManager  = inject[LrsClientManager](None)
+    lazy val lrsRegistration = inject[LrsRegistration](None)
+    lazy val userLocalServiceHelper  = inject[UserLocalServiceHelper](None)
   }
 })

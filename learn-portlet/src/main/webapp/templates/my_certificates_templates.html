@@ -1,16 +1,16 @@
 <script type="text/template" id="myCertificatesLayoutTemplate">
-    <table class="val-statistic-table js-certificates-table">
+    <table class="val-table val-statistic-table js-items-table">
         <thead>
         <tr>
-            <th class="expand"></th>
+            <th class="narrow-col"></th>
             <th>{{certificateLabel}}</th>
-            <th class="summary">
+            <th class="narrow-col text-center">
                 <span class="val-icon val-icon-user valamis-tooltip" data-placement="bottom" title="{{certificateUserTooltipDescription}}"></span>
             </th>
-            <th class="summary">
+            <th class="narrow-col text-center">
                 <span class="val-icon val-icon-checkmark valamis-tooltip" data-placement="bottom" title="{{certificateCheckbuttonTooltipDescription}}"></span>
             </th>
-            <th class="summary">
+            <th class="narrow-col text-center">
                 <span class="val-icon val-icon-alert valamis-tooltip" data-placement="bottom" title="{{certificateAlertTooltipDescription}}"></span>
             </th>
         </tr>
@@ -28,11 +28,11 @@
 </script>
 
 <script type="text/template" id="myCertificatesRowViewTemplate">
-        <td class="expand js-toggle-details"> <span class="val-icon-toggle"></span> </td>
-        <td><a href="{{url}}"> {{title}} </a></td>
-        <td class="summary"> {{totalUsers}} </td>
-        <td class="summary"> {{successUsers}} </td>
-        <td class="summary"> {{overdueUsers}} </td>
+        <td class="narrow-col cursor-pointer js-toggle-details"> <span class="val-icon-toggle"></span> </td>
+        <td class="title"><a href="{{url}}"> {{title}} </a></td>
+        <td class="narrow-col text-center"> {{totalUsers}} </td>
+        <td class="narrow-col text-center"> {{successUsers}} </td>
+        <td class="narrow-col text-center"> {{overdueUsers}} </td>
 </script>
 
 <script type="text/template" id="myCertificatesDetailsViewTemplate">
@@ -61,14 +61,15 @@
 
 <script type="text/template" id="myCertificatesUsersItemViewTemplate">
     <div class="column-left">
-        <div class="user-img {{#isExpired}} user-expired {{/isExpired}}"><img src="{{picture}}" alt="{{name}}">
+        <div class="user-img">
+            <img src="{{logo}}" alt="{{name}}" class="img-circle {{#isExpired}} failed {{/isExpired}}">
         </div>
         <div>
             <div>
                 <span class="user-name"> {{name}} </span>
-                {{#isExpired}} <span class="status-label failed">{{expiredLabel}}</span> {{/isExpired}}
+                {{#isExpired}} <span class="val-label failed">{{expiredLabel}}</span> {{/isExpired}}
             </div>
-            {{statistic.success}} {{ofLabel}} {{statistic.total}} {{goalsAchievedLabel}}
+            {{successCount}} {{ofLabel}} {{totalGoals}} {{goalsAchievedLabel}}
         </div>
     </div>
 

@@ -26,9 +26,14 @@ abstract class SlideSetExporterImpl
     require(slideSets.length == 1)
 
     val slideSet = slideSets.head
-    val slides = slideService.getSlides(slideSet.id)
-    val questions = getQuestions(slides)
-    val plaintexts = getPlainTexts(slides)
+    val slidesWithDeletedQuestions = slideService.getSlides(slideSet.id)
+    val questions = getQuestions(slidesWithDeletedQuestions)
+    val plaintexts = getPlainTexts(slidesWithDeletedQuestions)
+
+    val slides = getSlideWithOutDeletedQuestions(slidesWithDeletedQuestions,
+      questions,
+      plaintexts)
+
     val categories = (questions.flatMap(_._1.categoryId) ++ plaintexts.flatMap(_.categoryId)).distinct
       .flatMap(categoryService.getByID)
 

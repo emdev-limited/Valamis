@@ -54,7 +54,7 @@ var LiferayArticleView = Backbone.View.extend({
         }, this);
 
         this.model.on('change:title', function () {
-            this.$('.acticle-title').html(this.model.get('title'));
+            this.$('.title').text(this.model.get('title'));
         }, this);
 
         this.model.on('change:selected', function () {

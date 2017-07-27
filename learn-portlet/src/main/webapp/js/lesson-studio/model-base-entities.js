@@ -628,7 +628,7 @@ var baseLessonStudioCollections = {
             return a.get('id') > b.get('id') ? -1 : 1;
         },
         setSelectedDefault: function(){
-            if(slidesApp.slideCollection.size() > 0){
+            if(slidesApp.slideCollection.length > 0){
                 var devicesIds = [],
                   slideElements = [];
                 slidesApp.slideCollection.each(function(model){
@@ -637,7 +637,7 @@ var baseLessonStudioCollections = {
                         return false;
                     }
                 });
-                if(slideElements.length == 0 && slidesApp.slideElementCollection.size() > 0){
+                if(slideElements.length == 0 && slidesApp.slideElementCollection.length > 0){
                     slideElements = slidesApp.slideElementCollection.where({ toBeRemoved: false });
                 }
                 if( slideElements.length > 0 ){

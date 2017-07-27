@@ -1,7 +1,7 @@
 package com.arcusys.valamis.web.servlet.admin
 
-import com.arcusys.valamis.lrsEndpoint.model.AuthorizationType
-import com.arcusys.valamis.lrsEndpoint.model.AuthorizationType.AuthorizationType
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.AuthorizationType
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.AuthorizationType.AuthorizationType
 import com.arcusys.valamis.web.servlet.admin.AdminSettingType.AdminSettingType
 import com.arcusys.valamis.web.servlet.request.{BaseRequest, Parameter}
 import org.scalatra.ScalatraBase
@@ -29,6 +29,7 @@ object AdminRequest extends BaseRequest {
   val LtiLaunchPresentationReturnUrl = "ltiLaunchPresentationReturnUrl"
   val LtiOauthVersion = "ltiOauthVersion"
   val LtiOauthSignatureMethod = "ltiOauthSignatureMethod"
+  val BetaStudioUrl = "betaStudioUrl"
   val Type = "type"
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
@@ -55,6 +56,8 @@ object AdminRequest extends BaseRequest {
     def ltiOauthSignatureMethod = Parameter(AdminRequest.LtiOauthSignatureMethod).required
 
     def customHost = Parameter(AdminRequest.CustomHost).option("")
+
+    def betaStudioUrl = Parameter(AdminRequest.BetaStudioUrl).required
 
     def endPoint: String = {
       if (isExternalLrs) {

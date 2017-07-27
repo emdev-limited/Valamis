@@ -1,23 +1,17 @@
 package com.arcusys.learn.liferay.update.version260
 
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
+import com.arcusys.learn.liferay.update.SlickDBContext
 import com.arcusys.learn.liferay.update.version250.slide.SlideTableComponent
-import com.arcusys.slick.migration.dialect.Dialect
 import com.arcusys.slick.migration.table.TableMigration
-import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.web.configuration.ioc.Configuration
-import com.escalatesoft.subcut.inject.Injectable
 
-class DBUpdater2501 extends LUpgradeProcess with SlideTableComponent with Injectable with SlickProfile{
+class DBUpdater2501 extends LUpgradeProcess with SlideTableComponent with SlickDBContext {
 
   implicit val bindingModule = Configuration
 
   override def getThreshold = 2501
 
-  lazy val dbInfo = inject[SlickDBInfo]
-  lazy val db = dbInfo.databaseDef
-  lazy val driver = dbInfo.slickProfile
-  implicit val dialect = new Dialect(dbInfo.slickDriver)
   lazy val slideSetMigration = TableMigration(slideSets)
 
   import driver.simple._

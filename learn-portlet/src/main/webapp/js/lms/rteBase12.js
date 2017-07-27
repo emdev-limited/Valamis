@@ -16,9 +16,9 @@ var SCORM12API = function () {
 
 SCORM12API.prototype.doSyncRequest = function (url, methodType) {
     return window.LearnAjax.syncRequest(path.root + url, methodType, {
-        activityID:this.currentActivityID,
-        packageID:this.currentPackageID,
-        organizationID:this.currentOrganizationID
+        activityID: encodeURIComponent(this.currentActivityID),
+        packageID: this.currentPackageID,
+        organizationID: encodeURIComponent(this.currentOrganizationID)
     });
 };
 

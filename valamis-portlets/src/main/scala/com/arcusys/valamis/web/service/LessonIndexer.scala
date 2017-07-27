@@ -2,7 +2,7 @@ package com.arcusys.valamis.web.service
 
 import java.util
 
-import com.arcusys.learn.liferay.LiferayClasses._
+import com.arcusys.learn.liferay.LiferayClasses.{LDocument, LDocumentImpl, LSearchContext}
 import com.arcusys.learn.liferay.constants.FieldHelper
 import com.arcusys.learn.liferay.model.ValamisBaseIndexer
 import com.arcusys.learn.liferay.services.AssetEntryLocalServiceHelper
@@ -11,55 +11,41 @@ import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lesson.model.Lesson
 import com.arcusys.valamis.lesson.service.LessonService
-import com.arcusys.valamis.web.configuration.ioc.InjectableFactory
+import com.arcusys.valamis.web.configuration.ioc.Configuration
 
 object LessonIndexer {
   val PortletId: String = PortletName.LessonViewer.key
-
-  val LessonClassName = "com.arcusys.valamis.lesson.model.Lesson"
-
-  private final val ClassNames: Array[String] = Array(LessonClassName)
 }
 
-class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
-  lazy val lessonService = inject[LessonService]
-  lazy val fileService = inject[FileService]
-  lazy val courseService = inject[CourseService]
-
-  override def getClassName: String = LessonIndexer.LessonClassName
-
-  override def getClassNames: Array[String] = LessonIndexer.ClassNames
+class LessonIndexer extends ValamisBaseIndexer[Lesson] {
+  private lazy val lessonService = Configuration.inject[LessonService](None)
+  private lazy val fileService = Configuration.inject[FileService](None)
+  private lazy val courseService = Configuration.inject[CourseService](None)
 
   override def getPortletId: String = LessonIndexer.PortletId
 
-  protected def addReindexCriteria(dynamicQuery: LDynamicQuery, companyId: Long) {
-  }
-
-  protected def doDelete(obj: Object) {
-    val lessonId = getLessonId(obj)
-
-    for (asset <- AssetEntryLocalServiceHelper.fetchAssetEntry(LessonIndexer.LessonClassName, lessonId))
+  protected def proxyDelete(lesson: Lesson) {
+    for (asset <- AssetEntryLocalServiceHelper.fetchAssetEntry(getClassName, lesson.id))
       deleteDocument(asset.getCompanyId, asset.getPrimaryKey)
 
   }
 
   private def getSearchContentForPackage(lessonId: Long): String = {
     val content = fileService.getFileContentOption("data/" + lessonId + "/data/" + SearchEngineUtilHelper.SearchContentFileName)
-    content.fold("")(new String(_,SearchEngineUtilHelper.SearchContentFileCharset))
+    content.fold("")(new String(_, SearchEngineUtilHelper.SearchContentFileCharset))
   }
 
-  protected def doGetDocument(obj: Object): LDocument =  {
-    val lessonId = getLessonId(obj)
-    val lesson = lessonService.getLessonRequired(lessonId)
-    val asset = AssetEntryLocalServiceHelper.getAssetEntry(LessonIndexer.LessonClassName, lessonId)
+  protected def proxyGetDocument(lesson: Lesson): LDocument = {
+    val lessonId = lesson.id
+    val asset = AssetEntryLocalServiceHelper.getAssetEntry(getClassName, lessonId)
 
     val document = new LDocumentImpl
     document.addUID(LessonIndexer.PortletId, asset.getPrimaryKey)
     document.addKeyword(FieldHelper.COMPANY_ID, asset.getCompanyId)
-    document.addKeyword(FieldHelper.ENTRY_CLASS_NAME, LessonIndexer.LessonClassName)
+    document.addKeyword(FieldHelper.ENTRY_CLASS_NAME, getClassName)
     document.addKeyword(FieldHelper.ENTRY_CLASS_PK, lessonId)
     document.addKeyword(FieldHelper.PORTLET_ID, LessonIndexer.PortletId)
-    document.addDate(FieldHelper.MODIFIED_DATE, asset.getModifiedDate)    // Should be set for LR7 (check in OpenSearch while searching).
+    document.addDate(FieldHelper.MODIFIED_DATE, asset.getModifiedDate) // Should be set for LR7 (check in OpenSearch while searching).
     document.addKeyword(FieldHelper.GROUP_ID, asset.getGroupId)
     document.addKeyword(FieldHelper.SCOPE_GROUP_ID, asset.getGroupId)
     document.addKeyword(FieldHelper.CONTENT, getSearchContentForPackage(lessonId))
@@ -68,11 +54,9 @@ class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
     document
   }
 
-  protected def doReindex(obj: Object) {
-    val lessonId = getLessonId(obj)
-
-    val assetEntry = AssetEntryLocalServiceHelper.getAssetEntry(LessonIndexer.LessonClassName, lessonId)
-    SearchEngineUtilHelper.updateDocument(getSearchEngineId, assetEntry.getCompanyId, getDocument(obj))
+  protected def proxyReindex(lesson: Lesson) {
+    val assetEntry = AssetEntryLocalServiceHelper.getAssetEntry(getClassName, lesson.id)
+    SearchEngineUtilHelper.updateDocument(getSearchEngineId, assetEntry.getCompanyId, getDocument(lesson))
   }
 
   protected def doReindex(className: String, classPK: Long) {
@@ -88,10 +72,11 @@ class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
 
   protected def reindexByLesson(lessonId: Long) {
     val documents = new util.ArrayList[LDocument]
-    val asset = AssetEntryLocalServiceHelper.fetchAssetEntry(LessonIndexer.LessonClassName, lessonId)
-    documents.add(getDocument(asset))
+    lessonService
+      .getLesson(lessonId)
+      .foreach(lesson => documents.add(getDocument(lesson)))
 
-    for (asset <- AssetEntryLocalServiceHelper.fetchAssetEntry(LessonIndexer.LessonClassName, lessonId))
+    for (asset <- AssetEntryLocalServiceHelper.fetchAssetEntry(getClassName, lessonId))
       SearchEngineUtilHelper.updateDocuments(getSearchEngineId, asset.getCompanyId, documents)
   }
 
@@ -104,14 +89,6 @@ class LessonIndexer extends ValamisBaseIndexer with InjectableFactory {
     courseService.getByCompanyId(companyId).toStream
       .flatMap(course => lessonService.getAllVisible(course.getGroupId))
       .filter(lesson => lesson.isVisible.getOrElse(true))
-      .flatMap(lesson => AssetEntryLocalServiceHelper.fetchAssetEntry(LessonIndexer.LessonClassName, lesson.id))
-      .foreach(asset => SearchEngineUtilHelper.updateDocument(indexer, companyId, getDocument(asset)))
-  }
-
-  protected def getLessonId(obj: Object): Long = {
-    obj match {
-      case l: Lesson => l.id
-      case a: LAssetEntry => a.getClassPK
-    }
+      .foreach(lesson => SearchEngineUtilHelper.updateDocument(indexer, companyId, getDocument(lesson)))
   }
 }

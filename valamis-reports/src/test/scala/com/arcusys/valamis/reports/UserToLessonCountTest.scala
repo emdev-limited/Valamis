@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import com.arcusys.valamis.lesson.model.{Lesson, LessonGrade, LessonType, UserLessonResult}
 import com.arcusys.valamis.lesson.service.{LessonService, LessonStatementReader}
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.reports.service.ReportServiceImpl
 import com.arcusys.valamis.reports.table.LessonTables

@@ -42,7 +42,8 @@ contentProviderManager.module('Entities', function (Entities, contentProviderMan
                         customerKey: model.get('customerKey'),
                         customerSecret: model.get('customerSecret'),
                         isPrivate: model.get("isPrivate"),
-                        image: model.get("image")
+                        image: model.get("image"),
+                        isSelective: model.get("isSelective")
                     };
                 }
             },
@@ -60,7 +61,8 @@ contentProviderManager.module('Entities', function (Entities, contentProviderMan
                         customerKey: model.get('customerKey'),
                         customerSecret: model.get('customerSecret'),
                         isPrivate: model.get("isPrivate"),
-                        image: model.get("image")
+                        image: model.get("image"),
+                        isSelective: model.get("isSelective")
                     };
                 }
             }

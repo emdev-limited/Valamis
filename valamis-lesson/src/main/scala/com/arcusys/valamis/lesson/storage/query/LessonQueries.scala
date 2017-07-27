@@ -18,8 +18,29 @@ trait LessonQueries {
 
   type LessonQuery = Query[LessonTable, LessonTable#TableElementType, Seq]
 
+  val updateQ = Compiled { (id: Rep[Long]) =>
+    lessons
+      .filterById(id)
+      .map(l => (
+        l.title,
+        l.description,
+        l.isVisible,
+        l.beginDate,
+        l.endDate,
+        l.requiredReview,
+        l.scoreLimit))
+  }
+
+  val filterByIdQ = Compiled { id: Rep[Long] =>
+    lessons.filterById(id)
+  }
+
   implicit class LessonExtensions(q: LessonQuery) {
     def filterById(id: Long): LessonQuery = {
+      q.filter(_.id === id)
+    }
+
+    def filterById(id: Rep[Long]): LessonQuery = {
       q.filter(_.id === id)
     }
 

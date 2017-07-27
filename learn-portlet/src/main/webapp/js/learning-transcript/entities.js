@@ -119,28 +119,46 @@ learningTranscript.module('Entities', function(Entities, learningTranscript, Bac
 
   // certificates
 
-  // todo should return valamis certificates (with statuses success and overdue) and open badges certificates
-  // todo this api should be in certificate servlet
   var CertificatesCollectionService = new Backbone.Service({
-    url: path.root,
-    sync: {
-      'read': {
-        'path': function (collection, options) {
-          return path.api.transcript+'user/' + options.userId + '/certificates'
-        },
-        'data': function () {
-          var params = {
-            withOpenBadges: true,
-            courseId: Utils.getCourseId()
-          };
-          return params;
-        },
-        'method': 'get'
+      url: path.root,
+      sync: {
+          read: {
+              path: function (collection, options) {
+                  return path.api.learningPaths + 'users/' + options.userId + '/learning-paths/'
+              },
+              data: function () {
+                  var params = {
+                      sort: 'title',
+                      status: 'Success',
+                      skip: 0,
+                      take: 9999,
+                      layoutId: Utils.getPlid()
+                  };
+                  return params;
+              }
+          }
+      },
+      targets: {
+          getOpenBadges: {
+              path: function (collection, options) {
+                  return path.api.transcript + 'user/' + options.userId + '/open-badges';
+              },
+              data: function () {
+                  return {courseId: Utils.getCourseId()}
+              },
+              method: 'get'
+          }
       }
-    }
   });
 
   Entities.Certificate = Backbone.Model.extend({
+    defaults: {
+      isOpenBadges: false
+    },
+    getFullLogoUrl: function() {
+      var logoUrl = this.get('logoUrl');
+      return (logoUrl) ? '/' + path.api.prefix + logoUrl : '';
+    },
     getPrintUrl: function (model, userId) {
       var params = {
         courseId: Utils.getCourseId()
@@ -153,21 +171,7 @@ learningTranscript.module('Entities', function(Entities, learningTranscript, Bac
   Entities.CertificatesCollection = Backbone.Collection.extend({
     model: Entities.Certificate,
     parse: function(response) {
-      var certificates = [];
-      _.forEach(response, function(record) {
-        var achievementDate = (record.userState && record.userState.statusAcquiredDate)?
-          record.userState.statusAcquiredDate: '';
-        var c = _.extend({
-          achievementDate: achievementDate,
-          expirationDate: record.expirationDate || '',
-          isOverdue: record.isOverdue,
-          isOpenbadges: (record.certificate.id < 0)
-        }, record.certificate);
-
-        certificates.push(c);
-      });
-
-      return certificates;
+      return response.items;
     }
   }).extend(CertificatesCollectionService);
 

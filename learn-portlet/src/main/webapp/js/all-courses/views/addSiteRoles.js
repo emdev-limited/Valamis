@@ -53,6 +53,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
             this.itemsToolbarView = new Views.AddSiteRolesToolbarView();
             this.itemsListView = new Views.AddSiteRolesListView({ collection: this.collection });
             this.constructor.__super__.onRender.apply(this, arguments);
+            this.listPaginator.empty();
         }
     });
 });

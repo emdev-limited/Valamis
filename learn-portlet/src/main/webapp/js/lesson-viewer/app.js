@@ -196,11 +196,9 @@ lessonViewer.commands.setHandler('player:parameters:save', function (id, title, 
 lessonViewer.commands.setHandler('player:session:end', function () {
     valamisApp.execute('portlet:unset:onbeforeunload');
     lessonViewer.execute('player:parameters:clear');
-    lessonViewer.router.navigate('/');
 
     setTimeout(function(){
-        lessonViewer.execute('packages:show');
-        lessonViewer.execute('packages:reload');
+        window.location.assign(window.location.pathname);
     }, 800);
 });
 

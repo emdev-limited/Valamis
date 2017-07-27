@@ -2,11 +2,11 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet.{RenderRequest, RenderResponse}
 
-import com.arcusys.valamis.certificate.service.AssignmentService
-import com.arcusys.valamis.web.portlet.base.{OAuthPortlet, PermissionUtil, PortletBase, ViewAllPermission}
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
+import com.arcusys.valamis.web.portlet.base._
 
 class LearningTranscriptView extends OAuthPortlet with PortletBase {
-  private lazy val assignmentService = inject[AssignmentService]
 
   override def doView(request: RenderRequest, response: RenderResponse) {
     implicit val out = response.getWriter
@@ -22,7 +22,7 @@ class LearningTranscriptView extends OAuthPortlet with PortletBase {
 
     val data = Map(
       "viewAllPermission" -> viewAllPermission,
-      "isAssignmentDeployed" -> assignmentService.isAssignmentDeployed
+      "isAssignmentDeployed" -> false
     ) ++ securityScope.data
 
     sendMustacheFile(data, "learning_transcript.html")

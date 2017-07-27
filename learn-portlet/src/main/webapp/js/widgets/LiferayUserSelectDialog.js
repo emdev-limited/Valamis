@@ -96,11 +96,12 @@ LiferayUserCollection = Backbone.Collection.extend({
 }).extend(LiferayUserCollectionService);
 
 LiferayUserListElement = Backbone.View.extend({
+  tagName: 'tr',
+  className: 'cursor-pointer',
   events: {
-    'click .js-toggle-user': 'toggleThis'
+    'click': 'toggleThis'
   },
   initialize: function (options) {
-    this.$el = jQuery('<tr>');
     this.singleSelect = options.singleSelect;
   },
   render: function () {
@@ -115,8 +116,6 @@ LiferayUserListElement = Backbone.View.extend({
     else {
       this.model.trigger('unsetIsSelectedAll', this.model);
       this.model.toggle();
-      this.$('.js-toggle-user').toggleClass('neutral', !this.model.get('selected'));
-      this.$('.js-toggle-user').toggleClass('primary', this.model.get('selected'));
     }
   }
 });

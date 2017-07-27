@@ -4,7 +4,7 @@ import com.arcusys.learn.liferay.LiferayClasses.LUser
 import com.arcusys.valamis.certificate.model.CertificateStatuses
 import com.arcusys.valamis.certificate.model.goal.GoalStatistic
 import com.arcusys.valamis.gradebook.model.{CourseGrade, Statistic}
-import com.arcusys.valamis.lrs.model.EndpointInfo
+import com.arcusys.valamis.lrssupport.lrs.model.EndpointInfo
 import com.arcusys.valamis.user.model.{User, UserInfo}
 import com.arcusys.valamis.user.util.UserExtension
 import com.arcusys.valamis.web.servlet.course.CourseResponse

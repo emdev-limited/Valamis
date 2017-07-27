@@ -10,7 +10,7 @@ var PdfElementModule = slidesApp.module('PdfElementModule', {
             }),
             templateHelpers: function() {
                 return {
-                    content: slidesApp.getFileUrl(this.model, this.model.get('content')),
+                    contentVal: slidesApp.getFileUrl(this.model, this.model.get('content')),
                     noSettings: true
                 }
             },

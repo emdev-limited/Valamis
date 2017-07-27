@@ -173,6 +173,19 @@ var lessonStudioServices = {
                 },
                 'data': {courseId: Utils.getCourseId()},
                 'method': 'delete'
+            },
+
+            'getByActivityId': {
+                'path': function(model) {
+                    return path.api.betaStudio + 'slide-sets/select-by-activity-id'
+                },
+                'data': function (model) {
+                    return {
+                        'activityId': model.get('activityId'),
+                        'X-Valamis-Plid': Utils.getPlid()
+                    }
+                },
+                'method': 'get'
             }
         }
     }),

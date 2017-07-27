@@ -7,8 +7,7 @@ import com.arcusys.valamis.updaters.common.model.PeriodTypes.PeriodType
 import com.arcusys.valamis.updaters.version310.model.certificate.GoalType
 
 trait CertificateGoalTableComponent
-  extends CertificateTableComponent
-    with CertificateGoalGroupTableComponent {
+  extends  CertificateGoalGroupTableComponent {
   self: SlickProfile =>
 
   import driver.simple._

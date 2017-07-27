@@ -4,7 +4,7 @@
     <definition>
         <notification-type>SCORMApplication</notification-type>
         <!--Receive a message when someone -->
-        <description>lesson's notifications</description>
+        <description>publishes a new lesson.</description>
         <delivery-type>
             <name>website</name>
             <type>10002</type> <!-- TYPE_WEBSITE-->

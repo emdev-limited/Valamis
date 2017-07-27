@@ -1,7 +1,7 @@
 <script type="text/template" id="lessonManagerLayoutTemplate">
     <div id="lessonManagerToolbar"></div>
     <div id="lessonManagerPackages"></div>
-    <div id="lessonManagerPaginator" class="val-paginator text-center"></div>
+    <div id="lessonManagerPaginator" class="val-paginator"></div>
 
     <div id="lessonManagerEditModalRegion"></div>
     <div id="lessonManagerModalRegion">
@@ -11,8 +11,8 @@
 <script type="text/template" id="packageManagerToolbarTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
             </div>
         </div>
         <div class="dropdown filter-element shift-left js-category-filter" id="lessonManagerTags" data-value="">
@@ -97,7 +97,7 @@
         <li class="description">{{description}}</li>
 
         {{^canChangeVisibility}}
-        <li class="status">
+        <li>
             <span class="val-label">{{itemVisibilityLabel}}</span>
         </li>
         {{/canChangeVisibility}}
@@ -154,8 +154,8 @@
     <div class="modal-close val-icon-exit"></div>
 
     <div class="bbm-modal__bottombar">
-        <button class="button big neutral modal-close">{{editPackageCancelButtonLabel}}</button>
-        {{#LM_MODIFY}}<button class="button big primary js-save-package js-submit-button">{{editPackageSubmitButtonLabel}}</button>{{/LM_MODIFY}}
+        {{#LM_MODIFY}}<button class="button medium primary js-save-package js-submit-button">{{editPackageSubmitButtonLabel}}</button>{{/LM_MODIFY}}
+        <button class="button medium simple modal-close">{{editPackageCancelButtonLabel}}</button>
     </div>
 </script>
 
@@ -188,7 +188,7 @@
                         <button class="button big primary js-upload-image inline">
                             {{editPackageUploadImageButtonLabel}}
                         </button>
-                        <button class="button medium simple no-text val-icon-trash danger-color inline js-delete-logo">
+                        <button class="button medium simple no-text val-icon-trash danger inline js-delete-logo">
                             {{deleteLogoLabel}}
                         </button>
                         <button class="button big neutral js-select-from-media-gallery">
@@ -280,20 +280,19 @@
 </script>
 
 <script type="text/template" id="packageManagerNewPackageList">
-    <table class="val-table medium list new-packages-list-table">
+    <table class="val-table">
         <tbody class="js-new-package-items">
 
         </tbody>
     </table>
     <div class="bbm-modal__bottombar">
-        <a href="#" class="button big neutral modal-close js-cancel-upload-data">Cancel</a>
-        <button class="button big primary js-save-packages-data js-submit-button">Save</button>
-
+        <button class="button medium primary js-save-packages-data js-submit-button">Save</button>
+        <button class="button medium simple modal-close js-cancel-upload-data">Cancel</button>
     </div>
 </script>
 
 <script type="text/html" id="packageManagerNewPackagesItemView">
-        <td>
+        <td class="narrow-col">
             <img class="val-img-logo js-logo js-upload-image"
                  src="{{#logo}}/delegate/packages/{{id}}/logo?courseId={{courseId}}{{/logo}}" />
         </td>

@@ -1,7 +1,7 @@
 package com.arcusys.learn.liferay.update.version300.certificate3006
 
+import com.arcusys.learn.liferay.update.migration.GoalType
 import com.arcusys.learn.liferay.update.version300.certificate3004.{CertificateGoalGroupTableComponent, CertificateTableComponent}
-import com.arcusys.valamis.certificate.model.goal.GoalType
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes._
 import com.arcusys.valamis.persistence.common.DbNameUtils._

@@ -12,15 +12,6 @@ var ValamisApp = Marionette.Application.extend({
     },
     start: function(options){
 
-        var oldSync = Backbone.sync;
-        Backbone.sync = function(method, model, options){
-            _.extend(options.data,{'p_auth': Liferay.authToken});
-            options.beforeSend = function(xhr){
-                xhr.setRequestHeader('X-CSRF-Token', Liferay.authToken);
-            };
-            return oldSync(method, model, options);
-        };
-
         var appregionId = 'valamisAppRegion';
 
         if(jQueryValamis('#' + appregionId).length <= 0) {
@@ -36,6 +27,7 @@ var ValamisApp = Marionette.Application.extend({
 
         this.mainRegion.show(layoutView);
         this.started = true;
+        this.loadedResources = [];
     }
 });
 
@@ -113,7 +105,8 @@ valamisApp.commands.setHandler('notify', function(notificationType, message, opt
 valamisApp.commands.setHandler('subapp:start', function(options){
     //TODO check required options!!!;
     var defaultLanguage = 'en';
-    var resourceName = options.resourceName;
+    var resourceName = (_.isArray(options.resourceName)) 
+    	? options.resourceName : [options.resourceName];
     var app = options.app;
     var appOptions = options.appOptions;
     var permissions = options.permissions;
@@ -124,33 +117,54 @@ valamisApp.commands.setHandler('subapp:start', function(options){
 
     Valamis.language = Valamis.language || {};
 
-    var onBankLanguageLoad  = function(properties) {
+    var onBankLanguageLoad  = function(properties, resourceName, deferred) {
         _.extend(Valamis.language , properties);
-
-        app.start(appOptions);
-
-        if (window.hasOwnProperty('elementQuery')) {
-            elementQuery.init();
-        }
+        valamisApp.loadedResources.push(resourceName);
+        deferred.resolve();
     };
 
-    var onBankLanguageError = function() {
-        alert('Translation resource loading failed!');
+    var onBankLanguageError = function(properties, resourceName, deferred) {
+        alert('Translation resource '+ + ' loading failed!');
+        deferred.reject();
     };
 
-    var getPackSource = function(language){
-        return Utils.getContextPath() + 'i18n/'+ resourceName +'_' + language + '.properties?v=' + Utils.getValamisVersion();
+    var getPackSource = function(resourceName, language){
+        return Utils.getContextPath() + 'i18n/'+ resourceName +'_'
+            + language + '.properties?v=' + Utils.getValamisVersion();
     };
 
-    var getLanguageBank = function (options) {
+    var getLanguageBank = function (resourceName, options, deferred) {
         Backbone.emulateJSON = true;
-        var defaultURL = getPackSource(defaultLanguage);
-        var localizedURL = getPackSource(options.language);
+        var defaultURL = getPackSource(resourceName, defaultLanguage);
+        var localizedURL = getPackSource(resourceName, options.language);
 
-        Utils.i18nLoader(localizedURL, defaultURL, onBankLanguageLoad, onBankLanguageError);
+        Utils.i18nLoader(localizedURL, defaultURL,
+            function (properties) {
+                onBankLanguageLoad(properties, resourceName, deferred)
+            },
+            function (properties) {
+                onBankLanguageError(properties, resourceName, deferred)
+            });
     };
 
-    getLanguageBank({language : Utils.getLanguage()});
+    var defArray = [];
+    resourceName.forEach(function (name) {
+        if (!_.contains(valamisApp.loadedResources, name)) {
+            var deferred = jQueryValamis.Deferred();
+            defArray.push(deferred);
+            getLanguageBank(name, {language: Utils.getLanguage()}, deferred);
+        }
+    });
+
+    jQueryValamis.when.apply(this, defArray).then(
+        function() {
+            app.start(appOptions);
+
+            if (window.hasOwnProperty('elementQuery')) {
+                elementQuery.init();
+            }
+        }
+    );
 });
 
 valamisApp.commands.setHandler('portlet:set:onbeforeunload', function(message, callback) {

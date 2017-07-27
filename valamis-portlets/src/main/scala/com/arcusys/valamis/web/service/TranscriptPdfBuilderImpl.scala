@@ -7,6 +7,7 @@ package com.arcusys.valamis.web.service
 
 import java.io._
 import java.net.URI
+import java.util.Locale
 import javax.servlet.ServletContext
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.sax.SAXResult
@@ -14,8 +15,7 @@ import javax.xml.transform.stream.StreamSource
 
 import com.arcusys.learn.liferay.util.LanguageHelper
 import com.arcusys.valamis.certificate.model._
-import com.arcusys.valamis.certificate.service.{AssignmentService, CertificateUserService}
-import com.arcusys.valamis.certificate.storage.{CertificateRepository, CertificateStateRepository}
+import com.arcusys.valamis.certificate.service._
 import com.arcusys.valamis.gradebook.model.LessonWithGrades
 import com.arcusys.valamis.gradebook.service.LessonGradeService
 import com.arcusys.valamis.uri.service.TincanURIService
@@ -23,14 +23,19 @@ import com.arcusys.valamis.user.model.UserInfo
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.util.FileSystemUtil
 import com.arcusys.valamis.util.mustache.Mustache
-import com.arcusys.valamis.utils.ResourceReader
+import com.arcusys.valamis.utils.{MessageBusExtension, ResourceReader}
 import com.arcusys.valamis.web.servlet.course.{CourseConverter, CourseFacadeContract, CourseResponseWithGrade}
-import com.arcusys.valamis.web.servlet.transcript.{TranscriptPdfBuilder, UserStatusResponse}
+import com.arcusys.valamis.web.servlet.transcript.TranscriptPdfBuilder
 import org.apache.fop.apps.FopConfParser
 import org.apache.xmlgraphics.util.MimeConstants
 import org.joda.time.DateTime
+import org.json4s.jackson.JsonMethods
 
-abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+
+// TODO: move pdf builder to Learning Path project
+abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder with JsonMethods with MessageBusExtension {
 
   def certificateUserService: CertificateUserService
 
@@ -38,17 +43,13 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
 
   def userService: UserService
 
-  def certificateStateRepository: CertificateStateRepository
-
   def uriService: TincanURIService
 
   def lessonGradeService: LessonGradeService
 
-  def assignmentService: AssignmentService
-
   def resourceReader: ResourceReader
 
-  def certificateRepository: CertificateRepository
+  def learningPathService: LearningPathService
 
   private lazy val defaultBaseURI = new URI("http://valamis.arcusys.com")
   private lazy val templatesPath = "fop"
@@ -59,10 +60,10 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
     }
   }
 
-  private def convertExpirationDate(expirationDate: Option[DateTime]): String = {
+  private def convertExpirationDate(expirationDate: Option[DateTime], locale: Locale): String = {
     expirationDate match {
-      case Some(date: DateTime) => date.toString("dd MMMM, YYYY")
-      case _ => LanguageHelper.get("transcript.Permanent")
+      case Some(date: DateTime) => date.toString("dd MMMM, YYYY", locale)
+      case _ => LanguageHelper.get(locale, "transcript.Permanent")
     }
   }
 
@@ -71,32 +72,30 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
     "title" -> course.course.title,
     "grade" -> convertGrade(course.grade))
 
-  private def certificate2Map(certificate: UserStatusResponse) = {
+  private def certificate2Map(lp: LPInfoWithUserStatus, locale: Locale) = {
 
-    val issueDate = certificate.userState.map(c => c.statusAcquiredDate.toString("dd MMMM, YYYY"))
+    val issueDate = lp.statusDate
 
     val isOpenBadges = issueDate.isEmpty
     val expirationDate = if (isOpenBadges) None
-    else convertExpirationDate(certificate.expirationDate)
+    else {
+      val expDate = lp.validPeriod.map(vp => issueDate.get.plus(vp))
+      convertExpirationDate(expDate, locale)
+    }
 
-    Map("title" -> certificate.certificate.title,
-      "issueDate" -> issueDate,
+    Map("title" -> lp.title,
+      "issueDate" -> issueDate.map(_.toString("dd MMMM, YYYY", locale)),
       "expirationDate" -> expirationDate,
-      "issueDateTitle" -> LanguageHelper.get("transcript.IssueDate"),
-      "expirationDateTitle" -> LanguageHelper.get("transcript.ExpirationDate"),
+      "issueDateTitle" -> LanguageHelper.get(locale, "transcript.IssueDate"),
+      "expirationDateTitle" -> LanguageHelper.get(locale, "transcript.ExpirationDate"),
       "isOpenBadges" -> isOpenBadges,
-      "openBadges" -> LanguageHelper.get("transcript.OpenBadges"))
+      "openBadges" -> LanguageHelper.get(locale, "transcript.OpenBadges"))
   }
 
   private def lesson2Map(lesson: LessonWithGrades) = Map(
     "lessonName" -> lesson.lesson.title,
     "gradeAuto" -> convertGrade(lesson.autoGrade),
     "gradeTeacher" -> convertGrade(lesson.teacherGrade.flatMap(_.grade))
-  )
-
-  private def assignment2Map(assignment: Assignment, userId: Long) = Map(
-    "assignmentName" -> assignment.title,
-    "grade" -> convertGrade(assignment.users.find(_.userInfo.id == userId).flatMap(_.submission.grade.map(_.toFloat)))
   )
 
   private def getLessonFOTemplate(templatePath: String, models: Seq[LessonWithGrades], userId: Long, servletContext: ServletContext) = {
@@ -109,21 +108,6 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
     models.map { model =>
 
       lesson2Map(model)
-
-    }.foldLeft("")((acc, model) => acc + modelTemplate.render(model))
-  }
-
-
-  private def getAssignmentFOTemplate(templatePath: String, models: Seq[Assignment], userId: Long, servletContext: ServletContext) = {
-
-    val modelTemplate = {
-      val inputStream = resourceReader.getResourceAsStream(servletContext, templatesPath + "/assignment.fo")
-      new Mustache(inputStream)
-    }
-
-    models.map { model =>
-
-      assignment2Map(model, userId)
 
     }.foldLeft("")((acc, model) => acc + modelTemplate.render(model))
   }
@@ -160,7 +144,8 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
   private def getCourseFOTemplate(templatePath: String,
                                   models: Seq[CourseResponseWithGrade],
                                   userId: Long,
-                                  servletContext: ServletContext) = {
+                                  servletContext: ServletContext,
+                                  locale: Locale) = {
     val modelTemplate = {
       val inputStream = resourceReader.getResourceAsStream(servletContext, templatesPath + "/course.fo")
       new Mustache(inputStream)
@@ -169,11 +154,6 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
       models.map(_.course.id),
       isFinished = true,
       skipTake = None).records
-
-    val assignments = if (assignmentService.isAssignmentDeployed)
-      assignmentService.getUserAssignments(userId).records
-        .filter(a => a.users.count(u => u.userInfo.id == userId && u.submission.status == UserStatuses.Completed) > 0)
-    else Seq()
 
     models.map { model =>
 
@@ -186,40 +166,26 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
         servletContext
       )
 
-      val assigmentsForCourse = assignments.filter(_.course.id == model.course.id)
-      val mappedAssignments = getAssignmentFOTemplate(templatePath,
-        assigmentsForCourse,
-        userId,
-        servletContext)
-
       val lessonsForPdf = mappedLessons match {
         case "" => mappedCourse + ("hasLessons" -> false)
         case _ =>
-          val title = getTitleWithGradesFOTemplate(templatePath, LanguageHelper.get("transcript.lessons"),
-            Some(LanguageHelper.get("transcript.autoGradeTitle")),
-            LanguageHelper.get("transcript.instrGradeTitle"), true,
+          val title = getTitleWithGradesFOTemplate(templatePath, LanguageHelper.get(locale, "transcript.lessons"),
+            Some(LanguageHelper.get(locale, "transcript.autoGradeTitle")),
+            LanguageHelper.get(locale, "transcript.instrGradeTitle"), hasAutoGrade = true,
             servletContext)
 
           mappedCourse + ("hasLessons" -> true) + ("lessons" -> mappedLessons) + ("titleLesson" -> title)
       }
-      val assignmentsForPdf = mappedAssignments match {
-        case "" => mappedCourse + ("hasAssignments" -> false)
-        case _ =>
-          val title = getTitleWithGradesFOTemplate(templatePath, LanguageHelper.get("transcript.assignments"),
-            None,
-            LanguageHelper.get("transcript.instrGradeTitle"), false, servletContext)
 
-          mappedCourse + ("hasAssignments" -> true) + ("assignments" -> mappedAssignments) + ("titleAssignments" -> title)
-      }
-
-      lessonsForPdf ++ assignmentsForPdf
+      lessonsForPdf
     }.foldLeft("")((acc, model) => acc + modelTemplate.render(model))
   }
 
 
   private def getFOTemplate(modelTemplateFileName: String,
-                            models: Seq[UserStatusResponse],
-                            servletContext: ServletContext) = {
+                            models: Seq[LPInfoWithUserStatus],
+                            servletContext: ServletContext,
+                            locale: Locale) = {
     val modelTemplate = {
       val inputStream = resourceReader.getResourceAsStream(servletContext, modelTemplateFileName)
       new Mustache(inputStream)
@@ -227,16 +193,17 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
 
     models.map { model =>
 
-      certificate2Map(model)
+      certificate2Map(model, locale)
     }.foldLeft("")((acc, model) => acc + modelTemplate.render(model))
   }
 
 
-  override def build(companyId: Long, userId: Long, servletContext: ServletContext): ByteArrayOutputStream = {
+  override def build(companyId: Long, userId: Long, servletContext: ServletContext, locale: Locale): ByteArrayOutputStream = {
     val renderedCertificateFOTemplate = getFOTemplate(
       templatesPath + "/cert.fo",
-      certificateUserService.getCertificatesByUserWithOpenBadgesAndDates(companyId, userId).map { case (c, s) => UserStatusResponse(c, s) },
-      servletContext
+      await(learningPathService.getPassedLearningPaths(userId, companyId)),
+      servletContext,
+      locale
     )
 
     val courses = lessonGradeService.getCoursesCompletedWithGrade(userId)
@@ -247,7 +214,8 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
       templatesPath,
       responseCourses,
       userId,
-      servletContext
+      servletContext,
+      locale
     )
 
     val user = userService.getById(userId)
@@ -275,17 +243,16 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
 
     val viewModel = Map(
       "username" -> user.getFullName,
-      "learningTranscriptTitle" -> LanguageHelper.get("transcript.LearningTranscriptTitle"),
-      "date" -> (new DateTime()).toString("dd MMMM, YYYY"),
+      "learningTranscriptTitle" -> LanguageHelper.get(locale, "transcript.LearningTranscriptTitle"),
+      "date" -> (new DateTime()).toString("dd MMMM, YYYY", locale),
       "userAvatarLink" -> url)
 
     var renderedFOTemplate = template.render(viewModel)
 
     val renderedCourseTitle = if (renderedCourseFOTemplate.isEmpty) ""
-    else getTitleFOTemplate(templatesPath, LanguageHelper.get("course"), servletContext)
+    else getTitleFOTemplate(templatesPath, LanguageHelper.get(locale, "course"), servletContext)
     val renderedCertificateTitle = if (renderedCertificateFOTemplate.isEmpty) ""
-    else getTitleFOTemplate(templatesPath, LanguageHelper.get("transcript.Certificates"), servletContext)
-
+    else getTitleFOTemplate(templatesPath, LanguageHelper.get(locale, "transcript.Certificates"), servletContext)
 
 
     renderedFOTemplate = renderedFOTemplate.substring(0, renderedFOTemplate.indexOf("</fo:table-cell>")) +
@@ -308,14 +275,12 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
   override def buildCertificate(userId: Long,
                                 servletContext: ServletContext,
                                 certificateId: Long,
-                                companyId: Long): ByteArrayOutputStream = {
+                                companyId: Long,
+                                locale: Locale): ByteArrayOutputStream = {
     val user = userService.getById(userId)
 
-    val userStatus = certificateRepository.getWithUserState(
-      companyId,
-      userId,
-      CertificateStatuses.Success).headOption
-      .map { case (c, s) => UserStatusResponse(c, Some(s)) }
+    val certificate =
+      await(learningPathService.getLearningPathsWithUserStatusByIds(Seq(certificateId), userId)).headOption
 
 
     val inputStream = resourceReader.getResourceAsStream(servletContext, templatesPath + "/fop-conf.xml")
@@ -341,18 +306,22 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
     val tempFile = FileSystemUtil.streamToTempFile(inputStreamBackground, "background", "png")
 
 
-    val viewModel = userStatus.map { status =>
+    val viewModel = certificate
+      .filter(c => c.status.contains(CertificateStatuses.Success) && c.statusDate.isDefined)
+      .map { c =>
+        val issuedDate = c.statusDate.get
+        val expiringDate = c.validPeriod.map(valid => issuedDate.plus(valid))
 
-      val expirationDate = convertExpirationDate(status.expirationDate)
+        val expirationDate = convertExpirationDate(expiringDate, locale)
 
-      Map(
-        "username" -> user.getFullName,
-        "expirationDate" -> expirationDate,
-        "achievementDate" -> status.userState.map(_.statusAcquiredDate.toString("dd MMMM, YYYY")),
-        "certificateTitle" -> status.certificate.title,
-        "background" -> tempFile.toURI,
-        "hasExpirationDate" -> (expirationDate != LanguageHelper.get("transcript.Permanent")))
-    }.getOrElse(Map())
+        Map(
+          "username" -> user.getFullName,
+          "expirationDate" -> expirationDate,
+          "achievementDate" -> issuedDate.toString("dd MMMM, YYYY", locale),
+          "certificateTitle" -> c.title,
+          "background" -> tempFile.toURI,
+          "hasExpirationDate" -> (expirationDate != LanguageHelper.get(locale, "transcript.Permanent")))
+      }.getOrElse(Map())
 
     val renderedFOTemplate = template.render(viewModel)
     val src = new StreamSource(new StringReader(renderedFOTemplate))
@@ -364,4 +333,10 @@ abstract class TranscriptPdfBuilderImpl extends TranscriptPdfBuilder {
     transformer.transform(src, res)
     out
   }
+
+  private def await[T](action: Future[T]): T = {
+    Await.result(action, Duration.Inf)
+  }
+
+
 }

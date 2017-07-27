@@ -4,7 +4,7 @@ import java.text.Normalizer
 import javax.servlet.http.HttpServletResponse
 
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.lrs.service.util.TinCanVerbs
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanVerbs
 import com.arcusys.valamis.slide.model.Slide
 import com.arcusys.valamis.slide.service.SlideService
 import com.arcusys.valamis.uri.model.TincanURIType

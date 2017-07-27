@@ -1,9 +1,9 @@
 package com.arcusys.learn.liferay.update.version300.migrations
 
 import com.arcusys.learn.liferay.update.SlickDBContext
+import com.arcusys.learn.liferay.update.migration.GoalType
 import com.arcusys.learn.liferay.update.version300.{certificate => oldScheme}
 import com.arcusys.learn.liferay.update.version300.{certificate3004 => newScheme}
-import com.arcusys.valamis.certificate.model.goal.GoalType
 import com.arcusys.valamis.model.PeriodTypes._
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.escalatesoft.subcut.inject.BindingModule

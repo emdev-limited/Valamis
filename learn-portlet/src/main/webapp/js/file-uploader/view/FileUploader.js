@@ -59,8 +59,11 @@ var FileUploader = Backbone.View.extend({
   render: function () {
     var that = this;
     this.$el.html(Mustache.render(jQuery('#fileUploaderDropZone').html(), {
-        fileUploadEndpoint: this.fileUploadEndpoint,
-        fileUploadAdditionalInfo: this.fileUploadAdditionalInfo
+      fileUploadEndpoint: this.fileUploadEndpoint,
+      fileUploadAdditionalInfo: this.fileUploadAdditionalInfo,
+      dropOrLabel: Valamis.language['dropOrLabel'],
+      browseLabel: Valamis.language['browseLabel'],
+      filesToUploadLabel: Valamis.language['filesToUploadLabel'],
     }));
     var widgetOptions = {
       dataType: 'json',

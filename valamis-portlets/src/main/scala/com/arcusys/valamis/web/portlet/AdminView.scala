@@ -5,9 +5,10 @@ import javax.portlet.{GenericPortlet, PortletRequest, RenderRequest, RenderRespo
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
-import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.settings.service.SettingService
+import com.arcusys.valamis.util.BuildInfo
 import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, PortletBase}
 import org.joda.time.{DateTime, Duration}
 import org.joda.time.format.DateTimeFormat
@@ -42,14 +43,20 @@ class AdminView extends GenericPortlet with PortletBase {
     val ltiOauthVersion = settingManager.getLtiOauthVersion
     val ltiOauthSignatureMethod = settingManager.getLtiOauthSignatureMethod
 
+    val betaStudioUrl = settingManager.getBetaStudioUrl
+
+    val isDefaultInstance = companyId == PortalUtilHelper.getDefaultCompanyId
+
     val data = Map(
-      "isDefaultInstance" -> (companyId == PortalUtilHelper.getDefaultCompanyId),
+      "isDefaultInstance" -> isDefaultInstance,
       "isAdmin" -> true,
       "isPortlet" -> true,
       "issuerName" -> issuerName,
       "issuerURL" -> issuerURL,
       "issuerEmail" -> issuerEmail,
       "issuerOrganization" -> issuerOrganization,
+      "valamisVersion" -> BuildInfo.version,
+      "releaseName" -> BuildInfo.releaseName,
       "googleClientId" -> googleClientId,
       "googleAppId" -> googleAppId,
       "googleApiKey" -> googleApiKey,
@@ -57,7 +64,8 @@ class AdminView extends GenericPortlet with PortletBase {
       "ltiMessageType" -> ltiMessageType,
       "ltiVersion" -> ltiVersion,
       "ltiOauthVersion" -> ltiOauthVersion,
-      "ltiOauthSignatureMethod" -> ltiOauthSignatureMethod) ++
+      "ltiOauthSignatureMethod" -> ltiOauthSignatureMethod,
+      "betaStudioUrl" -> betaStudioUrl) ++
       translations ++
       scope.data ++
       getTincanEndpointData

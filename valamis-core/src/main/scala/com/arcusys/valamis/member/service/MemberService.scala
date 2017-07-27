@@ -116,7 +116,7 @@ class MemberService {
 
   def getMembers(viewerId: Long, viewerType: MemberTypes.Value): Seq[LUser] = {
     viewerType match {
-      case MemberTypes.User => Seq(UserHelper().getUser(viewerId))
+      case MemberTypes.User => UserHelper().fetchUser(viewerId).toSeq
       case MemberTypes.UserGroup =>
         UserHelper().getUserGroupUsers(viewerId)
       case MemberTypes.Organization =>

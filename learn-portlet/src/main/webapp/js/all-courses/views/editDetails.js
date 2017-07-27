@@ -21,7 +21,9 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
             endDate: '.js-course-end-datetimepicker',
             template: '.js-course-template',
             theme: '.js-course-theme',
-            certificates: '.js-course-certificates'
+            certificates: '.js-course-certificates',
+            tags: '.js-course-tags',
+            instructors: '.js-course-instructors'
         },
         manualUrlEdit: false,
         events: {
@@ -146,7 +148,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 return false;
             }
 
-            var tagsElem = this.$('.val-tags')[0].selectize;
+            var tagsElem = this.ui.tags[0].selectize;
             var tagsIds = tagsElem.getValue().split(',');
 
             var tags = [], tagList = [];
@@ -160,11 +162,12 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 });
             }
 
-            var certificatesElem = this.$('.val-certificates')[0].selectize;
-            var certificatesIds = certificatesElem.getValue().split(',');
+            var certificatesElem = this.ui.certificates[0].selectize;
+
+            var certificatesIds = (!!certificatesElem )? certificatesElem.getValue().split(',') : [];
 
             var certificates = [], certificateList = [];
-            if (certificatesIds[0] != '') {
+            if (!!certificatesIds && certificatesIds[0] != '') {
                 _.forEach(certificatesIds, function (certificatesId) {
                     certificateList.push(certificatesElem.options[certificatesId].text);
                     certificates.push({
@@ -174,7 +177,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 });
             }
 
-            var instructorsElem = this.$('.val-instructors')[0].selectize;
+            var instructorsElem = this.ui.instructors[0].selectize;
             var instructorsIds = instructorsElem.getValue().split(",");
             var instructors = [];
             if (instructorsIds[0] != '') {
@@ -185,7 +188,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                     });
                 });
             }
-            
+
             this.model.set({
                 title: title,
                 description: description,
@@ -226,24 +229,31 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
         },
         activateEditor: function () {
             var editorDeffered = $.Deferred();
-            setTimeout(function () {
-                CKEDITOR.replace('allCoursesLongDescriptionTextView', {
-                    toolbarLocation: 'top',
-                    height: 100,
-                    toolbar: [
-                        {name: 'document', items: ['Source']},
-                        {
-                            name: 'paragraph',
-                            items: ['NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']
-                        },
-                        {name: 'basicstyles', items: ['Bold', 'Italic', 'Underline']},
-                        {name: 'styles', items: ['Font', 'FontSize']},
-                        {name: 'colors', items: ['TextColor', 'BGColor']},
-                        {name: 'insert', items: ['Image']}
-                    ]
-                });
 
-                editorDeffered.resolve();
+            var intervalId = setInterval(function(){
+                if(typeof CKEDITOR !== 'undefined' && typeof CKEDITOR._bundle !== 'undefined'
+                        && CKEDITOR._bundle == 'valamis' && CKEDITOR.status == 'loaded'
+                        && $('#allCoursesLongDescriptionTextView').length > 0) {
+
+                    clearInterval(intervalId);
+                    CKEDITOR.replace('allCoursesLongDescriptionTextView', {
+                        toolbarLocation: 'top',
+                        height: 100,
+                        toolbar: [
+                            {name: 'document', items: ['Source']},
+                            {
+                                name: 'paragraph',
+                                items: ['NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']
+                            },
+                            {name: 'basicstyles', items: ['Bold', 'Italic', 'Underline']},
+                            {name: 'styles', items: ['Font', 'FontSize']},
+                            {name: 'colors', items: ['TextColor', 'BGColor']},
+                            {name: 'insert', items: ['Image']}
+                        ]
+                    });
+
+                    editorDeffered.resolve();
+                }
             }, 100);
 
             return editorDeffered.promise();
@@ -263,7 +273,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
             var that = this;
 
             // will be in next release
-/*            if (!this.model.id) {
+            if (!this.model.id) {
                 this.templates = new allCourses.Entities.TemplatesCollection();
                 this.templates.fetch({
                     reset: true,
@@ -271,7 +281,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                         that.fillTemplate();
                     }
                 });
-            }*/
+            }
             
             this.themes = new allCourses.Entities.ThemesCollection();
             this.themes.fetch({
@@ -347,7 +357,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 this.$('.js-course-end-datetimepicker').data('DateTimePicker').defaultDate(null);
             }
             this.$('.js-course-user-limit').valamisPlusMinus({
-                min: 0, max: 9999
+                min: 1, max: 9999, obligatory: false
             });
             if (this.model.get('userLimit')) {
                 this.$('.js-course-user-limit').valamisPlusMinus("value", this.model.get('userLimit'));
@@ -363,11 +373,11 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 }
             });
 
-            var modelTags = _(this.model.get('tags')).map(function (tag) {
+            var modelTags = _.map(this.model.get('tags'), function (tag) {
                 return tag.id
             });
 
-            var selectize = this.$('.js-course-tags').selectize({
+            var selectize = this.ui.tags.selectize({
                 delimiter: ',',
                 persist: false,
                 valueField: 'id',
@@ -375,7 +385,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 create: true,
                 plugins: ['remove_button']
             });
-            selectize[0].selectize.setValue(modelTags.value());
+            selectize[0].selectize.setValue(modelTags);
         },
 
         fillTemplate: function () {
@@ -386,7 +396,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 }
             });
 
-            var selectize = this.$('.js-course-template').selectize({
+            var selectize = this.ui.template.selectize({
                 valueField: 'id',
                 labelField: 'name',
                 options: selectTemplates
@@ -411,7 +421,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 defaultThemeId = selectThemes[0].id;
             }
 
-            var selectize = this.$('.js-course-theme').selectize({
+            var selectize = this.ui.theme.selectize({
                 valueField: 'id',
                 labelField: 'name',
                 options: selectThemes
@@ -440,7 +450,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
                 }
             });
 
-            var selectize = this.$('.js-course-certificates').selectize({
+            var selectize = this.ui.certificates.selectize({
                 delimiter: ',',
                 persist: false,
                 valueField: 'id',
@@ -470,7 +480,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
             var modelInstructors = [];
 
             var initSelectize = function(hasInstructors) {
-                var selectize = that.$('.js-course-instructors').selectize({
+                var selectize = that.ui.instructors.selectize({
                     delimiter: ',',
                     persist: false,
                     valueField: 'id',

@@ -32,7 +32,6 @@ body .overflow-hidden {
  * http://neat.bourbon.io
  * Copyright 2012-2014 thoughtbot, inc.
  * MIT License */
-  /* phenomenizer */
 }
 
 .valamis-slides .shift-right .button:first-child {
@@ -678,6 +677,10 @@ body .overflow-hidden {
   line-height: initial;
 }
 
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content span {
+  display: block;
+}
+
 .valamis-slides .reveal .slides .rj-element.rj-text .item-content ol,
 .valamis-slides .reveal .slides .rj-element.rj-text .item-content ul {
   display: block;
@@ -726,8 +729,8 @@ body .overflow-hidden {
 
 .valamis-slides .reveal .slides .rj-element.question-element {
   max-width: 80%;
-  min-width: 200px;
-  min-height: 200px;
+  min-width: 0px;
+  min-height: 0px;
 }
 
 .valamis-slides .reveal .slides .rj-element.question-element .item-content {
@@ -1745,119 +1748,16 @@ body .overflow-hidden {
   cursor: default;
 }
 
-.valamis-slides .slideset-editor.phenomenizer-editor {
-  visibility: visible;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-}
-
-.valamis-slides .slideset-editor.phenomenizer-editor .slides-editor-topbar .button-group button.button > [class^="val-icon-"]:before {
-  margin: 0;
-}
-
-.valamis-slides .slideset-editor.phenomenizer-editor .button-group {
-  margin-top: 0;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .sidebar-wide {
-  width: 260px;
-  min-height: 260px;
-  margin-left: -260px;
-  float: left;
-  background-color: #F2F2F2;
-  border-right: 1px solid #ddd;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .sidebar-wide .filter-element input {
-  width: 205px;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .sidebar-wide .val-tree {
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content {
-  min-height: 300px;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content {
-  padding: 5px;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-plus, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-remove, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-edit-desc {
-  cursor: pointer;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-plus circle, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-plus rect, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-remove circle, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-remove rect, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-edit-desc circle, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-edit-desc rect {
-  opacity: 0.6;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-plus:hover circle, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-plus:hover rect, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-remove:hover circle, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-remove:hover rect, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-edit-desc:hover circle, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-edit-desc:hover rect {
-  opacity: 1;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-plus text, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-remove text, .valamis-slides .phenomenizer-editor-wrapper .phenomenizer-content .content .tree-edit-desc text {
-  font-weight: bold;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .tree-textarea {
-  width: 200px;
-  height: 40px;
-  min-height: 0;
-  border: 0;
-  background-color: transparent;
-  padding: 0;
-  box-shadow: none;
-  font-weight: bold;
-  line-height: 1.2;
-  resize: none;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .tree-textarea:focus {
-  background-color: transparent;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .tree-node-drag {
-  pointer-events: none !important;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .tree-text-box {
-  width: 95%;
-  margin: 0 auto;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  cursor: inherit;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .tree-controls {
-  cursor: pointer;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .tree-controls span {
-  color: #fff;
-}
-
-.valamis-slides .phenomenizer-editor-wrapper .ui-draggable-dragging {
-  width: 215px;
-  padding: 10px;
-  overflow: hidden;
-  border-radius: 3px;
-  background-color: #F2F2F2;
-  border: 2px solid #386C9C;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  pointer-events: none;
-}
-
 .valamis-slides .slides-editor-modals-container .val-table {
   margin: 0px;
 }
 
 .valamis-slides .slides-editor-modals-container .val-table .js-file-uploader {
   padding: 0px;
+}
+
+.valamis-slides .liferay-articles-modal .val-table .liferay-article.selected {
+  border: 2px solid #598000;
 }
 
 .valamis-slides .template-info img {

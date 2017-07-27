@@ -9,8 +9,6 @@ else  // iframes
 path.api = {
     prefix: 'delegate/'
 };
-path.api.certificates = path.api.prefix + 'certificates/';
-path.api.certificateStates = path.api.prefix + 'certificate-states/';
 path.api.category = path.api.prefix + 'categories/';
 path.api.lesson = path.api.packages = path.api.prefix + 'packages/';
 path.api.lessonResults = path.api.prefix + 'lesson-results/';
@@ -26,13 +24,21 @@ path.api.administering = path.api.prefix + 'administering/';
 path.api.questions = path.api.prefix + 'questions/';
 path.api.plainText = path.api.prefix + 'plaintext/';
 path.api.print = path.api.prefix + 'print/';
+path.api.certificatesTracker = path.api.prefix + 'learning-paths/expired-certificates/';
 
 path.api.activityToStatement = path.api.prefix + 'activityToStatement/';
-path.api.manifestactivities =  path.api.prefix + 'manifestactivities/';
-path.api.report =  path.api.prefix + 'report/';
-path.api.liferay = path.api.prefix  + 'liferay/';
-path.api.lrs2activity = path.api.prefix  + 'lrs2activity-filter-api-controller/';
-path.api.uri = path.api.prefix  + 'uri/';
+path.api.manifestactivities = path.api.prefix + 'manifestactivities/';
+path.api.report = path.api.prefix + 'report/';
+path.api.reportExport = {};
+path.api.reportExport.certificates = path.api.prefix + 'report/export/certificate';
+path.api.reportExport.lessons = path.api.prefix + 'report/export/lesson';
+path.api.reportExport.users = path.api.prefix + 'report/export/most-active-users';
+path.api.reportExport.averageGrades = path.api.prefix + 'report/export/average-grades';
+path.api.reportExport.attemptedLessons = path.api.prefix + 'report/export/attempted-lessons';
+
+path.api.liferay = path.api.prefix + 'liferay/';
+path.api.lrs2activity = path.api.prefix + 'lrs2activity-filter-api-controller/';
+path.api.uri = path.api.prefix + 'uri/';
 
 path.api.tags = path.api.prefix + 'tags/';
 
@@ -50,16 +56,6 @@ path.scormorganizations = path.api.prefix + 'scormorganizations/';
 path.rte = path.api.prefix + 'rte/';
 
 path.api.activities = path.api.prefix + 'activities/';
-path.api.statements = path.api.prefix + 'statements/';
-
-path.api.competences = {};
-path.api.competences.category = path.api.prefix + 'competencecategory';
-path.api.competences.level = path.api.prefix + 'competencelevel';
-path.api.competences.skill = path.api.prefix + 'competenceskill';
-path.api.competences.competence = path.api.prefix + 'competence';
-path.api.competences.experience = path.api.prefix + 'competencecertificate';
-path.api.competences.usersWithSkills = path.api.prefix + 'competence/user-summary';
-path.api.competences.UsersWithoutSkills = path.api.prefix + 'competence/user-summary/empty-skills';
 
 path.api.stories = path.api.prefix + 'storyTrees/';
 
@@ -68,19 +64,23 @@ path.api.valamisActivityComment = path.api.prefix + 'activity-comment/';
 
 path.api.exportData = path.api.prefix + 'export/';
 
-path.api.packageExport = function(id) {};
-
 path.api.urlCheck = path.api.prefix + 'url/check/';
 
 path.api.dashboard = path.api.prefix + 'dashboard/';
 
 path.api.transcript = path.api.prefix + 'transcript/';
 
-path.api.certificateGoals = path.api.prefix + 'certificate-goals/';
-
 path.api.liferayArticle = path.api.prefix + 'liferay/article/';
 
-path.api.learningReport = path.api.prefix + 'learning-report/';
+path.api.patternReport = {};
+path.api.patternReport.lessons = path.api.prefix + 'learning-pattern-report/';
+path.api.patternReport.paths = path.api.prefix + 'learning-paths/learning-pattern-report/';
+path.api.patternReport.settings = path.api.prefix + 'learning-pattern-report/settings/';
 
-path.api.trainingCalendars = path.api.prefix + 'training-calendars/';
-path.api.trainingEvents = path.api.prefix + 'training-events/';
+path.api.learningPaths = path.api.prefix + 'learning-paths/';
+path.api.learningPathsStatistic = path.api.prefix + 'learning-paths/learning-statistics-report/learning-paths/';
+
+path.api.lti = path.api.prefix + 'lti/';
+path.api.lessonsSettings = path.api.prefix + 'lessons-settings/';
+
+path.api.betaStudio = path.api.prefix + 'valamis-studio/';

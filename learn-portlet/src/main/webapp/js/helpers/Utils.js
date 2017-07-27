@@ -175,9 +175,9 @@ var Utils = {
   },
   makeUrl: function (string) {
     var checker =
-        new RegExp(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/g);
+        new RegExp(/(?!<a[^>]*?>)(((([A-Za-z]{2,9}:(?:\/\/))(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=.\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\-\!%=&?"'#:;\/\\\w]*))?))(?![^<]*?<\/a>)/g);
 
-    return string.replace(checker, function (match) {
+      return string.replace(checker, function (match) {
       var href = match;
       if (match.indexOf('://') < 0) href = 'http://' + match; //To prevent making relative links
 
@@ -190,6 +190,15 @@ var Utils = {
     if (index > 0)
       language = language.substr(0, index);
     return language;
+  },
+  getLangKey: function(label, postfix) {
+    function camelize(str) {
+      return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (letter, index) {
+        return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
+      }).replace(/\s+/g, '');
+    }
+
+    return camelize(label) + postfix;
   },
   loadLanguage: function(resourceName,onLanguageLoad) {
     var defaultLanguage = 'en';
@@ -213,11 +222,22 @@ var Utils = {
         + "?plid=" + this.getPlid()
         + "&oid=" + id
   },
+  getAssignmentUrl: function(id) {
+      return Liferay.ThemeDisplay.getPathMain()
+          + "/portal/assignments/open"
+          + "?assignmentId=" + id
+          + "&userId=" + this.getUserId()
+          + "&plid=" + this.getPlid()
+  },
   getCertificateUrl: function(id) {
+    var prefix = Liferay.ThemeDisplay.getPathMain() + '/portal/learning-path/open';
+    var lpIdParameter = (!!id) ? '?lpId=' + id + '&' : '?';
+    return  prefix + lpIdParameter + 'plid=' + this.getPlid();
+  },
+  getEventUrl: function(id) {
     return Liferay.ThemeDisplay.getPathMain()
-        + "/portal/learn-portlet/open_certificate"
-        + "?plid=" + this.getPlid()
-        + "&oid=" + id
+        + '/portal/training-events/open/?eventId=' + id
+        + "&plid=" + this.getPlid();
   },
   mimeToExt: {
     'image': {
@@ -302,6 +322,36 @@ var Utils = {
     } catch(e) {
         return false;
     }
+  },
+  /*
+   * Splits a collection into sets, grouped by the result of running each value
+   * through iteratee. If iteratee is a string instead of a function, groups by
+   * the property named by iteratee on each of the values.
+   *
+   * @param {array|object} collection - The collection to iterate over.
+   * @param {(string|function)[]} keys - The iteratees to transform keys.
+   * @param {function} reject - The callback to reject collection items.
+   *
+   * @returns {Object} - Returns the composed aggregate object.
+   */
+  nest: function (collection, keys, reject) {
+      if (!keys.length) {
+          reject || (reject = function(coll) { return coll; });
+          return reject(collection);
+      }
+      else {
+          return _(collection).groupBy(keys[0]).mapValues(function (values) {
+              return Utils.nest(values, keys.slice(1), reject);
+          }).value();
+      }
+  },
+  omitEmptyObjects: function (obj) {
+      return _(obj)
+          .pick(function(key) { return _.isObject(key); }) // pick objects only
+          .mapValues(Utils.omitEmptyObjects) // call only for object values
+          .omit(_.isEmpty) // remove all objects that match the reject predicate
+          .assign(_.omit(obj, function(key) { return _.isObject(key); })) // assign back primitive values
+          .value();
   }
 };
 

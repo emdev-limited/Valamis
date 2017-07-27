@@ -1,13 +1,15 @@
 package com.arcusys.valamis.lesson.service.impl
 
 
+import java.util.Locale
+
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.util.CourseUtilHelper
 import com.arcusys.valamis.lesson.model.{Lesson, LessonUser, LessonViewer}
-import com.arcusys.valamis.member.model.{Member, MemberTypes}
 import com.arcusys.valamis.lesson.service.LessonMembersService
 import com.arcusys.valamis.lesson.storage.LessonTableComponent
 import com.arcusys.valamis.lesson.storage.query.{LessonQueries, LessonViewerQueries}
+import com.arcusys.valamis.member.model.{Member, MemberTypes}
 import com.arcusys.valamis.member.service.MemberService
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
 import com.arcusys.valamis.persistence.common.SlickProfile
@@ -16,6 +18,8 @@ import com.arcusys.valamis.user.service.UserService
 
 import scala.slick.driver.JdbcProfile
 import scala.slick.jdbc.JdbcBackend
+import com.arcusys.valamis.utils._
+
 
 /**
   * Created by mminin on 19.02.16.
@@ -31,7 +35,6 @@ abstract class LessonMembersServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
 
   def memberService: MemberService
   def userService: UserService
-
 
   def removeMembers(lessonId: Long, viewerIds: Seq[Long], viewerType: MemberTypes.Value): Unit = {
     db.withTransaction { implicit s =>
@@ -74,7 +77,7 @@ abstract class LessonMembersServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
     if (viewerIds.isEmpty) {
       RangeResult(0, Nil)
     } else {
-      val companyId = CourseUtilHelper.getCompanyId(courseId)
+      val companyId = getCompanyIdByCourseId(courseId)
 
       memberService.getMembers(viewerIds, true, viewerType, companyId, nameFilter, ascending, skipTake)
     }
@@ -84,21 +87,30 @@ abstract class LessonMembersServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
                      nameFilter: Option[String],
                      ascending: Boolean,
                      skipTake: Option[SkipTake],
-                     organizationId: Option[Long]): RangeResult[User] = {
-    val (courseId, viewerIds) = db.withSession { implicit s =>
-      val courseId = lessons.filterById(lessonId).selectCourseId.first
-
-      val viewerIds = lessonViewers
+                     organizationId: Option[Long])
+                    (implicit locale: Locale): RangeResult[User] = {
+    val viewerIds = db.withSession { implicit s =>
+      lessonViewers
         .filterByTypeAndLessonId(MemberTypes.User, lessonId)
         .map(_.viewerId)
         .list
-      (courseId, viewerIds)
+
     }
+
     val users = viewerIds.map { id =>
       userService.getWithDeleted(id)
     }
+      .filter { m =>
+        nameFilter
+          .forall(text => m.name.toLowerCase(locale).contains(text.toLowerCase(locale)))
+      }
+      .sorted(
+        if (ascending) Ordering.by((_: User).name)
+        else Ordering.by((_: User).name).reverse
+      )
+      .skip(skipTake)
 
-    RangeResult(users.size, users)
+    RangeResult(viewerIds.size, users)
   }
 
   def getAvailableMembers(lessonId: Long,
@@ -117,7 +129,7 @@ abstract class LessonMembersServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
       (courseId, viewerIds)
     }
 
-    val companyId = CourseUtilHelper.getCompanyId(courseId)
+    val companyId = getCompanyIdByCourseId(courseId)
 
     memberService.getMembers(viewerIds, false, viewerType, companyId, nameFilter, ascending, skipTake)
   }
@@ -138,7 +150,7 @@ abstract class LessonMembersServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
       (courseId, viewerIds)
     }
 
-    val companyId = CourseUtilHelper.getCompanyId(courseId)
+    val companyId = getCompanyIdByCourseId(courseId)
 
     memberService.getUserMembers(viewerIds, false, companyId, nameFilter, ascending, skipTake, organizationId)
   }
@@ -169,5 +181,9 @@ abstract class LessonMembersServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
         }
       }
     }
+  }
+
+  protected def getCompanyIdByCourseId(courseId: Long): Long = {
+    CourseUtilHelper.getCompanyId(courseId)
   }
 }

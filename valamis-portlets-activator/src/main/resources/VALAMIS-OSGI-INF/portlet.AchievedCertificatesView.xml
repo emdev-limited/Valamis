@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<component name="com.arcusys.valamis.web.portlet.AchievedCertificatesView" immediate="true">
+  <implementation class="com.arcusys.valamis.web.portlet.AchievedCertificatesView"/>
+  <service>
+    <provide interface="javax.portlet.Portlet"/>
+  </service>
+  <property name="javax.portlet.portlet-name" type="String" value="com_arcusys_valamis_web_portlet_AchievedCertificatesView"/>
+  <property name="com.liferay.portlet.display-category" type="String" value="Valamis Dashboard"/>
+  <property name="javax.portlet.info.title" type="String" value="Achieved Certificates"/>
+  <property name="javax.portlet.display-name" type="String" value="Achieved Certificates"/>
+  <property name="javax.portlet.resource-bundle" type="String" value="content.Language"/>
+
+  <property name="javax.portlet.portlet-mode" type="String" value="text/html;view"/>
+  <property name="javax.portlet.expiration-cache" type="Integer" value="0"/>
+  <property name="com.liferay.portlet.ajaxable" type="Boolean" value="false"/>
+  <property name="com.liferay.portlet.show-portlet-access-denied" type="Boolean" value="false"/>
+  <property name="com.liferay.portlet.private-session-attributes" type="Boolean" value="false"/>
+  <property name="com.liferay.portlet.preferences-unique-per-layout" type="Boolean" value="false"/>
+  <property name="com.liferay.portlet.preferences-owned-by-group" type="Boolean" value="false"/>
+  <property name="com.liferay.portlet.add-default-resource" type="Boolean" value="true"/>
+  <property name="com.liferay.portlet.css-class-wrapper" type="String" value="valamis"/>
+  <property name="com.liferay.portlet.footer-portlet-css" type="String">
+    /css/valamis.css
+  </property>
+  <property name="com.liferay.portlet.header-portlet-javascript" type="String">
+
+    /js/achieved-certificates-all.js
+
+  </property>
+
+</component>

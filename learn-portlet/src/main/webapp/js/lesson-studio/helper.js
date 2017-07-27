@@ -22,7 +22,7 @@ function placeSlideControls(windowWidth, windowHeight) {
         slidesApp.RevealControlsModule.view.ui.buttons_add_page.show();
     }
 
-    if(container.size() > 0 && slideContainer.size() > 0) {
+    if(container.length > 0 && slideContainer.length > 0) {
 
         mainWrapper
             .css({
@@ -48,7 +48,7 @@ function placeSlideControls(windowWidth, windowHeight) {
 }
 
 function placeTemplateModal(windowWidth, windowHeight, isDirectionDown) {
-    if( jQueryValamis(lessonStudio.slidesWrapper + ' .slide-templates-modal').size() == 0 ){
+    if( jQueryValamis(lessonStudio.slidesWrapper + ' .slide-templates-modal').length == 0 ){
         return;
     }
     var sidebarWidth = !jQueryValamis(lessonStudio.slidesWrapper + ' .sidebar').is(':hidden') ? lessonStudio.fixedSizes.SIDEBAR_WIDTH : 0;
@@ -71,7 +71,7 @@ function placeTemplateModal(windowWidth, windowHeight, isDirectionDown) {
             'bottom': windowHeight - ( downButtonClientRect.top - buttonMargin )
         });
 
-        if( templateModal.find('.arrow-down').size() == 0 )
+        if( templateModal.find('.arrow-down').length == 0 )
             templateModal.find('.bbm-modal--open')
                 .prepend('<div class="arrow-down"></div>');
     }
@@ -84,7 +84,7 @@ function placeTemplateModal(windowWidth, windowHeight, isDirectionDown) {
             'top': windowHeight / 2
                 - ( templateModal.find('.bbm-modal--open').outerHeight() / 2 )
         });
-        if( templateModal.find('.arrow-right').size() == 0 )
+        if( templateModal.find('.arrow-right').length == 0 )
             templateModal.find('.bbm-modal--open')
                 .prepend('<div class="arrow-right"></div>');
 
@@ -236,67 +236,69 @@ function generateUUID() {
  * @param {Boolean} considerNotFitting - whether to consider elements
  * that do not fit inside the container (have negative margins, etc.)
  */
-$.fn.fitTextToContainer = function(container, considerNotFitting) {
-    var getMaxValues = function($el, maxPossibleSize){
+(function ($) {
+    $.fn.fitTextToContainer = function (container, considerNotFitting) {
+        var getMaxValues = function ($el, maxPossibleSize) {
 
-        var getMaxWidth = function(el, maxFontSize) {
-            return el.css('font-size', maxFontSize + 'px').width();
+            var getMaxWidth = function (el, maxFontSize) {
+                return el.css('font-size', maxFontSize + 'px').width();
+            };
+            var getMaxHeight = function (el, maxFontSize) {
+                return el.css('font-size', maxFontSize + 'px').height();
+            };
+
+            var maxWidth = getMaxWidth($el, maxPossibleSize),
+                maxHeight = getMaxHeight($el, maxPossibleSize);
+
+            //if element does not attached to dom : create fake element, get values and remove it
+            if (maxWidth == 0 && maxHeight == 0) {
+                var $fakeEl = $el.clone();
+                $fakeEl.hide().appendTo('.reveal');
+                maxWidth = getMaxWidth($fakeEl, maxPossibleSize);
+                maxHeight = getMaxHeight($fakeEl, maxPossibleSize);
+                $fakeEl.remove();
+            }
+
+            return {
+                width: maxWidth,
+                height: maxHeight
+            };
         };
-        var getMaxHeight = function(el, maxFontSize) {
-            return el.css('font-size', maxFontSize + 'px').height();
-        };
 
-        var maxWidth = getMaxWidth($el, maxPossibleSize),
-            maxHeight = getMaxHeight($el, maxPossibleSize);
+        var $container = $(container);
+        if ($container.length == 0) $container = $(this);
+        var width = $container.width();
+        var height = $container.height();
+        var el = $(this);
+        el.css('margin-top', 0);
+        var maxPossibleSize = Math.max(width, height);
+        var max = getMaxValues(el, maxPossibleSize);
 
-        //if element does not attached to dom : create fake element, get values and remove it
-        if(maxWidth == 0 && maxHeight == 0) {
-            var $fakeEl = $el.clone();
-            $fakeEl.hide().appendTo('.reveal');
-            maxWidth  = getMaxWidth($fakeEl, maxPossibleSize);
-            maxHeight = getMaxHeight($fakeEl, maxPossibleSize);
-            $fakeEl.remove();
+        var factor = Math.min(width / max.width, height / max.height);
+        var size = maxPossibleSize * factor;
+        el.css('font-size', size);
+        if (considerNotFitting) {
+            var minTopOffset =
+                _.min(_.map(el.find('*')
+                        .filter(function () {
+                            var top = $(this).css('top');
+                            return top && top !== 'auto';
+                        }),
+                    function (item) {
+                        return $(item).offset().top;
+                    }
+                ));
+            minTopOffset = _.isFinite(minTopOffset) ? minTopOffset : 0;
+            var partialFactor = height / (el.height() + Math.abs(el.offset().top - minTopOffset));
+            partialFactor = ((Math.abs(el.height() - height) > Math.abs(el.offset().top - minTopOffset)))
+                ? 1
+                : partialFactor;
+            var marginTop = Math.abs(minTopOffset - el.offset().top) * partialFactor;
+            size = size * partialFactor;
+            el.css({
+                'font-size': size + 'px',
+                'margin-top': marginTop + 'px'
+            });
         }
-
-        return {
-            width: maxWidth,
-            height: maxHeight
-        };
     };
-
-    var $container = $(container);
-    if($container.size() == 0) $container = $(this);
-    var width = $container.width();
-    var height = $container.height();
-    var el = $(this);
-    el.css('margin-top', 0);
-    var maxPossibleSize = Math.max(width, height);
-    var max = getMaxValues(el, maxPossibleSize);
-
-    var factor = Math.min(width / max.width, height / max.height);
-    var size = maxPossibleSize * factor;
-    el.css('font-size', size);
-    if(considerNotFitting) {
-        var minTopOffset =
-            _.min(_.map(el.find('*')
-                .filter(function () {
-                    var top = $(this).css('top');
-                    return top && top !== 'auto';
-                }),
-                function (item) {
-                    return $(item).offset().top;
-                }
-            ));
-        minTopOffset = _.isFinite(minTopOffset) ? minTopOffset : 0;
-        var partialFactor =  height / (el.height() + Math.abs(el.offset().top - minTopOffset));
-        partialFactor = ((Math.abs(el.height() - height) > Math.abs(el.offset().top - minTopOffset)))
-            ? 1
-            : partialFactor;
-        var marginTop = Math.abs(minTopOffset - el.offset().top) * partialFactor;
-        size = size * partialFactor;
-        el.css({
-            'font-size': size + 'px',
-            'margin-top': marginTop + 'px'
-        });
-    }
-};
+})(jQuery);

@@ -7,7 +7,7 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
     };
 
     Views.topLessonsView = Marionette.ItemView.extend({
-        template: '#ValamisReportEmptyListTemplate',
+        template: '#valamisReportEmptyListTemplate',
         className: 'val-portlet val-reports top-lessons-report',
         initialize: function (options) {
 

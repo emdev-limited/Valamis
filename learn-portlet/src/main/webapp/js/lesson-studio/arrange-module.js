@@ -95,9 +95,28 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
             if(e) e.preventDefault();
             var slides = slidesApp.slideCollection.where({toBeRemoved: false});
             if(slides.length > 1) {
-                var slideId = getSlideId(this.$el);
-                var slideModel = slidesApp.getSlideModel(slideId);
+                var slideId = getSlideId(this.$el),
+                    slideModel = slidesApp.getSlideModel(slideId),
+                    leftSlide = slides.find(function (slide) {
+                        return  slide.get('leftSlideId') == slideId;
+                    }),
+                    topSlide = slides.find(function (slide) {
+                        return slide.get('topSlideId') == slideId;
+                    });
+                slidesApp.historyManager.groupOpenNext();
+                if (!!leftSlide) {
+                    leftSlide.set('leftSlideId', !!topSlide ? topSlide.getId() : slideModel.get('leftSlideId'));
+                }
+                if (!!topSlide) {
+                    topSlide.set('topSlideId', !!leftSlide ? undefined : slideModel.get('topSlideId'));
+                    topSlide.set('leftSlideId', !!leftSlide ? slideModel.get('leftSlideId') : undefined);
+                }
+                slidesApp.slideSetModel.set('slideOrder',
+                    _.map(ArrangeModule.slideOrder, function (val) {
+                        return _.without(val, slideId);
+                    }));
                 slideModel.set('toBeRemoved', true);
+                slidesApp.historyManager.groupClose();
             }
         },
         selectSlide: function(e){
@@ -126,6 +145,7 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
             placeholder: 'slides-arrange-placeholder',
             revert: true,
             delay: 50,
+            revertDuration: 50,
             sort: function(e, ui) {
                 var placeholderBackground = $('<div></div>').css({
                     'width': '196px',
@@ -400,11 +420,11 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
                 listElement.parent().remove();
             }
             listElement.remove();
-        } else {
+        }/* else {
             //When undo action complete
-            slidesApp.historyManager
+             slidesApp.historyManager
                 .once('undo:after', arrangeModule.onSlidesUpdated, arrangeModule);
-        }
+        }*/
     };
 
 
@@ -421,6 +441,7 @@ var arrangeModule = slidesApp.module('ArrangeModule', function (ArrangeModule, s
                     $arrangeContainer.prevAll().hide();
                     valamisApp.execute('notify', 'clear');
                     arrangeModule.initDraggable();
+                    arrangeModule.updateSlideRefs();
                 }, 0);
             });
             $arrangeContainer.append(arrangeView.render().el);

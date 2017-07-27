@@ -46,13 +46,13 @@ var ContentManager = Marionette.Application.extend({
             isButton = jQueryValamis(target).is('button') || jQueryValamis(target).parent().is('button');
 
         //if CM opened in modal window
-        if( self.mainRegion.currentView.$el.closest('.val-modal').size() > 0 ){
+        if( self.mainRegion.currentView.$el.closest('.val-modal').length > 0 ){
             workArea = workArea.add('#valamisAppModalRegion .val-modal:gt(0)');
         } else {
             workArea = workArea.add('#valamisAppModalRegion');
         }
 
-        if( !!contentRegion && !isButton  &&  jQueryValamis(target).closest(workArea,context).size() === 0 ){
+        if( !!contentRegion && !isButton  &&  jQueryValamis(target).closest(workArea,context).length === 0 ){
             contentRegion.$el.find('.js-content-list li').removeClass('active-item');
             contentRegion.activeItemId = '';
             if( contentRegion.preview.currentView ){

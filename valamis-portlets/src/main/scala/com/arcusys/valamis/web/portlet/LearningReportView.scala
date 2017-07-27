@@ -2,8 +2,10 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet.{RenderRequest, RenderResponse}
 
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, OAuthPortlet, PortletBase}
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
+import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, PortletBase}
 import com.arcusys.valamis.web.portlet.util.LearningReportSettingsService
 
 class LearningReportView extends OAuthPortlet with PortletBase {

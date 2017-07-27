@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-if(typeof jQueryValamis == 'undefined'){
+if(typeof jQueryValamis === 'undefined'){
     jQueryValamis = jQuery.noConflict();
     //jQueryValamis = Backbone.$.noConflict();
 }

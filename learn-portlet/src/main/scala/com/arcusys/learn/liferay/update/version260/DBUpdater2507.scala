@@ -17,8 +17,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class DBUpdater2507(dbInfo: SlickDBInfo) extends LUpgradeProcess
-  with ActorsSchema
-  with AccountsSchema {
+with ActorsSchema
+with AccountsSchema {
 
   override def getThreshold = 2507
 

@@ -3,13 +3,11 @@ package com.arcusys.valamis.web.configuration.database
 import java.sql.SQLException
 
 import com.arcusys.slick.drivers.{DB2Driver, OracleDriver, SQLServerDriver}
-import com.arcusys.valamis.certificate.storage.schema.{CertificateHistoryTableComponent, UserStatusHistoryTableComponent}
 import com.arcusys.valamis.content.storage.impl.schema.ContentTableComponent
 import com.arcusys.valamis.course.schema.CourseUserQueueTableComponent
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.persistence.impl.contentProviders.schema.ContentProviderTableComponent
-import com.arcusys.valamis.persistence.impl.course.schema.{CourseCertificateTableComponent, CourseExtendedTableComponent,
-                                                           CourseInstructorTableComponent}
+import com.arcusys.valamis.persistence.impl.course.schema.{CourseCertificateTableComponent, CourseExtendedTableComponent, CourseInstructorTableComponent}
 import com.arcusys.valamis.persistence.impl.slide.schema.SlideTableComponent
 import slick.driver.HsqldbDriver
 import slick.jdbc.meta.MTable
@@ -23,8 +21,6 @@ class CreateTablesNew(dbInfo: SlickDBInfo)
   extends SlickProfile
     with ContentTableComponent
     with SlideTableComponent
-    with CertificateHistoryTableComponent
-    with UserStatusHistoryTableComponent
     with ContentProviderTableComponent
     with CourseUserQueueTableComponent
     with CourseExtendedTableComponent
@@ -40,7 +36,6 @@ class CreateTablesNew(dbInfo: SlickDBInfo)
   val tables = Seq(
     questionCategories, questions, plainTexts, answers,
     slideThemes, slideSets, slides, slideElements, devices, slideElementProperties, slideProperties,
-    certificatesHistoryTQ, userHistoryTQ,
     contentProviders, queueTQ, coursesExtended, courseCertificates, courseInstructors
   )
 

@@ -6,11 +6,12 @@ import java.util.UUID
 
 import com.arcusys.json.JsonHelper
 import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.export.model.ExportModel
 import com.arcusys.valamis.export.service.ExportService
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lrs.serializer.{AgentSerializer, StatementSerializer}
-import com.arcusys.valamis.lrs.service.{LrsClientManager, LrsRegistration}
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.lrs.tincan.{Actor, AuthorizationScope, StatementResult}
 import com.arcusys.valamis.util.FileSystemUtil
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
@@ -41,7 +42,8 @@ class ExportServiceImpl(implicit val bindingModule: BindingModule) extends Expor
                       relatedActivities: Option[String]): String = {
     val guid = UUID.randomUUID.toString
     implicit val companyId = CompanyHelper.getCompanyId
-    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All).auth
+    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+      host = PortalUtilHelper.getLocalHostUrl).auth
 
     val f = Future {
       CompanyHelper.setCompanyId(companyId)
@@ -107,7 +109,7 @@ class ExportServiceImpl(implicit val bindingModule: BindingModule) extends Expor
           ) match {
             case Success(value) => value
             case Failure(value) => throw new Exception("Fail:" + value)
-          }, Some(lrsAuth))
+          }, Some(lrsAuth))(CompanyHelper.getCompanyId)
         result.statements.foreach(s => {
           if (!isFirst) {
             output.write(",")

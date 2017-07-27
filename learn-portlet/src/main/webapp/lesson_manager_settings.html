@@ -2,7 +2,7 @@
 <script type="text/template" id="lmsettings-modals-template">
     <div class="lmsettings-modals-container"></div>
 </script>
-
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 <script type="text/template" id="lmsettings-import-modal-template">
     <div class="bbm-modal__topbar">
         <h3 class="bbm-modal__title">{{importLabel}}</h3>
@@ -15,8 +15,19 @@
 </script>
 
 <script type="text/javascript">
+    var Valamis = Valamis || {};
+    Valamis.language = Valamis.language || {};
+
+    function onCommonLanguageLoad(properties) {
+        _.extend(Valamis.language, properties);
+    }
+
+    jQueryValamis(function () {
+        Utils.loadLanguage('common', onCommonLanguageLoad);
+    });
+
     var PMSettingsLayout = Backbone.Marionette.LayoutView.extend({
-        template: _.template(Mustache.to_html(jQuery('#lmsettings-modals-template').html())),
+        template: _.template(Mustache.to_html(jQueryValamis('#lmsettings-modals-template').html())),
         regions: {
             modals: {
                 selector: '.lmsettings-modals-container',
@@ -28,10 +39,10 @@
 
     var pmSettingsLayout = new PMSettingsLayout();
 
-    jQuery(function () { jQuery('#lm-settings-layout').append(pmSettingsLayout.render().el); });
+    jQueryValamis(function () { jQueryValamis('#lm-settings-layout').append(pmSettingsLayout.render().el); });
 
     var UploadPMImportModal = Backbone.Modal.extend({
-        template: _.template(Mustache.to_html(jQuery('#lmsettings-import-modal-template').html())),
+        template: _.template(Mustache.to_html(jQueryValamis('#lmsettings-import-modal-template').html())),
         className: 'val-modal',
         submitEl: '.bbm-button',
         cancelEl: '.modal-close',

@@ -8,12 +8,14 @@ import com.arcusys.valamis.lesson.model.Lesson
 import com.arcusys.valamis.lesson.service.{LessonAssetHelper, LessonNotificationService, LessonService}
 import com.arcusys.valamis.lesson.tincan.service.{LessonCategoryGoalService, TincanPackageService}
 import com.arcusys.valamis.liferay.SocialActivityHelper
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.persistence.common.SlickDBInfo
 import com.arcusys.valamis.slide.convert.{PDFProcessor, PresentationProcessor}
 import com.arcusys.valamis.slide.model.SlideSet
 import com.arcusys.valamis.slide.service._
 import com.arcusys.valamis.slide.service.export._
 import com.arcusys.valamis.slide.storage._
+import com.arcusys.valamis.statements.StatementChecker
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.uri.service.TincanURIService
 import com.arcusys.valamis.utils.ResourceReader
@@ -52,6 +54,9 @@ class SlideConfiguration(db: => SlickDBInfo)(implicit configuration: BindingModu
     lazy val uriService = inject[TincanURIService](None)
     lazy val slideTagService = inject[TagService[SlideSet]](None)
     lazy val lessonNotificationService = inject[LessonNotificationService](None)
+    lazy val lrsReader = inject[LrsClientManager](None)
+    lazy val lrsRegistration = inject[LrsRegistration](None)
+    lazy val statementChecker = inject[StatementChecker](None)
   }
 
   bind[SlideService] toSingle new SlideServiceImpl {

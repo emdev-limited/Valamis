@@ -27,8 +27,6 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
 
   def courseCertificateRepository: CourseCertificateRepository
 
-  def certificateRepository: CertificateRepository
-
   val isMember = (gr: LGroup, user: LUser) => user.getGroups.asScala.exists(_.getGroupId == gr.getGroupId)
 
   private val notGuestSite = (gr: LGroup) => gr.getFriendlyURL != "/guest"
@@ -66,7 +64,8 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
                              skipTake: Option[SkipTake],
                              namePattern: String,
                              sortAscDirection: Boolean,
-                             isActive: Option[Boolean] = None): RangeResult[CourseInfo] = {
+                             isActive: Option[Boolean] = None,
+                             withGuestSite: Boolean = false): RangeResult[CourseInfo] = {
 
     val namePatternLC = namePattern.toLowerCase
     val userGroupIds = user.map(_.getUserGroupIds.toSeq).getOrElse(Seq())
@@ -83,7 +82,7 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
         notPersonalSite(gr) &&
         allowedToSee(gr) &&
         namePatternFits(gr, namePatternLC) &&
-        notGuestSite(gr) &&
+        (withGuestSite || notGuestSite(gr)) &&
         isVisible(gr)
 
     var courses = getByCompanyId(companyId = companyId, skipCheckActive = true).filter(allFilters)
@@ -104,7 +103,8 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
                                    user: LUser,
                                    skipTake: Option[SkipTake],
                                    namePattern: String,
-                                   sortAscDirection: Boolean): RangeResult[CourseInfo] = {
+                                   sortAscDirection: Boolean,
+                                   withGuestSite: Boolean = false): RangeResult[CourseInfo] = {
     val namePatternLC = namePattern.toLowerCase
 
     val userOrganizations = user.getOrganizations.asScala
@@ -121,7 +121,7 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
         notPersonalSite(gr) &&
         !isMember(gr, user) &&
         namePatternFits(gr, namePatternLC) &&
-        notGuestSite(gr) &&
+        (withGuestSite || notGuestSite(gr)) &&
         allowedToSee(gr) &&
         isVisible(gr)
 
@@ -157,7 +157,8 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
   override def getByUserAndName(user: LUser,
                                 skipTake: Option[SkipTake],
                                 namePattern: Option[String],
-                                sortAsc: Boolean): RangeResult[CourseInfo] = {
+                                sortAsc: Boolean,
+                                withGuestSite: Boolean = false): RangeResult[CourseInfo] = {
 
     val namePatternLC = namePattern.getOrElse("").toLowerCase
 
@@ -169,7 +170,7 @@ abstract class CourseServiceImpl extends api.CourseServiceImpl with CourseServic
       .filter(isMember(_, user)) ++ organizationGroups)
       .filter(namePatternFits(_, namePatternLC))
       .filter(hasCorrectType)
-      .filter(notGuestSite)
+      .filter(gr => (withGuestSite || notGuestSite(gr)))
       .filter(notPersonalSite)
       .filter(isVisible)
 

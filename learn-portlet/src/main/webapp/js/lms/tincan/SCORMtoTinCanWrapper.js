@@ -228,7 +228,7 @@ function SetActivity(activityId, activityName, activityDesc) {
         return;
 
     if (currentActivityID.indexOf('http') == -1) {
-        currentActivityURI = document.location.protocol + "//" + document.location.host + (currentActivityID.indexOf('/') == 0 ? currentActivityID : '/' + currentActivityID);
+        currentActivityURI = document.location.protocol + "//" + document.location.host + encodeURIComponent(currentActivityID.indexOf('/') == 0 ? currentActivityID : '/' + currentActivityID);
         SetActivity();
     }
     else {
@@ -236,7 +236,7 @@ function SetActivity(activityId, activityName, activityDesc) {
             type: 'GET',
             dataType: 'text',
             url: path.root + path.api.uri + '?prefix=' + document.location.protocol + "//" + document.location.host +
-                path.root + path.api.uri + '&id=' + currentActivityID +
+                path.root + path.api.uri + '&id=' + encodeURIComponent(currentActivityID) +
                 '&type=activity&content=' + JSON.stringify(activityDefinition),
 
             success: function (data) {

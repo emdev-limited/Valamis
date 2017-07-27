@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<component name="com.arcusys.valamis.web.init.language.NlResourceBundle">
+    <implementation class="com.arcusys.valamis.web.init.language.NlResourceBundle"/>
+    <service>
+        <provide interface="java.util.ResourceBundle"/>
+    </service>
+    <property name="language.id" type="String" value="nl_NL"/>
+</component>

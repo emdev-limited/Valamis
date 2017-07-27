@@ -1,7 +1,7 @@
 package com.arcusys.valamis.web.servlet
 
 import com.arcusys.valamis.exception.EntityNotFoundException
-import com.arcusys.valamis.lrs.service.util.{TinCanVerb, TinCanVerbs}
+import com.arcusys.valamis.lrssupport.lrs.service.util.{TinCanVerb, TinCanVerbs}
 import com.arcusys.valamis.slide.service.SlideService
 import com.arcusys.valamis.uri.model.TincanURIType
 import com.arcusys.valamis.uri.service.TincanURIService

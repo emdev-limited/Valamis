@@ -2,7 +2,7 @@ package com.arcusys.valamis.lesson.service.impl
 
 import com.arcusys.valamis.lesson.model.{UserLessonResult, Lesson}
 import com.arcusys.valamis.lesson.service.{LessonStatementReader, LessonService}
-import com.arcusys.valamis.lrs.service.util.TinCanVerbs
+import com.arcusys.valamis.lrssupport.lrs.service.util._
 import com.arcusys.valamis.lrs.tincan.{Activity, Statement, Agent}
 
 abstract class LessonResultCalculate {

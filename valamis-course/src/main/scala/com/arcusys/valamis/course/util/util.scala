@@ -15,9 +15,8 @@ package util {
           else if (privatePageCount > 0) {
             s"/group$str"
           }
-          else {
-            if (organizationId != 0) friendlyUrl else ""
-          }
+          else ""
+
         case _ => ""
       }
     }

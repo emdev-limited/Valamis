@@ -1,11 +1,11 @@
 package com.arcusys.learn.liferay.update.version260
 
 import com.arcusys.learn.liferay.update.version260.migrations.LrsEndpointMigration
-import com.arcusys.valamis.persistence.impl.lrs.LrsEndpointTableComponent
-import com.arcusys.valamis.lrsEndpoint.model.AuthType
+import com.arcusys.learn.liferay.update.version260.scheme2506.{AuthType, LrsEndpointTableComponent}
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import slick.driver.JdbcProfile
 
 import scala.slick.jdbc.JdbcBackend
 import scala.util.Try
@@ -30,8 +30,9 @@ class LrsEndpointMigrationTest
 
     def createSchema() {
       import driver.simple._
-      db.withSession { implicit s => lrsEndpoint.ddl.create }
+      db.withSession { implicit s => lrsEndpoint.ddl.create}
     }
+
   }
   test("create lrsEndpoint") {
     val migrator = new LrsEndpointMigration(db, driver) {
@@ -50,7 +51,7 @@ class LrsEndpointMigrationTest
     }
 
     assert(stored.endpoint == "/valamis-lrs-portlet/test")
-    assert(stored.auth == AuthType.BASIC)
+    assert(stored.auth == AuthType.Basic)
     assert(stored.customHost isEmpty)
     assert(stored.key.contains("11111"))
 

@@ -15,7 +15,8 @@ import com.arcusys.valamis.web.servlet.request.ServletRequestHelper
 import ServletRequestHelper._
 import com.arcusys.learn.liferay.LiferayClasses.LThemeDisplay
 import com.arcusys.learn.liferay.constants.WebKeysHelper
-import com.arcusys.learn.liferay.services.ServiceContextHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, ServiceContextHelper}
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
 import com.arcusys.valamis.web.servlet.social.request.ActivityRequest
 import com.arcusys.valamis.web.servlet.social.response.ActivityConverter
 

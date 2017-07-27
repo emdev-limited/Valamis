@@ -41,7 +41,7 @@ gradebook.module('Views.AssignmentsList', function (AssignmentsList, gradebook, 
     }
   });
 
-  AssignmentsList.AssignmentUsersCollectionView = Marionette.CompositeView.extend({
+  AssignmentsList.AssignmentUsersCollectionView = gradebook.Views.ItemsCollectionView.extend({
     template: '#gradebookAssignmentUsersCollectionViewTemplate',
     childView: AssignmentsList.AssignmentUserItemView,
     childViewContainer: '.js-items-list',

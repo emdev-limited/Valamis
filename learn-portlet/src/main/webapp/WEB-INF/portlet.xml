@@ -112,53 +112,6 @@
     </portlet>
 
     <portlet>
-        <portlet-name>Curriculum</portlet-name>
-        <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.valamis.web.portlet.CurriculumAdmin</portlet-class>
-
-        <expiration-cache>0</expiration-cache>
-
-        <supports>
-            <mime-type>text/html</mime-type>
-            <portlet-mode>view</portlet-mode>
-            <portlet-mode>edit</portlet-mode>
-        </supports>
-
-        <portlet-info>
-            <title>Curriculum Management</title>
-        </portlet-info>
-    </portlet>
-
-
-    <portlet>
-        <portlet-name>CurriculumUser</portlet-name>
-        <display-name>Valamis</display-name>
-        <portlet-class>com.arcusys.valamis.web.portlet.CurriculumUser</portlet-class>
-
-        <expiration-cache>0</expiration-cache>
-
-        <supports>
-            <mime-type>text/html</mime-type>
-            <portlet-mode>view</portlet-mode>
-        </supports>
-
-        <portlet-info>
-            <title>Curriculum Viewer</title>
-        </portlet-info>
-
-        <security-role-ref>
-            <role-name>guest</role-name>
-        </security-role-ref>
-        <security-role-ref>
-            <role-name>power-user</role-name>
-        </security-role-ref>
-        <security-role-ref>
-            <role-name>user</role-name>
-        </security-role-ref>
-    </portlet>
-
-
-    <portlet>
         <portlet-name>TinCanStatementViewer</portlet-name>
         <display-name>Valamis</display-name>
         <portlet-class>com.arcusys.valamis.web.portlet.TinCanStatementViewerView</portlet-class>
@@ -185,7 +138,6 @@
         <supports>
             <mime-type>text/html</mime-type>
             <portlet-mode>view</portlet-mode>
-            <portlet-mode>edit</portlet-mode>
         </supports>
 
         <portlet-info>
@@ -283,7 +235,7 @@
         </supports>
 
         <portlet-info>
-            <title>Learning Paths</title>
+            <title>My Learning Paths</title>
         </portlet-info>
     </portlet>
 
@@ -369,7 +321,7 @@
         </supports>
 
         <portlet-info>
-            <title>My Certificates</title>
+            <title>Learning Path Statistics</title>
         </portlet-info>
     </portlet>
 
@@ -386,7 +338,7 @@
         </supports>
 
         <portlet-info>
-            <title>My Courses</title>
+            <title>Course Statistics</title>
         </portlet-info>
     </portlet>
 
@@ -474,6 +426,24 @@
 
         <portlet-info>
             <title>Learning Pattern Report</title>
+        </portlet-info>
+    </portlet>
+
+    <portlet>
+        <portlet-name>CertExpirationTracker</portlet-name>
+        <display-name>Valamis</display-name>
+        <portlet-class>com.arcusys.valamis.web.portlet.CertificateExpirationTrackerView</portlet-class>
+
+        <expiration-cache>0</expiration-cache>
+
+        <supports>
+            <mime-type>text/html</mime-type>
+            <portlet-mode>view</portlet-mode>
+            <portlet-mode>edit</portlet-mode>
+        </supports>
+
+        <portlet-info>
+            <title>Сertificate Expiration Tracker</title>
         </portlet-info>
     </portlet>
 

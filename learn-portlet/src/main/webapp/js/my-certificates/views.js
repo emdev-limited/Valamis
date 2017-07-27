@@ -1,34 +1,48 @@
 myCertificates.module('Views', function (Views, myCertificates, Backbone, Marionette, $, _) {
 
-  var ROW_TYPE = {
-    DETAILS: 'details',
-    CERTIFICATE: 'certificate'
-  };
+  var ROW_TYPE = myCertificates.Entities.ROW_TYPE;
 
-  var USERS_COUNT = 10;
+  var STATUSES = {
+    undef: 'Undefined',
+    inprogress: 'InProgress',
+    success: 'Success',
+    failed: 'Failed',
+    // path status
+    expired: 'Expired'
+  };
 
   Views.UsersItemView = Marionette.CompositeView.extend({
     tagName: 'li',
     template: '#myCertificatesUsersItemViewTemplate',
-    templateHelpers: function() {
-      var totalGoals = this.model.get('statistic').total;
-      //TODO: find a way to check whether the user has achieved the certificate before any deleted goals were restored
-      //(this works for now)
-      var successProgress = 0, inProgress, failedProgress = 0;
-      if(this.model.get('status') == 'Success') {
+    templateHelpers: function () {
+      var totalGoals = 0;
+
+      var successProgress = 0, inProgress = 0, failedProgress = 0;
+      if (this.model.get('status') == STATUSES.success) {
         successProgress = 100;
         inProgress = failedProgress = 0;
       } else {
-        successProgress = (totalGoals) ? Math.floor(this.model.get('statistic').success * 100 / totalGoals) : 0;
-        failedProgress = (totalGoals) ? Math.floor(this.model.get('statistic').failed * 100 / totalGoals) : 0;
-        inProgress = (totalGoals) ? Math.floor(this.model.get('statistic').inProgress * 100 / totalGoals) : 0;
+        var goalStatuses = this.model.get('statusToCount') || {};
+
+        var inProgressCount = goalStatuses[STATUSES.inprogress] || 0 + goalStatuses[STATUSES.undef];
+        var successCount = goalStatuses[STATUSES.success] || 0;
+        var failedCount = goalStatuses[STATUSES.failed] || 0;
+        $.each(goalStatuses, function (k, v) {
+          totalGoals += v;
+        });
+
+        successProgress = (totalGoals) ? Math.floor(successCount * 100 / totalGoals) : 0;
+        failedProgress = (totalGoals) ? Math.floor(failedCount * 100 / totalGoals) : 0;
+        inProgress = (totalGoals) ? Math.floor(inProgressCount * 100 / totalGoals) : 0;
       }
 
       return {
-        isExpired: this.model.get('status') == 'Overdue',
+        isExpired: this.model.get('status') == STATUSES.expired,
         successProgress: successProgress + '%',
         failedProgress: failedProgress + '%',
-        inProgress: inProgress + '%'
+        inProgress: inProgress + '%',
+        successCount: successCount,
+        totalGoals: totalGoals
       }
     }
   });
@@ -38,25 +52,42 @@ myCertificates.module('Views', function (Views, myCertificates, Backbone, Marion
     childView: Views.UsersItemView,
     childViewContainer: '.js-users-list',
     initialize: function () {
-      if (this.model.get('tpe') === ROW_TYPE.CERTIFICATE)
+      this.isDetails = this.model.get('tpe') === ROW_TYPE.DETAILS;
+
+      if (!this.isDetails)
         this.template = '#myCertificatesRowViewTemplate';
       else {
         this.template = '#myCertificatesDetailsViewTemplate';
-        this.$el.addClass('hidden');
-        this.collection = new myCertificates.Entities.UsersCollection();
+        this.$el.addClass('hidden details');
+        this.collection = new myCertificates.Entities.UsersCollection([], {useSkipTake: true});
       }
     },
+    templateHelpers: function () {
+      var values = {};
+
+      if (!this.isDetails) {
+        var userStatuses = this.model.get('statusToCount') || {};
+
+        var successCount = userStatuses[STATUSES.success] || 0;
+        var expiredCount = userStatuses[STATUSES.expired] || 0;
+        var totalUsers = 0;
+        $.each(userStatuses, function (k, v) {
+          totalUsers += v;
+        });
+
+        values.totalUsers = totalUsers;
+        values.successUsers = successCount;
+        values.overdueUsers = expiredCount;
+        values.url = Utils.getCertificateUrl(this.model.get('id'));
+      }
+
+      return values;
+    },
     onRender: function () {
-      if (this.model.get('tpe') === ROW_TYPE.DETAILS) {
-        var fetchedCollection = new myCertificates.Entities.UsersCollection();
-
-        fetchedCollection.on('sync', function () {
-          this.collection.add(fetchedCollection.toJSON());
-        }, this);
-
-        this.$('.js-scroll-div').valamisInfiniteScroll(fetchedCollection, {
-          count: USERS_COUNT,
-          certificateId: this.model.get('certificateId')
+      if (this.isDetails) {
+        var that = this;
+        this.$('.js-scroll-div').valamisInfiniteScroll(this.collection, function () {
+          that.collection.fetchMore({pathId: that.model.get('pathId')});
         });
       }
     }
@@ -66,42 +97,35 @@ myCertificates.module('Views', function (Views, myCertificates, Backbone, Marion
     template: '#myCertificatesLayoutTemplate',
     childView: Views.RowItemView,
     childViewContainer: '#certificatesTable',
+    ui: {
+      pathsTable: '.js-items-table',
+      showMore: '.js-show-more',
+      toggleDetails: '.js-toggle-details',
+      noItems: '.js-no-items'
+    },
     events: {
-      'click .js-show-more': 'takeCertificates',
-      'click .js-toggle-details': 'toggleDetails'
+      'click @ui.showMore': 'fetchMore',
+      'click @ui.toggleDetails': 'toggleDetails'
     },
-    initialize: function() {
-      this.page = 0;
-
-      this.collection = new myCertificates.Entities.CertificateCollection();
-      this.fetchedCollection = new myCertificates.Entities.CertificateCollection();
-
-      this.fetchedCollection.on('certificateCollection:updated', function(details) {
-        this.$('.js-certificates-table').toggleClass('hidden', details.total == 0);
-        this.$('.js-no-items').toggleClass('hidden', details.total > 0);
-        this.$('.js-show-more').toggleClass('hidden', this.page * details.count >= details.total);
-      }, this);
-    },
-    onRender: function() {
+    onRender: function () {
       this.$('.valamis-tooltip').tooltip();
-      this.takeCertificates();
-    },
-    takeCertificates: function() {
-      this.page++;
 
-      var that = this;
-      this.fetchedCollection.fetch({
-        page: this.page,
-        success: function() {
-          that.fetchedCollection.each(function(item) {
-            that.collection.add(_.extend({tpe: ROW_TYPE.CERTIFICATE}, item.toJSON()));
-            that.collection.add({tpe: ROW_TYPE.DETAILS, certificateId: item.get('id')});
-          });
-
-        }
+      this.collection = new myCertificates.Entities.PathsCollection([], {
+        useSkipTake: true,
+        itemsPerPage: 5
       });
+      this.collection.on('sync', this.checkUi, this);
+      this.collection.fetchMore();
     },
-    toggleDetails: function(e) {
+    fetchMore: function () {
+      this.collection.fetchMore();
+    },
+    checkUi: function () {
+      this.ui.pathsTable.toggleClass('hidden', !this.collection.hasItems());
+      this.ui.noItems.toggleClass('hidden', this.collection.hasItems());
+      this.ui.showMore.toggleClass('hidden', !this.collection.hasMore());
+    },
+    toggleDetails: function (e) {
       var targetTr = $(e.target).parents('tr');
       targetTr.toggleClass('open');
       var detailsTr = $(e.target).parents('tr').next('tr');

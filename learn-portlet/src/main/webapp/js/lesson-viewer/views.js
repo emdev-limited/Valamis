@@ -16,10 +16,13 @@ lessonViewer.module('Views', function (Views, lessonViewer, Backbone, Marionette
 
     Views.ToolbarView = Marionette.ItemView.extend({
         template: '#lessonViewerToolbarTemplate',
+        ui: {
+            searchField: '.js-search > input[type="text"]'
+        },
         events: {
             'click .dropdown-menu > li.js-category': 'changeCategory',
             'click .js-sort-filter .dropdown-menu > li': 'changeSort',
-            'keyup .js-search': 'changeSearchText',
+            'keyup @ui.searchField': 'changeSearchText',
             'click .js-list-view': 'listDisplayMode',
             'click .js-tile-view': 'tilesDisplayMode'
         },
@@ -32,7 +35,7 @@ lessonViewer.module('Views', function (Views, lessonViewer, Backbone, Marionette
         onValamisControlsInit: function(){
             this.$('.js-category-filter').valamisDropDown('select', this.model.get('selectedCategories')[0]);
             this.$('.js-sort-filter').valamisDropDown('select', this.model.get('sort'));
-            this.$('.js-search').val(this.model.get('searchtext'));
+            this.ui.searchField.val(this.model.get('searchtext')).trigger('input');
 
             var displayMode = lessonViewer.settings.get('displayMode');
             if (displayMode === DISPLAY_TYPE.TILES)
@@ -104,6 +107,14 @@ lessonViewer.module('Views', function (Views, lessonViewer, Backbone, Marionette
 
             var packageRating = this.model.get('rating');
 
+            var statusClass = '';
+            if (this.model.get('status') == 'finished') {
+                statusClass = 'success';
+            }
+            if (this.model.get('status') == 'inReview') {
+                statusClass = 'inprogress';
+            }
+
             return {
                 courseId: Utils.getCourseId,
                 timestamp: Date.now(),
@@ -116,7 +127,8 @@ lessonViewer.module('Views', function (Views, lessonViewer, Backbone, Marionette
                 ratingAverage: Math.round(packageRating.average * 10) / 10,
                 ratingScore: packageRating.score,
                 noAverage: (packageRating.total == 0),
-                notRated: (packageRating.score == 0)
+                notRated: (packageRating.score == 0),
+                statusClass: statusClass
             }
         },
         className: 'tile s-12 m-4 l-2',

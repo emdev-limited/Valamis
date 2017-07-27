@@ -55,6 +55,14 @@
     String keyCertificateExpiredBody = "valamisCertificateExpiredBody";
     String keyCertificateExpiredEnable = "valamis.certificate.expired.enable";
 
+    String keyTrainingEventUserAddedSubject = "valamisTrainingEventUserAddedSubject";
+    String keyTrainingEventUserAddedBody = "valamisTrainingEventUserAddedBody";
+    String keyEventUserAddedEnable = "valamis.events.user.added.enable";
+
+    String keyTrainingEventReminderSubject = "valamisTrainingEventReminderSubject";
+    String keyTrainingEventReminderBody = "valamisTrainingEventReminderBody";
+    String keyTrainingEventReminderEnable = "valamis.event.reminder.enable";
+
 
     String adminEmailFromName = PrefsPropsUtil.getString(company.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_NAME);
     String adminEmailFromAddress = PrefsPropsUtil.getString(company.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
@@ -109,12 +117,21 @@
     String valamisEmailCertificateExpiredBody = PrefsPropsUtil.getContent(company.getCompanyId(), keyCertificateExpiredBody);
     boolean valamisEmailCertificateExpiredEnable = PrefsPropsUtil.getBoolean(company.getCompanyId(), keyCertificateExpiredEnable);
 
+    String valamisTrainingEventUserAddedSubject = PrefsPropsUtil.getContent(company.getCompanyId(), keyTrainingEventUserAddedSubject);
+    String valamisTrainingEventUserAddedBody = PrefsPropsUtil.getContent(company.getCompanyId(), keyTrainingEventUserAddedBody);
+    boolean valamisTrainingEventUserAddedEnable = PrefsPropsUtil.getBoolean(company.getCompanyId(), keyEventUserAddedEnable);
+
+    String valamisTrainingEventReminderSubject = PrefsPropsUtil.getContent(company.getCompanyId(), keyTrainingEventReminderSubject);
+    String valamisTrainingEventReminderBody = PrefsPropsUtil.getContent(company.getCompanyId(), keyTrainingEventReminderBody);
+    boolean valamisTrainingEventReminderEnable = PrefsPropsUtil.getBoolean(company.getCompanyId(), keyTrainingEventReminderEnable);
+
+
 %>
 
 <liferay-ui:error-marker key="errorSection" value="email_notifications" />
 
 <liferay-ui:tabs
-        names="sender,account-created-notification,email-verification-notification,password-changed-notification,password-reset-notification,valamis-certificate-user-achieved,valamis-certificate-user-added,valamis-certificate-user-deactivated,valamis-course-user-added,valamis-course-lesson-available-added,valamis-grade-course,valamis-grade-lesson,valamis-certificate-expires,valamis-certificate-expired"
+        names="sender,account-created-notification,email-verification-notification,password-changed-notification,password-reset-notification,valamis-certificate-user-achieved,valamis-certificate-user-added,valamis-certificate-user-deactivated,valamis-course-user-added,valamis-course-lesson-available-added,valamis-grade-course,valamis-grade-lesson,valamis-certificate-expires,valamis-certificate-expired,valamis-event-user-added,valamis-training-event-reminder"
         refresh="<%= false %>"
 >
     <liferay-ui:section>
@@ -398,6 +415,12 @@
                          number of days
                     </dd>
                     <dt>
+                        [$DATE$]
+                    </dt>
+                    <dd>
+                        Date
+                    </dd>
+                    <dt>
                         [$CERTIFICATE_LINK$]
                     </dt>
                     <dd>
@@ -438,6 +461,18 @@
                         <%= company.getVirtualHostname() %>
                     </dd>
                     <dt>
+                        [$DAYS$]
+                    </dt>
+                    <dd>
+                        number of days
+                    </dd>
+                    <dt>
+                        [$DATE$]
+                    </dt>
+                    <dd>
+                        Date
+                    </dd>
+                    <dt>
                         [$CERTIFICATE_LINK$]
                     </dt>
                     <dd>
@@ -448,6 +483,81 @@
         </aui:fieldset>
     </liferay-ui:section>
 
+    <liferay-ui:section>
+        <aui:fieldset>
+            <aui:input label="enabled" name='<%= "settings--valamis.events.user.added.enable--" %>' type="checkbox" value="<%=  valamisTrainingEventUserAddedEnable %>" />
+            <liferay-ui:error key="valamisTrainingEventUserAddedSubject" message="please-enter-a-valid-subject" />
+
+            <aui:input cssClass="lfr-input-text-container" label="subject" name='<%= "settings--" + keyTrainingEventUserAddedSubject +"--" %>' type="text" value="<%= valamisTrainingEventUserAddedSubject %>" />
+
+            <liferay-ui:error key="emailTrainingEventUserAddedBody" message="please-enter-a-valid-body" />
+
+            <aui:field-wrapper label="body">
+                <liferay-ui:input-editor editorImpl="<%= EDITOR_WYSIWYG_IMPL_KEY %>" initMethod='<%= "initEmailTrainingEventUserAddedBodyEditor" %>' name="emailTrainingEventUserAddedBody" toolbarSet="email" width="470" />
+
+                <aui:input name='<%= "settings--"+ keyTrainingEventUserAddedBody +"--" %>' type="hidden" value="<%= valamisTrainingEventUserAddedBody %>" />
+            </aui:field-wrapper>
+
+            <div class="terms email-course-added definition-of-terms">
+                <dt>
+                    [$USER_SCREENNAME$]
+                </dt>
+                <dd>
+                    <liferay-ui:message key="the-user-screen-name"/>
+                </dd>
+                <dt>
+                    [$EVENT_LINK$]
+                </dt>
+                <dd>
+                    Event link
+                </dd>
+            </div>
+        </aui:fieldset>
+    </liferay-ui:section>
+
+    <liferay-ui:section>
+        <aui:fieldset>
+            <aui:input label="enabled" name='<%= "settings--valamis.event.reminder.enable--" %>' type="checkbox" value="<%=  valamisTrainingEventReminderEnable %>" />
+            <liferay-ui:error key="valamisTrainingEventReminderSubject" message="please-enter-a-valid-subject" />
+
+            <aui:input cssClass="lfr-input-text-container" label="subject" name='<%= "settings--" + keyTrainingEventReminderSubject +"--" %>' type="text" value="<%= valamisTrainingEventReminderSubject %>" />
+
+            <liferay-ui:error key="emailTrainingEventReminderBody" message="please-enter-a-valid-body" />
+
+            <aui:field-wrapper label="body">
+                <liferay-ui:input-editor editorImpl="<%= EDITOR_WYSIWYG_IMPL_KEY %>" initMethod='<%= "initEmailTrainingEventReminderBodyEditor" %>' name="emailTrainingEventReminderBody" toolbarSet="email" width="470" />
+
+                <aui:input name='<%= "settings--"+ keyTrainingEventReminderBody +"--" %>' type="hidden" value="<%= valamisTrainingEventReminderBody %>" />
+            </aui:field-wrapper>
+
+            <div class="terms email-course-added definition-of-terms">
+                <dt>
+                    [$USER_SCREENNAME$]
+                </dt>
+                <dd>
+                    <liferay-ui:message key="the-user-screen-name"/>
+                </dd>
+                <dt>
+                    [$EVENT_LINK$]
+                </dt>
+                <dd>
+                    Event link
+                </dd>
+                <dt>
+                    [$DAYS$]
+                </dt>
+                <dd>
+                    Number of days
+                </dd>
+                <dt>
+                    [$DATE$]
+                </dt>
+                <dd>
+                    Date
+                </dd>
+            </div>
+        </aui:fieldset>
+    </liferay-ui:section>
 
 
 </liferay-ui:tabs>
@@ -507,6 +617,14 @@
 
     function <portlet:namespace />initEmailVerificationBodyEditor() {
     return "<%= UnicodeFormatter.toString(adminEmailVerificationBody) %>";
+    }
+
+    function <portlet:namespace />initEmailTrainingEventUserAddedBodyEditor() {
+    return "<%= UnicodeFormatter.toString(valamisTrainingEventUserAddedBody) %>";
+    }
+
+    function <portlet:namespace />initEmailTrainingEventReminderBodyEditor() {
+    return "<%= UnicodeFormatter.toString(valamisTrainingEventReminderBody) %>";
     }
 
     function <portlet:namespace />saveEmails() {
@@ -570,17 +688,27 @@
     catch (e) {
     }
     try {
-    document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyCertificateExpiresBody%>--'].value = window['<portlet:namespace />emailCetificateExpiresBody'].getHTML();
+    document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyCertificateExpiresBody%>--'].value = window['<portlet:namespace />emailCertificateExpiresBody'].getHTML();
     }
     catch (e) {
     }
     try {
-    document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyCertificateExpiredBody%>--'].value = window['<portlet:namespace />emailCetificateExpiredBody'].getHTML();
+    document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyCertificateExpiredBody%>--'].value = window['<portlet:namespace />emailCertificateExpiredBody'].getHTML();
     }
     catch (e) {
     }
     try {
     document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyCourseLessonAvailableBody%>--'].value = window['<portlet:namespace />emailCourseLessonAvailableBody'].getHTML();
+    }
+    catch (e) {
+    }
+    try {
+    document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyTrainingEventUserAddedBody%>--'].value = window['<portlet:namespace />emailTrainingEventUserAddedBody'].getHTML();
+    }
+    catch (e) {
+    }
+    try {
+    document.<portlet:namespace />fm['<portlet:namespace />settings--<%=keyTrainingEventReminderBody%>--'].value = window['<portlet:namespace />emailTrainingEventReminderBody'].getHTML();
     }
     catch (e) {
     }

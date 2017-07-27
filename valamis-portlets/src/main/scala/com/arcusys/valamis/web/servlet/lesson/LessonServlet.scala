@@ -1,5 +1,6 @@
 package com.arcusys.valamis.web.servlet.lesson
 
+import java.util.Locale
 import javax.servlet.http.HttpServletResponse
 
 import com.arcusys.learn.liferay.constants.QueryUtilHelper
@@ -36,6 +37,8 @@ class LessonServlet
   lazy val lessonAttemptService = inject[UserLessonResultService]
   lazy val courseService = inject[CourseService]
   lazy val scormActivityService = inject[ActivityServiceContract]
+
+  implicit def locale: Locale = request.getLocale
 
   implicit override val jsonFormats: Formats =
     DefaultFormats + new LessonInfoSerializer + new EnumNameSerializer(LessonType) + DateTimeSerializer
@@ -76,8 +79,7 @@ class LessonServlet
   get("/packages(/)", request.getParameter("action") == "ALL_AVAILABLE_FOR_PLAYER") {
     val courseId = req.courseIdRequired
     val sourceCourseIds = GroupLocalServiceHelper
-      .searchExceptPrivateSites(getCompanyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
-      .map(i => i.getGroupId)
+      .searchSiteIds(getCompanyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
       .filterNot(_ == courseId)
 
     val filter = LessonFilter(
@@ -100,7 +102,7 @@ class LessonServlet
 
   get("/packages(/)", request.getParameter("action") == "ALL") {
     val courseIds = if(req.instanceScope) {
-      GroupLocalServiceHelper.searchIdsExceptPrivateSites(req.companyId)
+      GroupLocalServiceHelper.searchSiteIds(req.companyId)
     } else {
       Seq(req.courseIdRequired)
     }
@@ -169,7 +171,7 @@ class LessonServlet
     val beginDate = req.beginDate
     val endDate = req.endDate
 
-    val limit = new LessonLimit(
+    val limit = LessonLimit(
       lessonId,
       req.passingLimit,
       req.rerunInterval,
@@ -239,14 +241,16 @@ class LessonServlet
     val playerId = req.playerIdOption
     val courseId = req.courseId
 
-    if (playerId.isDefined && courseId.isDefined) {
+    val tags = if (playerId.isDefined && courseId.isDefined) {
       lessonPlayerService.getTagsFromPlayer(playerId.get, courseId.get)
     } else if (courseId.isDefined) {
       lessonService.getTagsFromCourse(courseId.get)
     } else {
-      val courseIds = GroupLocalServiceHelper.searchIdsExceptPrivateSites(req.companyId)
+      val courseIds = GroupLocalServiceHelper.searchSiteIds(req.companyId)
       lessonService.getTagsFromCourses(courseIds)
     }
+
+    tags.sortBy(_.text.toLowerCase)
   }
 
   post("/packages/rate(/)", request.getParameter("action") == "UPDATERATING") {

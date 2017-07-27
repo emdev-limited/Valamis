@@ -7,13 +7,13 @@
 
     var Valamis = Valamis || {};
 
-    jQueryValamis(document).ready(function () {
+    jQueryValamis(function () {
 
         if (!valamisApp.started) { valamisApp.start(); }
 
         var coursesBrowserOptions = {
             language: '{{language}}',
-            resourceName: 'allCourses',
+            resourceName: ['allCourses', 'common'],
             permissions: {},
             app: allCourses,
             appOptions: { editor: false }

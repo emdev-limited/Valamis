@@ -1,68 +1,63 @@
-myCertificates.module('Entities', function(Entities, myCertificates, Backbone, Marionette, $, _) {
+myCertificates.module('Entities', function (Entities, myCertificates, Backbone, Marionette, $, _) {
 
-  var CERTIFICATES_COUNT = 5;
+  Entities.ROW_TYPE = {
+    DETAILS: 'details',
+    CERTIFICATE: 'certificate'
+  };
 
-  var CertificateCollectionService = new Backbone.Service({
+  var PathsCollectionService = new Backbone.Service({
     url: path.root,
     sync: {
       'read': {
-        'path': function (model, options) {
-          return path.api.certificates;
+        'path': function () {
+          return path.api.learningPathsStatistic;
         },
         'data': function (collection, options) {
           return {
-            courseId: Utils.getCourseId(),
-            page: options.page,
-            count: CERTIFICATES_COUNT,
-            sortBy: 'creationDate',
-            sortAscDirection: true,
-            isActive: true,
-            additionalData: 'usersStatistics'
+            skip: options.skip,
+            take: options.take
           };
-        },
-        'method': 'get'
+        }
       }
     }
   });
 
-  Entities.CertificateCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({}),
+  Entities.PathsCollection = valamisApp.Entities.LazyCollection.extend({
+    model: Backbone.Model,
     parse: function (response) {
-      this.trigger('certificateCollection:updated', {total: response.total, count: CERTIFICATES_COUNT});
-      return _.map(response.records, function(model) {
-        model['url'] = Utils.getCertificateUrl(model.id);
-        return model;
+      this.total = 2 * response.total;
+      var res = [];
+      _.each(response.items, function (item) {
+        res.push(_.extend({tpe: Entities.ROW_TYPE.CERTIFICATE}, item));
+        res.push(_.extend({tpe: Entities.ROW_TYPE.DETAILS, pathId: item.id}));
       });
+      return res;
     }
-  }).extend(CertificateCollectionService);
+  }).extend(PathsCollectionService);
 
   var UsersCollectionService = new Backbone.Service({
     url: path.root,
     sync: {
       'read': {
-        'path': path.api.users,
+        'path': function (collection, options) {
+          return path.api.learningPathsStatistic + options.pathId + '/users';
+        },
         'data': function (collection, options) {
-          var params = {
-            certificateId: options.certificateId,
-            courseId: Utils.getCourseId(),
-            sortBy: 'name',
-            sortAscDirection: true,
-            page: options.page,
-            count: options.count,
-            isUserJoined: true,
-            withStat: true
+          return {
+            skip: options.skip,
+            take: options.take
           };
-          return params;
         },
         'method': 'get'
       }
     }
   });
 
-  Entities.UsersCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({}),
+  Entities.UsersCollection = valamisApp.Entities.LazyCollection.extend({
+    model: Backbone.Model,
     parse: function (response) {
-      return response.records;
+      this.total = response.total;
+      return response.items;
     }
   }).extend(UsersCollectionService);
 

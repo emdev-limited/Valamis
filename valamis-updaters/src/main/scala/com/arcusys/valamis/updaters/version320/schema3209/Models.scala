@@ -2,6 +2,10 @@ package com.arcusys.valamis.updaters.version320.schema3209
 
 import org.joda.time.DateTime
 
+case class TrainingEventGoal(goalId: Long,
+                             certificateId: Long,
+                             eventId: Long)
+
 case class Certificate(id: Long,
                        title: String,
                        description: String,

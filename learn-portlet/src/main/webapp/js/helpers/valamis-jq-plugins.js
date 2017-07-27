@@ -13,8 +13,10 @@
 
                 var actionButton = elem.find(".button");
                 var dropdownMenu = elem.find('.dropdown-menu');
+                var arrowSpan = actionButton.find(">span[class*='val-icon-arrow']");
                 actionButton.unbind('click').on('click', function(){
                     dropdownMenu.toggleClass("dropdown-visible");
+                    arrowSpan.toggleClass("val-icon-arrow-down val-icon-arrow-up");
                 });
 
                 var dropdownItems = dropdownMenu.find("li");
@@ -29,6 +31,7 @@
                                     .find('.dropdown-text').html(item.html());
                             }
                             dropdownMenu.removeClass('dropdown-visible');
+                            arrowSpan.toggleClass("val-icon-arrow-up val-icon-arrow-down");
                             $(document).ajaxStart(function() {
                                 actionButton.prop('disabled', true);
                             });
@@ -43,6 +46,9 @@
                 $('body').on('click', function(e){
                     if (elem.has(e.target).length === 0) {
                         dropdownMenu.removeClass('dropdown-visible');
+                        if(arrowSpan.hasClass("val-icon-arrow-up")) {
+                            arrowSpan.toggleClass("val-icon-arrow-up val-icon-arrow-down");
+                        }
                     }
                 });
             });
@@ -115,54 +121,51 @@
             return this.each(function() {
                 var elem = $(this);
 
-                elem.unbind('keypress').keypress(function(e) {
-                    var code = e.keyCode ? e.keyCode : e.charCode;
-
-                    var allowed = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
-                    if (options.allowNegative) {
-                        allowed.push(45);
+                elem.unbind('click').click(function(e){
+                    if(e.target.selectionStart !== undefined) $(e.target).attr('caretpos', e.target.selectionStart);
+                });
+                elem.unbind('keypress').keypress(function(e){
+                    $(e.target).attr('keypressvalue', $(e.target).val());
+                    if(e.target.selectionStart !== undefined) {
+                        $(e.target).attr('caretpos', e.target.selectionStart);
                     }
-                    if (options.allowFloat) {
-                        // use dot as delimiter
-                        allowed.push(46);
-                    }
-
-                    if (allowed.indexOf(code) < 0) {
-                        return false;
-                    }
-
-                    // do not allow input dot twice
-                    if(($(this).val().indexOf('.') > 0) && e.charCode == 46){
-                        return false
-                    }
-                    // do not allow input minus twice
-                    if(($(this).val().indexOf('-') > -1) && e.charCode == 45){
-                        return false
+                    if(e.keyCode == 13) {
+                        e.target.blur();
                     }
                 });
-
-                elem.unbind('keyup').keyup(function(e){
-                    // form regexp
-                    var pattern = '^';
-                    if (options.allowNegative) {
-                        pattern += '([-])?';
-                    }
-                    pattern += '[0-9]+';
-                    if (options.allowFloat) {
-                        pattern += '([.])?([0-9]+)?';
-                    }
-                    pattern += '$';
+                elem.unbind('input').on('input', function(e){
+                    var pattern = '[0-9]*';
+                    options.allowNegative ? pattern = '^-?' + pattern : pattern = '^' + pattern;
+                    options.allowFloat ? pattern += '\\.?([0-9]+)?$' : pattern += '$';
 
                     var regexp = new RegExp(pattern);
-                    var value = parseFloat(elem.val());
 
-                    // if value doesn't match regexp or value can't be parsed, clear field
-                    if (!regexp.test(value) || isNaN(value)) {
-                        elem.val('');
+                    if(!regexp.test($(e.target).val())) {
+                        $(e.target).val($(e.target).attr('keypressvalue'));
+                        if(e.target.setSelectionRange && $(e.target).attr('caretpos') !== undefined) {
+                            var caretPosition = parseInt($(e.target).attr('caretpos'));
+                            e.target.setSelectionRange(caretPosition, caretPosition);
+                        }
                     }
-                    else {
-                        elem.val(value);
+
+                    var val = parseFloat($(e.target).val());
+                    var regexp2 = new RegExp('\\.0*$');
+                    if(!isNaN(val) && !regexp2.test($(e.target).val())) {
+                        $(e.target).val(val);
+                        $(e.target).attr('keypressvalue', val);
                     }
+
+                    if (_.isFunction(options.callback_func)) {
+                        options.callback_func();
+                    }
+                });
+                elem.unbind('change').on('change', function(e){
+                    var val = parseFloat($(e.target).val());
+                    if(isNaN(val)) {
+                        val = 0;
+                    }
+                    $(e.target).val(val);
+                    $(e.target).attr('keypressvalue', val);
 
                     if (_.isFunction(options.callback_func)) {
                         options.callback_func();
@@ -191,7 +194,8 @@
         'max': '100',
         'step': '1',
         'allowNegative': false,
-        'allowFloat': false
+        'allowFloat': false,
+        'obligatory': true
     };
 
     var changeInputWidth = function(textInput, value){
@@ -216,18 +220,28 @@
                 var step = parseFloat(options.step);
 
                 if(value > maxValue) value = maxValue;
-                if(value < minValue) value = minValue;
+                if(value < minValue) {
+                    if(options.obligatory) {
+                        value = minValue;
+                    }
+                    else {
+                        value = '';
+                    }
+                }
                 return value;
             };
 
             var options = $.extend({}, defaults, params);
             options.fixed = getFixed(options.step);
 
+            var iniValue = '';
+            if(options.obligatory) iniValue = options.min;
+
             var html = '<button class="button medium neutral no-text minus-button">'
                 + '<span class="val-icon-minus"></span>'
                 + '</button>'
                     //+ '<span>'
-                + '<input type="text" class="text-input valamis" value="0"/>'
+                + '<input type="text" class="text-input valamis" value="' + iniValue + '"/>'
                     //+ '</span>'
                 + '<button class="button medium neutral no-text plus-button">'
                 + '<span class="val-icon-plus"></span>'
@@ -255,67 +269,64 @@
                 plusButton.unbind('click').click(function() {
                     var step = parseFloat(options.step);
                     var maxValue = parseFloat(options.max);
-                    var value = parseFloat(textInput.val() || 0).toFixed(options.fixed);
-                    var newValue = parseFloat(value) + step;
+                    var value = parseFloat(textInput.val() || options.min).toFixed(options.fixed);
+                    if(!options.obligatory && textInput.val() == '') {
+                        var newValue = parseFloat(value);
+                    }
+                    else {
+                        var newValue = parseFloat(value) + step;
+                    }
 
                     newValue = fixValue(newValue.toFixed(options.fixed));
 
                     textInput.val(newValue);
                     changeInputWidth(textInput, newValue);
                 });
-
+                textInput.unbind('click').click(function(e){
+                    if(e.target.selectionStart !== undefined) $(e.target).attr('caretpos', e.target.selectionStart);
+                });
                 textInput.unbind('keypress').keypress(function(e){
-                    var code = e.keyCode ? e.keyCode : e.charCode;
-
-                    var allowed = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
-                    if (options.allowNegative) {
-                        allowed.push(45);
+                    $(e.target).attr('keypressvalue', $(e.target).val());
+                    if(e.target.selectionStart !== undefined) {
+                        $(e.target).attr('caretpos', e.target.selectionStart);
                     }
-                    if (options.allowFloat) {
-                        allowed.push(46);
-                    }
-
-                    if (allowed.indexOf(code) < 0) {
-                        return false;
-                    }
-
-                    // do not allow input dot twice
-                    if(($(this).val().indexOf('.') > 0) && e.charCode == 46){
-                        return false
-                    }
-                    // do not allow input minus twice
-                    if(($(this).val().indexOf('-') > -1) && e.charCode == 45){
-                        return false
+                    if(e.keyCode == 13) {
+                        e.target.blur();
                     }
                 });
-
-                textInput.unbind('keyup').keyup(function(e){
-                    // form regexp
-                    var pattern = '^';
-                    if (options.allowNegative) {
-                        pattern += '([-])?';
-                    }
-                    pattern += '[0-9]+';
-                    if (options.allowFloat) {
-                        pattern += '([.])?([0-9]+)?';
-                    }
-                    pattern += '$';
+                textInput.unbind('input').on('input', function(e){
+                    var pattern = '[0-9]*';
+                    options.allowNegative ? pattern = '^-?' + pattern : pattern = '^' + pattern;
+                    options.allowFloat ? pattern += '\\.?([0-9]+)?$' : pattern += '$';
 
                     var regexp = new RegExp(pattern);
-                    var value = parseFloat(textInput.val());
 
-                    // if value doesn't match regexp or value can't be parsed, clear field
-                    if (!regexp.test(value) || isNaN(value)) {
-                        textInput.val(options.min);
-                    }
-                    else {
-                        textInput.val(value);
+                    if(!regexp.test($(e.target).val())) {
+                        $(e.target).val($(e.target).attr('keypressvalue'));
+                        if(e.target.setSelectionRange && $(e.target).attr('caretpos') !== undefined) {
+                            var caretPosition = parseInt($(e.target).attr('caretpos'));
+                            e.target.setSelectionRange(caretPosition, caretPosition);
+                        }
                     }
 
-                    setTimeout(function(){
-                        textInput.val(fixValue(textInput.val()));
-                        changeInputWidth(textInput, textInput.val());
-                    }, 300);
+                    var val = parseFloat($(e.target).val());
+                    var regexp2 = new RegExp('\\.0*$');
+                    if(!isNaN(val) && !regexp2.test($(e.target).val())) {
+                        val = fixValue(val);
+                        $(e.target).val(val);
+                        $(e.target).attr('keypressvalue', val);
+                    }
+                    changeInputWidth($(e.target), $(e.target).val());
+                });
+
+                textInput.unbind('change').on('change', function(e){
+                    var val = parseFloat($(e.target).val());
+                    if(isNaN(val)) {
+                        options.obligatory ? val =  options.min : val = '';
+                    }
+                    $(e.target).val(val);
+                    $(e.target).attr('keypressvalue', val);
+                    changeInputWidth($(e.target), $(e.target).val());
                 });
             });
         },
@@ -360,6 +371,9 @@
                 minusButton.unbind('click');
                 plusButton.unbind('click');
                 textInput.unbind('keypress');
+                textInput.unbind('click');
+                textInput.unbind('change');
+                textInput.unbind('input');
                 elem.destroy();
             });
         }
@@ -379,33 +393,32 @@
 })(jQuery);
 
 // valamis infinite scroll TODO: add valamisView with infinite scroll
-(function($){
-    var fetchCollection = function(collection, options) {
-      collection.fetch(options);
-    };
+(function ($) {
 
-  $.fn.valamisInfiniteScroll = function(collection, options) {
-    var page = 1;
+  $.fn.valamisInfiniteScroll = function(collection, fetchFunc) {
     var that = this;
-    var itemsCount = options.count;
+
+    var fetchCollection = function() {};
+    if (_.isFunction(fetchFunc)) {
+      fetchCollection = fetchFunc;
+    }
 
     var elem = this.find('.js-scroll-bounded');
     var waitForResponse = false;
     elem.on('scroll', function () {
-      var scrolltop =   elem.scrollTop();
+      var scrolltop = elem.scrollTop();
       var difference = elem.find('> .js-scroll-list').height() - elem.height();
 
       if (scrolltop >= difference * 0.9 && !waitForResponse) {
         waitForResponse = true;
         that.find('.js-loading-gif').removeClass('hidden');
-        page++;
 
-        fetchCollection(collection, _.extend(options, {page: page}));
+        fetchCollection();
       }
     });
 
-    collection.on('sync', function() {
-      if (collection.length < itemsCount) {
+    collection.on('sync', function () {
+      if (!collection.hasMore()) {
         elem.off('scroll');
       }
 
@@ -413,7 +426,7 @@
       waitForResponse = false;
     });
 
-    fetchCollection(collection, _.extend(options, {page: page}));
+    fetchCollection();
   }
 })(jQuery);
 
@@ -608,17 +621,32 @@
 //valamis search field
 (function ($) {
   $.fn.valamisSearch = function () {
+      this.each(function () {
+          var elem = $(this);
+          elem
+              .on('click', function (e) {
+                  if($(e.target).closest('input[type="text"]').length == 0){
+                      $(e.target).children('input[type="text"]').val('').focus().trigger('keyup');
+                      $(e.target).removeClass('cleartext');
+                  }
+              });
+          elem.children('input[type="text"]')
+              .on('focus', function(){
+                  elem.addClass('focus');
+              })
+              .on('blur', function(){
+                  elem.removeClass('focus');
+              })
+              .on('input', function(e){
+                  if($(e.target).val() == '') {
+                      elem.removeClass('cleartext');
+                  }
+                  else {
+                      elem.addClass('cleartext');
+                  }
+              });
 
-    this.each(function () {
-      var elem = $(this);
-      elem
-        .on('focus', function () {
-          elem.parent('.val-search').addClass('focus');
-        })
-        .on('blur', function () {
-          elem.parent('.val-search').removeClass('focus');
-        });
-    });
+      });
   };
 })(jQuery);
 
@@ -663,7 +691,7 @@
 
 //valamis disable submit buttons
 (function ($) {
-    var classes = '.js-submit-button, .js-publish-lesson, .js-action-share, .js-save-competences, ' +
+    var classes = '.js-submit-button, .js-publish-lesson, .js-action-share, ' +
         '.js-action-delete, .js-confirmation, .js-delete-comment, .js-post-my-comment, .js-post-status';
 
     function toggleElAvailability(e, disable) {

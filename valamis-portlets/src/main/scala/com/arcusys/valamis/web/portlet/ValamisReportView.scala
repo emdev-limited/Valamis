@@ -3,9 +3,11 @@ package com.arcusys.valamis.web.portlet
 import javax.portlet._
 import javax.servlet.http.HttpServletRequest
 
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.learn.liferay.util.PortalUtilHelper
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
 import com.arcusys.valamis.util.serialization.JsonHelper
-import com.arcusys.valamis.web.portlet.base.{OAuthPortlet, PortletBase}
+import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, PortletBase}
 import com.arcusys.valamis.web.servlet.request.ServletRequestHelper.ServletRequestExt
 import com.arcusys.valamis.web.portlet.util.{ReportPeriodType, ReportPortletPreferences, ReportTypes, ReportsScopes}
 
@@ -14,6 +16,7 @@ object ReportAction extends Enumeration {
 }
 
 class ValamisReportView extends OAuthPortlet with PortletBase {
+
   override def doView(request: RenderRequest, response: RenderResponse) {
     implicit val out = response.getWriter
 

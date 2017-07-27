@@ -38,7 +38,7 @@
         }
     </style>
     <div class="adminBanner hideBanner" id="<portlet:namespace />Banner">
-        This is Valamis CE version - No support - No warranty - <a target="_blank" href="http://valamis.arcusys.com/-/valamis-ee-download">Update to EE version</a>
+        This is Valamis CE version - No support - No warranty - <a target="_blank" href="https://valamis.arcusys.com/-/valamis-ee-download">Update to EE version</a>
         <div class="closeButton" onclick="<portlet:namespace />DoClose()"></div>
     </div>
     <script>

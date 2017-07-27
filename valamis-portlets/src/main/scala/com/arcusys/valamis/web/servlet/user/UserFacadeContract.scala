@@ -15,13 +15,4 @@ trait UserFacadeContract {
             withStat: Boolean = false): CollectionResponse[UserResponseBase]
 
   def getById(id: Long): UserResponse
-
-  def getUserResponseWithCertificateStatus(user: LUser,
-                                           userJoinedDate: DateTime,
-                                           status: CertificateStatuses.Value): UserWithCertificateStatusResponse
-
-  def getUserResponseWithCertificateStatus(user: User,
-                                           userJoinedDate: Option[DateTime],
-                                           status: Option[CertificateStatuses.Value]): UserWithCertificateStatusResponse
-
 }

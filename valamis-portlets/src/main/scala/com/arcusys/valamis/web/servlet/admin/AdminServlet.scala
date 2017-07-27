@@ -3,10 +3,10 @@ package com.arcusys.valamis.web.servlet.admin
 import javax.servlet.http.HttpServletResponse
 
 import com.arcusys.learn.liferay.util.{PortalUtilHelper, PortletName}
-import com.arcusys.valamis.lrs.service.LrsRegistration
+import com.arcusys.valamis.lrssupport.lrs.service.LrsRegistration
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
-import com.arcusys.valamis.lrsEndpoint.model._
-import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, AuthorizationType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.settings.service.SettingService
 import com.arcusys.valamis.web.portlet.base.ViewPermission
 import com.arcusys.valamis.web.servlet.base.{BaseApiController, PermissionUtil}
@@ -22,7 +22,9 @@ class AdminServlet extends BaseApiController {
   get("/administering/settings/lrs(/)") {
     implicit val companyId = getCompanyId
 
-    jsonAction(lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All, Some(request)))
+    jsonAction(lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+      Some(request),
+      PortalUtilHelper.getLocalHostUrl))
   }
 
   post("/administering/settings/:type(/)") {
@@ -35,6 +37,7 @@ class AdminServlet extends BaseApiController {
       case AdminSettingType.GoogleAPI => updateGoogleAPISettings
       case AdminSettingType.Lti => updateLTISettings
       case AdminSettingType.Lrs => updateLrsSettings
+      case AdminSettingType.BetaStudio => updateStudioSettings
     }
     halt(HttpServletResponse.SC_NO_CONTENT)
   }
@@ -82,5 +85,9 @@ class AdminServlet extends BaseApiController {
     settingsManager.setLtiVersion(adminRequest.ltiVersion)
     settingsManager.setLtiOauthSignatureMethod(adminRequest.ltiOauthSignatureMethod)
     settingsManager.setLtiOauthVersion(adminRequest.ltiOauthVersion)
+  }
+
+  private def updateStudioSettings(implicit companyId: Long) = {
+    settingsManager.setBetaStudioUrl(adminRequest.betaStudioUrl)
   }
 }

@@ -11,6 +11,7 @@ Marionette.TemplateCache.prototype.compileTemplate = function(rawTemplate, optio
     return _.partial(Mustache.render, rawTemplate);
 };
 
+
 // Render a template with data by passing in the template
 // selector and the data to render.
 Marionette.Renderer = {

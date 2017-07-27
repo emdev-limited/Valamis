@@ -6,7 +6,7 @@ import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.course.util.{CourseFriendlyUrlExt, CourseInfoFriendlyUrlExt}
 import com.arcusys.valamis.course.model.{CourseInfo, CourseMembershipType}
 import com.arcusys.valamis.course.CourseMemberService
-import com.arcusys.valamis.course.service.{CertificateService, CourseService, CourseUserQueueService}
+import com.arcusys.valamis.course.service.{CourseCertificateService, CourseService, CourseUserQueueService}
 import com.arcusys.valamis.ratings.RatingService
 import com.arcusys.valamis.ratings.model.Rating
 import org.joda.time.DateTime
@@ -15,9 +15,6 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import com.arcusys.valamis.web.util.ForkJoinPoolWithLRCompany.ExecutionContext
 
-/**
-  * Created by Iliya Tryapitsin on 12.03.14.
-  */
 case class CourseResponseWithGrade(course: CourseResponse,
                                    grade: Option[Float])
 
@@ -132,13 +129,13 @@ object CourseConverter {
   }
 
   def addCertificatesInfo(course: CourseResponse)(implicit userId: Long,
-                                                  certificateService: CertificateService): CourseResponse = {
-    val certificatesResponse = certificateService.getCertificates(course.id).map(cert => {
-      val userStatus = certificateService.getUserCertificateStatus(cert.id, userId).map(_.toString)
-      CertificateConverter.toResponse(cert, userStatus)
-    })
+                                                  courseCertificateService: CourseCertificateService): CourseResponse = {
+    val certificatesResponse =
+      courseCertificateService.getLearningPathsWithUserStatusByCourseId(course.id, userId) map { lp =>
+        CertificateConverter.toResponse(lp)
+      }
 
-    course.copy(prerequisitesCompleted = Some(certificateService.prerequisitesCompleted(course.id, userId)),
+    course.copy(prerequisitesCompleted = Some(courseCertificateService.prerequisitesCompleted(course.id, userId)),
       certificates = certificatesResponse)
   }
 

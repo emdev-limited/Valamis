@@ -1,7 +1,7 @@
 <script type="text/template" id="slides-editor-settings-modals-template">
     <div class="modals-container"></div>
 </script>
-
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 <script type="text/template" id="slides-editor-import-modal-template">
     <div class="bbm-modal__topbar">
         <h3 class="bbm-modal__title">{{importLabel}}</h3>
@@ -14,8 +14,19 @@
 </script>
 
 <script>
+    var Valamis = Valamis || {};
+    Valamis.language = Valamis.language || {};
+
+    function onCommonLanguageLoad(properties) {
+        _.extend(Valamis.language, properties);
+    }
+
+    jQueryValamis(function () {
+        Utils.loadLanguage('common', onCommonLanguageLoad);
+    });
+
     var ModalsLayout = Backbone.Marionette.LayoutView.extend({
-        template: function(){ return jQuery('#slides-editor-settings-modals-template').html()},
+        template: function(){ return jQueryValamis('#slides-editor-settings-modals-template').html()},
         regions: {
             modals: {
                 selector: '.modals-container',
@@ -26,7 +37,7 @@
 
 
     var ImportSlideSetModal = Backbone.Modal.extend({
-        template: function(){return jQuery('#slides-editor-import-modal-template').html()},
+        template: function(){return jQueryValamis('#slides-editor-import-modal-template').html()},
         submitEl: '.bbm-button',
         cancelEl: '.modal-close',
         className: 'val-modal',
@@ -59,7 +70,7 @@
 
 <script>
     var modalsLayout = new ModalsLayout();
-    jQuery('#modals-layout').append(modalsLayout.render().el);
+    jQueryValamis('#modals-layout').append(modalsLayout.render().el);
 
     function importSlideSet(){
         var importSlideSetModal = new ImportSlideSetModal();

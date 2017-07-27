@@ -1,6 +1,6 @@
 package com.arcusys.learn.liferay.update.version300.certificate3004
 
-import com.arcusys.valamis.certificate.model.goal.GoalType
+import com.arcusys.learn.liferay.update.migration.GoalType
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.model.PeriodTypes._
 import com.arcusys.valamis.persistence.common.DbNameUtils._
@@ -19,6 +19,8 @@ trait CertificateGoalTableComponent
                              periodType: PeriodType,
                              arrangementIndex: Int,
                              isOptional: Boolean = false)
+
+
 
   implicit lazy val certificateGoalTypeMapper = enumerationIdMapper(GoalType)
   implicit lazy val validPeriodTypeMapper = enumerationMapper(PeriodTypes)

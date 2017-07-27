@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<component name="com.arcusys.valamis.web.service.OpenCertificateAction" immediate="true">
+    <implementation class="com.arcusys.valamis.web.service.OpenCertificateAction"/>
+    <service>
+        <provide interface="com.liferay.portal.kernel.struts.StrutsAction"/>
+    </service>
+    <property name="path" type="String">/portal/learn-portlet/open_certificate</property>
+</component>

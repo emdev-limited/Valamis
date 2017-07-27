@@ -44,7 +44,7 @@ lessonViewer.module('Views.ScormContent', function (ScormContent, lessonViewer, 
 
       var activitiesData = window.LearnAjax.syncRequest(path.root + path.api.manifestactivities
         + '?packageID=' + this.packageId
-        + '&organizationID=' + this.organizationId
+        + '&organizationID=' + encodeURIComponent(this.organizationId)
       );
       this.buildScormTree(activitiesData);
     },
@@ -127,7 +127,7 @@ lessonViewer.module('Views.ScormContent', function (ScormContent, lessonViewer, 
     },
     getNavigationRequestURL: function (requestType) {
       return path.root + path.sequencing +  'NavigationRequest/' + this.packageId + '/'
-        + this.organizationId + '/' + requestType;
+        + encodeURIComponent(this.organizationId) + '/' + requestType;
     },
     doSuspend: function () {
       // SCORM 1.2, ignore auto doContinue on LMSFinish
@@ -152,12 +152,12 @@ lessonViewer.module('Views.ScormContent', function (ScormContent, lessonViewer, 
     doChoice: function (id) {
       // SCORM 1.2, ignore auto doContinue on LMSFinish
       window.API.silenceFinish();
-      this.$('#playerDataOutput').attr('src', this.getNavigationRequestURL('choice{' + id + '}'));
+      this.$('#playerDataOutput').attr('src', this.getNavigationRequestURL('choice{' + encodeURIComponent(id) + '}'));
     },
     doJump: function (id) {
       // SCORM 1.2, ignore auto doContinue on LMSFinish
       window.API.silenceFinish();
-      this.$('#playerDataOutput').attr('src', this.getNavigationRequestURL('jump{' + id + '}'));
+      this.$('#playerDataOutput').attr('src', this.getNavigationRequestURL('jump{' + encodeURIComponent(id) + '}'));
     },
     finishLesson: function() {
       //  // SCORM 1.2, ignore auto doContinue on LMSFinish

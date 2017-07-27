@@ -6,7 +6,8 @@
 </div>
 
 <script type="text/javascript">
-    CKEDITOR_BASEPATH = Utils.getContextPath() + "/js/vendor/ckeditor/";
+
+    CKEDITOR_BASEPATH = "{{contextPath}}/js/vendor/ckeditor/";
 
     jQueryValamis(function () {
 
@@ -35,7 +36,7 @@
         var showGlobalBase = ('{{showGlobalBase}}' == 'true');
 
         var contentManagerOptions = {
-            resourceName: 'questionManager',
+            resourceName: ['questionManager', 'common'],
             permissions: contentManagerPermissions,
             app: contentManager,
             appOptions: {showGlobalBase: showGlobalBase}

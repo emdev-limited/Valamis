@@ -21,6 +21,10 @@ trait LessonService {
 
   def getLesson(id: Long): Option[Lesson]
 
+  def getLessonTitlesByIds(ids: Seq[Long]): Seq[(Long, String)]
+
+  def getLessonForPublicApi(id: Long): Option[(Lesson, Option[LessonLimit])]
+
   def getLessonRequired(id: Long): Lesson
 
   def getAll(courseId: Long): Seq[Lesson]
@@ -62,6 +66,9 @@ trait LessonService {
                          skipTake: Option[SkipTake] = None
                         ): RangeResult[LessonFull]
 
+  def getLessonsForPublicApi(courseId: Long, lessonType: Option[LessonType],
+                             skipTake: Option[SkipTake]): Seq[(Lesson, Option[LessonLimit])]
+
   def getLogo(id: Long): Option[Array[Byte]]
 
   def setLogo(id: Long, name: String, content: Array[Byte]): Unit
@@ -84,9 +91,20 @@ trait LessonService {
              isVisible: Option[Boolean],
              beginDate: Option[DateTime],
              endDate: Option[DateTime],
+             requiredReview: Boolean,
+             scoreLimit: Double): Lesson
+
+  def update(id: Long,
+             title: String,
+             description: String,
+             isVisible: Option[Boolean],
+             beginDate: Option[DateTime],
+             endDate: Option[DateTime],
              tagIds: Seq[Long],
              requiredReview: Boolean,
              scoreLimit: Double): Unit
+
+  def updateLessonTags(id: Long, tagIds: Seq[Long]): Unit
 
   def updateLessonsInfo(lessonsInfo: Seq[LessonInfo]): Unit
 
@@ -95,6 +113,8 @@ trait LessonService {
   def getTagsFromCourse(courseId: Long): Seq[ValamisTag]
 
   def getTagsFromCourses(courseIds: Seq[Long]): Seq[ValamisTag]
+
+  def isExisted(lessonId: Long): Boolean
 
   def getLessonURL(lesson: Lesson, companyId: Long, plId: Option[Long] = None): String
 }

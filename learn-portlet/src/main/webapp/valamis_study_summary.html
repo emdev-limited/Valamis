@@ -1,12 +1,11 @@
-<div class="val-row val-study-summary" id="valamisStudySummaryAppRegion">
-</div>
+<div class="val-row val-study-summary" id="valamisStudySummaryAppRegion"></div>
 <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
 
 <script type="text/javascript">
 
     var Valamis = Valamis || {};
 
-    jQueryValamis(document).ready(function () {
+    jQueryValamis(function () {
 
         if (!valamisApp.started) {
             valamisApp.start();
@@ -21,7 +20,7 @@
         var userModel = {
             userPageUrl: '{{{userPageUrl}}}',
             userPicture: '{{{userPicture}}}',
-            userName:'{{userName}}'
+            userName:'{{{userName}}}'
         };
 
         var studySummaryOptions = {

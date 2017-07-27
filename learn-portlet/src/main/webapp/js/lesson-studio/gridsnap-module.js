@@ -250,7 +250,7 @@ var ValamisGridSnapModule = function(GridSnapModule, App, Backbone, Marionette, 
             height = isVertical ? 1 : parent.height() + offset * 2,
             width = isVertical ? parent.width() + offset * 2 : 1;
 
-        if( $('#gridLine-' + [posName, sideName, pos].join('-') + '.' + type).size() == 0 ){
+        if( $('#gridLine-' + [posName, sideName, pos].join('-') + '.' + type).length == 0 ){
             $('<div/>',{
                 'id': 'gridLine-' + [posName, sideName, pos].join('-'),
                 'class': 'grid-line ' + type + ' grid-line-' + [posName, sideName].join('-')
@@ -280,7 +280,7 @@ var ValamisGridSnapModule = function(GridSnapModule, App, Backbone, Marionette, 
     };
 
     this.disableGrid = function() {
-        if( $(gridOpts.linesContainer).find('.grid-line').size() > 0 ){
+        if( $(gridOpts.linesContainer).find('.grid-line').length > 0 ){
             this.displayGridToggle();
         }
     };
@@ -314,7 +314,7 @@ var ValamisGridSnapModule = function(GridSnapModule, App, Backbone, Marionette, 
 
     this.displayGridToggle = function(){
 
-        if( $(gridOpts.linesContainer).find('.grid-line').size() > 0 ){
+        if( $(gridOpts.linesContainer).find('.grid-line').length > 0 ){
             this.removeGrid();
             this.configure({
                 partsQuantity: gridOpts.partsQuantityDefault,

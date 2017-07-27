@@ -7,6 +7,9 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
 
     Views.ToolbarView = Marionette.ItemView.extend({
         template: '#allCoursesToolbarTemplate',
+        ui: {
+            searchField: '.js-search > input[type="text"]'
+        },
         behaviors: {
             ValamisUIControls: {}
         },
@@ -18,7 +21,7 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
             }
         },
         events: {
-            'keyup .js-search': 'changeSearchText',
+            'keyup @ui.searchField': 'changeSearchText',
             'click .js-new-course' : 'createNewCourse',
             'paginatorShowing' : 'allCoursesToolbarShowing',
             'click .dropdown-menu > li.js-sort': 'changeSort',
@@ -27,9 +30,11 @@ allCourses.module('Views', function (Views, allCourses, Backbone, Marionette, $,
         initialize:function(){
             this.inputTimeout = {};
         },
+        onValamisControlsInit: function(){
+            this.ui.searchField.val(this.model.get('searchtext')).trigger('input');
+        },
         onRender: function(){
             this.$('.js-sort-filter').valamisDropDown('select', this.model.get('sort'));
-            this.$('.js-search').val(this.model.get('searchtext'));
 
             var displayMode = this.options.settings.get('displayMode') || Views.DISPLAY_TYPE.LIST;
             this.$('.js-display-option[data-value="'+ displayMode +'"]').addClass('active');

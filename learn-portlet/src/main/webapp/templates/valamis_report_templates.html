@@ -1,4 +1,5 @@
 <script type="text/template" id="ValamisReportLayoutTemplate">
+    <div id="valamisReportExportSelector" class="dropdown-selector-export"></div>
     <div id="valamisReportPeriodSelector"></div>
     <div id="valamisReportLoading"></div>
     <div id="valamisReportRenderer"></div>
@@ -46,9 +47,97 @@
     <span data-value="{{id}}">{{optionTitle}}</span>
 </script>
 
-<script type="text/template" id="ValamisReportEmptyListTemplate">
-    <div class="valamis-info-label shifted">
+<script type="text/template" id="valamisAverageReportListTemplate">
+    <div id="valamisReportCoursesList"></div>
+    <div id="averageGradesRegion"></div>
+    <div id="emptyListRegion" class="hidden">
+        <div class="valamis-report-empty-list valamis-info-label no-items">
+            <span class="js-no-items-label">{{noItemsLabel}}</span>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="valamisAttemptedReportListTemplate">
+    <div class="button-group inline-group">
+        <div id="reportCoursesList"></div>
+        <div id="sortRegion"></div>
+    </div>
+    <div id="reportRegion"></div>
+    <div id="emptyListRegion" class="hidden">
+        <div class="valamis-report-empty-list valamis-info-label no-items">
+            <span class="js-no-items-label">{{noItemsLabel}}</span>
+        </div>
+    </div>
+    <div class="toggle-container js-show-more hidden">
+        <i class="loading-spinner"></i>
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span>{{showMoreLabel}}</span>
+    </div>
+</script>
+
+<script type="text/template" id="valamisReportEmptyListTemplate">
+    <div class="valamis-info-label no-items">
         <span class="hidden js-no-finished-label">{{noFinishedLessonsLabel}}</span>
         <span class="hidden js-no-items-label">{{noItemsLabel}}</span>
+    </div>
+</script>
+
+<script type="text/template" id="reportExportFieldset">
+        <div class="dropdown-selector js-dropdown-selector dropdown-selector-export">
+            <div class="current-selection js-current-selection">
+                <strong class="cs-label js-label">{{exportLabel}}</strong>
+                <span class="val-icon-arrow-down val-icon-right" title="{{changeLabel}}"></span>
+            </div>
+
+            <div class="dropdown-wrapper">
+                <form>
+                    <p>{{reportFormatLabel}}</p>
+                    <div>
+                        <input type="radio" value="csv" name="format" class="shift-left" checked id="reportExportCsv">
+                        <label for="reportExportCsv">{{reportFormatCsvLabel}}</label>
+                    </div>
+
+                    <div>
+                        <input type="radio" value="json" name="format" class="shift-left" id="reportExportJson">
+                        <label for="reportExportJson">{{reportFormatJsonLabel}}</label>
+                    </div>
+                    {{#isLimit}}
+                    <div class="limit-input">
+                        <span>Limit</span>
+                        <input class="js-digits-only" value="100" name="limit">
+                    </div>
+                    {{/isLimit}}
+                    <div class="submit-button">
+                        <button type="submit" class="button medium neutral js-apply">{{downloadReportLabel}}
+                        </button>
+                    </div>
+                    <div class="loading-message">{{loadingLabel}}...</div>
+                </form>
+            </div>
+        </div>
+</script>
+
+<script type="text/html" id="reportCoursesListTemplate">
+    <div class="dropdown js-courses-list">
+        <button class="button medium neutral ellipsis">
+            <span class="dropdown-text"></span><span class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {{#courses}}
+            <li data-value="{{id}}">{{title}}</li>
+            {{/courses}}
+        </ul>
+    </div>
+</script>
+
+<script type="text/html" id="reportSortTemplate">
+    <div class="dropdown js-sort-list">
+        <button class="button medium neutral ellipsis">
+            <span class="dropdown-text">{{sortByLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li data-value="0">{{legendAttemptedLabel}}</li>
+            <li data-value="1">{{legendCompletedLabel}}</li>
+        </ul>
     </div>
 </script>

@@ -1,8 +1,7 @@
 package com.arcusys.learn.liferay.update.version260.migrations
 
 import com.arcusys.learn.liferay.LogFactoryHelper
-import com.arcusys.valamis.persistence.impl.lrs.LrsEndpointTableComponent
-import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
+import com.arcusys.learn.liferay.update.version260.scheme2506.{AuthType, LrsEndpoint, LrsEndpointTableComponent}
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.util.enumeration._
 import slick.jdbc.GetResult
@@ -16,6 +15,8 @@ class LrsEndpointMigration(val db: JdbcBackend#DatabaseDef,
   with SlickProfile {
 
   val log = LogFactoryHelper.getLog(getClass)
+
+  val jdbcProfile = driver
 
   import driver.simple._
 

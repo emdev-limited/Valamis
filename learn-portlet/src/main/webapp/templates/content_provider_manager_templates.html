@@ -6,14 +6,14 @@
 <script type="text/template" id="contentProviderManagerAppLayoutTemplate">
     <div id="contentProvidersToolbar"></div>
     <div id="contentProvidersList"></div>
-    <div id="contentProvidersPaginator" class="val-paginator text-center"></div>
+    <div id="contentProvidersPaginator" class="val-paginator"></div>
 </script>
 
 <script type="text/template" id="contentProviderManagerToolbarTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
             </div>
         </div>
         {{#CONTENT_PROVIDER_MANAGER.MODIFY_ACTION}}
@@ -63,11 +63,11 @@
     <div class="modal-close val-icon-exit"></div>
 
     <div class="bbm-modal__bottombar">
-        <button class="button big neutral modal-close">
-            {{cancelLabel}}
-        </button>
-        <button class="button big primary js-submit-button ">
+        <button class="button medium primary js-submit-button">
             {{saveProviderButtonLabel}}
+        </button>
+        <button class="button medium simple modal-close">
+            {{cancelLabel}}
         </button>
     </div>
 </script>
@@ -127,7 +127,14 @@
                     {{providerCustomerKey}}  <input type='text' class="js-provider-customer-key text-input valamis" value='{{customerKey}}' placeholder='{{providerCustomerKeyPlaceholder}}'/>
                     {{providerCustomerSecret}}  <input type='text' class="js-provider-customer-secret text-input valamis" value='{{customerSecret}}' placeholder='{{providerCustomerSecretPlaceholder}}'/>
                 </div>
-
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{isProviderSelective}}</div>
+            <div class="div-col content-col">
+                <input type="checkbox" id="isSelective" class="js-is-selective-enable val-checkbox"
+                       {{#isSelective}}checked{{/isSelective}}/>
+                <label class="checkbox-label" for="isSelective"></label>
             </div>
         </div>
     </div>

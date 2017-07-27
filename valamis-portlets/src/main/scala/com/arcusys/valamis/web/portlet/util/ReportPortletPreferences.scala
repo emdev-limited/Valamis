@@ -15,6 +15,8 @@ object ReportTypes extends Enumeration {
   val Certificate = Value("reportTypeCertificates")
   val Lesson = Value("reportTypeTopLessons")
   val User = Value("reportTypeMostActiveUsers")
+  val AveragePassingGrade = Value("reportTypeAveragePassingGrade")
+  val LessonsAttempted = Value("reportTypeNumberOfLessonsAttempted")
 }
 
 object ReportPeriodType extends Enumeration {

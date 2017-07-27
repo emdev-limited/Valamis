@@ -683,13 +683,14 @@ allCourses.module('Entities', function (Entities, allCourses, Backbone, Marionet
         url: path.root,
         sync: {
             'read': {
-                'path': path.api.certificates,
+                'path': path.api.learningPaths + 'learning-paths',
                 'data': function () {
                     return {
-                        courseId: Utils.getCourseId(),
-                        sortBy: 'creationDate',
+                        sortBy: 'name',
                         sortAscDirection: true,
-                        isActive: true,
+                        activated: true,
+                        skip: 0,
+                        take: 9999
                     };
                 },
                 'method': 'get'
@@ -700,7 +701,7 @@ allCourses.module('Entities', function (Entities, allCourses, Backbone, Marionet
     Entities.CertificateCollection = Backbone.Collection.extend({
         model: Backbone.Model,
         parse: function (response) {
-            return response.records;
+            return response.items;
         }
     }).extend(CertificateCollectionService);
 

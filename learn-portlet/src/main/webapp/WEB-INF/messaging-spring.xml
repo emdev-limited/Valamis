@@ -9,7 +9,9 @@
     <bean id="valamis.main.lrsDeployed.listener" class="com.arcusys.valamis.web.configuration.LrsDeployedMessageListener" />
     <bean id="valamis.main.assignment.listener" class="com.liferay.portal.kernel.messaging.DummyMessageListener" />
     <bean id="valamis.main.assignmentDeployed.listener" class="com.liferay.portal.kernel.messaging.DummyMessageListener" />
-    <bean id="valamis.main.assignmentCompleted.listener" class="com.arcusys.valamis.web.listener.AssignmentMessageListener" />
+    <bean id="valamis.lessons.destination.listener" class="com.arcusys.valamis.web.listener.LessonMessageListener" />
+    <bean id="valamis.courses.destination.listener" class="com.arcusys.valamis.web.listener.CourseMessageListener" />
+    <bean id="valamis.learningPaths.deleted.listener" class="com.arcusys.valamis.web.listener.LearningPathDeletedMessageListener"/>
     <!-- Destinations -->
     <bean id="valamis.main.lrsDeployed.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
         <property name="name" value="valamis/main/lrsDeployed" />
@@ -20,8 +22,19 @@
     <bean id="valamis.main.assignmentDeployed.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
         <property name="name" value="valamis/main/assignmentDeployed" />
     </bean>
-    <bean id="valamis.main.assignmentCompleted.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
-        <property name="name" value="valamis/main/assignmentCompleted" />
+    <bean id="valamis.lrs.statementStored.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
+        <property name="name" value="valamis/lrs/statement/stored" />
+    </bean>
+
+    <bean id="valamis.lessons.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
+        <property name="name" value="valamis/lessons"/>
+    </bean>
+    <bean id="valamis.courses.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
+        <property name="name" value="valamis/courses"/>
+    </bean>
+
+    <bean id="valamis.learningPaths.deleted.destination" class="com.liferay.portal.kernel.messaging.SerialDestination">
+        <property name="name" value="valamis/learningPaths/deleted"/>
     </bean>
     <!-- Configurator -->
     <bean id="messagingConfigurator" class="com.liferay.portal.kernel.messaging.config.PluginMessagingConfigurator">
@@ -42,9 +55,19 @@
                         <ref bean="valamis.main.assignmentDeployed.listener" />
                     </list>
                 </entry>
-                <entry key="valamis/main/assignmentCompleted">
+                <entry key="valamis/lessons">
                     <list value-type="com.liferay.portal.kernel.messaging.MessageListener">
-                        <ref bean="valamis.main.assignmentCompleted.listener" />
+                        <ref bean="valamis.lessons.destination.listener" />
+                    </list>
+                </entry>
+                <entry key="valamis/courses">
+                    <list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+                        <ref bean="valamis.courses.destination.listener" />
+                    </list>
+                </entry>
+                <entry key="valamis/learningPaths/deleted">
+                    <list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+                        <ref bean="valamis.learningPaths.deleted.listener" />
                     </list>
                 </entry>
             </map>
@@ -54,7 +77,12 @@
                 <ref bean="valamis.main.lrsDeployed.destination"/>
                 <ref bean="valamis.main.assignment.destination"/>
                 <ref bean="valamis.main.assignmentDeployed.destination"/>
-                <ref bean="valamis.main.assignmentCompleted.destination"/>
+                <ref bean="valamis.lrs.statementStored.destination"/>
+
+                <ref bean="valamis.lessons.destination"/>
+                <ref bean="valamis.courses.destination"/>
+
+                <ref bean="valamis.learningPaths.deleted.destination"/>
             </list>
         </property>
     </bean>

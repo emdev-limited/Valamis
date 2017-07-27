@@ -70,10 +70,14 @@ abstract class TincanLessonBuilderImpl
 
     val slideSet = slideSetService.getById(slideSetId)
 
-    val (slides, textElements) = getSlides(slideSet)
+    val (slidesWithDeletedQuestions, textElements) = getSlides(slideSet)
 
-    val questions = getQuestions(slides)
-    val plaintexts = getPlainTexts(slides)
+    val questions = getQuestions(slidesWithDeletedQuestions)
+    val plaintexts = getPlainTexts(slidesWithDeletedQuestions)
+
+    val slides = getSlideWithOutDeletedQuestions(slidesWithDeletedQuestions,
+      questions,
+      plaintexts)
 
     val contentToIndex = composeContentForSearchIndex(questions, plaintexts, textElements)
 
@@ -103,12 +107,12 @@ abstract class TincanLessonBuilderImpl
         .toMap
         .mapValues(file => lessonGeneratorClassLoader.getResourceAsStream(file))
 
-    Map (
+    Map(
       "tincan.xml" -> new ByteArrayInputStream(manifest.getBytes(StandardCharsets.UTF_8)),
       "data/index.html" -> new ByteArrayInputStream(mainHtml.getBytes),
-      SearchContentFileName -> new ByteArrayInputStream(contentToIndex.getBytes(SearchContentFileCharset))
+      s"data/$SearchContentFileName" -> new ByteArrayInputStream(contentToIndex.getBytes(SearchContentFileCharset))
     ) ++
-      getSlidesFiles(slides).toMap.map{ case (k,v) => ("data/" + k,v) } ++
+      getSlidesFiles(slides).toMap.map { case (k, v) => ("data/" + k, v) } ++
       commonResources ++
       generatorResources
   }

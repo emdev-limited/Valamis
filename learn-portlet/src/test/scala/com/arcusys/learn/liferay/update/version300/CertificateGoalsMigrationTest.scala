@@ -2,10 +2,11 @@ package com.arcusys.learn.liferay.update.version300
 
 import java.sql.Connection
 
+import com.arcusys.learn.liferay.update.migration.GoalType
 import com.arcusys.learn.liferay.update.version300.migrations.CertificateGoalMigration
 import com.arcusys.learn.liferay.update.version300.{certificate => oldScheme}
 import com.arcusys.learn.liferay.update.version300.{certificate3004 => newScheme}
-import com.arcusys.valamis.certificate.model.goal.{GoalStatuses, GoalType}
+import com.arcusys.valamis.certificate.model.goal.GoalStatuses
 import com.arcusys.valamis.model.PeriodTypes
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.slick.util.SlickDbTestBase
@@ -134,6 +135,7 @@ class CertificateGoalsMigrationTest
     assert(courseGoalsData.head.courseId == 12L)
     assert(courseGoalsData.head.goalId == courseGoalId)
     assert(packageGoalsData.head.packageId == 13L)
+
     assert(packageGoalsData.head.goalId == packageGoalId)
     assert(statementGoalsData.head.verb == "verb")
     assert(statementGoalsData.head.goalId == statementGoalId)

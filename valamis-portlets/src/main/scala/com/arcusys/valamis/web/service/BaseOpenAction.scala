@@ -21,26 +21,32 @@ abstract class BaseOpenAction extends LBaseStrutsAction with Injectable {
   def getById(id: Long): Option[LAssetEntry]
 
   override def execute(originalStrutsAction: LStrutsAction, request: HttpServletRequest, response: HttpServletResponse): String = {
-    val themeDisplay = request.getAttribute(WebKeysHelper.THEME_DISPLAY).asInstanceOf[LThemeDisplay]
-    val privateLayout = themeDisplay.getLayout.isPrivateLayout
     val resourcePrimKey: Long = ParamUtilHelper.getLong(request, "resourcePrimKey")
     val objectId = ParamUtilHelper.getLong(request, "oid")
     val maximized: Boolean = ParamUtilHelper.getBoolean(request, "maximized")
-    val plid =
-      if (isValidPlid(ParamUtilHelper.getLong(request, "plid"))) ParamUtilHelper.getLong(request, "plid")
-      else themeDisplay.getPlid
+
+    val plIdOpt = Option(ParamUtilHelper.getLong(request, "plid")) filter { plId =>
+      plId > 0 && isValidPlid(plId)
+    }
 
     val assetEntry =
-      if(resourcePrimKey != 0)
+      if (resourcePrimKey != 0)
         getByPrimaryKey(resourcePrimKey)
       else
         getById(objectId)
 
-    val portletURL = assetEntry match {
-      case Some(c) => getURL(plid, privateLayout, c, request)
-      case None => getDynamicPortletURL(plid, request, portletId)
-    }
-
+    val portletURL =
+      plIdOpt match {
+        case Some(plId) => getDynamicPortletURL(plId, request, portletId)
+        case None =>
+          val themeDisplay = request.getAttribute(WebKeysHelper.THEME_DISPLAY).asInstanceOf[LThemeDisplay]
+          val privateLayout = themeDisplay.getLayout.isPrivateLayout
+          val plId = themeDisplay.getPlid
+          assetEntry match {
+            case Some(asset) => getURL(plId, privateLayout, asset, request)
+            case None => getDynamicPortletURL(plId, request, portletId)
+          }
+      }
     if (maximized) {
       portletURL.setWindowState(WindowState.MAXIMIZED)
     }
@@ -72,7 +78,7 @@ abstract class BaseOpenAction extends LBaseStrutsAction with Injectable {
       layouts.add(0, selLayout)
     }
     import scala.collection.JavaConversions._
-    val layout = layouts.find (layout => {
+    val layout = layouts.find(layout => {
       val layoutTypePortlet = layout.getLayoutType.asInstanceOf[LLayoutTypePortlet]
       val portlet = layoutTypePortlet.getAllPortlets
         .find(p => PortletConstantsHelper.getRootPortletId(p.getPortletId) == portletId)
@@ -97,7 +103,7 @@ abstract class BaseOpenAction extends LBaseStrutsAction with Injectable {
       LayoutLocalServiceHelper.getLayout(plid)
       true
     } catch {
-      case e: LNoSuchLayoutException => false
+      case _: LNoSuchLayoutException => false
     }
   }
 

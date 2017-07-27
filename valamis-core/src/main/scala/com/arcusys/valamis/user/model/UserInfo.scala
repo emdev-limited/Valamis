@@ -6,6 +6,7 @@ import com.arcusys.valamis.user.util.UserExtension
 
 case class UserInfo(id: Long,
                     name: String,
+                    firstName: String = "",
                     email: String,
                     picture: String = "",
                     pageUrl: String = "",
@@ -16,6 +17,7 @@ case class UserInfo(id: Long,
   def this(lUser: LUser) = this(
     id = lUser.getUserId,
     name = lUser.getFullName,
+    firstName = lUser.getFirstName,
     email = lUser.getEmailAddress,
     picture = lUser.getPortraitUrl,
     pageUrl = lUser.getPublicUrl,
@@ -32,6 +34,7 @@ case class UserInfo(id: Long,
   def this(lUser: LUser, groupId: Long) = this(
     id = lUser.getUserId,
     name = lUser.getFullName,
+    firstName = lUser.getFirstName,
     email = lUser.getEmailAddress,
     picture = lUser.getPortraitUrl,
     pageUrl = lUser.getPublicUrl,

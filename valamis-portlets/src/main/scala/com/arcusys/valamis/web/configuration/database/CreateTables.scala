@@ -3,57 +3,47 @@ package com.arcusys.valamis.web.configuration.database
 import java.sql.SQLException
 
 import com.arcusys.slick.drivers.{DB2Driver, OracleDriver, SQLServerDriver}
-import com.arcusys.valamis.certificate.storage.schema.{CertificateGoalGroupTableComponent, _}
+import com.arcusys.valamis.certificate.storage.schema._
 import com.arcusys.valamis.gradebook.storage.{CourseGradeTableComponent, CourseTableComponent}
 import com.arcusys.valamis.lesson.scorm.storage.ScormManifestTableComponent
 import com.arcusys.valamis.lesson.storage.{LessonAttemptsTableComponent, LessonGradeTableComponent, LessonTableComponent}
 import com.arcusys.valamis.lesson.tincan.storage.{LessonCategoryGoalTableComponent, TincanActivityTableComponent}
 import com.arcusys.valamis.log.LogSupport
-import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.persistence.impl.file.FileTableComponent
-import com.arcusys.valamis.persistence.impl.lrs.{LrsEndpointTableComponent, TokenTableComponent}
 import com.arcusys.valamis.persistence.impl.scorm.schema._
-import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementTableComponent, SettingTableComponent, StatementToActivityTableComponent}
+import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementTableComponent, StatementToActivityTableComponent}
 import com.arcusys.valamis.persistence.impl.social.schema.{CommentTableComponent, LikeTableComponent}
 import com.arcusys.valamis.persistence.impl.uri.TincanUriTableComponent
-import slick.driver.HsqldbDriver
-import slick.jdbc._
+import com.arcusys.valamis.settings._
+import com.arcusys.valamis.lrssupport.tables._
+import com.arcusys.valamis.storyTree.storage.StoryTreeTableComponent
+import slick.driver.{HsqldbDriver, JdbcProfile}
 import slick.jdbc.meta._
 
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
 
 class CreateTables(dbInfo: SlickDBInfo)
   extends SlickProfile
     with LogSupport
+    with DatabaseLayer
+    with StoryTreeTableComponent
     with LikeTableComponent
     with CommentTableComponent
     with CertificateTableComponent
-    with ActivityGoalTableComponent
-    with CourseGoalTableComponent
-    with PackageGoalTableComponent
-    with StatementGoalTableComponent
-    with AssignmentGoalTableComponent
     with CertificateStateTableComponent
     with FileTableComponent
-    with TokenTableComponent
     with LessonCategoryGoalTableComponent
     with CourseTableComponent
     with SettingTableComponent
     with StatementToActivityTableComponent
-    with LrsEndpointTableComponent
     with TincanUriTableComponent
     with LessonTableComponent
     with TincanActivityTableComponent
     with ScormManifestTableComponent
     with LessonAttemptsTableComponent
-    with CertificateGoalStateTableComponent
     with ActivityToStatementTableComponent
-    with CertificateMemberTableComponent
     with LessonGradeTableComponent
-    with CertificateGoalTableComponent
-    with CertificateGoalGroupTableComponent
     with ActivityDataMapTableComponent
     with ActivityStateNodeTableComponent
     with AttemptDataTableComponent
@@ -80,23 +70,20 @@ class CreateTables(dbInfo: SlickDBInfo)
   val db = dbInfo.databaseDef
   val driver = dbInfo.slickProfile
 
-  import driver.simple._
+  import driver.api._
 
-  val dbTimeout = Duration.Inf
-  val tables = Seq(
-    certificates, certificateGoalGroups, certificateGoals, certificateStates,
-    activityGoals, courseGoals, packageGoals, statementGoals, assignmentGoals,
+  val tables = Seq(activityToStatement,
+    certificates, certificateStates,
     files,
-    tokens,
     lessonCategoryGoals,
+    trees, nodes, packages,
     likes, comments,
     completedCourses,
-    settings, statementToActivity, lrsEndpoint,
+    statementToActivity,
     tincanUris,
     lessons, lessonLimits, playerLessons, lessonViewers, lessonAttempts, invisibleLessonViewers,
     tincanActivitiesTQ, scormManifestsTQ,
-    certificateGoalStates, certificateMembers,
-    activityToStatement, lessonGrades, courseGrades,
+    lessonGrades, courseGrades,
     activityDataMapTQ,
     activityStateNodeTQ,
     scormUsersTQ,
@@ -126,35 +113,30 @@ class CreateTables(dbInfo: SlickDBInfo)
   private def hasTable(tableName: String): Boolean = {
     driver match {
       case SQLServerDriver | OracleDriver =>
-        db.withSession { implicit s =>
           try {
-            StaticQuery.queryNA[String](s"SELECT * FROM $tableName WHERE 1 = 0").list
+            execSync(sql"""SELECT COUNT(*) FROM #$tableName WHERE 1 = 0""".as[Int].headOption)
             true
           } catch {
-            case e: SQLException => false
+            case _: SQLException => false
           }
-        }
       case driver: HsqldbDriver =>
         val action = MTable.getTables(Some("PUBLIC"), Some("PUBLIC"), Some(tableName), Some(Seq("TABLE"))).headOption
-        Await.result(db.run(action), Duration.Inf).isDefined
+        execSync(action).isDefined
       case DB2Driver =>
-        Await.result(db.run(driver.defaultTables), Duration.Inf).map(_.name.name).contains(tableName)
-      case _ => Await.result(db.run(MTable.getTables(tableName).headOption), Duration.Inf).isDefined
+        execSync(driver.defaultTables).map(_.name.name).contains(tableName)
+      case _ => execSync(MTable.getTables(tableName).headOption).isDefined
     }
   }
 
   def create() {
     if (!hasTables) {
-      // TODO: combine ddl to single query
-      db.withTransaction { implicit s =>
-        tables.foreach { table =>
-          try {
-            table.ddl.create
-          } catch {
-            case ex: SQLException => log.error(s"Failed to create table ${table.baseTableRow.tableName}: ${ex.getMessage}")
-          }
-        }
-      }
+      execSyncInTransaction(
+        DBIO.sequence(
+          createSettingsSchema(db) +: tables.map(_.schema.create)
+        ).transactionally
+      )
     }
   }
+
+  override val jdbcProfile: JdbcProfile = dbInfo.slickProfile
 }

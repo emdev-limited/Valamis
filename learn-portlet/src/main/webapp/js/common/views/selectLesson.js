@@ -35,13 +35,15 @@ valamisApp.module('Views.SelectLesson', function (SelectLesson, valamisApp, Back
   SelectLesson.LessonsListItemView = Marionette.ItemView.extend({
     template: '#lessonSelectListItemViewTemplate',
     tagName: 'tr',
+    ui: {
+      selectItem :'.js-select-lesson'
+    },
     events: {
-      'click .js-select-lesson': 'selectGoal'
+      'click @ui.selectItem': 'selectGoal'
     },
     selectGoal: function() {
       this.model.toggle();
-      this.$('.js-select-lesson').toggleClass('primary', this.model.get('selected'));
-      this.$('.js-select-lesson').toggleClass('neutral', !this.model.get('selected'));
+      this.ui.selectItem.prop('checked', this.model.get('selected'));
     }
   });
 

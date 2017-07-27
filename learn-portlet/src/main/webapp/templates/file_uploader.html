@@ -4,7 +4,7 @@
             <label id="dropzone" class="dropzone fileinput-button">
                 <div>
                     <div class="upload-image"></div>
-                    <div> Drop or <span class="upload-browse-label"> browse </span> files to upload.</div>
+                    <div> {{dropOrLabel}} <span class="upload-browse-label"> {{browseLabel}} </span> {{filesToUploadLabel}}</div>
                     <span class="upload-info-label"> {{fileUploadAdditionalInfo}} </span>
                 </div>
                 <input id="fileupload" class="hidden js-file-uploader-input" type="file" name="files[]" data-url="{{fileUploadEndpoint}}" multiple>
@@ -27,7 +27,7 @@
 <script type="text/html" id="fileUploaderDoneItemPackage">
   <div>
     <div id="dropzone" class="dropzone fileinput-button">
-      Drop files to upload<br>(or click)
+      {{dropFilesToUploadLabel}}<br>{{orClickLabel}}
       <input id="fileupload" type="file" name="files[]" data-url="{{fileUploadEndpoint}}" multiple>
     </div>
     <strong>{{filename}}</strong>

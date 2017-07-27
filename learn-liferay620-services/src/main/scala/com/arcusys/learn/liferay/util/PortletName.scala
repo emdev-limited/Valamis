@@ -59,7 +59,8 @@ object PortletName { //TODO: Enumeration?
 
   case object ValamisReport extends PortletName("ValamisReport")
 
-  case object LearningReport extends PortletName("LearningReport")
+  case object CertExpirationTracker extends PortletName("CertExpirationTracker")
 
+  case object LearningReport extends PortletName("LearningReport")
 }
 

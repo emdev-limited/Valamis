@@ -7,7 +7,5 @@ import scala.concurrent.Future
 
 trait CertificateHistoryService {
 
-  def add(certificate: Certificate, isDelete: Boolean = false): Unit
-
   def get(companyId: Long, date: DateTime): Future[Seq[CertificateHistory]]
 }

@@ -1,22 +1,31 @@
 package com.arcusys.valamis.slide.service
 
 import java.io.InputStream
+import java.util.UUID
 import javax.servlet.ServletContext
 
-import com.arcusys.learn.liferay.services.GroupLocalServiceHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, GroupLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.lesson.model.{Lesson, LessonType, PackageActivityType}
 import com.arcusys.valamis.lesson.service.{LessonAssetHelper, LessonNotificationService, LessonService}
 import com.arcusys.valamis.lesson.tincan.model.{LessonCategoryGoal, TincanActivity}
 import com.arcusys.valamis.lesson.tincan.service.{LessonCategoryGoalService, TincanPackageService}
 import com.arcusys.valamis.liferay.SocialActivityHelper
+import com.arcusys.valamis.lrs.tincan.{Activity, AuthorizationScope, Statement, Verb}
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.slide.model.{SlideSet, SlideSetStatus}
 import com.arcusys.valamis.slide.service.export.TincanLessonBuilder
 import com.arcusys.valamis.slide.storage.SlideSetRepository
+import com.arcusys.valamis.statements.StatementChecker
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.uri.model.TincanURIType
 import com.arcusys.valamis.uri.service.TincanURIService
 import com.arcusys.valamis.util.StreamUtil
+import com.arcusys.valamis.utils.TincanHelper
 import org.joda.time.DateTime
+import com.arcusys.valamis.utils.TincanHelper.TincanAgent
+import com.arcusys.valamis.utils.TincanHelper
+
 
 
 
@@ -34,6 +43,9 @@ abstract class SlideSetPublishServiceImpl extends SlideSetPublishService {
   def slideTagService: TagService[SlideSet]
   def lessonTagService: TagService[Lesson]
   def lessonNotificationService: LessonNotificationService
+  def lrsReader : LrsClientManager
+  def lrsRegistration : LrsRegistration
+  def statementChecker: StatementChecker
 
   //TODO: remove method, slide set should not require temp lesson
   override def findPublishedLesson(slideSetId: Long, userId: Long): Lesson = {
@@ -114,9 +126,11 @@ abstract class SlideSetPublishServiceImpl extends SlideSetPublishService {
 
     val tagsIds = slideTagService.getByItemId(slideSet.id).map(_.id)
     lessonTagService.setTags(packageAssetId, tagsIds)
+    if (slideSet.status == SlideSetStatus.Draft && slideSet.version == 1.0) {
+      lessonNotificationService.sendLessonAvailableNotification(Seq(lesson), lesson.courseId)
 
-    if (slideSet.status == SlideSetStatus.Draft && slideSet.version == 1.0)
-      lessonNotificationService.sendLessonAvailableNotification(Seq(lesson),lesson.courseId)
+      sendStatement(userId, slideSet)
+    }
   }
 
   private def createTincanActivity(slideSet: SlideSet, lessonId: Long, launch: String): Unit = {
@@ -184,5 +198,28 @@ abstract class SlideSetPublishServiceImpl extends SlideSetPublishService {
     }
 
     lesson
+  }
+
+  private def sendStatement(userId: Long,
+                            slideSet: SlideSet): Unit = {
+    lazy val companyId = CompanyHelper.getCompanyId
+    val verb = Verb("http://adlnet.gov/expapi/verbs/imported", Map("en-US" -> "imported"))
+    val statement = Statement(
+      Option(UUID.randomUUID),
+      UserLocalServiceHelper().getUser(userId).getAgentByUuid,
+      verb,
+      Activity(
+        id = slideSet.activityId,
+        name = Some(Map("en-US" -> slideSet.title)),
+        theType = Some("http://adlnet.gov/expapi/activities/course"),
+        description = Some(Map("en-US" -> slideSet.description))),
+      timestamp = DateTime.now,
+      stored = DateTime.now
+    )
+    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+      host = PortalUtilHelper.getLocalHostUrl)(companyId).auth
+
+    statementChecker.checkStatements(Seq(statement))
+    lrsReader.statementApi(_.addStatement(statement), Some(lrsAuth))(CompanyHelper.getCompanyId)
   }
 }

@@ -5,7 +5,7 @@ import java.io.InputStream
 import com.arcusys.valamis.file.storage.FileStorage
 import com.arcusys.valamis.lesson.tincan.model.TincanActivity
 import com.arcusys.valamis.lesson.tincan.storage.{LessonCategoryGoalTableComponent, TincanActivityTableComponent}
-import com.arcusys.valamis.lrs.service.util.TinCanActivityType
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanActivityType
 import com.arcusys.valamis.persistence.common.SlickProfile
 
 import scala.slick.driver.JdbcProfile

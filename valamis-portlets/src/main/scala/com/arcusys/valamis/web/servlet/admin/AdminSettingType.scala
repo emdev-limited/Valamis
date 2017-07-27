@@ -7,4 +7,5 @@ object AdminSettingType extends Enumeration {
   val Issuer = Value("issuer")
   val GoogleAPI = Value("google-api")
   val Lti = Value("lti")
+  val BetaStudio = Value("beta-studio")
 }

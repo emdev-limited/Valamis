@@ -22,14 +22,16 @@ trait CourseService extends api.CourseService{
                     Option[SkipTake],
                     namePattern: String,
                     sortAscDirection: Boolean,
-                    isActive: Option[Boolean] = None): RangeResult[CourseInfo]
+                    isActive: Option[Boolean] = None,
+                    withGuestSite: Boolean = false): RangeResult[CourseInfo]
 
   def getNotMemberVisible(companyId: Long,
                           user: LUser,
                           skipTake:
                           Option[SkipTake],
                           namePattern: String,
-                          sortAscDirection: Boolean): RangeResult[CourseInfo]
+                          sortAscDirection: Boolean,
+                          withGuestSite: Boolean = false): RangeResult[CourseInfo]
 
   def getByIdCourseInfo(courseId: Long): CourseInfo
 
@@ -54,7 +56,8 @@ trait CourseService extends api.CourseService{
   def getByUserAndName(user: LUser,
                        skipTake: Option[SkipTake],
                        namePattern: Option[String],
-                       sortAsc: Boolean = true): RangeResult[CourseInfo]
+                       sortAsc: Boolean = true,
+                       withGuestSite: Boolean = false): RangeResult[CourseInfo]
 
   def addCourse(companyId: Long,
                 userId: Long,

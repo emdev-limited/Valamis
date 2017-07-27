@@ -51,6 +51,29 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
             var countAll = 0;
 
             if (responseData['data'].length) {
+                function tooptipContent(d) {
+                    if (d.children) return null;
+
+                    var html = '',
+                        userInfoAssets = ['Certificates','Lessons'];
+
+                    html += '<div class="tooltip-header">';
+                    html += '<div class="image" style="background-image: url(' + d.picture + ')"></div>';
+                    html += '<strong>' + d.name + '</strong>';
+                    html += '</div>';
+                    html += '<ul>';
+                    _.each(userInfoAssets, function(asset) {
+                        if (d['count'+asset] > 0) {
+                            html += '<li>';
+                            html += Valamis.language['userInfo'+ asset + 'Label'];
+                            html += '<strong>' + d['count'+asset] + '</strong>';
+                            html += '</li>';
+                        }
+                    });
+                    html += '</ul>';
+
+                    return html;
+                }
 
                 _.each(responseData['data'], function(item) {
                     countAll += item.countCompleted;
@@ -97,29 +120,6 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
                     .attr('data-trigger', function(d) { return d.children ? null : 'manual'; })
                     .attr('title', function(d) { return tooptipContent(d)});
 
-                function tooptipContent(d) {
-                    if (d.children) return null;
-
-                    var html = '',
-                        userInfoAssets = ['Certificates','Lessons','Assignments'];
-
-                    html += '<div class="tooltip-header">';
-                    html += '<div class="image" style="background-image: url(' + d.picture + ')"></div>';
-                    html += '<strong>' + d.name + '</strong>';
-                    html += '</div>';
-                    html += '<ul>';
-                    _.each(userInfoAssets, function(asset) {
-                        if (d['count'+asset] > 0) {
-                            html += '<li>';
-                            html += Valamis.language['userInfo'+ asset + 'Label'];
-                            html += '<strong>' + d['count'+asset] + '</strong>';
-                            html += '</li>';
-                        }
-                    });
-                    html += '</ul>';
-
-                    return html;
-                }
 
                 that.$('.js-has-tooltip').mousemove( function(e) {
                     cellTooltip = $('.cell-tooltip', this);

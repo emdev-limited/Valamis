@@ -8,11 +8,19 @@ import org.scalatra.ScalatraBase
 trait PackagePolicy { self: ScalatraBase =>
 
   before("/packages(/)", request.getMethod == "GET", request.getParameter("action") == "ALL") {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer, PortletName.LessonManager)
+    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonManager)
   }
 
   before("/packages(/)", request.getMethod == "GET", request.getParameter("action") == "VISIBLE") {
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonViewer)
+  }
+
+  before("/packages(/)", request.getMethod == "GET", request.getParameter("action") == "ALL_FOR_PLAYER") {
+    PermissionUtil.requirePermissionApi(PreferencesPermission, PortletName.LessonViewer)
+  }
+
+  before("/packages(/)", request.getMethod == "GET", request.getParameter("action") == "ALL_AVAILABLE_FOR_PLAYER") {
+    PermissionUtil.requirePermissionApi(PreferencesPermission, PortletName.LessonViewer)
   }
 
   before("/packages/:id/logo", request.getMethod == "GET") {

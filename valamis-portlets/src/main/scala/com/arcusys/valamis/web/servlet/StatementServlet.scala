@@ -1,8 +1,9 @@
 package com.arcusys.valamis.web.servlet
 
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.valamis.certificate.model.CertificateSortBy
-import com.arcusys.valamis.lrs.service.LrsClientManager
 import com.arcusys.valamis.lrs.tincan.valamis.ActivityIdLanguageMap
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
 import com.arcusys.valamis.web.servlet.base.BaseJsonApiController
 import com.arcusys.valamis.web.servlet.certificate.request.CertificateRequest
 import com.arcusys.valamis.web.servlet.certificate.response.AvailableStatementResponse
@@ -39,6 +40,6 @@ class StatementServlet extends BaseJsonApiController {
 
         case Failure(e) => throw e
       }
-    }
+    }(CompanyHelper.getCompanyId)
   }
 }

@@ -11,7 +11,8 @@ import com.arcusys.valamis.slide.service.contentProvider.model.ContentProvider
 trait ContentProviderRepository {
   def getAll(skipTake: Option[SkipTake],
              namePattern: Option[String],
-             sortAscDirection: Boolean): Seq[ContentProvider]
+             sortAscDirection: Boolean,
+             companyId: Long): Seq[ContentProvider]
   def create(contentProvider: ContentProvider): ContentProvider
   def update(contentProvider: ContentProvider): ContentProvider
   def delete(id: Long): Unit

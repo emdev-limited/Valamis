@@ -45,4 +45,8 @@ trait LessonPlayerService {
   def getLessonIfAvailable(lessonId: Long, user: LUser): Option[Lesson]
 
   def isLessonVisible(user: LUser, lesson: Lesson): Boolean
+
+  def updateCategories(categoriesIds: Seq[Long], playerId: Long, courseId: Long, userId: Long)
+
+  def getCategories(playerId: Long): Seq[ValamisTag]
 }

@@ -72,21 +72,34 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         activateEditor: function () {
             var editorDeffered = $.Deferred();
-            setTimeout(function(){
-            CKEDITOR.replace('contentManagerQuestionTextView', {
-                toolbarLocation: 'bottom',
-                height: 100,
-                toolbar: [
-                    { name: 'document', items: [ 'Source' ] },
-                    { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
-                    { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline' ] },
-                    { name: 'styles', items: [ 'Font', 'FontSize' ] },
-                    { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
-                    { name: 'insert', items: [ 'Image'] }
-                ]});
 
-                editorDeffered.resolve();
-             }, 100);
+            if(typeof CKEDITOR === 'undefined'){
+                $('body').append('<script src="' + location.origin + Utils.getContextPath()
+                    + 'js/vendor/ckeditor/ckeditor.js" type="text/javascript"></script>');
+            }
+
+            var intervalId = setInterval(function(){
+                if(typeof CKEDITOR !== 'undefined' && typeof CKEDITOR._bundle !== 'undefined'
+                    && CKEDITOR._bundle == 'valamis' && CKEDITOR.status == 'loaded'
+                    && $('#contentManagerQuestionTextView').length > 0) {
+
+                    clearInterval(intervalId);
+                    CKEDITOR.replace('contentManagerQuestionTextView', {
+                        toolbarLocation: 'bottom',
+                        height: 100,
+                        toolbar: [
+                            { name: 'document', items: [ 'Source' ] },
+                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
+                            { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline' ] },
+                            { name: 'styles', items: [ 'Font', 'FontSize' ] },
+                            { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+                            { name: 'insert', items: [ 'Image'] }
+                        ]});
+
+                    editorDeffered.resolve();
+                }
+
+            }, 100);
 
             return editorDeffered.promise();
         },

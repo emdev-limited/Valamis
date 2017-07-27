@@ -6,20 +6,15 @@ import com.arcusys.learn.liferay.LiferayClasses._
 import com.liferay.counter.service.CounterLocalServiceUtil
 import com.liferay.portal.kernel.dao.orm._
 import com.liferay.portal.kernel.util.OrderByComparator
-import com.liferay.portal.service.{ClassNameLocalServiceUtil, GroupLocalServiceUtil, UserLocalServiceUtil}
+import com.liferay.portal.service.{ClassNameLocalServiceUtil, UserLocalServiceUtil}
 import com.liferay.portal.util.PortalUtil
-import com.liferay.portlet.asset.model.{AssetEntryModel, AssetEntry}
-import com.liferay.portlet.asset.service.{AssetEntryLocalServiceUtil, AssetTagLocalServiceUtil, AssetCategoryLocalServiceUtil}
+import com.liferay.portlet.asset.service.{AssetCategoryLocalServiceUtil, AssetEntryLocalServiceUtil}
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 object AssetCategoryLocalServiceHelper {
   lazy val groupClassNameId = ClassNameLocalServiceUtil.getClassNameId("com.liferay.portal.model.Group")
-
-  def getVocabularyRootCategories(vocabularyId: Long, start: Int, end: Int) = {
-    val orderByComparator: OrderByComparator = null
-    AssetCategoryLocalServiceUtil.getVocabularyRootCategories(vocabularyId, start, end, orderByComparator)
-  }
 
   def getVocabularyRootCategories(vocabularyId: Long): Seq[LAssetCategory] = {
     val orderByComparator: OrderByComparator = null
@@ -27,6 +22,12 @@ object AssetCategoryLocalServiceHelper {
       .getVocabularyRootCategories(vocabularyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator)
       .asScala
   }
+
+  def getAssetCategory(categoryId: Long): Option[LAssetCategory] =
+    Try(AssetCategoryLocalServiceUtil.fetchAssetCategory(categoryId)).toOption
+
+  def getAssetEntryAssetCategories(entryId: Long): Seq[LAssetCategory] =
+    AssetCategoryLocalServiceUtil.getAssetEntryAssetCategories(entryId).asScala
 
   def getCourseCategories(courseId: Long): Seq[LAssetCategory] = {
     getCourseEntryIds(courseId).flatMap(AssetCategoryLocalServiceUtil.getAssetEntryAssetCategories(_).asScala)
@@ -43,7 +44,7 @@ object AssetCategoryLocalServiceHelper {
     AssetEntryLocalServiceUtil.dynamicQuery(dq).asScala.map(_.asInstanceOf[Long])
   }
 
-  def addAssetCategory(companyId: Long, name: String) = {
+  def addAssetCategory(companyId: Long, name: String): LAssetCategory = {
     val vocabularyName = "ValamisPackageTags"
     val newId = CounterLocalServiceUtil.increment()
     val category = AssetCategoryLocalServiceUtil.createAssetCategory(newId)
@@ -63,7 +64,20 @@ object AssetCategoryLocalServiceHelper {
     category.setUserId(UserLocalServiceUtil.getDefaultUserId(companyId))
     category.setParentCategoryId(0)
     category.setName(name)
+    category.setCompanyId(companyId)
 
+    val cat = AssetCategoryLocalServiceUtil.addAssetCategory(category)
+    addCategoryResources(cat, addGroupPermissions = true, addGuestPermissions = true)
+    cat
+  }
+
+  def addCategoryResources(category: LAssetCategory,
+                           addGroupPermissions: Boolean,
+                           addGuestPermissions: Boolean): Unit = {
+    AssetCategoryLocalServiceUtil.addCategoryResources(category, addGroupPermissions, addGuestPermissions)
+  }
+
+  def updateAssetCategory(category: LAssetCategory): Unit = {
     AssetCategoryLocalServiceUtil.updateAssetCategory(category)
   }
 }

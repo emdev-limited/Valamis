@@ -70,11 +70,14 @@ object PortalUtilHelper {
   }
 
   def getLocalHostUrl(companyId: Long, isSecure : Boolean = false): String = {
-    lazy val company = CompanyLocalServiceUtil.getCompany(companyId)
+    getHostWithPort(companyId, isSecure) + PortalUtil.getPathContext
+  }
 
+  def getHostWithPort(companyId: Long, isSecure: Boolean = false): String = {
+    val company = CompanyLocalServiceUtil.getCompany(companyId)
     val hostName = company.getVirtualHostname
-    val port = PortalUtil.getPortalPort(isSecure)
-    PortalUtil.getPortalURL(hostName, port, isSecure) + PortalUtil.getPathContext
+    val port = getPortalPort(isSecure)
+    getPortalURL(hostName, port, isSecure)
   }
 
   def getHostName(companyId: Long): String =

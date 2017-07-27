@@ -14,4 +14,6 @@ case class ContentProvider(id: Long = 0L,
                            height: Int,
                            isPrivate: Boolean,
                            customerKey: String,
-                           customerSecret: String)
+                           customerSecret: String,
+                           companyId: Long,
+                           isSelective: Boolean)

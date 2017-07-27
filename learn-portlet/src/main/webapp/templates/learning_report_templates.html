@@ -187,8 +187,8 @@
 <script type="text/template" id="reportFilterTextSearchTemplate">
     <div class="filter-section-title">{{title}}</div>
     <div class="filter-search-field">
-        <div class="val-search">
-            <input class="js-search" placeholder="" type="text" value="{{currentValue}}">
+        <div class="val-search js-search">
+            <input placeholder="" type="text" value="{{currentValue}}">
         </div>
     </div>
 </script>
@@ -468,8 +468,8 @@
 <script type="text/template" id="learningReportSettingsUsersToolbarViewTemplate">
     <div class="filters-row clearfix">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
             </div>
         </div>
         {{#showUserTypes}}
@@ -547,7 +547,7 @@
 </script>
 
 <script type="text/template" id="learningReportSettingsEditUsersItemViewTemplate">
-    <td class="checkbox-col">
+    <td class="narrow-col">
         <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
         <label class="checkbox-label" for="toggleItem_{{id}}"></label>
     </td>
@@ -561,7 +561,7 @@
     <td>{{name}}</td>
 
     <td class="text-right">
-        <button class="button medium danger no-text js-delete-item">
+        <button class="button medium danger simple no-text js-delete-item">
             <span class="val-icon-trash"></span> {{deleteLabel}}
         </button>
     </td>

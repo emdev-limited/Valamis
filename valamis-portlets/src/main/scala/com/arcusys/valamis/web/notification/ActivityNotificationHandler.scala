@@ -29,7 +29,7 @@ class ActivityNotificationHandler extends LBaseUserNotificationHandler {
 
   private def getParams (notification: ActivityNotificationModel) = {
     val userName = UserLocalServiceHelper().getUser(notification.userId).getFullName
-    val courseName = CourseUtilHelper.getName(notification.courseId)
+    val courseName = CourseUtilHelper.getName(notification.courseId).getOrElse("")
 
     Map (
       "user" -> userName,

@@ -1,0 +1,96 @@
+<script type="text/template" id="certificateExpirationTrackerTemplate">
+    <div class="certificate-expiration-tracker">
+        <div id="certificateExpirationTrackerToolbarRegion"></div>
+        <div id="certificateExpirationTrackerResultsRegion"></div>
+        <div id="certificateExpirationTrackerContentRegion"></div>
+    </div>
+</script>
+
+<script type="text/template" id="expirationToolbarTemplate">
+    <div class="report-selector val-row filters-row">
+        <div class="dropdown-selector shift-left js-dropdown-selector">
+            <div class="current-selection js-current-selection">
+                <div class="cs-label shift-left js-label">{{startDateValue}} - {{endDateValue}}</div>
+                <span class="val-icon-arrow-down shift-left" title="{{changeLabel}}"></span>
+            </div>
+
+            <div class="dropdown-wrapper hidden">
+
+                <ul class="dropdown-options js-dropdown-options">
+                    {{#options}}
+                    <li data-value="{{id}}" class="{{#active}}active{{/active}}">
+                        <span>
+                            {{timePeriodLabel}}
+                        </span>
+                    </li>
+                    {{/options}}
+                </ul>
+                <div class="dates-selector">
+                    <form onsubmit="return false;">
+                        <div class="date-inputs">
+                            <input type="text" id="period-selector-start" value="{{startDateLocal}}">
+                            <input type="text" id="period-selector-end" value="{{endDateLocal}}">
+                        </div>
+
+                        <div style="position: relative;" id="selector-datepicker-wrapper"></div>
+
+                        <div class="submit-button">
+                            <button type="submit" class="button medium neutral js-apply" disabled="disabled">{{applyLabel}}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="shift-right notify-all cursor-pointer js-send-notifications">
+            <div class="shift-left">{{notifyAllLabel}}</div>
+            <div class="val-icon-bell shift-right"></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="expirationResultsTemplate">
+    <div class="chart-container">
+        <div class="chart centered-y-block">
+            <div class="expiration-pie-graphic js-expiration-pie-graphic"></div>
+        </div>
+        <div class="chart-legend centered-y-block">
+            <div class="amount shift-left">{{allAmount}}</div>
+            <div class="legend shift-right">{{{usersFoundLabel}}}</div>
+        </div>
+    </div>
+    <div class="legend-container centered-y-block">
+        <div class="legend-wrapper shift-left">
+            <div>
+                <div>
+                    <div class="legend-number">{{totalExpired}}</div>
+                    <span class="legend-hint expired-color">{{expiredLabel}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="delimiter shift-left">
+        </div>
+        <div class="legend-wrapper shift-left">
+            <div>
+                <div>
+                    <div class="legend-number">{{totalExpires}}</div>
+                    <span class="legend-hint expiring-color">{{expiringLabel}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="expirationItemTemplate">
+    <img src="{{userLogo}}" alt="{{name}}" class="img-circle shift-left centered-y-block">
+    <div class="item-info centered-y-block">
+        <strong class="item-name">{{userName}}</strong>
+        <div class="certificate-info">
+            <span class="certificate-name"> {{certificateTitle}} </span>
+            <span class="{{#certificateExpiredInFuture}}expiring-color{{/certificateExpiredInFuture}}
+                         {{^certificateExpiredInFuture}}expired-color{{/certificateExpiredInFuture}}">{{expiration}} {{expiredDate}}</span>
+        </div>
+    </div>
+    <span class="val-icon-bell shift-right cursor-pointer js-send-notification" title="{{changeLabel}}"></span>
+    <div class="decorate-line"></div>
+</script>

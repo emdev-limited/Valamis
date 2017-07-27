@@ -52,7 +52,7 @@ var KeyboardModule = function(KeyboardModule, App, Backbone, Marionette, $, _) {
 
     this.onKeyPress = function (event) {
         if (App.mode != 'edit' || App.isEditing
-            || valamisApp.mainRegion.currentView.modals.$el.find('.val-modal').size() > 0) {
+            || valamisApp.mainRegion.currentView.modals.$el.find('.val-modal').length > 0) {
                 return;
         }
         var keyCode = event.which || event.keyCode,

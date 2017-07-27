@@ -29,6 +29,7 @@
         jQueryValamis(this).click(function(event) {
             if(jQueryValamis(event.target).closest('.js-dropdown-selector').length == 0) {
                 jQueryValamis('.dropdown-selector',jQueryValamis('#valamisReportPeriodSelector')).removeClass('show-dropdown-menu');
+                jQueryValamis('.dropdown-selector',jQueryValamis('#valamisReportExportSelector')).removeClass('show-dropdown-menu');
             }
         })
     });

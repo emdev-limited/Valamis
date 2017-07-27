@@ -17,6 +17,14 @@
         {
           "id" : "reportTypeMostActiveUsers",
           "dependencies" : [ "reportPeriod" ]
+        },
+        {
+          "id" : "reportTypeAveragePassingGrade",
+          "dependencies" : []
+        },
+        {
+          "id" : "reportTypeNumberOfLessonsAttempted",
+          "dependencies" : []
         }
       ]
     },

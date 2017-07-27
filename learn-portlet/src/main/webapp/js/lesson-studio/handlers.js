@@ -160,7 +160,7 @@ slidesApp.commands.setHandler('resize:prepare', function (view) {
 
 slidesApp.commands.setHandler('item:delete', function (view) {
     view = view || slidesApp.selectedItemView;
-    if(!view.model.get('toBeRemoved') && jQueryValamis(lessonStudio.slidesWrapper + ' #slideEntity_' + view.model.getId()).size() == 0){
+    if(!view.model.get('toBeRemoved') && jQueryValamis(lessonStudio.slidesWrapper + ' #slideEntity_' + view.model.getId()).length == 0){
         slidesApp.execute('item:create', view.model);
     }
 

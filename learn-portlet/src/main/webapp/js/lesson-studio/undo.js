@@ -75,7 +75,7 @@ var HistoryManager = function( module, app ){
         if ( !objectsHistory.models[options.namespace][modelCid] ) {
             objectsHistory.models[options.namespace][modelCid] = {
                 hIndex: -1,
-                mIndex: Math.max( modelIndex, model.collection.size() ),
+                mIndex: Math.max( modelIndex, model.collection.length ),
                 data: [],
                 collection: model.collection
             };

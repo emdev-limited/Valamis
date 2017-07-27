@@ -121,7 +121,8 @@ lessonViewer.module('Entities', function(Entities, lessonViewer, Backbone, Mario
                     attemptsCount: record.attemptsCount,
                     suspendedId: record.suspendedId,
                     creationDate: record.lesson.creationDate,
-                    ownerId: record.lesson.ownerId
+                    ownerId: record.lesson.ownerId,
+                    remain: Math.max(limit.passingLimit - record.attemptsCount, 0)
                 };
                 if (record.owner != undefined) lesson.owner = record.owner.name;
 

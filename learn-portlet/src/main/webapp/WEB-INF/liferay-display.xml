@@ -7,11 +7,7 @@
         <portlet id="TinCanStatementViewer">Valamis TinCan Statement Viewer</portlet>
         <portlet id="LearningTranscript">Learning Transcript</portlet>
         <portlet id="LearningReport">Learning Pattern Report</portlet>
-    </category>
-
-    <category name="Valamis Curriculum tools">
-        <portlet id="Curriculum">Curriculum</portlet>
-        <portlet id="CurriculumUser">Curriculum user</portlet>
+        <portlet id="CertExpirationTracker">Сertificate expiration tracker</portlet>
     </category>
 
     <category name="Valamis Lesson tools">
@@ -32,12 +28,12 @@
 
     <category name="Valamis Dashboard">
         <portlet id="AchievedCertificates">Achieved Certificates</portlet>
-        <portlet id="LearningPaths">Learning Paths</portlet>
+        <portlet id="LearningPaths">My Learning Paths</portlet>
         <portlet id="MyLessons">Lessons</portlet>
         <portlet id="ValamisActivities">Valamis Activities</portlet>
         <portlet id="RecentLessons">Recent</portlet>
         <portlet id="ValamisStudySummary">Valamis Study Summary</portlet>
-        <portlet id="MyCertificates">My Certificates</portlet>
-        <portlet id="MyCourses">My Courses</portlet>
+        <portlet id="MyCertificates">Learning Path Statistics</portlet>
+        <portlet id="MyCourses">Course Statistics</portlet>
     </category>
 </display>

@@ -2,19 +2,20 @@ package com.arcusys.valamis.web.servlet.lrsProxy
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import com.arcusys.learn.liferay.LogFactoryHelper
-import com.arcusys.learn.liferay.services.ServiceContextHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, ServiceContextHelper}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.valamis.lrs.model.{AuthConstants, AuthInfo, OAuthAuthInfo}
+import com.arcusys.valamis.lrssupport.lrs.model.{AuthConstants, AuthInfo, OAuthAuthInfo}
 import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.service.util.StatementChecker
-import com.arcusys.valamis.lrs.service.{LrsRegistration, ProxyLrsInfo}
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsRegistration, ProxyLrsInfo}
 import com.arcusys.valamis.lrs.tincan.{Agent, AuthorizationScope, Statement}
-import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
-import com.arcusys.valamis.oauth.HttpClientPoolImpl
-import com.arcusys.valamis.oauth.util.OAuthUtils
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.oauth.HttpClientPoolImpl
+import com.arcusys.valamis.lrssupport.oauth.util.OAuthUtils
+import com.arcusys.valamis.statements.StatementChecker
 import com.arcusys.valamis.util.StreamUtil
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.configuration.ioc.Configuration
@@ -79,12 +80,12 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
     val agent = JsonHelper.fromJson[Agent](request.getParameter("agent"))
     // For: annonymus user not to work with state
     if (agent.account.map(_.name).contains("anonymous"))
-      request.getMethod match {
-        case "GET" =>
-          response.setStatus(HttpServletResponse.SC_NOT_FOUND)
-        case _ =>
-          response.setStatus(HttpServletResponse.SC_OK)
-      }
+     request.getMethod match {
+       case "GET" =>
+         response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+       case _ =>
+         response.setStatus(HttpServletResponse.SC_OK)
+     }
     else
       doProxy(request, response)
   }
@@ -151,10 +152,12 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
     response.setStatus(responseCode)
 
     if (responseCode != HttpServletResponse.SC_NO_CONTENT) {
+      // TODO: replace literal to endpoint from database, it can be not related (full)
+      val responseBody = authResponse.readBodyAsString().replaceAll("valamis-lrs-portlet/xapi", "delegate/proxy")
+      response.setHeader(CONTENT_LENGTH, responseBody.getBytes(StandardCharsets.UTF_8).length.toString)
+
       val writer = response.getWriter
       try {
-        // TODO: replace literal to endpoint from database, it can be not related (full)
-        val responseBody = authResponse.readBodyAsString().replaceAll("valamis-lrs-portlet/xapi", "delegate/proxy")
         writer.write(responseBody)
         writer.flush()
       } catch {
@@ -185,19 +188,19 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
       .filterNot(_.equalsIgnoreCase(AUTHORIZATION))
       .filterNot(h => headersList.exists(_.getKey.equalsIgnoreCase(h)))
       .foreach(name =>
-        if (name.equalsIgnoreCase(HOST)) {
-          val url = new URL(lrsUrl)
-          val hostValue = url.getPort match {
-            case -1 => url.getHost
-            case _ => url.getHost + ':' + url.getPort
-          }
-          authRequest.getHeaders.add(new Parameter(name, hostValue))
-        } else if (name.equalsIgnoreCase(CONTENT_LENGTH)) {
-          val count = inputStream.available.toString
-          authRequest.getHeaders.add(new Parameter(name, count))
-        } else {
-          authRequest.getHeaders.add(new Parameter(name, request.getHeader(name)))
+      if (name.equalsIgnoreCase(HOST)) {
+        val url = new URL(lrsUrl)
+        val hostValue = url.getPort match {
+          case -1 => url.getHost
+          case _ => url.getHost + ':' + url.getPort
         }
+        authRequest.getHeaders.add(new Parameter(name, hostValue))
+      } else if (name.equalsIgnoreCase(CONTENT_LENGTH)) {
+        val count = inputStream.available.toString
+        authRequest.getHeaders.add(new Parameter(name, count))
+      } else {
+        authRequest.getHeaders.add(new Parameter(name, request.getHeader(name)))
+      }
       )
     authRequest
   }
@@ -231,7 +234,8 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
               val request = context.getRequest
               val session = request.getSession
               implicit val companyId = context.getCompanyId
-              session.setAttribute("LRS_ENDPOINT_INFO", lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All))
+              session.setAttribute("LRS_ENDPOINT_INFO", lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+                host = PortalUtilHelper.getLocalHostUrl))
             }
           case _ =>
         }

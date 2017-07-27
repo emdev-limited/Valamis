@@ -10,7 +10,7 @@ import com.arcusys.valamis.gradebook.service.{LessonGradeService, TeacherCourseG
 import com.arcusys.valamis.gradebook.utils.LessonWithGradesSortExtension
 import com.arcusys.valamis.lesson.model.{Lesson, LessonSort, LessonSortBy, LessonStates}
 import com.arcusys.valamis.lesson.service._
-import com.arcusys.valamis.lrs.service.util.TinCanVerbs
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanVerbs
 import com.arcusys.valamis.model.{Order, RangeResult, SkipTake}
 import com.arcusys.valamis.user.model.{UserSort, UserSortBy}
 import com.arcusys.valamis.user.service.UserService
@@ -51,7 +51,7 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
   }
 
   private def isGradeMoreSuccessLimit(grade: Float, scoreLimit: Double): Boolean = {
-    grade >= scoreLimit
+    (grade.toDouble + 0.0001) >= scoreLimit
   }
 
   def isCourseCompleted(courseId: Long, userId: Long): Boolean = {
@@ -136,6 +136,20 @@ abstract class LessonGradeServiceImpl extends LessonGradeService {
     getUsersGradesByLessons(users, Seq(lesson)).flatMap { grade =>
       grade.teacherGrade.flatMap(_.grade) orElse grade.autoGrade
     }.sum
+  }
+
+// TODO decide what make with gradebook average grades - maybe make one
+  def getLessonAverageGradesForReport(lesson: Lesson,
+                                      users: Seq[LUser]): Option[Float] = {
+    val averadeGrade = getUsersGradesByLessons(users, Seq(lesson))
+      .flatMap { grade =>
+        grade.teacherGrade.flatMap(_.grade) orElse grade.autoGrade
+      }
+    if (averadeGrade.length > 0) {
+      Some(averadeGrade.sum / averadeGrade.length)
+    } else {
+      None
+    }
   }
 
   def getLessonGradesByCourse(courseId: Long,

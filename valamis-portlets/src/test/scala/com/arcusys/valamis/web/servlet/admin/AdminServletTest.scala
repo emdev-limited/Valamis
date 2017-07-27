@@ -3,7 +3,7 @@ package com.arcusys.valamis.web.servlet.admin
 import javax.servlet.http.HttpServletRequest
 
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, LrsEndpoint}
 import com.arcusys.valamis.persistence.common.SlickDBInfo
 import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.arcusys.valamis.web.configuration.database.DatabaseInit
@@ -32,8 +32,8 @@ class AdminServletTest
   val adminServlet = new AdminServlet(){
     override def checkCSRFToken: Unit = Unit
     override def requirePortletPermission(permission: PermissionBase, portlets: PortletName*): Unit = Unit
-    this.bindingModule <~ new NewBindingModule(fn = implicit module => {
-      module.bind[SlickDBInfo] toSingle slickDbInfo
+    override implicit val bindingModule: BindingModule = new NewBindingModule(fn = implicit module => {
+      module <~ new LrsSupportConfiguration(slickDbInfo)
     })
     override def getCompanyId = 1L
   }
@@ -44,6 +44,7 @@ class AdminServletTest
     createDB()
 
     new DatabaseInit(slickDbInfo).init()
+
 
     //add settings for registered lrs
     adminServlet.endpointService.setEndpoint {

@@ -322,12 +322,15 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
 
     Views.ToolbarView = Marionette.ItemView.extend({
         template: '#packageManagerToolbarTemplate',
+        ui: {
+            searchField: '.js-search > input[type="text"]'
+        },
         events: {
             'click .dropdown-menu > li.js-display': 'changePackageType',
             'click .dropdown-menu > li.js-scope': 'changeScope',
             'click .dropdown-menu > li.js-category': 'changeCategory',
             'click .dropdown-menu > li.js-sort': 'changeSort',
-            'keyup .js-search': 'changeSearchText',
+            'keyup @ui.searchField': 'changeSearchText',
             'click .js-list-view': 'listDisplayMode',
             'click .js-tile-view': 'tilesDisplayMode'
         },
@@ -345,7 +348,7 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
             this.$('.js-display-filter').valamisDropDown('select', this.model.get('packageType'));
             this.$('.js-category-filter').valamisDropDown('select', this.model.get('selectedCategories')[0]);
             this.$('.js-sort-filter').valamisDropDown('select', this.model.get('sort'));
-            this.$('.js-search').val(this.model.get('searchtext'));
+            this.ui.searchField.val(this.model.get('searchtext')).trigger('input');
 
             var displayMode = lessonManager.settings.get('displayMode');
             if (displayMode === DISPLAY_TYPE.TILES)
@@ -474,7 +477,7 @@ lessonManager.module("Views", function (Views, lessonManager, Backbone, Marionet
         },
         changeVisibility: function(e) {
             var visibilityType = $(e.target).attr('data-value');
-
+            this.visibleValue = visibilityType;
             switch (visibilityType) {
                 case 'true':
                     this.model.updateVisibility({}, { isVisible: true });

@@ -5,8 +5,8 @@ import com.arcusys.learn.liferay.LogFactoryHelper
 import com.arcusys.learn.liferay.services.CompanyLocalServiceHelper
 import com.arcusys.learn.liferay.services.MessageBusHelper._
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
-import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
-import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.configuration.ioc.Configuration
 import com.arcusys.valamis.web.service.LiferayContext

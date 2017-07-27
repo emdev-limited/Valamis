@@ -2,9 +2,12 @@ package com.arcusys.valamis.web.portlet.base
 
 import java.io.{FileNotFoundException, PrintWriter}
 import javax.portlet.{GenericPortlet, PortletRequest, RenderRequest, RenderResponse}
+import javax.servlet.http.HttpServletRequest
 
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.log.LogSupport
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsRegistration, UserCredentialsStorage}
 import com.arcusys.valamis.utils.ResourceReader
 import com.arcusys.valamis.web.configuration.InjectableSupport
 
@@ -21,10 +24,6 @@ trait PortletBase
   lazy val resourceReader = inject[ResourceReader]
 
   override def destroy() {}
-
-  override def doDispatch(request: RenderRequest, response: RenderResponse): Unit = {
-    self.doDispatch(request, response)
-  }
 
   protected def getTranslation(view: String, language: String): Map[String, String] = {
     try {
@@ -54,4 +53,14 @@ trait PortletBase
     }
     out.println(content)
   }
+
+  protected def getHttpRequest(renderRequest: RenderRequest): HttpServletRequest = {
+    PortalUtilHelper.getOriginalServletRequest(PortalUtilHelper.getHttpServletRequest(renderRequest))
+  }
+
+  implicit def companyId = CompanyHelper.getCompanyId
+
+  protected lazy val lrsRegistration = inject[LrsRegistration]
+
+  protected lazy val authCredentials = inject[UserCredentialsStorage]
 }

@@ -39,7 +39,7 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
       'commentActivity': {
         'path': path.api.valamisActivityComment,
         'data': function (model, options) {
-          var params = {
+          return {
             action: 'CREATE',
             userId: Valamis.currentUserId,
             activityId: model.get('id'),
@@ -47,20 +47,18 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
             courseId: Utils.getCourseId(),
             plid: Utils.getPlid()
           };
-          return params;
         },
         'method': 'post'
       },
       'deleteComment': {
         'path': path.api.valamisActivityComment,
         'data': function (model, options) {
-          var params = {
+          return {
             action: 'DELETE',
             id: model.get('id'),
             courseId: Utils.getCourseId(),
             plid: Utils.getPlid()
           };
-          return params;
         },
         'method': 'post'
       },
@@ -81,6 +79,10 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
   });
 
   Entities.ActivitiesModel = Backbone.Model.extend({
+    defaults: {
+      comments: [],
+      userLiked: []
+    },
     parse: function (response) {
       var currentUserLike = false;
       _.forEach(response['userLiked'], function(item) {
@@ -100,7 +102,7 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
           return options.resPath
         },
         'data':  function (collection, options) {          
-          var params = {
+          return {
             action: 'getActivities',
             courseId: Utils.getCourseId,
             page: options.page,
@@ -108,7 +110,6 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
             getMyActivities: options.getMyActivities,
             plid: Utils.getPlid()
           };
-          return params;
         },
         'method': 'get'
       }
@@ -116,7 +117,86 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
   });
 
   Entities.ActivitiesCollection = Backbone.Collection.extend({
-    model: Entities.ActivitiesModel
+    model: Entities.ActivitiesModel,
+    parse: function(response) {
+      var singleActivities = _.cloneDeep(response),
+        activityGroups = [];
+
+      // Convert plain activity response to a nested object,
+      // grouping activities by date, type, id and verb (in that exact order).
+      // Omit objects (at all levels) that have only 1 activity and user status activities,
+      // leaving them as plain ones.
+      var nested = Utils.nest(response,
+        [
+          function(item) {
+            return moment(item.date).format('L');
+          },
+          function(item) {
+            return item.obj.tpe;
+          },
+          function(item) {
+            return item.obj.id;
+          },
+          function(item) {
+            return item.verb;
+          }
+        ], function(collection) {
+          return (collection.length > 1 && _.first(collection).obj.tpe !== 'UserStatus') ? collection : [];
+        });
+
+      var groups = Utils.omitEmptyObjects(nested);
+
+      _.each(singleActivities, function(activity) {
+        activity.userLiked = _.toArray(activity.userLiked);
+      });
+
+      // Iterate over the resulting nested object,
+      // converting it to a set of group models with corresponding activities as their collections.
+      _.each(groups, function(activitiesByDate, date) {
+        _.each(activitiesByDate, function(activitiesByType, tpe) {
+          _.each(activitiesByType, function(activitiesByObjectId, id) {
+            _.each(activitiesByObjectId, function(objectActivitiesByVerb, verb) {
+              var group = {
+                isGroup: true,
+                collection: new Entities.ActivitiesCollection()
+              };
+
+              var byVerbIdArray = _.toArray(objectActivitiesByVerb);
+              var lastGroupActivity = _.first(byVerbIdArray);
+
+              _.extend(group, _.clone(lastGroupActivity));
+              delete group.id;
+              group.comments = [];
+              group.userLiked = [];
+              _.each(byVerbIdArray, function (activity) {
+                activity.isInGroup = true;
+                activity.userLiked = _.toArray(activity.userLiked);
+                activity.comments = _.toArray(activity.comments);
+                activity.currentUserLike = _(activity.userLiked)
+                  .map(function(user) { return user.id; })
+                  .contains(Valamis.currentUserId);
+                group.collection.add(activity);
+              });
+
+              activityGroups.push(group);
+
+              // Delete plain activities that have been copied to groups from the response.
+              _(singleActivities)
+                .filter(function (a) {
+                  return _.contains(_.pluck(byVerbIdArray, 'id'), a.id);
+                })
+                .each(function (a) {
+                  _.pull(singleActivities, a);
+                });
+            });
+          });
+        });
+      });
+
+      return [].concat(singleActivities, activityGroups).sort(function(a,b) {
+        return new Date(b.date) - new Date(a.date);
+      });
+    }
   }).extend(ActivitiesCollectionService);
 
   var LiferayUserModelService = new Backbone.Service({
@@ -137,13 +217,12 @@ valamisActivities.module('Entities', function(Entities, valamisActivities, Backb
       'postStatus': {
         'path': path.api.activities,
         'data': function (model, options) {
-          var params = {
+          return {
             action: 'CREATEUSERSTATUS',
             courseId: Utils.getCourseId(),
             content: options.content,
             plid: Utils.getPlid()
           };
-          return params;
         },
         'method': 'post'
       }

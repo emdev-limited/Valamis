@@ -1,25 +1,30 @@
 package com.arcusys.valamis.web.servlet.course
 
 import javax.servlet.http.HttpServletRequest
+
 import com.arcusys.learn.liferay.services.{LayoutSetPrototypeServiceHelper, ThemeLocalServiceHelper, UserLocalServiceHelper}
 import com.arcusys.learn.liferay.util.PortletName
+import com.arcusys.valamis.course.CourseMemberService
 import com.arcusys.valamis.course.exception._
-import com.arcusys.valamis.course.model.CourseInfo
-import com.arcusys.valamis.course.service.{CertificateService, CourseService, CourseUserQueueService, InstructorService}
+import com.arcusys.valamis.course.model.{CourseInfo, CourseMembershipType}
+import com.arcusys.valamis.course.model.CourseMembershipType.CourseMembershipType
+import com.arcusys.valamis.course.service.{CourseCertificateService, CourseService, CourseUserQueueService, InstructorService}
 import com.arcusys.valamis.web.portlet.base.ModifyPermission
 import com.arcusys.valamis.web.servlet.base.PermissionUtil
 import com.arcusys.valamis.web.servlet.base.exceptions.AccessDeniedException
 import org.joda.time.DateTime
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 /**
   * Created by amikhailov on 24.11.16.
   */
-class CourseValidator(implicit val certificateService: CertificateService,
+class CourseValidator(implicit val certificateService: CourseCertificateService,
                       val courseService: CourseService,
                       val instructorService: InstructorService,
-                      val courseUserQueueService: CourseUserQueueService) {
+                      val courseUserQueueService: CourseUserQueueService,
+                      val courseMemberService: CourseMemberService) {
 
   def validateDateInterval(beginDate: Option[DateTime], endDate: Option[DateTime]): Unit = {
     (beginDate, endDate) match {
@@ -33,9 +38,9 @@ class CourseValidator(implicit val certificateService: CertificateService,
 
   def validateThemeId(companyId: Long, themeId: Option[String]): Unit = {
     themeId match {
-      case (Some(themeId)) =>
-        if (ThemeLocalServiceHelper.fetchTheme(companyId, themeId).isEmpty) {
-          throw new ThemeNotFoundException(s"Theme not found, id $themeId")
+      case (Some(id)) =>
+        if (ThemeLocalServiceHelper.fetchTheme(companyId, id).isEmpty) {
+          throw new ThemeNotFoundException(s"Theme not found, id $id")
         }
       case None =>
     }
@@ -43,9 +48,9 @@ class CourseValidator(implicit val certificateService: CertificateService,
 
   def validateTemplateId(templateId: Option[Long]): Unit = {
     templateId match {
-      case (Some(templateId)) =>
-        if (LayoutSetPrototypeServiceHelper.fetchLayoutSetPrototype(templateId).isEmpty) {
-          throw new TemplateNotFoundException(s"Template not found, id $templateId")
+      case (Some(id)) =>
+        if (LayoutSetPrototypeServiceHelper.fetchLayoutSetPrototype(id).isEmpty) {
+          throw new TemplateNotFoundException(s"Template not found, id $id")
         }
       case None =>
     }
@@ -79,9 +84,11 @@ class CourseValidator(implicit val certificateService: CertificateService,
   }
 
   def validateUserIds(userIds: Seq[Long]): Unit = {
-    userIds.map(userId => if (UserLocalServiceHelper().fetchUser(userId).isEmpty) {
-      throw new UserNotFoundException(s"User with id {$userId} not found")
-    })
+    userIds foreach { userId =>
+      if (UserLocalServiceHelper().fetchUser(userId).isEmpty) {
+        throw new UserNotFoundException(s"User with id {$userId} not found")
+      }
+    }
   }
 
   def validateUserLimit(courseId: Long, userLimit: Option[Int]): Unit = {
@@ -99,12 +106,33 @@ class CourseValidator(implicit val certificateService: CertificateService,
     if (!canEditMembers(courseId, userId)) throw AccessDeniedException()
   }
 
-  def canEditMembers(courseId: Long, userId: Long)(implicit request: HttpServletRequest): Boolean =
-    PermissionUtil.hasPermissionApi(ModifyPermission, PortletName.AllCourses) ||
+  def validateMembershipType(courseId: Long, membershipType: CourseMembershipType): Unit = {
+    if (membershipType != CourseMembershipType.ON_REQUEST
+        && 0 < courseMemberService.getPendingMembershipRequestsCount(courseId)) {
+      throw new MembershipTypeRequestsNotEmptyException()
+    }
+  }
+
+  def canEditMembers(courseId: Long,
+                     userId: Long)
+                    (implicit request: HttpServletRequest): Boolean =
+    hasModifyPermissionForCourse(courseId, userId) ||
       instructorService.isExist(courseId, userId)
 
-  def canEditCourse()(implicit request: HttpServletRequest): Boolean =
-    PermissionUtil.hasPermissionApi(ModifyPermission, PortletName.AllCourses)
+  def canEditCourse(course: CourseResponse,
+                    userId: Long)
+                   (implicit request: HttpServletRequest): Boolean =
+    !isGuestCourse(course) && hasModifyPermissionForCourse(course.id, userId)
+
+  private def isGuestCourse(course: CourseResponse): Boolean =
+    course.friendlyUrl == "/guest"
+
+  private def hasModifyPermissionForCourse(courseId: Long, userId: Long): Boolean = {
+    UserLocalServiceHelper().fetchUser(userId).exists { user =>
+      PermissionUtil.hasPermissionApi(courseId, user,
+        ModifyPermission, PortletName.AllCourses)
+    }
+  }
 
   private def await[T](f: Future[T]): T = Await.result(f, Duration.Inf)
 }

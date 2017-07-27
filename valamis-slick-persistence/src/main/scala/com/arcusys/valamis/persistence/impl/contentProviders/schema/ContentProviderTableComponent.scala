@@ -17,7 +17,7 @@ trait ContentProviderTableComponent extends TypeMapper { self: SlickProfile =>
 
   class ContentProviderTable(tag : Tag) extends Table[ContentProvider](tag, tblName("CONTENT_PROVIDERS")) {
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("NAME", O.Length(20, varying = true))
+    def name = column[String]("NAME", O.Length(254, varying = true))
     def image = column[String]("IMAGE_URL", O.Length(2000, varying = true))
     def description = column[String]("DESCRIPTION")
     def url = column[String]("URL", O.Length(2000, varying = true))
@@ -26,6 +26,8 @@ trait ContentProviderTableComponent extends TypeMapper { self: SlickProfile =>
     def isPrivate = column[Boolean]("IS_PRIVATE")
     def customerKey = column[String]("CUSTOMER_KEY", O.Length(254, varying = true))
     def customerSecret = column[String]("CUSTOMER_SECRET", O.Length(254, varying = true))
+    def companyId = column[Long]("COMPANY_ID")
+    def isSelective = column[Boolean]("IS_SELECTIVE")
 
     def * =
       (
@@ -38,7 +40,9 @@ trait ContentProviderTableComponent extends TypeMapper { self: SlickProfile =>
         height,
         isPrivate,
         customerKey,
-        customerSecret
+        customerSecret,
+        companyId,
+        isSelective
       ) <> (ContentProvider.tupled, ContentProvider.unapply)
   }
 }

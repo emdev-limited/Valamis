@@ -5,7 +5,7 @@ import com.arcusys.learn.liferay.constants.StringPoolHelper
 import com.arcusys.learn.liferay.services.{AssetEntryLocalServiceHelper, LayoutSetLocalServiceHelper, WebServerServletTokenHelper}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.certificate.model.{Certificate, CertificateActivityType, CertificateStateType, CertificateStatuses}
-import com.arcusys.valamis.certificate.service.CertificateService
+import com.arcusys.valamis.certificate.service.{LearningPathService}
 import com.arcusys.valamis.certificate.storage.CertificateRepository
 import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.gradebook.model.{CourseActivityType, CourseGrade}
@@ -16,6 +16,9 @@ import com.arcusys.valamis.uri.service.TincanURIService
 import com.arcusys.valamis.web.servlet.course.CourseConverter
 import com.arcusys.valamis.web.servlet.social.response._
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 trait ActivityInterpreter{
   def getVerb(className: String, activityType: Int): String
@@ -38,18 +41,19 @@ class ActivityInterpreterImpl(implicit val bindingModule: BindingModule)
   val CourseGradeClassName = classOf[CourseGrade].getName
   val UserStatusClassName = classOf[UserStatus].getName
   val CourseStatus = CourseActivityType.getClass.getName
+  val LearningPathClassName = "com.arcusys.valamis.learningpath.models.LearningPath"
 
   lazy val uriService = inject[TincanURIService]
   lazy val courseService = inject[CourseService]
-  lazy val certificateRepository = inject[CertificateRepository]
   lazy val lessonService = inject[LessonService]
-  lazy val cerificateService = inject[CertificateService]
+  lazy val learningPathService = inject[LearningPathService]
 
 
   override def getVerb(className: String, activityType: Int): String = className match {
     case LessonClassName => PackageActivityType(activityType).toString
     case CertificateClassName => CertificateStatuses(activityType).toString
     case CertificateTypeClassName => "Published"
+    case LearningPathClassName => CertificateActivityType(activityType).toString
     case CertificateActivityTypeClassName => CertificateActivityType(activityType).toString
     case CourseGradeClassName | CourseStatus => "Completed"
     case UserStatusClassName => "Wrote"
@@ -72,8 +76,9 @@ class ActivityInterpreterImpl(implicit val bindingModule: BindingModule)
                       isSecure: Boolean = false): Option[ActivityObjectResponse] = {
     className match {
       case LessonClassName => getPackageActivityObj(classPK.get, extraData, plId, isSecure)
-      case CertificateClassName | CertificateTypeClassName | CertificateActivityTypeClassName =>
-        getCertificateActivityObj(classPK.get, extraData, plId, isSecure)
+      case CertificateClassName | CertificateTypeClassName |
+           CertificateActivityTypeClassName | LearningPathClassName =>
+        getLearningPathActivityObj(classPK.get, extraData, plId, isSecure)
       case CourseGradeClassName => Some(getCourseActivityObj(classPK.get, extraData))
       case UserStatusClassName => extraData.map(getUserStatusActivityObj)
       case CourseStatus => Some(getCourseActivityObj(classPK.get, extraData))
@@ -97,16 +102,17 @@ class ActivityInterpreterImpl(implicit val bindingModule: BindingModule)
     ActivityCourseResponse(courseId, course.map(_.getDescriptiveName).getOrElse(""), logo)
   }
 
-  private def getCertificateActivityObj(certificateId: Long,
+  private def getLearningPathActivityObj(lpId: Long,
                                         extraData: Option[String],
                                         plId: Option[Long] = None,
                                         isSecure: Boolean = false): Option[ActivityCertificateResponse] = {
-    certificateRepository.getByIdOpt(certificateId.toInt).map { certificate =>
-      val logo = if (certificate.logo == "") None else Some(certificate.logo)
-      ActivityCertificateResponse(certificateId,
-        certificate.title,
-        logo)
-    }
+    Await.result(learningPathService.getLearningPathsByIds(Seq(lpId)), Duration.Inf)
+      .headOption
+      .map { lpInfo =>
+        ActivityCertificateResponse(lpId,
+          lpInfo.title,
+          lpInfo.logoUrl)
+      }
   }
 
   private def getPackageActivityObj(packageId: Long,

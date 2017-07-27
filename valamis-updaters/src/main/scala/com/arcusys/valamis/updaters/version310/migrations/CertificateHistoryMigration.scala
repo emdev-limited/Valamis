@@ -1,20 +1,25 @@
 package com.arcusys.valamis.updaters.version310.migrations
 
-import com.arcusys.valamis.persistence.common.SlickProfile
+import java.sql.SQLException
+
+import com.arcusys.slick.drivers.{DB2Driver, OracleDriver, SQLServerDriver}
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
 import com.arcusys.valamis.updaters.version310.certificate.{CertificateStateTableComponent, CertificateTableComponent}
 import com.arcusys.valamis.updaters.version310.certificateHistory.{CertificateHistory, CertificateHistoryTableComponent, UserStatusHistory}
 import org.joda.time.DateTime
-import slick.driver.JdbcProfile
+import slick.driver.{HsqldbDriver, JdbcProfile}
 import slick.jdbc.JdbcBackend
+import slick.jdbc.meta.MTable
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CertificateHistoryMigration(val driver: JdbcProfile, db: JdbcBackend#DatabaseDef)
+class CertificateHistoryMigration(val driver: JdbcProfile, val db: JdbcBackend#DatabaseDef)
   extends CertificateHistoryTableComponent
     with CertificateTableComponent
     with CertificateStateTableComponent
-    with SlickProfile {
+    with SlickProfile
+    with DatabaseLayer {
 
   import driver.api._
 
@@ -25,7 +30,14 @@ class CertificateHistoryMigration(val driver: JdbcProfile, db: JdbcBackend#Datab
     val userStatusHistorySchema = userStatusHistoryTQ.schema
 
     db.run {
-      (certificateHistorySchema ++ userStatusHistorySchema).create.transactionally
+      for {
+        _ <- if (!hasTable(certificateHistoryTQ.baseTableRow.tableName))
+          certificateHistorySchema.create.transactionally
+          else DBIO.successful()
+        _ <- if (!hasTable(userStatusHistoryTQ.baseTableRow.tableName))
+          userStatusHistorySchema.create.transactionally
+          else DBIO.successful()
+      } yield ()
     }
   }
 
@@ -105,5 +117,23 @@ class CertificateHistoryMigration(val driver: JdbcProfile, db: JdbcBackend#Datab
 
         db.run(userStatusHistoryTQ ++= points.sortBy(_.date))
       }
+  }
+
+  private def hasTable(tableName: String): Boolean = {
+    driver match {
+      case SQLServerDriver | OracleDriver =>
+        try {
+          execSync(sql"""SELECT COUNT(*) FROM #$tableName WHERE 1 = 0""".as[Int].headOption)
+          true
+        } catch {
+          case _: SQLException => false
+        }
+      case driver: HsqldbDriver =>
+        val action = MTable.getTables(Some("PUBLIC"), Some("PUBLIC"), Some(tableName), Some(Seq("TABLE"))).headOption
+        execSync(action).isDefined
+      case DB2Driver =>
+        execSync(driver.defaultTables).map(_.name.name).contains(tableName)
+      case _ => execSync(MTable.getTables(tableName).headOption).isDefined
+    }
   }
 }

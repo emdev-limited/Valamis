@@ -7,8 +7,6 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
     USER_STATUS: 'UserStatus'
   };
 
-  var ACTIVITIES_COUNT = 30;
-
   Views.UserStatusView = Marionette.ItemView.extend({
     template: '#userStatusViewTemplate',
     className: 'activity-item user-status',
@@ -74,20 +72,34 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
 
   Views.ValamisActivityItemView = Marionette.LayoutView.extend({
     template: '#valamisActivityItemViewTemplate',
-    className: 'activity-item',
+    className: function () {
+      var defaultClassName = 'activity-item';
+      return defaultClassName + ((this.model.get('isInGroup')) ? ' grouped' : '');
+    },
     regions: {
-      'commentsRegion' : '.js-activity-comments'
+      'commentsRegion' : '.js-activity-comments',
+      'activityGroupRegion': '.js-items'
     },
     events: {
-      'focus .js-my-comment-field': function() {this.$('.js-post-my-comment').show();},
-      'blur .js-my-comment-field': function() {this.$('.js-post-my-comment').hide();},
-      'keypress .js-my-comment-field': 'keyAction',
+      'focus .js-my-comment-field': function(e) {
+        e.stopPropagation();
+        this.$('.js-post-my-comment').removeClass('hidden');
+      },
+      'blur .js-my-comment-field': function(e) {
+        e.stopPropagation();
+        this.$('.js-post-my-comment').addClass('hidden');
+      },
+      'keypress .js-my-comment-field': 'onCommentFieldFocus',
       'click .js-action-like': 'toggleLike',
-      'click .js-action-comment': function() {this.$('.js-activity-comments').toggle();},
+      'click .js-action-comment': 'toggleComment',
       'click .js-action-share': 'shareActivity',
       'click .js-action-delete': 'deleteActivity',
-      'click .js-show-liked-users': 'showUsersModal'
+      'click .js-show-liked-users': 'showUsersModal',
+      'click .js-toggle-details': 'toggleDetails',
+      'click .js-post-my-comment': 'sendComment',
+      'mousedown .js-post-my-comment': function(e) {e.preventDefault();}
     },
+    childViewContainer: '.js-items',
     initialize: function(options) {
       this.currentUserModel = options.currentUserModel;
     },
@@ -97,18 +109,18 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       var link = '';
       var imageApi = '';
       switch (this.model.get('obj')['tpe']) {
-        case OBJECT_TYPE.LESSON:
-          imageApi = path.api.packages;
-          link = Utils.getPackageUrl(this.model.get('obj')['id']);
-          break;
-        case OBJECT_TYPE.CERTIFICATE:
-          imageApi = path.api.certificates;
-          link = Utils.getCertificateUrl(this.model.get('obj')['id']);
-          break;
-        case OBJECT_TYPE.COURSE:
-          var logo = this.model.get('obj').logoCourse;
-          imageApi = (logo) ? (Liferay.ThemeDisplay.getPathImage() + logo) : '';
-          break;
+          case OBJECT_TYPE.LESSON:
+              imageApi = '/' + path.api.packages + this.model.get('obj')['id'] + '/logo?courseId=' + Utils.getCourseId();
+              link = Utils.getPackageUrl(this.model.get('obj')['id']);
+              break;
+          case OBJECT_TYPE.CERTIFICATE:
+              imageApi = Liferay.ThemeDisplay.getPortalURL() + "/" + this.model.get('obj')['logo'];
+              link = Utils.getCertificateUrl(this.model.get('obj')['id']);
+              break;
+          case OBJECT_TYPE.COURSE:
+              var logo = this.model.get('obj').logoCourse;
+              imageApi = (logo) ? (Liferay.ThemeDisplay.getPathImage() + logo) : '';
+              break;
       }
 
       var activityStmnt = (this.model.get('obj')['tpe'] !== OBJECT_TYPE.USER_STATUS)
@@ -135,8 +147,8 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
         }
       }
       else {
-        likeItems = userLikedList.filter(function(item) {
-          return item['id'] !== Valamis.currentUserId
+        likeItems = _.filter(userLikedList, function(item) {
+          return item['id'] !== Valamis.currentUserId;
         }).map(function(item) {
           return item['name'];
         });
@@ -149,21 +161,36 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
 
       var objectType = this.model.get('obj')['tpe'];
       var withImage = this.model.get('obj')['withImage'];
+      var userName = this.getUserName().join(' ');
+
+      var activityTitle = this.model.get('obj')['title'];
+      if(this.model.get('obj')['liferayEntry']) {
+        activityTitle = activityTitle.replace(this.model.get('user')['name'], userName).replace(this.model.get('user')['firstName'], userName);
+      }
+
+       var date = '';
+       if (!!this.model.get('date')) {
+           var lang = Utils.getUserLocale();
+           date = moment(this.model.get('date')).locale(lang).fromNow();
+       }
 
       return {
         currentUser: this.options.currentUserModel.toJSON(),
+        userName: userName,
+        activityTitle: activityTitle,
         activityStmnt: activityStmnt,
-        objectClassName: objectType.toLowerCase(),
+        objectClassName: (objectType === OBJECT_TYPE.CERTIFICATE) ? 'certificate' : '',
         withImage: withImage,
         commentText: (commentAmount || '') + ' ' + commentAmountLabel,
         canShare: objectType === OBJECT_TYPE.LESSON,
-        canDelete: (objectType === OBJECT_TYPE.USER_STATUS || this.model.get('verb') == 'Shared')
-        && this.model.get('user')['id'] === Valamis.currentUserId,
+        canDelete: (objectType === OBJECT_TYPE.USER_STATUS || this.model.get('verb') == 'Shared') &&
+        this.model.get('user')['id'] === Valamis.currentUserId,
         actLike: actLike,
         imageApi: imageApi,
-        courseId: Utils.getCourseId,
+        courseId: Utils.getCourseId(),
         objectComment: Utils.makeUrl(this.model.get('obj')['comment'] || ''),
-        link: link
+        link: link,
+        date: date
       }
     },
     onRender: function() {
@@ -172,25 +199,29 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       this.commentsCollection.on('model:deleted', function(modelId) {
         var correctComments =  _.filter(this.model.get('comments'), function(item) {
           return item.id != modelId });
-        this.model.set('comments',correctComments);
+        this.model.set('comments', correctComments);
         this.render();
       }, this);
       var commentsView = new Views.ValamisCommentCollectionView({collection: this.commentsCollection});
       this.commentsRegion.show(commentsView);
 
-      var that = this;
-      this.$('.js-post-my-comment').on('mousedown', function(event) {
-        event.preventDefault();
-      }).on('click', function() {
-        that.sendComment();
-      });
-    },
-    keyAction: function(e) {
-      if(e.keyCode === 13) {
-        this.sendComment();
+      if(this.model.get('isGroup')) {
+        var activityGroupView = new Views.ValamisActivitiesCollectionView({
+          collection: this.model.get('collection'),
+          activitiesCount: this.model.get('collection').length,
+          currentUserModel: this.options.currentUserModel,
+          isGroup: this.model.get('isGroup')
+        });
+        this.activityGroupRegion.show(activityGroupView);
       }
     },
-    sendComment: function() {
+    onCommentFieldFocus: function(e) {
+      if(e.keyCode === 13) {
+        this.sendComment(e);
+      }
+    },
+    sendComment: function(e) {
+      e.stopPropagation();
       var that = this;
       var comment = that.$('.js-my-comment-field').val();
       var $button = that.$('.js-post-my-comment');
@@ -206,7 +237,9 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
         });
       }
     },
-    toggleLike: function() {
+    toggleLike: function(e) {
+      e.stopPropagation();
+
       var iLikeThis = this.model.get('currentUserLike');
       var userLikedList = this.model.get('userLiked');
       var $button = this.$('.js-action-like');
@@ -215,8 +248,10 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       $button.css('pointer-events', 'none');
       if (iLikeThis)
         this.model.unlikeActivity().then(function (result) {
-          that.model.set('userLiked', userLikedList.filter(function(i) {return i['id'] !== Valamis.currentUserId}));
-          that.model.set('currentUserLike', false);
+          that.model.set({
+            userLiked: userLikedList.filter(function(i) {return i['id'] !== Valamis.currentUserId}),
+            currentUserLike: false
+          });
           that.render();
         }, function (err, res) {
           toastr.error(Valamis.language['failedLabel']);
@@ -224,12 +259,18 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       else
         this.model.likeActivity().then(function (result) {
           userLikedList.push(that.currentUserModel.toJSON());
-          that.model.set('userLiked', userLikedList);
-          that.model.set('currentUserLike', true);
+          that.model.set({
+            userLiked: userLikedList,
+            currentUserLike: true
+          });
           that.render();
         }, function (err, res) {
           toastr.error(Valamis.language['failedLabel']);
         });
+    },
+    toggleComment: function(e) {
+      e.stopPropagation();
+      this.$('.js-activity-comments').toggle();
     },
     showUsersModal: function() {
       var usersLikedView = new Views.UsersLikedCollectionView({
@@ -257,10 +298,35 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
     },
     deleteActivity: function() {
       this.model.destroy();
+    },
+    // Construct the user name(s) string:
+    // if the model is a single activity, use the user name provided;
+    // if the model is a group:
+    //  - join all but last names by "," and join the last name by "and";
+    //  - if a group contains more than 3 activities, join the first user's name by "and N others",
+    //    where N is the total group user count - 1
+    getUserName: function () {
+      var userName = [this.model.get('user')['name']];
+      if(this.model.get('isGroup')) {
+        var userNames = _(this.model.get('collection').toJSON()).map(function (activity) {
+          return activity.user.name;
+        }).unique().value();
+        userName = (userNames.length > 3)
+          ? [_.first(userNames), Valamis.language['andLabel'], (userNames.length - 1), Valamis.language['othersLabel']]
+          : [_.initial(userNames).join(', '), ((userNames.length > 1) ? Valamis.language['andLabel'] : ''), _.last(userNames)];
+      }
+
+      return userName;
+    },
+    toggleDetails: function(e) {
+      var targetButton = $(e.target).closest('.expand');
+      var targetGroup = this.$('.activity-group');
+      targetButton.toggleClass('open');
+      targetGroup.toggleClass('hidden');
     }
   });
 
-  Views.ValamisActivitiesCollectionView = Marionette.CompositeView.extend({
+  Views.ValamisActivitiesGroupView = Marionette.CompositeView.extend({
     template: '#valamisActivityCollectionViewTemplate',
     childView: Views.ValamisActivityItemView,
     childViewContainer: '.js-list-view',
@@ -269,20 +335,14 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
         currentUserModel: this.options.currentUserModel
       }
     },
-    events: {
-      'click .js-show-more': 'showMore'
+    templateHelpers: function () {
+      return {
+        isGroup: this.options.isGroup
+      }
     },
-    initialize: function(options) {
-      this.isMyActivities = options.isMyActivities;
+    initialize: function (options) {
       this.activitiesCount = options.activitiesCount;
       this.resourceURL = options.resourceURL;
-      this.page = 1;
-      this.activitiesCollection = new valamisActivities.Entities.ActivitiesCollection();
-
-      this.collection.on('reset', function(){
-        this.page = 1;
-        this.fetchCollection();
-      }, this);
 
       this.collection.on('remove', function() {
         this.$('.js-no-activities').toggleClass('hidden', this.collection.length > 0);
@@ -291,6 +351,23 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
       this.collection.on('activities:add', function (){
         this.$('.js-no-activities').toggleClass('hidden', this.collection.length > 0);
       }, this)
+    }
+  });
+
+  Views.ValamisActivitiesCollectionView = Views.ValamisActivitiesGroupView.extend({
+    events: {
+      'click .js-show-more': 'showMore'
+    },
+    initialize: function(options) {
+      this.constructor.__super__.initialize.apply(this, arguments);
+      this.isMyActivities = options.isMyActivities;
+      this.page = 1;
+      this.activitiesCollection = new valamisActivities.Entities.ActivitiesCollection();
+
+      this.collection.on('reset', function(){
+        this.page = 1;
+        this.fetchCollection();
+      }, this);
     },
     onRender: function() {
       this.activitiesCollection.on('sync', function() {
@@ -330,7 +407,7 @@ valamisActivities.module('Views', function (Views, valamisActivities, Backbone, 
         if (activity['id'] == 0)
           delete activity['id'];
 
-        if(this.$('#activitiesTabs .active a[href="#activitiesRegion"]').size())
+        if(this.$('#activitiesTabs .active a[href="#activitiesRegion"]').length)
           this.addInCollection(this.allActivitiesCollection, activity);
         else
           this.addInCollection(this.myActivitiesCollection, activity);

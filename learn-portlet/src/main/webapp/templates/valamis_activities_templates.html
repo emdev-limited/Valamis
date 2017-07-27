@@ -18,7 +18,7 @@
         <img class="img-circle" src="{{picture}}" alt="{{name}}">
     </div>
     <div class="activity-block">
-        <textarea rows="2" class="js-user-status" placeholder="{{updateStatusLabel}}" ></textarea>
+        <textarea rows="2" class="js-user-status" placeholder="{{updateStatusLabel}}" aria-label="{{updateStatusLabel}}"></textarea>
         <div class="text-right">
             <button class="button medium primary post-button js-post-status"> {{postLabel}} </button>
         </div>
@@ -27,31 +27,40 @@
 
 <script type="text/template" id="valamisActivityCollectionViewTemplate">
     <div>
-        <div class="js-list-view list">
+        <div class="js-list-view list {{#isGroup}}group{{/isGroup}}">
             <div class="div-table no-content-table js-no-activities hidden">
                 <div class="div-col div-col-center">{{noRecentLabel}}</div>
             </div>
         </div>
+        {{^isGroup}}
         <div class="toggle-container hidden js-show-more">
             <span class="val-icon-arrow-down val-icon-right"></span>
             <span> {{showMoreLabel}} </span>
         </div>
+        {{/isGroup}}
     </div>
 </script>
 
 <script type="text/template" id="valamisActivityItemViewTemplate">
+    {{^isGroup}}
     <div class="user-logo">
         <img class="img-circle" src="{{user.picture}}" alt="{{user.name}}">
     </div>
+    {{/isGroup}}
+    {{#isGroup}}
+    <div class="expand shift-left js-toggle-details">
+        <span class="val-icon-toggle"></span>
+    </div>
+    {{/isGroup}}
     <div class="activity-block">
         <div class="activity-label">
 
             {{#obj.liferayEntry}}
-                {{{obj.title}}}
+                {{{activityTitle}}}
             {{/obj.liferayEntry}}
 
             {{^obj.liferayEntry}}
-                <span class="user-label"> {{user.name}} </span>
+                <span class="user-label"> {{userName}} </span>
                 {{activityStmnt}}
                 {{#obj.course}} {{inLabel}}
                     {{#obj.course.url}} <a href="{{obj.course.url}}" target="_blank" class="title-label"> {{/obj.course.url}}
@@ -78,7 +87,7 @@
             <div class="activity-image">
                 <div class="image {{objectClassName}} "
                      {{#obj.logo}}
-                     style="background-image: url('/{{imageApi}}{{obj.id}}/logo?courseId={{courseId}}')"
+                     style="background-image: url('{{imageApi}}')"
                      {{/obj.logo}}
                      {{#obj.logoCourse}} {{#imageApi}}
                      style= "background-image: url('{{imageApi}}')"
@@ -97,7 +106,7 @@
 
                 {{^obj.liferayEntry}}
                     {{#link}}
-                    <a href="{{link}}">
+                    <a href="{{{link}}}">
                         {{/link}}
                         {{obj.title}}
                         {{#link}}
@@ -117,7 +126,7 @@
             <span class="js-action-like"> {{likeLabel}} </span>
             {{/currentUserLike}}
 
-            • <span class="js-action-comment"> {{commentText}} </span>
+            {{^isGroup}}• <span class="js-action-comment"> {{commentText}} </span>{{/isGroup}}
 
             {{#canShare}} • <span class="js-action-share"> {{shareLabel}} </span> {{/canShare}}
             {{#canDelete}} • <span class="js-action-delete"> {{deleteLabel}} </span> {{/canDelete}}
@@ -140,14 +149,20 @@
                 <img class="img-circle small" src="{{currentUser.picture}}" alt="{{currentUser.name}}">
             </div>
             <div>
-                <input class="js-my-comment-field" type="text" placeholder="{{writeCommentLabel}}">
+                <input class="js-my-comment-field" type="text" placeholder="{{writeCommentLabel}}" aria-label="{{writeCommentLabel}}">
                 <div class="text-right">
-                    <button class="button medium primary post-button js-post-my-comment" style="display: none;"> {{postLabel}} </button>
+                    <button class="button medium primary post-button hidden js-post-my-comment"> {{postLabel}} </button>
                 </div>
             </div>
         </div>
         {{/id}}
     </div>
+    {{#isGroup}}
+    <div class="activity-group js-items hidden"></div>
+    {{/isGroup}}
+</script>
+
+<script type="text/template" id="valamisActivityGroupViewTemplate">
 </script>
 
 <script type="text/template" id="valamisCommentItemViewTemplate">

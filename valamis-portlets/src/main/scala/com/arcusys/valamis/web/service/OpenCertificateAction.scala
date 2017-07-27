@@ -1,24 +1,19 @@
 package com.arcusys.valamis.web.service
 
-import java.net.URLEncoder
-import javax.portlet.PortletURL
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.learn.liferay.services.AssetEntryLocalServiceHelper
-import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.certificate.model.Certificate
+import com.arcusys.learn.liferay.util.ParamUtilHelper
 
-class OpenCertificateAction extends BaseOpenAction {
-  override val portletId = PortletName.CertificateViewer.key
+class OpenCertificateAction extends LBaseStrutsAction {
 
-  override def getById(id: Long): Option[LAssetEntry] =
-    Option(
-      AssetEntryLocalServiceHelper.getAssetEntry(classOf[Certificate].getName, id)
-    )
+  override def execute(originalStrutsAction: LStrutsAction, request: HttpServletRequest, response: HttpServletResponse): String = {
+    val resourcePrimKey: Long = ParamUtilHelper.getLong(request, "resourcePrimKey")
+    val objectId = ParamUtilHelper.getLong(request, "oid")
+    val plid = ParamUtilHelper.getLong(request, "plid")
 
-  override def sendResponse(response: HttpServletResponse, portletURL: PortletURL, assetEntry: Option[LAssetEntry]) = {
-    val hash = assetEntry.map(i => "/certificate/" + i.getClassPK).getOrElse("")
-    response.sendRedirect(portletURL.toString + "#" + hash)
+    val lpId = if (objectId > 0) objectId else resourcePrimKey
+    response.sendRedirect(s"/c/portal/learning-path/open?plid=$plid&lpId=$lpId")
+    ""
   }
 }

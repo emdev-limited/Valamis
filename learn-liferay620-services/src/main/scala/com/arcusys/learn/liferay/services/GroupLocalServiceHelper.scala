@@ -1,6 +1,9 @@
 package com.arcusys.learn.liferay.services
 
+import java.util
+
 import com.arcusys.learn.liferay.LiferayClasses.{LAssetVocabulary, LGroup, LUser}
+import com.arcusys.learn.liferay.constants.QueryUtilHelper
 import com.liferay.portal.kernel.dao.orm.QueryUtil
 import com.liferay.portal.model._
 import com.liferay.portal.service._
@@ -70,21 +73,36 @@ object GroupLocalServiceHelper {
     AssetVocabularyLocalServiceUtil.getGroupVocabulary(globalGroupId, vocabularyName)
   }
 
-  def searchExceptPrivateSites(companyId: Long,
-                               start: Int,
-                               end: Int): Seq[LGroup] = {
-    GroupLocalServiceUtil.getCompanyGroups(companyId, start, end)
+  def searchSites(companyId: Long,
+                  start: Int,
+                  end: Int,
+                  includeOpen: Boolean = true,
+                  includeRestricted: Boolean = true,
+                  includePrivate: Boolean = true
+                              ): Seq[Group] = {
+    val siteParams = new util.LinkedHashMap[String, AnyRef](3)
+
+    siteParams.put("site", Boolean.box(true))
+    siteParams.put("active", Boolean.box(true))
+
+    val types = Seq(
+      (includeOpen, GroupConstants.TYPE_SITE_OPEN),
+      (includeRestricted, GroupConstants.TYPE_SITE_RESTRICTED),
+      (includePrivate, GroupConstants.TYPE_SITE_PRIVATE))
+      .filter(_._1)
+      .map(_._2)
+
+    siteParams.put("types", types.asJava)
+
+    GroupLocalServiceUtil
+      .search(companyId, "", siteParams, start, end)
       .asScala
-      .filterNot(g => g.isUser || g.isUserGroup || g.isUserPersonalSite)
-      .map(new LGroup(_))
   }
 
-  def searchIdsExceptPrivateSites(companyId: Long,
-                                  start: Int = QueryUtil.ALL_POS,
-                                  end: Int = QueryUtil.ALL_POS): Seq[Long] = {
-    GroupLocalServiceUtil.getCompanyGroups(companyId, start, end)
-      .asScala
-      .filterNot(g => g.isUser || g.isUserGroup || g.isUserPersonalSite)
+  def searchSiteIds(companyId: Long,
+                    start: Int = QueryUtilHelper.ALL_POS,
+                    end: Int = QueryUtilHelper.ALL_POS): Seq[Long] = {
+    searchSites(companyId, start, end)
       .map(_.getGroupId)
   }
 

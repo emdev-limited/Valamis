@@ -1,15 +1,15 @@
 <script type="text/template" id="myCoursesLayoutTemplate">
-    <table class="val-statistic-table js-courses-table">
+    <table class="val-table val-statistic-table js-courses-table">
         <thead>
         <tr>
-            <th class="expand"></th>
+            <th class="narrow-col"></th>
             <th>{{courseNameLabel}}</th>
-            <th class="status js-status-col"><span>{{statusLabel}}</span></th>
-            <th class="status progress-col js-progress-col"></th>
-            <th class="summary">
+            <th class="narrow-col status js-status-col"><span>{{statusLabel}}</span></th>
+            <th class="narrow-col status progress-col js-progress-col"></th>
+            <th class="narrow-col">
                 <span class="val-icon val-icon-user valamis-tooltip" data-placement="bottom" title="{{courseUserTooltipDescription}}"></span>
             </th>
-            <th class="summary">
+            <th class="narrow-col">
                 <span class="val-icon val-icon-checkmark valamis-tooltip" data-placement="bottom" title="{{courseCheckbuttonTooltipDescription}}"></span>
             </th>
         </tr>
@@ -27,19 +27,19 @@
 </script>
 
 <script type="text/template" id="myCoursesRowViewTemplate">
-    <td class="expand js-toggle-details"> <span class="val-icon-toggle"></span> </td>
-    <td>
+    <td class="narrow-col cursor-pointer js-toggle-details">
+        <span class="val-icon-toggle"></span>
+    </td>
+    <td class="title">
         {{#url}}<a href="{{url}}" target="_blank">{{/url}}
         {{title}}
         {{#url}}</a>{{/url}}
     </td>
-    <td class="status">
-        <div class="status-label">
-            {{#isSuccess}} {{completedLabel}} {{/isSuccess}}
-            {{^isSuccess}} {{inProgressLabel}} {{/isSuccess}}
-        </div>
+    <td class="narrow-col status">
+        {{#isSuccess}}<span class="val-label success">{{completedLabel}}</span>{{/isSuccess}}
+        {{^isSuccess}}<span class="val-label">{{inProgressLabel}}</span>{{/isSuccess}}
     </td>
-    <td class="status progress-col">
+    <td class="narrow-col status progress-col">
         <div class="val-progress-bar">
             <div class="val-progress {{colorClass}}">
                 <span style="width: {{progress}};"
@@ -51,8 +51,8 @@
             <span class="val-percentage"> {{progress}} </span>
         </div>
     </td>
-    <td class="summary"> {{users}} </td>
-    <td class="summary"> {{completed}} </td>
+    <td class="narrow-col"> {{users}} </td>
+    <td class="narrow-col"> {{completed}} </td>
 </script>
 
 <script type="text/template" id="myCoursesDetailsViewTemplate">
@@ -80,7 +80,8 @@
 
 <script type="text/template" id="myCoursesUsersItemViewTemplate">
     <div class="column-left">
-        <div class="user-img {{#isCompleted}} user-completed {{/isCompleted}}"><img src="{{user.picture}}" alt="{{user.name}}">
+        <div class="user-img">
+            <img src="{{user.picture}}" alt="{{user.name}}" class="img-circle {{#isCompleted}} success {{/isCompleted}}">
         </div>
         <div>
             <div>

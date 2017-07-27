@@ -89,17 +89,17 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
           l.scoreLimit,
           l.requiredReview))
         .returning(lessons.selectId) += (
-          lessonType,
-          title,
-          description,
-          logo,
-          courseId,
-          isVisible,
-          ownerId,
-          DateTime.now,
-          scoreLimit.getOrElse(0.7),
-          requiredReview
-        )
+        lessonType,
+        title,
+        description,
+        logo,
+        courseId,
+        isVisible,
+        ownerId,
+        DateTime.now,
+        scoreLimit.getOrElse(0.7),
+        requiredReview
+      )
     }
 
     getLessonRequired(lessonId)
@@ -107,6 +107,18 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
 
   override def getLesson(id: Long): Option[Lesson] = execSync {
     lessons.filterById(id).result.headOption
+  }
+
+  override def getLessonTitlesByIds(ids: Seq[Long]): Seq[(Long, String)] = execSync {
+    lessons.filterByIds(ids) map { lesson =>
+      (lesson.id, lesson.title)
+    } result
+  }
+
+  def getLessonForPublicApi(id: Long): Option[(Lesson, Option[LessonLimit])] = execSync {
+    (lessons.filterById(id) joinLeft lessonLimits on { (lessons, limits) =>
+      lessons.id === limits.lessonId
+    }).result.headOption
   }
 
   override def getRootActivityId(id: Long): String = {
@@ -191,7 +203,7 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
           }
         }
 
-        assetHelper.deleteAssetEntry(id)
+        assetHelper.deleteAssetEntry(id, lesson)
         socialActivityHelper.deleteActivities(id)
     }
   }
@@ -207,36 +219,44 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
                       isVisible: Option[Boolean],
                       beginDate: Option[DateTime],
                       endDate: Option[DateTime],
+                      requiredReview: Boolean,
+                      scoreLimit: Double): Lesson = execSync {
+    updateQ(id)
+      .update((
+        title,
+        description,
+        isVisible,
+        beginDate,
+        endDate,
+        requiredReview,
+        scoreLimit)
+      )
+      .andThen {
+        filterByIdQ(id).result.head
+      }
+  }
+
+  override def update(id: Long,
+                      title: String,
+                      description: String,
+                      isVisible: Option[Boolean],
+                      beginDate: Option[DateTime],
+                      endDate: Option[DateTime],
                       tagIds: Seq[Long],
                       requiredReview: Boolean,
                       scoreLimit: Double): Unit = {
-    val lesson = execSync {
-      lessons
-        .filterById(id)
-        .map(l => (
-          l.title,
-          l.description,
-          l.isVisible,
-          l.beginDate,
-          l.endDate,
-          l.requiredReview,
-          l.scoreLimit))
-        .update((
-          title,
-          description,
-          isVisible,
-          beginDate,
-          endDate,
-          requiredReview,
-          scoreLimit)
-        )
-        .andThen {
-          lessons.filterById(id).result.head
-        }
-    }
+    val lesson =
+      update(id, title, description, isVisible, beginDate, endDate, requiredReview, scoreLimit)
 
     val assetId = assetHelper.updatePackageAssetEntry(lesson)
     tagService.setTags(assetId, tagIds)
+  }
+
+  override def updateLessonTags(id: Long, tagIds: Seq[Long]): Unit = {
+    val asset = assetHelper.getEntry(id).getOrElse {
+      throw new EntityNotFoundException("There is no asset entry for lesson with id: " + id)
+    }
+    tagService.setTags(asset.getPrimaryKey, tagIds)
   }
 
   override def update(lesson: Lesson): Unit = {
@@ -294,6 +314,20 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
 
   override def getAll(courseId: Long): Seq[Lesson] = execSync {
     lessons.filterByCourseId(courseId).result
+  }
+
+  override def getLessonsForPublicApi(courseId: Long, lessonType: Option[LessonType],
+                                      skipTake: Option[SkipTake]): Seq[(Lesson, Option[LessonLimit])] = execSync {
+    val lessonsQ = lessons
+      .filterByCourseId(courseId)
+      .filterByType(lessonType)
+      .joinLeft(lessonLimits).on((lessons, limits) => lessons.id === limits.lessonId)
+      .sortBy { case (l, _) => l.title }
+
+    (skipTake match {
+      case Some(SkipTake(skip, take)) => lessonsQ.drop(skip).take(take)
+      case None => lessonsQ
+    }).result
   }
 
   def getByCourses(courseIds: Seq[Long]): Seq[Lesson] = execSync {
@@ -461,6 +495,10 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
     }
 
     tagService.getByItemIds(lessonIds)
+  }
+
+  override def isExisted(lessonId: Long): Boolean = execSync {
+    lessons.filterById(lessonId).map(_.id).take(1).result.headOption.map(_.isDefined)
   }
 
   private def updateLogo(id: Long, name: Option[String]) = execSync {

@@ -2,18 +2,20 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet._
 
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.lesson.model.Lesson
 import com.arcusys.valamis.lesson.scorm.model.ScormUser
 import com.arcusys.valamis.lesson.scorm.storage.ScormUserStorage
 import com.arcusys.valamis.lesson.service.LessonPlayerService
 import com.arcusys.valamis.lrs.serializer.AgentSerializer
-import com.arcusys.valamis.lrs.service.util.TincanHelper._
+import com.arcusys.valamis.utils.TincanHelper._
 import com.arcusys.valamis.lrs.tincan.{Account, Agent}
 import com.arcusys.valamis.settings.service.SettingService
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.portlet.base._
 import com.arcusys.valamis.web.portlet.util.PlayerPortletPreferences
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
 
 class LessonViewerView extends OAuthPortlet with PortletBase {
   lazy val userService = inject[ScormUserStorage]
@@ -41,11 +43,11 @@ class LessonViewerView extends OAuthPortlet with PortletBase {
     val lessonToStartType = lessonToStart.map(_.lessonType.toString)
     val lessonToStartTitle = lessonToStart.map(_.title).orNull
 
-    val ltiLaunchPresentationReturnUrl = settingManager.getLtiLaunchPresentationReturnUrl()
-    val ltiMessageType = settingManager.getLtiMessageType()
-    val ltiVersion = settingManager.getLtiVersion()
-    val ltiOauthVersion = settingManager.getLtiOauthVersion()
-    val ltiOauthSignatureMethod = settingManager.getLtiOauthSignatureMethod()
+    val ltiLaunchPresentationReturnUrl = settingManager.getLtiLaunchPresentationReturnUrl
+    val ltiMessageType = settingManager.getLtiMessageType
+    val ltiVersion = settingManager.getLtiVersion
+    val ltiOauthVersion = settingManager.getLtiOauthVersion
+    val ltiOauthSignatureMethod = settingManager.getLtiOauthSignatureMethod
 
     val permission = new PermissionUtil(request, this)
 
@@ -123,4 +125,6 @@ class LessonViewerView extends OAuthPortlet with PortletBase {
     sendTextFile("/templates/paginator.html")
     sendMustacheFile(data, "lesson_viewer_settings.html")
   }
+
+
 }

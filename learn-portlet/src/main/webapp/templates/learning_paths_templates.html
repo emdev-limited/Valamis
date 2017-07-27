@@ -1,19 +1,22 @@
 <script type="text/template" id="learningPathsLayoutTemplate">
     <div class="js-list-view list">
-        <div class="div-table no-content-table js-no-certificates hidden">
+        <div class="div-table no-content-table js-no-learning-path hidden">
             <div class="div-col div-col-center">{{noLearningPathsLabel}}</div>
         </div>
     </div>
+    <div class="toggle-container text-center hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span> {{showMoreLabel}}
+    </div>
 </script>
 
-<script type="text/template" id="learningPathsItemViewTemplate">
+<script type="text/template" id="learningPathItemViewTemplate">
     <table class="val-table">
         <tr>
             <td class="narrow-col">
                 <div class="certificate image img-square"
-                     {{#logo}}
-                     style="background-image: url('/delegate/files/images?folderId={{id}}&file={{logo}}')"
-                     {{/logo}}>
+                     {{#fullLogoUrl}}
+                     style="background-image: url('{{fullLogoUrl}}')"
+                     {{/fullLogoUrl}}>
                 </div>
             </td>
             <td>
@@ -24,80 +27,60 @@
                             <li class="description">{{description}}</li>
                         </ul>
                         {{#isFailed}}
-                        <div class="status failed">
-                            <span class="val-label"> {{failedLabel}} </span>
+                        <div class="status">
+                            <span class="val-label failed"> {{failedLabel}} </span>
                         </div>
                         {{/isFailed}}
 
-                        <div class="js-certificate-goals"></div>
+                        <div class="val-progress-bar wide">
+                            <span class="val-percentage"> {{progressPercent}} {{progressLabel}} </span>
+                            <div class="val-progress success"> <span style="width: {{progressPercent}};"></span> </div>
+                        </div>
+
+                        <div class="val-list-table">
+                            <div class="val-list-table-body {{^isSingleLearningPath}} hidden {{/isSingleLearningPath}} js-goals-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="toggle-container js-toggle-goals">
+                        <span class="js-arrow-icon val-icon-arrow-down val-icon-right"></span>
+                        <span class="js-show-label"> {{showGoalsLabel}} </span>
+                        <span class="hidden js-hide-label"> {{hideGoalsLabel}} </span>
                     </div>
                 </div>
             </td>
         </tr>
     </table>
-
-
-
-    <div class="toggle-container js-toggle-goals">
-        <span class="js-arrow-icon val-icon-arrow-down val-icon-right"></span>
-        <span class="js-show-label"> {{showGoalsLabel}} </span>
-        <span class="hidden js-hide-label"> {{hideGoalsLabel}} </span>
-    </div>
-</script>
-
-<script type="text/template" id="learningPathsGoalsCollectionViewTemplate">
-    <div class="val-progress-bar wide">
-        <span class="val-percentage"> {{progressPercent}} {{progressLabel}} </span>
-        <div class="val-progress success"> <span style="width: {{progressPercent}};"></span> </div>
-    </div>
-
-    <label class="valamis-info-label shifted hidden js-no-goals-label"> {{noAvailableGoalsLabel}} </label>
-    <table class="learning-path-table val-table simple js-certificate-goals"></table>
 </script>
 
 <script type="text/template" id="learningPathsGoalItemViewTemplate">
-    <td class="progress-col narrow-col {{statusClass}}">
-        {{#isSuccess}}<span class="val-rounded-icon val-icon-checkmark success"></span>{{/isSuccess}}
-        {{#isFailed}}<span class="val-rounded-icon val-icon-exit failed"></span>{{/isFailed}}
-        {{#goalInProgress}}<div class="val-rounded-div small" ></div>{{/goalInProgress}}
-    </td>
-    <td>
-        {{#isSubjectDeleted}} <span class="valamis-info-label"> {{deletedItemLabel}} </span> {{/isSubjectDeleted}}
-        {{^isSubjectDeleted}}
-            {{#url}}<a href="{{{url}}}" target="_blank">{{/url}}
-                {{title}}
-            {{#url}}</a>{{/url}}
-            {{^groupId}} {{#isOptional}} (optional) {{/isOptional}} {{/groupId}}
-        {{/isSubjectDeleted}}
-    </td>
-    <td class="text-right narrow-col">
-        {{^isSubjectDeleted}}
-            {{#lessonCourse}}
-                {{inLabel}}
-                {{#packageCourse.url}}<a href="{{{packageCourse.url}}}" target="_blank">{{/packageCourse.url}}
-                {{packageCourse.title}}
-                {{#packageCourse.url}}</a>{{/packageCourse.url}}
-            {{/lessonCourse}}
+    <div class="clearfix list-table-row">
+    <span class="s-12 goal-title {{#isGroup}}group{{/isGroup}}">
+        <div class="ellipsis">
+            {{#isInProgress}}
+            <span class="val-rounded-div"></span>
+            {{/isInProgress}}
+            {{#isSucceed}}
+            <span class="val-rounded-icon val-icon-checkmark success"></span>
+            {{/isSucceed}}
+            {{#isFailed}}
+            <span class="val-rounded-icon val-icon-exit failed"></span>
+            {{/isFailed}}
 
-            {{#isCourse}}
-            {{courseLessonsAmount}} {{lessonsLabel}}
-            {{/isCourse}}
-
-            {{#isEvent}}
-            {{eventInfo}}
-            {{/isEvent}}
-        {{/isSubjectDeleted}}
-    </td>
-</script>
-
-<script type="text/template" id="learningPathsGroupItemViewTemplate">
-    <td class="progress-col narrow-col {{statusClass}}">
-        {{#isSuccess}}<span class="val-rounded-icon val-icon-checkmark success"></span>{{/isSuccess}}
-        {{#isFailed}}<span class="val-rounded-icon val-icon-exit failed"></span>{{/isFailed}}
-        {{#groupInProgress}}<div class="val-rounded-div {{#wasStarted}}success{{/wasStarted}}" ></div>{{/groupInProgress}}
-    </td>
-    <td colspan="2">
-        <span class="group-label">{{group1Label}} {{count}} {{group2Label}}</span>
-        <table class="learning-path-table val-table simple js-items"></table>
-    </td>
+            {{#isSubjectDeleted}} <span class="valamis-info-label"> {{deletedItemLabel}} </span> {{/isSubjectDeleted}}
+            {{^isSubjectDeleted}}
+                {{#isGroup}}
+                    {{title}}
+                {{/isGroup}}
+                {{^isGroup}}
+                    {{#isActivity}}{{doLabel}} {{count}} {{/isActivity}}
+                    <span class="js-title">{{title}}</span>
+                {{/isGroup}}
+            {{/isSubjectDeleted}}
+        </div>
+    </span>
+    </div>
+    {{#isGroup}}
+    <div class="group-children js-group-children"></div>
+    {{/isGroup}}
 </script>

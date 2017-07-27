@@ -162,10 +162,10 @@ var sidebarModule = slidesApp.module('SideBarModule', function(SideBarModule, sl
                         if (i != results.length - 1) {
                             var model = new lessonStudio.Entities.LessonPageModel({
                                 tempId: slidesApp.newSlideId--,
-                                slideSetId: slidesApp.slideSetModel.id
+                                slideSetId: slidesApp.slideSetModel.id,
+                                bgPdf: true
                             });
                             slidesApp.execute('reveal:page:add', orientationFormat, model, 'pdf');
-                            slidesApp.execute('reveal:page:applyTheme', model, true);
                         }
                     }
 

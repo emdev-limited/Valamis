@@ -1,17 +1,24 @@
 <script type="text/template" id="achievedCertificatesLayoutTemplate">
     <div class="js-list-view simple-list">
         <div class="div-table no-content-table js-no-certificates hidden">
-            <div class="div-col div-col-center">{{noAchievedCertificatesLabel}}</div>
+            <div class="div-col div-col-center">
+                <div class="get-certificate-image"></div>
+                <div>{{noAchievedCertificatesLabel}}</div>
+                <div>{{checkOutToJoinLabel}} <a href="{{availableCertificatesUrl}}">{{availableCertificatesLabel}}</a></div>
+            </div>
         </div>
+    </div>
+    <div class="toggle-container text-center hidden js-show-more">
+        {{showMoreLabel}} <span class="val-icon-arrow-down val-icon-right"></span>
     </div>
 </script>
 
 <script type="text/template" id="achievedCertificatesItemViewTemplate">
     <div class="tile-content">
-        <div class="image certificate img-square"
-            {{#logo}}
-            style="background-image: url('/delegate/certificates/{{id}}/logo?courseId={{courseId}}')"
-            {{/logo}}
+        <div class="image certificate img-square" title="{{title}}"
+             {{#logoUrl}}
+             style="background-image: url('{{fullLogoUrl}}')"
+             {{/logoUrl}}
         ></div>
         <ul>
             <li class="title ellipsis"><a href="{{url}}"> {{title}} </a></li>

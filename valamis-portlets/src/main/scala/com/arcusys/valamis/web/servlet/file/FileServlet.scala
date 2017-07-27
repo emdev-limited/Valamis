@@ -2,11 +2,8 @@ package com.arcusys.valamis.web.servlet.file
 
 import java.io.{IOException, InputStream}
 import javax.servlet.http._
-
 import com.arcusys.learn.liferay.services.{CompanyHelper, FileEntryServiceHelper, UserLocalServiceHelper}
 import com.arcusys.learn.liferay.util.{MimeTypesHelper, PortalUtilHelper}
-import com.arcusys.valamis.certificate.service.CertificateService
-import com.arcusys.valamis.certificate.service.export.CertificateExportProcessor
 import com.arcusys.valamis.content.export.QuestionExportProcessor
 import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.lesson.model.LessonType
@@ -14,6 +11,7 @@ import com.arcusys.valamis.lesson.service.export.PackageExportProcessor
 import com.arcusys.valamis.lesson.service.{LessonService, PackageUploadManager}
 import com.arcusys.valamis.model.Context
 import com.arcusys.valamis.slide.service.{SlideElementService, SlideService, SlideSetService, SlideThemeService}
+import com.arcusys.valamis.storyTree.service.StoryTreeService
 import com.arcusys.valamis.util.StreamUtil
 import com.arcusys.valamis.utils.ResourceReader
 import com.arcusys.valamis.web.service.{ImageProcessor, Sanitizer}
@@ -38,14 +36,13 @@ class FileServlet
 
   private lazy val imageProcessor = inject[ImageProcessor]
 
-  private lazy val certificateService = inject[CertificateService]
-  private lazy val certificateExportProcessor = inject[CertificateExportProcessor]
   private lazy val packageExportProcessor = inject[PackageExportProcessor]
   private lazy val questionExportProcessor = inject[QuestionExportProcessor]
   private lazy val slideSetService = inject[SlideSetService]
   private lazy val courseService = inject[CourseService]
   private lazy val slideService = inject[SlideService]
   private lazy val slideElementService = inject[SlideElementService]
+  private lazy val storyTreeService = inject[StoryTreeService]
 
   private lazy val lessonService = inject[LessonService]
 
@@ -201,20 +198,6 @@ class FileServlet
             getZipStream(stream, FileUtil.encodeSafeFileName(lesson.title))
 
         }
-      case FileExportRequest.Certificate =>
-        data.action match {
-          case FileExportRequest.ExportAll =>
-            getZipStream(
-              certificateExportProcessor.export(data.companyId),
-              "exportAllCertificates"
-            )
-
-          case FileExportRequest.Export =>
-            getZipStream(
-              certificateExportProcessor.export(data.companyId, data.id),
-              "exportCertificates"
-            )
-        }
       case FileExportRequest.Question =>
         data.action match {
           case FileExportRequest.ExportAll =>
@@ -263,19 +246,6 @@ class FileServlet
       case FileActionType.Add => addFile(fileRequest)
       case FileActionType.Update => updateFile(PackageFileRequest(this))
     }
-  })
-
-  post("/files/certificate/:id/logo")(jsonAction {
-    val id = params("id").toLong
-    val (name, data) = readSendImage
-
-    implicit lazy val context = Context(CompanyHelper.getCompanyId, PermissionUtil.getCourseId, PermissionUtil.getUserId)
-    certificateService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
-  })
-
-  delete("/files/certificate/:id/logo")(jsonAction {
-    val id = params("id").toLong
-    certificateService.deleteLogo(id)
   })
 
   post("/files/package/:id/logo")(jsonAction {
@@ -334,6 +304,17 @@ class FileServlet
     val id = params("id").toLong
     val (name, data) = readSendImage
     slideElementService.setLogo(id, name, data)
+  })
+
+  post("/files/story-tree/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    val (name, data) = readSendImage
+    storyTreeService.setLogo(id, name, imageProcessor.resizeImage(data, LogoWidth, LogoHeight))
+  })
+
+  delete("/files/story-tree/:id/logo")(jsonAction {
+    val id = params("id").toLong
+    storyTreeService.deleteLogo(id)
   })
 
   private def readSendImage: (String, Array[Byte]) = {
@@ -406,11 +387,6 @@ class FileServlet
 
       case UploadContentType.ImportMoodleQuestion =>
         fileFacade.importMoodleQuestions(
-          fileRequest.courseId,
-          fileRequest.stream)
-
-      case UploadContentType.ImportCertificate =>
-        fileFacade.importCertificates(
           fileRequest.courseId,
           fileRequest.stream)
 

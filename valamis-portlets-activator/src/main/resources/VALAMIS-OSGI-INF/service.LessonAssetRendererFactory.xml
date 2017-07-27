@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<component name="com.arcusys.valamis.web.service.LessonAssetRendererFactory" immediate="true">
+  <implementation class="com.arcusys.valamis.web.service.LessonAssetRendererFactory"/>
+  <service>
+    <provide interface="com.liferay.asset.kernel.model.AssetRendererFactory"/>
+  </service>
+  <property name="javax.portlet.name" type="String">com_arcusys_valamis_web_portlet_LessonManagerView
+    com_arcusys_valamis_web_portlet_LessonViewerView
+  </property>
+</component>

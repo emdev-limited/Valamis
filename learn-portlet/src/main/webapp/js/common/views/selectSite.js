@@ -30,20 +30,11 @@ valamisApp.module('Views.SelectSite', function (SelectSite, valamisApp, Backbone
     template: '#liferaySiteElementView',
     tagName: 'tr',
     events: {
-      'click .js-toggle-site-button': 'toggleThis'
+      'click .js-select-item': 'toggleThis'
     },
     toggleThis: function () {
       this.triggerMethod('site:selected');
-
       this.model.set('selected', !this.model.get('selected') );
-
-      if(this.model.get('selected')){
-        this.$('.js-toggle-site-button').removeClass('neutral');
-        this.$('.js-toggle-site-button').addClass('primary');
-      }else{
-        this.$('.js-toggle-site-button').addClass('neutral');
-        this.$('.js-toggle-site-button').removeClass('primary');
-      }
     }
   });
 

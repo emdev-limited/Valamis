@@ -24,9 +24,11 @@ class ContentProviderRepositoryImpl(val db: JdbcBackend#DatabaseDef,
 
   override def getAll(skipTake: Option[SkipTake],
                       namePattern: Option[String],
-                      sortAscDirection: Boolean): Seq[ContentProvider] = execSync {
+                      sortAscDirection: Boolean,
+                      companyId: Long): Seq[ContentProvider] = execSync {
 
     contentProviders
+      .filter(_.companyId === companyId)
       .filterByName(namePattern)
       .sortByTitle(sortAscDirection)
       .slice(skipTake)
@@ -46,7 +48,8 @@ class ContentProviderRepositoryImpl(val db: JdbcBackend#DatabaseDef,
         s.height,
         s.isPrivate,
         s.customerKey,
-        s.customerSecret))
+        s.customerSecret,
+        s.isSelective))
       .update(contentProvider.name,
         contentProvider.description,
         contentProvider.image,
@@ -55,7 +58,8 @@ class ContentProviderRepositoryImpl(val db: JdbcBackend#DatabaseDef,
         contentProvider.height,
         contentProvider.isPrivate,
         contentProvider.customerKey,
-        contentProvider.customerSecret)
+        contentProvider.customerSecret,
+        contentProvider.isSelective)
 
     val action = updateQ andThen providerQ.result.head
     execSync(action.transactionally)

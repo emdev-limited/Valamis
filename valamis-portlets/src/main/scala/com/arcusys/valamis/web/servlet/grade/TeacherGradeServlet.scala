@@ -3,13 +3,13 @@ package com.arcusys.valamis.web.servlet.grade
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.learn.liferay.util.PortletName
 import com.arcusys.valamis.gradebook.model.LessonWithGrades
-import com.arcusys.valamis.gradebook.service.TeacherCourseGradeService
+import com.arcusys.valamis.gradebook.service.{StatementService, TeacherCourseGradeService}
 import com.arcusys.valamis.web.portlet.base.ViewAllPermission
 import com.arcusys.valamis.web.servlet.base.ScalatraPermissionUtil
 import com.arcusys.valamis.web.servlet.grade.notification.GradebookNotificationHelper
 import com.arcusys.valamis.web.servlet.base.BaseJsonApiController
 import com.arcusys.valamis.lesson.service.{GradeVerifier, LessonService, TeacherLessonGradeService, UserLessonResultService}
-import org.scalatra.{NotFound, BadRequest}
+import org.scalatra.{BadRequest, NotFound}
 
 class TeacherGradeServlet extends BaseJsonApiController {
 
@@ -20,11 +20,16 @@ class TeacherGradeServlet extends BaseJsonApiController {
   lazy val userService = UserLocalServiceHelper()
   lazy val gradebookFacade = inject[GradebookFacadeContract]
   lazy val gradebookNotifications = inject[GradebookNotificationHelper]
+  lazy val statementService = inject[StatementService]
 
   def userId = params.as[Long]("userId")
+
   def courseId = params.as[Long]("courseId")
+
   def studyCourseId = params.as[Long]("studyCourseId")
+
   def lessonId = params.as[Long]("lessonId")
+
   def permissionUtil = new ScalatraPermissionUtil(this)
 
   post("/teacher-grades/lesson/:lessonId/user/:userId/comment(/)") {
@@ -44,9 +49,17 @@ class TeacherGradeServlet extends BaseJsonApiController {
     GradeVerifier.verify(grade)
     lessonGradeService.set(userId, lessonId, grade, comment)
 
+    val currentUserId = getUserId
+    try {
+      statementService.sendStatementUserReceivesGrade(userId, currentUserId, lesson, grade, comment)
+    } catch {
+      case e: Throwable => log.error("Failed to send statement " +
+        s"when an instructor puts the grade for the Lesson to the User with id=$userId", e)
+    }
+
     gradebookNotifications.sendPackageGradeNotification(
       courseId,
-      getUserId,
+      currentUserId,
       userId,
       grade,
       lesson,

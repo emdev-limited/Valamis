@@ -140,33 +140,42 @@ learningTranscript.module('Views', function (Views, learningTranscript, Backbone
     template: '#transcriptCertificateItemTemplate',
     className: 'certificate-item',
     templateHelpers: function () {
-      var achievementDate = this.model.get('achievementDate');
-      var expirationDate = this.model.get('expirationDate');
-      var logo = this.model.get('logo');
-      var logoUrl = (this.model.get('isOpenbadges'))
-          ? this.model.get('logo')
-          : '/' + path.api.certificates + this.model.get('id') + '/logo?courseId=' + Utils.getCourseId() + '&tmstamp=' + Date.now();
+      var lang = Utils.getLanguage();
+
+      var issuedDate = this.model.get('statusModifiedDate');
+      var issuedDateString = (issuedDate)
+          ? moment(issuedDate).locale(lang).format('L') : '';
+
+      var validPeriod = this.model.get('validPeriod');
+      var endDateString = '';
+      var isOverdue = false;
+
+      if (issuedDate && validPeriod) {
+        var expiredMoment = moment(issuedDate).add(moment.duration(validPeriod));
+        endDateString = expiredMoment.locale(lang).format('L');
+        isOverdue = moment().isAfter(expiredMoment);
+      }
+
+      var logo = this.model.get('isOpenBadges')
+          ? this.model.get('logo') : this.model.getFullLogoUrl();
 
       return {
-        achievementDateFormatted: (achievementDate)
-            ? $.datepicker.formatDate("dd MM, yy", new Date(achievementDate))
-            : '',
-        expirationDateFormatted: (expirationDate)
-            ? $.datepicker.formatDate("dd MM, yy", new Date(expirationDate))
-            : '',
-        logoUrl: logoUrl
+        isOverdue: isOverdue,
+        achievementDateFormatted: issuedDateString,
+        expirationDateFormatted: endDateString,
+        fullLogoUrl: logo
       }
     },
     events: {
       'click': 'printCertificate'
     },
     onRender: function () {
-      if (this.model.get('isOpenbadges')) {
+      if (this.model.get('isOpenBadges')) {
         this.$el.addClass('openbadges')
       }
     },
     printCertificate: function () {
-      if (!this.model.get('isOpenbadges')) {
+      if (!this.model.get('isOpenBadges')) {
         window.open(this.model.getPrintUrl(this.model, learningTranscript.selectedUserId), '_blank');
       }
     }
@@ -189,6 +198,7 @@ learningTranscript.module('Views', function (Views, learningTranscript, Backbone
     onRender: function () {
       var d1 = $.Deferred();
       var d2 = $.Deferred();
+      var d3 = $.Deferred();
       var that = this;
 
       var userModel = new learningTranscript.Entities.UserModel();
@@ -197,7 +207,7 @@ learningTranscript.module('Views', function (Views, learningTranscript, Backbone
         that.userInfoRegion.show(userInfoView);
       });
 
-      $.when(d1, d2).then(function() {
+      $.when(d1, d2, d3).then(function() {
         that.$('.js-loading').addClass('hidden');
       });
 
@@ -215,12 +225,25 @@ learningTranscript.module('Views', function (Views, learningTranscript, Backbone
       var certificateCollection = new learningTranscript.Entities.CertificatesCollection();
       certificateCollection.fetch({userId: learningTranscript.selectedUserId}).then(function () {
         d2.resolve();
-        if (certificateCollection.length > 0) {
-          var certificateCollectionView = new Views.CertificatesCollectionView({
-            collection: certificateCollection
+      });
+
+      var userOpenBadges = [];
+      certificateCollection.getOpenBadges({}, {userId: learningTranscript.selectedUserId})
+          .then(function (response) {
+            userOpenBadges = _.map(response, function(item) {
+              return _.extend(item, {isOpenBadges: true});
+            });
+            d3.resolve();
           });
-          that.certificatesInfoRegion.show(certificateCollectionView);
-        }
+
+      $.when(d2, d3).then(function() {
+        certificateCollection.add(userOpenBadges);
+          if (certificateCollection.length > 0) {
+              var certificateCollectionView = new Views.CertificatesCollectionView({
+                  collection: certificateCollection
+              });
+              that.certificatesInfoRegion.show(certificateCollectionView);
+          }
       });
     }
   });

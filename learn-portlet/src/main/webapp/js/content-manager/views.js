@@ -391,12 +391,12 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                     },
                     change: function(e, ui) {
 
-                        var isTree = ui.placeholder.closest('.val-tree').size() > 0;
+                        var isTree = ui.placeholder.closest('.val-tree').length > 0;
                         var isAllowed = false;
                         if ( !isTree ) {
-                            if (ui.item.hasClass('question') && ui.placeholder.next('.category').size() == 0)
+                            if (ui.item.hasClass('question') && ui.placeholder.next('.category').length == 0)
                                 isAllowed = true;
-                            if (ui.item.hasClass('category') && ui.placeholder.prev('.question').size() == 0)
+                            if (ui.item.hasClass('category') && ui.placeholder.prev('.question').length == 0)
                                 isAllowed = true;
                         }
                         ui.placeholder.toggleClass('ui-state-error',!isAllowed);
@@ -411,7 +411,7 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
                             //contentType = Views.getElementContentType( ui.item ),
                             //cid = Views.getElementUniqueId( ui.item, contentType );
 
-                        //var index = contentType ? ui.item.prevAll('.' + contentType).size() : 0;
+                        //var index = contentType ? ui.item.prevAll('.' + contentType).length : 0;
                         //var movedModel = that.collection.findWhere({uniqueId: cid});
                         //
                         //if( movedModel ){

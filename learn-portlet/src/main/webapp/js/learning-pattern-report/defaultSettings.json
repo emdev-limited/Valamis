@@ -1,0 +1,90 @@
+{
+  "lessonsReport": [
+    {
+      "id": "userSearch",
+      "type": "textSearch",
+      "defaultValue": ""
+    },
+    {
+      "id": "lessonSearch",
+      "type": "textSearch",
+      "defaultValue": ""
+    },
+    {
+      "id": "lessonType",
+      "type": "optionList",
+      "defaultValue": 0,
+      "options": [
+        {
+          "id": "lessonTypeAll",
+          "value": 0
+        },
+        {
+          "id": "lessonTypeWithQuestions",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "isSummaryVisible",
+      "type": "toggleSwitch",
+      "defaultValue": false
+    }
+  ],
+  "pathsReport": [
+    {
+      "id": "userSearch",
+      "type": "textSearch",
+      "defaultValue": ""
+    },
+    {
+      "id": "pathSearch",
+      "type": "textSearch",
+      "defaultValue": ""
+    },
+    {
+      "id": "pathGoalType",
+      "type": "optionList",
+      "defaultValue": 0,
+      "options": [
+        {
+          "id": "pathGoalTypeAll",
+          "value": 0
+        },
+        {
+          "id": "pathGoalTypeActivity",
+          "value": 1
+        },
+        {
+          "id": "pathGoalTypeCourse",
+          "value": 2
+        },
+        {
+          "id": "pathGoalTypeXAPI",
+          "value": 3
+        },
+        {
+          "id": "pathGoalTypeLesson",
+          "value": 4
+        },
+        {
+          "id": "pathGoalTypeAssignment",
+          "value": 5
+        },
+        {
+          "id": "pathGoalTypeEvent",
+          "value": 6
+        },
+        {
+          "id": "pathGoalTypeWebContent",
+          "value": 7
+        }
+      ]
+    },
+    {
+      "id": "isSummaryVisible",
+      "type": "toggleSwitch",
+      "defaultValue": false
+    }
+  ]
+}

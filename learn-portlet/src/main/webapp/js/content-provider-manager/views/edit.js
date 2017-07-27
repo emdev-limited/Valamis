@@ -47,7 +47,7 @@ contentProviderManager.module('Views', function (Views, contentProviderManager, 
             credentialsArea: '.js-provider-credentials-area',
             customerKey:'.js-provider-customer-key',
             customerSecret:'.js-provider-customer-secret',
-
+            isSelective: '.js-is-selective-enable',
             sizeType: 'input[name="providerSizeType"]',
             sizeArea: '.js-provider-size-area',
             height:'.js-provider-height',
@@ -145,6 +145,7 @@ contentProviderManager.module('Views', function (Views, contentProviderManager, 
                 customerSecret = this.ui.customerSecret.val();
             }
 
+
             this.model.set({
                 name: name,
                 description: description,
@@ -154,7 +155,8 @@ contentProviderManager.module('Views', function (Views, contentProviderManager, 
                 height: height,
                 isPrivate: isPrivate,
                 customerKey: customerKey,
-                customerSecret: customerSecret
+                customerSecret: customerSecret,
+                isSelective: this.ui.isSelective.is(':checked')
             });
             return true;
         },

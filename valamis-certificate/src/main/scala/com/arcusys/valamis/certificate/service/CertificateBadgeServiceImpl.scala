@@ -7,20 +7,24 @@ import com.arcusys.valamis.certificate.model.Certificate
 import com.arcusys.valamis.certificate.model.badge._
 import com.arcusys.valamis.certificate.service.util.OpenBadgesHelper
 import com.arcusys.valamis.certificate.storage.CertificateRepository
-import com.arcusys.valamis.settings.model
-import com.arcusys.valamis.settings.model.SettingType
-import com.arcusys.valamis.settings.storage.SettingStorage
+import com.arcusys.valamis.settings.service.SettingService
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.util.HexHelper
 import org.joda.time.DateTime
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 //TODO: remove hardcoded urls !!!
 abstract class CertificateBadgeServiceImpl extends CertificateBadgeService {
 
-  def certificateRepository: CertificateRepository
   def userLocalServiceHelper: UserLocalServiceHelper
-  def settingStorage: SettingStorage
+
+  def settingService: SettingService
+
   def userService: UserService
+
+  def learningPathService: LearningPathService
 
   def getIssuerBadge(certificateId: Long, liferayUserId: Long, rootUrl: String): BadgeResponse = {
     val recipient = "sha256$" + hashEmail(userLocalServiceHelper.getUser(liferayUserId).getEmailAddress)
@@ -43,38 +47,36 @@ abstract class CertificateBadgeServiceImpl extends CertificateBadgeService {
     BadgeResponse(certificateId.toString, identity, badgeUrl, verification, issueOn)
   }
 
-  def getBadgeModel(certificateId: Long, rootUrl: String): BadgeModel = {
-    val certificate = certificateRepository.getById(certificateId)
+  def getBadgeModel(certificateId: Long, companyId: Long, rootUrl: String): Option[BadgeModel] = {
 
-    val name = certificate.title.replaceAll("%20", " ")
-    val imageUrl = if (certificate.logo == "")
-      "%s/delegate/files/resources?file=/img/certificate_cover.svg".format(rootUrl)
-    else
-      "%s/delegate/files/images?folderId=%s&file=%s".format(rootUrl, certificate.id, certificate.logo)
+    Await.result(learningPathService.getLearningPathById(certificateId, companyId), Duration.Inf) map { lp =>
+      val lpVersion = lp.version
+      val name = lpVersion.title.replaceAll("%20", " ")
+      val imageUrl = lpVersion.logo match {
+        case Some(logo) =>
+          "%s/delegate/learning-paths/logo-files/%s".format(rootUrl, logo)
+        case None =>
+          "%s/delegate/files/resources?file=/img/certificate_cover.svg".format(rootUrl)
+      }
 
-    val description = certificate.shortDescription.replaceAll("%20", " ")
-    val issuerUrl = "%s/delegate/certificates/%s/issue_badge/issuer?rootUrl=%s".format(
-      rootUrl,
-      certificateId,
-      rootUrl)
+      val description = lpVersion.openBadgesDescription.getOrElse("").replaceAll("%20", " ")
+      val issuerUrl = "%s/delegate/certificates/%s/issue_badge/issuer?rootUrl=%s".format(
+        rootUrl,
+        certificateId,
+        rootUrl)
 
-    BadgeModel(name, description, imageUrl, rootUrl, issuerUrl)
+      BadgeModel(name, description, imageUrl, rootUrl, issuerUrl)
+    }
+
   }
 
-  def getIssuerModel(rootUrl: String): IssuerModel = {
+  def getIssuerModel(rootUrl: String, companyId: Long): IssuerModel = {
 
-    val issuerName = settingStorage
-      .getByKey(SettingType.IssuerName)
-      .getOrElse(model.EmptySetting(SettingType.IssuerName))
-      .value
+    val issuerName = settingService.getIssuerName(companyId)
 
-    val issuerUrl = settingStorage.getByKey(SettingType.IssuerURL)
-      .getOrElse(model.EmptySetting(SettingType.IssuerURL, rootUrl))
-      .value
+    val issuerUrl = settingService.getIssuerURL(companyId)
 
-    val issuerEmail = settingStorage.getByKey(SettingType.IssuerEmail)
-      .getOrElse(model.EmptySetting(SettingType.IssuerEmail))
-      .value
+    val issuerEmail = settingService.getIssuerEmail(companyId)
 
     IssuerModel(issuerName, issuerUrl, issuerEmail)
   }

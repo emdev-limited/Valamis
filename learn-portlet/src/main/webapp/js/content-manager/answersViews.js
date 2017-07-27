@@ -16,10 +16,19 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         useEditor: false,
         onRender: function(){
             var that = this;
+            var editorId = this.getEditorId();
             if(this.useEditor) {
-                setTimeout(function () {
-                    that.activateEditor();
-                }, 50);
+                var intervalId = setInterval(function(){
+
+                    if(typeof CKEDITOR !== 'undefined' && typeof CKEDITOR._bundle !== 'undefined'
+                        && CKEDITOR._bundle == 'valamis' && CKEDITOR.status == 'loaded'
+                        && $('#' + editorId).length > 0){
+
+                        clearInterval(intervalId);
+                        that.activateEditor();
+                    }
+
+                }, 100);
             }
             this.$el.attr('id', this.model.cid);
         },
@@ -265,10 +274,18 @@ contentManager.module("Views", function (Views, ContentManager, Backbone, Marion
         },
         onRender: function(){
             var that = this;
+            var editorId = this.model.get('editorId');
             if(this.useEditor) {
-                setTimeout(function () {
-                    that.activateEditor();
-                }, 50);
+                var intervalId = setInterval(function(){
+                    if(typeof CKEDITOR !== 'undefined' && typeof CKEDITOR._bundle !== 'undefined'
+                        && CKEDITOR._bundle == 'valamis' && CKEDITOR.status == 'loaded'
+                        && $('#' + editorId).length > 0) {
+
+                        clearInterval(intervalId);
+                        that.activateEditor();
+                    }
+
+                }, 100);
             }
         },
         activateEditor: function () {

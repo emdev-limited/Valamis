@@ -1364,6 +1364,7 @@ th {
 }
 
 .valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.dragging-answer-item {
+  z-index: 99999;
   -ms-transform: rotate(-2deg);
       transform: rotate(-2deg);
 }

@@ -21,14 +21,14 @@
 <script type="text/template" id="allCoursesAppLayoutTemplate">
     <div id="allCourseToolbar"></div>
     <div id="allCourseCourseList"></div>
-    <div id="allCoursePaginator" class="val-paginator text-center"></div>
+    <div id="allCoursePaginator" class="val-paginator"></div>
 </script>
 
 <script type="text/template" id="allCoursesToolbarTemplate">
     <div class="val-row filters-row">
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
             </div>
         </div>
         {{#isEditor}}{{#ALLCOURSE.CREATE_COURSE}}
@@ -107,11 +107,11 @@
     <div class="modal-close val-icon-exit"></div>
 
     <div class="bbm-modal__bottombar">
-        <button class="button big neutral modal-close">
-            {{cancelLabel}}
-        </button>
-        <button class="button big primary js-submit-button ">
+        <button class="button medium primary js-submit-button">
             {{saveCourseButtonLabel}}
+        </button>
+        <button class="button medium simple modal-close">
+            {{cancelLabel}}
         </button>
     </div>
 </script>
@@ -133,7 +133,7 @@
                     <button class="button medium primary inline js-upload-image">
                         {{uploadLabel}}
                     </button>
-                    <button class="button medium simple no-text val-icon-trash danger-color inline js-delete-logo">
+                    <button class="button medium simple no-text val-icon-trash danger inline js-delete-logo">
                         {{deleteLogoLabel}}
                     </button>
                     <button class="button medium neutral js-select-from-media-gallery">
@@ -253,18 +253,18 @@
         <div class="div-row">
             <div class="div-col name-col">{{courseUserLimitLabel}}</div>
             <div class="div-col content-col">
-                <div class="js-course-user-limit js-plus-minus shift-left"></div>
-                <p>{{courseUserLimitComment}}</p>
+                <div class="js-course-user-limit js-plus-minus display-inline-block"></div>
+                <p class="display-inline-block">{{courseUserLimitComment}}</p>
             </div>
         </div>
-<!--        {{^title}}
+        {{^title}}
         <div class="div-row">
             <div class="div-col name-col">{{courseTemplateLabel}}</div>
             <div class="div-col content-col selectize-dropdown-style">
                 <select type="text" class="js-course-template demo-default selectized" title="Templates" tabindex="-1" />
             </div>
         </div>
-        {{/title}}-->
+        {{/title}}
         <div class="div-row">
             <div class="div-col name-col">{{courseThemeLabel}}</div>
             <div class="div-col content-col selectize-dropdown-style">
@@ -450,8 +450,8 @@
         <div class="filter-element paging-showing-label shift-left js-paginator-showing"></div>
 
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" placeholder="{{searchLabel}}" class="js-search">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
             </div>
         </div>
 
@@ -475,58 +475,62 @@
             <button class="button medium simple no-text js-global-assign-role">
                 <span class="val-icon-user"></span>
             </button>
-            <button class="button medium simple no-text js-global-delete-item">
+            <button class="button medium danger simple no-text js-global-delete-item">
                 <span class="val-icon-trash"></span>
             </button>
         </div>
     </div>
 
     <div class="filters-row clearfix table-header-row">
-        <table class="val-table medium list no-out-margin">
-            <td class="checkbox-col">
-                <input type="checkbox" name="check"
-                       {{#isAddView}}
-                       id="AddViewCheckbox"
-                       {{/isAddView}}
-                {{^isAddView}}
-                id="notAddViewCheckbox"
+        <table class="val-table">
+            <thead>
+            <tr>
+                <th class="narrow-col">
+                    <input type="checkbox" name="check"
+                           {{#isAddView}}
+                           id="AddViewCheckbox"
+                           {{/isAddView}}
+                    {{^isAddView}}
+                    id="notAddViewCheckbox"
+                    {{/isAddView}}
+                    class="val-checkbox js-selectAll-item"/>
+                    <label class="checkbox-label"
+                           {{#isAddView}}
+                           for="AddViewCheckbox"
+                           {{/isAddView}}
+                    {{^isAddView}}
+                    for="notAddViewCheckbox"
+                    {{/isAddView}} ">
+                    </label>
+                </th>
+
+                <th class="picture-placeholder"></th>
+                <th class="name-col">{{memberLabel}}</th>
+
+                {{#isAddView}}
+                <th class="role-col">{{rolesLabel}}</th>
                 {{/isAddView}}
-                class="val-checkbox js-selectAll-item"/>
-                <label class="checkbox-label"
-                       {{#isAddView}}
-                       for="AddViewCheckbox"
-                       {{/isAddView}}
-                {{^isAddView}}
-                for="notAddViewCheckbox"
-                {{/isAddView}} ">
-                </label>
-            </td>
 
-            <td class="name-col">{{memberLabel}}</td>
-            <td class="picture-placeholder"></td>
-
-            {{#isAddView}}
-            <td class="role-col">{{rolesLabel}}</td>
-            {{/isAddView}}
-
-            <td class="text-right">
-                <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
-                    <button class="button medium simple">
-                        <span class="dropdown-text">{{byNameAscLabel}}</span><span
-                            class="val-icon-arrow-down val-icon-right"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li class="selected" data-value="name:true"> {{byNameAscLabel}}</li>
-                        <li data-value="name:false"> {{byNameDescLabel}}</li>
-                    </ul>
-                </div>
-            </td>
+                <th class="text-right">
+                    <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
+                        <button class="button medium simple">
+                            <span class="dropdown-text">{{byNameAscLabel}}</span><span
+                                class="val-icon-arrow-down val-icon-right"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li class="selected" data-value="name:true"> {{byNameAscLabel}}</li>
+                            <li data-value="name:false"> {{byNameDescLabel}}</li>
+                        </ul>
+                    </div>
+                </th>
+            </tr>
+            </thead>
         </table>
     </div>
 </script>
 
 <script type="text/template" id="allCoursesEditMembersItemViewTemplate">
-    <td class="checkbox-col">
+    <td class="narrow-col">
         <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
         <label class="checkbox-label" for="toggleItem_{{id}}"></label>
     </td>
@@ -537,7 +541,7 @@
     </td>
     {{/picture}}
 
-    <td class="name-col"> {{name}}</td>
+    <td class="name-col title"> {{name}}</td>
 
     <td><span class="role-col"></span></td>
 
@@ -545,14 +549,14 @@
         <button class="button medium simple no-text js-assign-role">
             <span class="val-icon-user"></span>
         </button>
-        <button class="button medium simple no-text js-delete-item">
+        <button class="button medium danger simple no-text js-delete-item">
             <span class="val-icon-trash"></span>
         </button>
     </td>
 </script>
 
 <script type="text/template" id="allCoursesAddMembersItemViewTemplate">
-    <td class="checkbox-col">
+    <td class="narrow-col">
         {{#prerequisitesCompleted}}
         <input type="checkbox" id="toggleAddItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
         <label class="checkbox-label" for="toggleAddItem_{{id}}"></label>
@@ -569,11 +573,13 @@
     </td>
     {{/picture}}
 
-    <td class="name-col"> {{name}}</td>
+    <td class="name-col title"> {{name}}</td>
 
-    {{^prerequisitesCompleted}}
-    <td class="text-right">{{userJoinByCertificatesError}}</td>
-    {{/prerequisitesCompleted}}
+
+    <td class="text-right">
+        {{^prerequisitesCompleted}}{{userJoinByCertificatesError}}{{/prerequisitesCompleted}}
+    </td>
+
 </script>
 
 <script type="text/template" id="allCoursesMemberRequestsItemViewTemplate">
@@ -584,28 +590,25 @@
     {{/picture}}
 
     <td class="name-col">
-        <span class="name-field">{{name}}</span>
-        <span class="email-field">{{email}}</span>
+        <div class="title">{{name}}</div>
+        <div class="info">{{email}}</div>
     </td>
 
     <td class="text-right">
+        {{^prerequisitesCompleted}}
+        <span class="info">{{userJoinByCertificatesError}}</span>
+        {{/prerequisitesCompleted}}
+
         {{#isMyId}}
-        <span>{{userJoinHimselfError}}</span>
+        <span class="info">{{userJoinHimselfError}}</span>
         {{/isMyId}}
         {{^isMyId}}
-        {{^prerequisitesCompleted}}
-        <span>{{userJoinByCertificatesError}}</span>
-        {{/prerequisitesCompleted}}
+            {{#prerequisitesCompleted}}
+            <button class="button medium primary js-button-accept">{{buttonLabelApprove}}</button>
+            {{/prerequisitesCompleted}}
+            <button class="button medium neutral js-button-deny">{{buttonLabelDeny}}</button>
         {{/isMyId}}
     </td>
-    {{^isMyId}}
-    <td class="text-right">
-        {{#prerequisitesCompleted}}
-        <button class="button medium primary js-button-accept">{{buttonLabelApprove}}</button>
-        {{/prerequisitesCompleted}}
-        <button class="button medium neutral js-button-deny">{{buttonLabelDeny}}</button>
-    </td>
-    {{/isMyId}}
 </script>
 
 <script type="text/template" id="allCoursesMemberQueueItemViewTemplate">
@@ -616,51 +619,52 @@
     {{/picture}}
 
     <td class="name-col">
-        <span class="name-field">{{name}}</span>
-        <span class="email-field">{{email}}</span>
+        <div class="title">{{name}}</div>
+        <div class="info">{{email}}</div>
     </td>
 
     <td class="text-right">
+        {{^prerequisitesCompleted}}
+        <span class="info">{{userJoinByCertificatesError}}</span>
+        {{/prerequisitesCompleted}}
+
         {{#isMyId}}
-        <span>{{userJoinHimselfError}}</span>
+        <span class="info">{{userJoinHimselfError}}</span>
         {{/isMyId}}
         {{^isMyId}}
-        {{^prerequisitesCompleted}}
-            <span>{{userJoinByCertificatesError}}</span>
-        {{/prerequisitesCompleted}}
+            {{#prerequisitesCompleted}}
+            <button class="button medium primary js-button-accept">{{buttonLabelApprove}}</button>
+            {{/prerequisitesCompleted}}
+            <button class="button medium neutral js-button-deny">{{buttonLabelDeny}}</button>
         {{/isMyId}}
     </td>
-    {{^isMyId}}
-    <td class="text-right">
-        {{#prerequisitesCompleted}}
-        <button class="button medium primary js-button-accept">{{buttonLabelApprove}}</button>
-        {{/prerequisitesCompleted}}
-        <button class="button medium neutral js-button-deny">{{buttonLabelDeny}}</button>
-    </td>
-    {{/isMyId}}
 </script>
 
 <script type="text/template" id="allCoursesAddSiteRolesToolbarViewTemplate">
     <div class="filters-row clearfix table-header-row site-roles-table-header-row">
-        <table class="val-table medium list no-out-margin">
-            <td class="checkbox-col">
-                <input type="checkbox" name="check" id="SiteRolesGlobalCheckbox"
-                       class="val-checkbox js-selectAll-item"/>
-                <label class="checkbox-label" for="SiteRolesGlobalCheckbox"> </label>
-            </td>
+        <table class="val-table">
+            <thead>
+            <tr>
+                <th class="narrow-col">
+                    <input type="checkbox" name="check" id="SiteRolesGlobalCheckbox"
+                           class="val-checkbox js-selectAll-item"/>
+                    <label class="checkbox-label" for="SiteRolesGlobalCheckbox"> </label>
+                </th>
 
-            <td class="name-col"> {{siteRoleNameHeaderLabel}}</td>
-            <td class="description-col"> {{siteRoleDescriptionHeaderLabel}}</td>
+                <th> {{siteRoleNameHeaderLabel}}</th>
+                <th> {{siteRoleDescriptionHeaderLabel}}</th>
+            </tr>
+            </thead>
         </table>
     </div>
 </script>
 
 <script type="text/template" id="allCoursesAddSiteRolesItemViewTemplate">
-    <td class="checkbox-col">
+    <td class="narrow-col">
         <input type="checkbox" id="siteRoleToggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
         <label class="checkbox-label" for="siteRoleToggleItem_{{id}}"></label>
     </td>
 
-    <td class="name-col"> {{name}}</td>
-    <td class="description-col"> {{description}}</td>
+    <td class="title"> {{name}}</td>
+    <td> {{description}}</td>
 </script>

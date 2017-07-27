@@ -1,13 +1,9 @@
 package com.arcusys.valamis.web.servlet.course
 
-import com.arcusys.learn.liferay.services.{LayoutSetPrototypeServiceHelper, ThemeLocalServiceHelper}
 import com.arcusys.valamis.course.model.CourseMembershipType
 import com.arcusys.valamis.member.model.MemberTypes
-import com.arcusys.valamis.web.servlet.request.{BaseCollectionFilteredRequest, BaseCollectionFilteredRequestModel, BaseRequest, Parameter}
+import com.arcusys.valamis.web.servlet.request.{BaseCollectionFilteredRequestModel, BaseRequest, Parameter}
 import org.apache.http.ParseException
-import org.joda.time.DateTime
-import org.json4s.DefaultFormats
-import org.json4s.ext.{EnumNameSerializer, JodaTimeSerializers}
 import org.scalatra.{ScalatraBase, ScalatraServlet}
 
 /**
@@ -38,6 +34,7 @@ object CourseRequest extends BaseRequest{
   val CertificateIds = "certificateIds"
   val InstructorIds = "instructorIds"
   val HasLogo = "hasLogo"
+  val WithGuestSite = "withGuestSite"
 
   def apply(controller: ScalatraServlet) = new Model(controller)
 
@@ -95,6 +92,8 @@ object CourseRequest extends BaseRequest{
     def ratingScore = Parameter(RatingScore).doubleRequired
 
     def hasLogo = Parameter(HasLogo).booleanOption.getOrElse(false)
+
+    def withGuestSite = Parameter(WithGuestSite).booleanOption.getOrElse(false)
   }
 
 }

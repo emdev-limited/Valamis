@@ -3,7 +3,6 @@ package com.arcusys.valamis.web.servlet.file
 import java.io._
 
 import com.arcusys.json.JsonHelper
-import com.arcusys.valamis.certificate.service.export.CertificateImportProcessor
 import com.arcusys.valamis.content.export.{QuestionImportProcessor, QuestionMoodleImportProcessor}
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lesson.service.export.PackageImportProcessor
@@ -14,7 +13,6 @@ import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 class FileFacade(implicit val bindingModule: BindingModule) extends FileFacadeContract with Injectable {
 
   private lazy val fileService = inject[FileService]
-  private lazy val certificateImportProcessor = inject[CertificateImportProcessor]
   private lazy val packageImportProcessor = inject[PackageImportProcessor]
   private lazy val questionImportProcessor = inject[QuestionImportProcessor]
   private lazy val questionMoodleImportProcessor = inject[QuestionMoodleImportProcessor]
@@ -91,14 +89,5 @@ class FileFacade(implicit val bindingModule: BindingModule) extends FileFacadeCo
     stream.close()
     packageImportProcessor.importItems(file, courseId, userId)
     FileResponse(-1, "Package", file.getName, "")
-  }
-
-  override def importCertificates(courseId: Int, stream: InputStream): FileResponse = {
-    val file = FileSystemUtil.streamToTempFile(stream, "Import", FileRequest.ExportExtension)
-    stream.close()
-
-    certificateImportProcessor.importItems(file, courseId)
-
-    FileResponse(-1, "Certificate", file.getName, "")
   }
 }

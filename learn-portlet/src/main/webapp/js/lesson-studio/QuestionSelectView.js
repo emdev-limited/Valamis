@@ -1,6 +1,6 @@
 var contentManagerModalView = Marionette.ItemView.extend({
     template: '#content-manager-modal-template',
-    onRender: function () {
+    onShow: function () {
 
         var contentManagerOptions = {
             resourceName: 'questionManager',

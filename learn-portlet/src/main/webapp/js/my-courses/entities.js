@@ -1,19 +1,22 @@
 myCourses.module('Entities', function(Entities, myCourses, Backbone, Marionette, $, _) {
 
-  var COURSES_COUNT = 5;
+  Entities.ROW_TYPE = {
+    DETAILS: 'details',
+    COURSE: 'course'
+  };
 
   var CourseCollectionService = new Backbone.Service({
     url: path.root,
     sync: {
       'read': {
         'path': function (model, options) {
-          return path.api.courses + "my/";
+          return path.api.courses + 'my/';
         },
         'data': function (collection, options) {
           var params = {
             sortAscDirection: true,
             page: options.page,
-            count: COURSES_COUNT
+            count: options.count
           };
           return params;
         },
@@ -22,11 +25,16 @@ myCourses.module('Entities', function(Entities, myCourses, Backbone, Marionette,
     }
   });
 
-  Entities.CourseCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({}),
+  Entities.CourseCollection = valamisApp.Entities.LazyCollection.extend({
+    model: Backbone.Model,
     parse: function (response) {
-      this.trigger('courseCollection:updated', {total: response.total, count: COURSES_COUNT});
-      return response.records;
+      this.total = 2 * response.total;
+      var res = [];
+      _.each(response.records, function (item) {
+        res.push(_.extend({tpe: Entities.ROW_TYPE.COURSE}, item));
+        res.push(_.extend({tpe: Entities.ROW_TYPE.DETAILS, courseId: item.id}));
+      });
+      return res;
     }
   }).extend(CourseCollectionService);
 
@@ -52,11 +60,8 @@ myCourses.module('Entities', function(Entities, myCourses, Backbone, Marionette,
     }
   });
 
-  Entities.UsersCollection = Backbone.Collection.extend({
-    model: Backbone.Model.extend({}),
-    parse: function (response) {
-      return response.records;
-    }
+  Entities.UsersCollection = valamisApp.Entities.LazyCollection.extend({
+    model: Backbone.Model
   }).extend(UsersCollectionService);
   
 });

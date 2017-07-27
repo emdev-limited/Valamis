@@ -82,12 +82,12 @@ trait LessonTableComponent extends LongKeyTableComponent with TypeMapper { self:
     def lesson = foreignKey(fkName("LIMIT_TO_LESSON"), lessonId, lessons)(_.id)
   }
 
-  class PlayerLessonTable(tag: Tag) extends Table[PlayerLesson](tag, tblName("LESSON_TO_PLAYER")) {
+  class PlayerLessonTable(tag: Tag) extends Table[LessonPlayerOrder](tag, tblName("LESSON_TO_PLAYER")) {
     def playerId = column[Long]("PLAYER_ID")
     def lessonId = column[Long]("LESSON_ID")
     def index = column[Int]("INDEX")
 
-    def * = (playerId, lessonId, index) <> (PlayerLesson.tupled, PlayerLesson.unapply)
+    def * = (playerId, lessonId, index) <> (LessonPlayerOrder.tupled, LessonPlayerOrder.unapply)
     def pk = primaryKey(pkName("LESSON_TO_PLAYER"), (playerId, lessonId))
 
     def lesson = foreignKey(fkName("PLAYER_TO_LESSON"), lessonId, lessons)(_.id)

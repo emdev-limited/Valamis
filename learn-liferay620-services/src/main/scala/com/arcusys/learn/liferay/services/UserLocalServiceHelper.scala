@@ -95,7 +95,8 @@ trait UserLocalServiceHelper {
                            contains: Boolean,
                            companyId: Long,
                            nameLike: Option[String],
-                           organizationId: Option[Long]): Option[DynamicQuery] = {
+                           organizationId: Option[Long],
+                           activated: Option[Boolean]= Some(true)): Option[DynamicQuery] = {
     var query = UserLocalServiceUtil.dynamicQuery
       .add(RestrictionsFactoryUtil.eq("defaultUser", false))
       .add(RestrictionsFactoryUtil.eq("companyId", companyId))
@@ -112,6 +113,13 @@ trait UserLocalServiceHelper {
       case None => Some(query)
       case Some(Nil) => None
       case Some(ids) => Some(query.addFilterByValues("userId", ids, contains = true))
+    }
+
+    val deactivedStatus = 5
+    activated match{
+      case Some(true) => Some(query.add(RestrictionsFactoryUtil.ne("status", deactivedStatus)))
+      case Some(false) => Some(query.add(RestrictionsFactoryUtil.eq("status", deactivedStatus)))
+      case _ =>  Some(query)
     }
   }
 
@@ -195,7 +203,11 @@ trait UserLocalServiceHelper {
   }
 
   def getGroupUserIds(groupId: Long): Seq[Long] = {
-    UserLocalServiceUtil.getGroupUserIds(groupId) match {
+    val usersIds = UserLocalServiceUtil.getGroupUsers(groupId)
+      .asScala.filter(_.isActive)
+      .map(_.getUserId)
+
+    usersIds match {
       case seq if seq.nonEmpty => seq
       case _ =>
         val orgId = getOrganizationIdByGroupId(groupId)

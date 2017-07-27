@@ -9,6 +9,17 @@ valamisApp.module("Views", function (Views, valamisApp, Backbone, Marionette, $,
         submitEl: '.js-submit-button',
         cancelEl: '.modal-close',
         clickOutside: function(){void 0},
+        checkKey: function(e) {
+            var keyboard = {
+                esc: 27
+            };
+            if (this.active) {
+                switch (e.keyCode) {
+                    case keyboard.esc:
+                        return this.triggerCancel();
+                }
+            }
+        },
         initialize: function(options){
             this.header = options.header;
             this.contentView = options.contentView;

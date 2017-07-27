@@ -239,7 +239,8 @@ valamisApp.module("Entities", function(Entities, valamisApp, Backbone, Marionett
         defaults: {
             page: 0,
             itemsPerPage: 10,
-            total: 0
+            total: 0,
+            useSkipTake: false
         },
         initialize: function(models, options){
             options = _.defaults(options || {}, this.defaults);
@@ -252,13 +253,23 @@ valamisApp.module("Entities", function(Entities, valamisApp, Backbone, Marionett
             if (options.reset || options.firstPage) { this.page = 1; }
             else { this.page++; }
 
-            return this.fetch(_.extend({
-                page: this.page,
-                count: this.itemsPerPage,
+            var paging = {};
+            if (!this.useSkipTake) {
+                paging.page = this.page;
+                paging.count = this.itemsPerPage;
+            }
+            else {
+                paging.skip = (this.page - 1) * this.itemsPerPage;
+                paging.take = this.itemsPerPage;
+            }
+
+            var params = _.extend({
                 add: true,
                 remove: false,
                 merge: false
-            }, options));
+            }, options, paging);
+
+            return this.fetch(params);
         },
         parse: function (response) {
             this.total = response.total;
@@ -269,222 +280,6 @@ valamisApp.module("Entities", function(Entities, valamisApp, Backbone, Marionett
         },
         hasMore: function(){
             return this.length < this.total
-        }
-    });
-
-    // model and collection for certificate goals
-
-    Entities.GOAL_TYPE = {
-        COURSE: 'Course',
-        STATEMENT: 'Statement',
-        ACTIVITY: 'Activity',
-        PACKAGE: 'Package',
-        ASSIGNMENT: 'Assignment',
-        EVENT: 'TrainingEvent'
-    };
-
-    Entities.STATUS = {
-        NOTSTARTED: 'NotStarted',
-        INPROGRESS: 'InProgress',
-        SUCCESS: 'Success',
-        FAILED: 'Failed'
-    };
-
-    Entities.toGoalResponse = function(response) {
-        var goalType = Entities.GOAL_TYPE;
-
-        var objectName = '',
-          objectTitle = '';
-
-        var id = response.goal.goalId;
-        var hasGroup = !!response.goalData.groupId;
-        var goal = {
-            id: id,
-            uniqueId: 'goal_' + (hasGroup ? (response.goalData.groupId + '_' + id) : id),
-            groupId: response.goalData.groupId,
-            oldGroupId: response.goalData.oldGroupId,
-            title: response.goal.title,
-            isSubjectDeleted: response.goal.isSubjectDeleted,
-            count: response.goal.count,
-            arrangementIndex: response.goalData.arrangementIndex,
-            isOptional: response.goalData.isOptional,
-            type: response.goalData.goalType,
-            periodValue: response.goalData.periodValue,
-            periodType: response.goalData.periodType,
-            certificateId: response.goalData.certificateId,
-            modifiedDate: Utils.formatDate(response.goalData.modifiedDate, 'HH:mm, DD.MM.YYYY'),
-            isDeleted: response.goal.isDeleted,
-            user: response.user
-        };
-
-        switch (response.goalData.goalType) {
-            case goalType.COURSE:
-                goal.goalItemTypeText = Valamis.language['courseLabel'];
-                goal.courseLessonsAmount = response.goal.lessonsAmount;
-                goal.url = response.goal.url;
-                break;
-            case goalType.STATEMENT:
-                objectName = response.goal.objName;
-                objectTitle = objectName
-                  ? Utils.getLangDictionaryTincanValue(objectName)
-                  : response.goal.obj;
-                goal.title = Valamis.language[response.goal.verb] + ' ' + objectTitle;
-                goal.goalItemTypeText = Valamis.language['statementLabel'];
-                break;
-            case goalType.ACTIVITY:
-                goal.title = response.goal.title;
-                goal.goalItemTypeText = Valamis.language['activityLabel'];
-                goal.isActivity = true;
-                goal.noDate = _.contains(['participation', 'contribution'], response.goal.activityName);
-                break;
-            case goalType.PACKAGE:
-                goal.goalItemTypeText = Valamis.language['lessonLabel'];
-                if (!goal.isSubjectDeleted) {
-                    goal.url = Utils.getPackageUrl(response.goal.packageId);
-                    if (!!response.goal.course) {
-                        goal.packageCourse = {
-                            url: response.goal.course.url,
-                            title: response.goal.course.title
-                        };
-                    }
-                }
-                break;
-            case goalType.ASSIGNMENT:
-                goal.goalItemTypeText = Valamis.language['assignmentLabel'];
-                break;
-            case goalType.EVENT:
-                goal.goalItemTypeText = Valamis.language['eventLabel'];
-                goal.eventInfo = Utils.formatDate(response.goal.startTime, 'l') + ' - '
-                    + Utils.formatDate(response.goal.endTime, 'l');
-                break;
-        }
-
-        return goal;
-    };
-
-    Entities.BaseGoalsCollection = Backbone.Collection.extend({
-        comparator: function(item) {
-            return item.get('arrangementIndex');
-        },
-        toGroupResponse: function(rawResponse) {
-            var groups = [];
-            _.each(rawResponse, function (item) {
-                var id = item.group.id;
-                var group = {
-                    id: id,
-                    uniqueId: 'group_' + id,
-                    isGroup: true,
-                    collection: item.group.collection,
-                    isDeleted: item.group.isDeleted,
-                    count: item.group.count,
-                    arrangementIndex: item.group.arrangementIndex,
-                    periodValue: item.group.periodValue,
-                    periodType: item.group.periodType,
-                    certificateId: item.group.certificateId,
-                    modifiedDate: Utils.formatDate(item.group.modifiedDate, 'HH:mm, DD.MM.YYYY'),
-                    user: item.user
-                };
-
-                groups.push(group);
-            });
-
-            return groups;
-        },
-        toGoalResponse: function (rawResponse) {
-            var certGoals = [];
-            _(rawResponse).map(function (item) {
-                return Entities.toGoalResponse(item);
-            }).each(function(goal) {
-                certGoals.push(goal);
-            });
-
-            return certGoals;
-        },
-        setUserStatuses: function(goalsStatuses) {
-            var statuses = Entities.STATUS;
-
-            function getGoalStatusAndDateFinish(goalId, type) {
-                var goalArray = [];
-                var goalType = Entities.GOAL_TYPE;
-
-                switch(type) {
-                    case goalType.COURSE:
-                        goalArray = goalsStatuses.courses;
-                        break;
-                    case goalType.STATEMENT:
-                        goalArray = goalsStatuses.statements;
-                        break;
-                    case goalType.ACTIVITY:
-                        goalArray = goalsStatuses.activities;
-                        break;
-                    case goalType.PACKAGE:
-                        goalArray = goalsStatuses.packages;
-                        break;
-                    case goalType.ASSIGNMENT:
-                        goalArray = goalsStatuses.assignments;
-                        break;
-                    case goalType.EVENT:
-                        goalArray = goalsStatuses.trainingEvents;
-                        break;
-                }
-
-                var goal = goalArray.filter(function (i) { return i.id == goalId })[0];
-                var status = (goal) ? goal.status : '';
-                var dateFinish = (goal) ? goal.dateFinish : '';
-
-                return { status: status, dateFinish: dateFinish };
-            }
-
-            function setStatuses(collection) {
-
-                collection.each(function(goal) {
-                    var result = { status: '', dateFinish: '', doneCount: '' };
-                    if (goal.get('isGroup')) {
-                        setStatuses(goal.get('collection'));
-
-                        // todo set on backend?
-                        var coll = goal.get('collection');
-                        var failedCount = coll.filter(function(model) {
-                            return model.get('status') == statuses.FAILED
-                        }).length;
-                        var doneCount = coll.filter(function (model) {
-                            return model.get('status') == statuses.SUCCESS
-                        }).length;
-                        var wasFailed = failedCount > (coll.length - goal.get('count'));
-                        if (wasFailed)  // group will be failed if failedCount > collection.length
-                            result.status = statuses.FAILED;
-                        else {
-                            var wasSucceed = doneCount >= goal.get('count');
-                            result.status = (wasSucceed) ? statuses.SUCCESS : statuses.INPROGRESS;
-                            result.doneCount = doneCount;
-                        }
-                    }
-                    else {
-                        result = getGoalStatusAndDateFinish(goal.get('id'), goal.get('type'));
-                    }
-
-                    goal.set({
-                        status: result.status,
-                        dateFinish: result.dateFinish,
-                        doneCount: result.doneCount
-                    });
-                });
-            }
-
-            setStatuses(this);
-
-            var totalRequired = 0;
-            var doneGoals = 0;
-            this.each(function(goal) {
-                if (!goal.get('isOptional')) totalRequired = totalRequired + 1;
-                if (goal.get('status') == statuses.SUCCESS && !goal.get('isOptional')) doneGoals = doneGoals + 1;
-                else
-                    if (goal.get('isGroup')) {
-                        doneGoals = doneGoals + (goal.get('doneCount') / goal.get('count'));
-                    }
-            });
-
-            this.progress = doneGoals / totalRequired;
         }
     });
 });

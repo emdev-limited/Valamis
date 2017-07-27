@@ -29,4 +29,13 @@ trait UserLessonResultService {
   def getLastResult(userId: Long): Option[UserLessonResult]
 
   def get(users: Seq[LUser], lessons: Seq[Lesson]): Seq[UserLessonResult]
+
+  def getAttemptedTotal(lessonsIds: Seq[Long],
+                        isFinished: Boolean,
+                        limit: Int,
+                        offset: Int): Seq[(Long, Int)]
+
+  def getAttemptedTotal(lessonsIds: Seq[Long],
+                        userIds: Seq[Long],
+                        isFinished: Boolean): Seq[(Long, Int)]
 }

@@ -6,60 +6,74 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
     var DROPDOWN = {
         WIDTH: 195,
         SHIFT_TOP: 25,
-        SHIFT_LEFT: 19
+        SHIFT_LEFT: 19,
+        SHIFT_RIGHT: 30
+    };
+
+    var availableReportTypes = {
+        certificates: 'reportTypeCertificates',
+        topLessons: 'reportTypeTopLessons',
+        mostActiveUsers: 'reportTypeMostActiveUsers',
+        averagePassingGrade: 'reportTypeAveragePassingGrade',
+        numberOfLessonsAttempted: 'reportTypeNumberOfLessonsAttempted'
     };
 
     Views.AppLayoutView = Marionette.LayoutView.extend({
         template: '#ValamisReportLayoutTemplate',
         className: 'valamis-report-container',
-        regions:{
-            'periodSelector' : '#valamisReportPeriodSelector',
-            'loadingBlock' : '#valamisReportLoading',
-            'reportRenderer' : '#valamisReportRenderer'
+        regions: {
+            'periodSelector': '#valamisReportPeriodSelector',
+            'exportSelector': '#valamisReportExportSelector',
+            'loadingBlock': '#valamisReportLoading',
+            'reportRenderer': '#valamisReportRenderer'
         },
-        initialize: function() {
-            this.reportType = this.options['reportType'] || 'reportTypeCertificates';
+        initialize: function () {
+            this.reportType = this.options['reportType'] || availableReportTypes.certificates;
+            this.reportsScope = this.options['reportsScope'] || 'currentCourse';
+            this.userIds = this.options['userIds'] || [];
 
-            this.model = new valamisReport.Entities.reportModel(
-                {
-                    'reportType': this.reportType,
-                    'reportsScope': this.options['reportsScope'] || 'currentCourse',
-                    'userIds': this.options['userIds'] || '[]'
-                }
-            );
+            this.model = new valamisReport.Entities.reportModel({
+                'reportType': this.reportType,
+                'reportsScope': this.reportsScope,
+                'userIds': this.userIds
+            });
         },
-
         childEvents: {
             'loading:finished': function () {
                 this.loading = false;
                 this.hideLoading();
             },
-            'settings:changed': function(event, datesModel) {
+            'settings:changed': function (event, datesModel) {
                 this.renderReport(datesModel);
             }
         },
 
         onRender: function () {
             this.buildPeriodSelectorMenu();
+            this.buildExportSelectorMenu(this.periodView.collection.models[0]);
             this.renderReport(this.periodView.collection.models[0]);
         },
 
-        onShow: function() {
-            this.periodSelector.show(this.periodView);
+        onShow: function () {
+            if (this.options.reportType != "reportTypeAveragePassingGrade"
+                && this.options.reportType != "reportTypeNumberOfLessonsAttempted") {
+                this.periodSelector.show(this.periodView);
+            }
+            this.exportSelector.show(this.exportView);
         },
 
         modelEvents: {
             'change': 'render'
         },
 
-        buildPeriodSelectorMenu: function() {
+        buildPeriodSelectorMenu: function () {
             var periodSelectorData = {
-                "id" : "reportPeriod",
-                "type" : "dropdown",
-                "visibility" : true,
-                "hotSelector" : true,
-                "data" : "datePeriod",
-                "currentOptionId" : this.options['reportPeriodType'] || 'periodLastWeek',
+                "id": "reportPeriod",
+                "type": "dropdown",
+                "visibility": true,
+                "hotSelector": true,
+                "data": "datePeriod",
+                "currentOptionId": this.options['reportPeriodType'] || 'periodLastWeek',
                 "options": [
                     {
                         "id": "periodLastWeek",
@@ -78,21 +92,35 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
                         "groupFirstItem": true
                     }
                 ],
-                "startDate" : this.options['reportPeriodStart'],
-                "endDate" : this.options['reportPeriodEnd']
+                "startDate": this.options['reportPeriodStart'],
+                "endDate": this.options['reportPeriodEnd']
             };
 
             if (periodSelectorData.currentOptionId != 'periodCustom') {
-                var periodOption = _.find(periodSelectorData.options, function(e){ return e.id === periodSelectorData.currentOptionId; });
-                periodSelectorData.startDate = moment().subtract(periodOption.days,'days').format(fetchDateFormat);
+                var periodOption = _.find(periodSelectorData.options, function (e) {
+                    return e.id === periodSelectorData.currentOptionId;
+                });
+                periodSelectorData.startDate = moment().subtract(periodOption.days, 'days').format(fetchDateFormat);
                 periodSelectorData.endDate = moment().format(fetchDateFormat);
-            };
+            }
 
             var periodSelectorCollection = new valamisReportSettings.Entities.ReportSettingsModel([periodSelectorData]);
 
             this.periodView = new Views.PeriodSelectorView({
                 collection: periodSelectorCollection
             });
+        },
+
+        buildExportSelectorMenu: function (model) {
+            var reportModel = new valamisReport.Entities.reportModel({
+                reportType: this.reportType,
+                reportsScope: this.reportsScope,
+                userIds: this.userIds,
+                startDate: model.get('startDate'),
+                endDate: model.get('endDate'),
+                availableReportTypes: availableReportTypes
+            });
+            this.exportView = new Views.ExportSelectorView({model: reportModel});
         },
 
         renderReport: function (datesModel) {
@@ -108,16 +136,21 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
                 endDate: datesModel.get('endDate').split('/').join('-')
             };
 
-            if (this.reportType == 'reportTypeCertificates') {
+            if (this.reportType == availableReportTypes.certificates) {
                 reportView = new Views.CertificateGraphView(options);
             }
-            else if (this.reportType == 'reportTypeTopLessons') {
+            else if (this.reportType == availableReportTypes.topLessons) {
                 reportView = new Views.topLessonsView(options);
             }
-            else if (this.reportType == 'reportTypeMostActiveUsers') {
+            else if (this.reportType == availableReportTypes.mostActiveUsers) {
                 reportView = new Views.mostActiveUsersView(options);
             }
-
+            else if (this.reportType == availableReportTypes.averagePassingGrade) {
+                reportView = new Views.averagePassingGradeView(options);
+            }
+            else if (this.reportType == availableReportTypes.numberOfLessonsAttempted) {
+                reportView = new Views.numberOfLessonsAttemptedView(options);
+            }
             this.showLoading();
             that.reportRenderer.show(reportView);
         },
@@ -136,13 +169,13 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
     Views.LoadingView = Marionette.ItemView.extend({
         template: '#loadingTemplate',
         className: 'loading-message-block',
-        onDestroy: function() {
+        onDestroy: function () {
             this.triggerMethod('loading:finished');
         }
     });
 
     Views.PeriodSelectorView = Marionette.CollectionView.extend({
-        className: 'report-period-selector',
+        className: 'report-selector',
         childView: valamisReportSettings.Views.ReportSettingFieldsetView,
         childEvents: {
             'dropdown:toggle': function (childView, model) {
@@ -155,7 +188,7 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
 
                 if (dropdownElClickedNewState) {
                     var dropdownPosition = {
-                        left: $('.js-label', dropdownElClicked).width() - Math.round(DROPDOWN.WIDTH/2) + DROPDOWN.SHIFT_LEFT,
+                        left: $('.js-label', dropdownElClicked).width() - Math.round(DROPDOWN.WIDTH / 2) + DROPDOWN.SHIFT_LEFT,
                         top: DROPDOWN.SHIFT_TOP
                     };
                     $('.dropdown-wrapper', dropdownElClicked).css(dropdownPosition);
@@ -167,7 +200,7 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
                             endSelector: childView.$('#period-selector-end')
                         };
 
-                        $.each(dateSelectors, function(key, selector) {
+                        $.each(dateSelectors, function (key, selector) {
                             selector.data('DateTimePicker').hide();
                         });
                     }
@@ -178,5 +211,74 @@ valamisReport.module('Views', function (Views, valamisReport, Backbone, Marionet
         }
     });
 
+    Views.ExportSelectorView = Marionette.CompositeView.extend({
+        className: 'report-selector',
+        template: '#reportExportFieldset',
+        childView: valamisReportSettings.Views.ReportExportFieldsetView,
+        events: {
+            'click .js-current-selection': 'toggleDropdown',
+            'submit form': 'downloadReportExport'
+        },
+        templateHelpers: function () {
+            return {
+                isLimit: this.model.get("reportType") != availableReportTypes.certificates
+            }
+        },
+        onRender: function () {
+            this.$('.js-digits-only').valamisDigitsOnly();
+        },
+        downloadReportExport: function () {
+            var limit = this.$('input[name="limit"]').val();
+            if (!limit) {
+                limit = 0;
+            }
+            var startDate = this.formatDate(this.model.get('startDate'));
+            var endDate = this.formatDate(this.model.get('endDate'));
+            var format = this.$('input[type=radio]:checked').val();
 
+            this.model.set({
+                'startDate': startDate,
+                'endDate': endDate,
+                'top': limit,
+                'format': format
+            });
+
+            var _this = this;
+            var $submitButton = this.$('.submit-button button');
+            var $loadingMessage = this.$('.loading-message');
+            $submitButton.fadeOut().promise().done(function () {
+                $loadingMessage.show();
+                _this.model.exportReport().then(function (data) {
+                    $loadingMessage.hide();
+                    $submitButton.show();
+                    window.location.href = data.path;
+                }, function (err, res) {
+                    valamisApp.execute('notify', 'error', Valamis.language['requestFailedError']);
+                    $loadingMessage.hide();
+                    $submitButton.show();
+                });
+            });
+            return false;
+        },
+        toggleDropdown: function () {
+            var activeStateClass = 'show-dropdown-menu';
+
+            var dropdownElClicked = $('.js-dropdown-selector', this.$el);
+            var dropdownElClickedNewState = !(dropdownElClicked.hasClass(activeStateClass));
+
+            dropdownElClicked.removeClass(activeStateClass);
+
+            if (dropdownElClickedNewState) {
+                var dropdownPosition = {
+                    left: $('.js-label', dropdownElClicked).width() - Math.round(DROPDOWN.WIDTH) + DROPDOWN.SHIFT_RIGHT
+                };
+                $('.dropdown-wrapper', dropdownElClicked).css(dropdownPosition);
+            }
+            dropdownElClicked.toggleClass(activeStateClass, dropdownElClickedNewState);
+        },
+        formatDate: function (date) {
+            var outputDateFormat = 'YYYY-MM-DD';
+            return moment(date, fetchDateFormat).format(outputDateFormat);
+        }
+    });
 });

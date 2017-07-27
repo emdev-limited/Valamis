@@ -24,6 +24,16 @@ Valamis = (function(){
                     return params;
                 },
                 'method': 'get'
+            },
+            'getLessonsSettingsCategories': {
+                'path': path.api.lessonsSettings + 'categories',
+                'data': function (collection, options) {
+                    return {
+                        courseId: Utils.getCourseId(),
+                        playerId: options.playerId
+                    };
+                },
+                'method': 'get'
             }
         }
     });

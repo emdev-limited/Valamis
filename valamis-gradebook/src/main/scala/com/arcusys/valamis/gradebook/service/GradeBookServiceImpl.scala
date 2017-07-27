@@ -3,7 +3,7 @@ package com.arcusys.valamis.gradebook.service
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.valamis.gradebook.model.{AttemptInfo, CommentInfo, StatementInfo}
 import com.arcusys.valamis.lesson.service.{LessonService, LessonStatementReader}
-import com.arcusys.valamis.lrs.service.util.TinCanVerbs
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanVerbs
 import com.arcusys.valamis.lrs.tincan._
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
 import com.arcusys.valamis.user.model.UserInfo

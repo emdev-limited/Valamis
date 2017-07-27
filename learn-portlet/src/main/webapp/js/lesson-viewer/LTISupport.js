@@ -28,8 +28,8 @@ ltiSupport = {
         });
     },
     createForm : function(id, target, actionUrl, parameters, $appendElement) {
-        $(".tempForm").remove();
-        var form = $(
+        jQuery(".tempForm").remove();
+        var form = jQuery(
             '<form class="tempForm" style="display:none;"' +
             'id="' + id + '"' +
             'target="' + target + '"' +

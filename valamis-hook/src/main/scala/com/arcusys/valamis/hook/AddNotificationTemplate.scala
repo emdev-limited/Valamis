@@ -46,6 +46,11 @@ class AddNotificationTemplate extends SimpleAction {
     val valamisCertificateExpiredSubject: String = "valamisCertificateExpiredSubject"
     val valamisCertificateExpiredBody: String = "valamisCertificateExpiredBody"
 
+    val valamisTrainingEventUserAddedSubject: String = "valamisTrainingEventUserAddedSubject"
+    val valamisTrainingEventUserAddedBody: String = "valamisTrainingEventUserAddedBody"
+
+    val valamisTrainingEventReminderSubject: String = "valamisTrainingEventReminderSubject"
+    val valamisTrainingEventReminderBody: String = "valamisTrainingEventReminderBody"
 
     val preferences = PrefsPropsUtil.getPreferences(companyId.toLong)
 
@@ -125,7 +130,7 @@ class AddNotificationTemplate extends SimpleAction {
     setValueIfEmpty(preferences,
       valamisCertificateExpiresBody,
       header +
-        "Certificate [$CERTIFICATE_LINK$] expires in [$DAYS$] days.<br><br>" +
+        "Certificate [$CERTIFICATE_LINK$] expires in [$DAYS$] days, [$DATE$]<br><br>" +
         " Please visit the link above to see the certificate." +
         footer)
 
@@ -133,8 +138,24 @@ class AddNotificationTemplate extends SimpleAction {
     setValueIfEmpty(preferences,
       valamisCertificateExpiredBody,
       header +
-        "Certificate [$CERTIFICATE_LINK$] has expired. <br><br> " +
+        "Certificate [$CERTIFICATE_LINK$] has expired  [$DAYS$] days ago, [$DATE$] <br><br>" +
         "Please visit the link above to see the certificate." +
+        footer)
+
+    setValueIfEmpty(preferences, valamisTrainingEventUserAddedSubject, "You've been added to an event")
+    setValueIfEmpty(preferences,
+      valamisTrainingEventUserAddedBody,
+      header +
+        "You've been added to the event [$EVENT_LINK$].<br/><br/>" +
+        "Please visit the link above to access the event." +
+        footer)
+
+    setValueIfEmpty(preferences, valamisTrainingEventReminderSubject, "There is an upcoming training event")
+    setValueIfEmpty(preferences,
+      valamisTrainingEventReminderBody,
+      header +
+        "The training event [$EVENT_LINK$] starts in [$DAYS$] days, [$DATE$]<br><br>" +
+        "Please visit the link above to access the event." +
         footer)
 
     preferences.store()

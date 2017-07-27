@@ -1,11 +1,6 @@
 myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _) {
 
-  var ROW_TYPE = {
-    DETAILS: 'details',
-    COURSE: 'course'
-  };
-
-  var USERS_COUNT = 10;
+  var ROW_TYPE = myCourses.Entities.ROW_TYPE;
 
   Views.UsersItemView = Marionette.CompositeView.extend({
     tagName: 'li',
@@ -55,27 +50,24 @@ myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _
       return templateData
     },
     initialize: function() {
-      if (this.model.get('tpe') === ROW_TYPE.COURSE)
+      this.isDetails = this.model.get('tpe') === ROW_TYPE.DETAILS;
+
+      if (!this.isDetails)
         this.template = '#myCoursesRowViewTemplate';
       else {
         this.template = '#myCoursesDetailsViewTemplate';
-        this.$el.addClass('hidden');
+        this.$el.addClass('hidden details');
 
         this.collection = new myCourses.Entities.UsersCollection();
       }
     },
     onRender: function () {
-      if (this.model.get('tpe') === ROW_TYPE.DETAILS) {
-        var fetchedCollection = new myCourses.Entities.UsersCollection();
-
-        fetchedCollection.on('sync', function () {
-          this.collection.add(fetchedCollection.toJSON());
-        }, this);
-
-        this.$('.js-scroll-div').valamisInfiniteScroll(fetchedCollection, {
-          count: USERS_COUNT,
-          groupId: this.model.get('courseId')
+      if (this.isDetails) {
+        var that = this;
+        this.$('.js-scroll-div').valamisInfiniteScroll(this.collection, function () {
+          that.collection.fetchMore({groupId: that.model.get('courseId')});
         });
+
       }
     }
   });
@@ -84,25 +76,32 @@ myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _
     template: '#myCoursesLayoutTemplate',
     childView: Views.RowItemView,
     childViewContainer: '#coursesTable',
-    events: {
-      'click .js-show-more': 'takeCourses',
-      'click .js-toggle-details': 'toggleDetails'
+    ui: {
+      coursesTable: '.js-courses-table',
+      showMore: '.js-show-more',
+      toggleDetails: '.js-toggle-details',
+      noItems: '.js-no-items'
     },
-    initialize: function() {
-      this.page = 0;
-
-      this.collection = new myCourses.Entities.CourseCollection();
-      this.fetchedCollection = new myCourses.Entities.CourseCollection();
-
-      this.fetchedCollection.on('courseCollection:updated', function(details) {
-        this.$('.js-courses-table').toggleClass('hidden', details.total == 0);
-        this.$('.js-no-items').toggleClass('hidden', details.total > 0);
-        this.$('.js-show-more').toggleClass('hidden', this.page * details.count >= details.total);
-      }, this);
+    events: {
+      'click @ui.showMore': 'fetchMore',
+      'click @ui.toggleDetails': 'toggleDetails'
     },
     onRender: function() {
       this.$('.valamis-tooltip').tooltip();
-      this.takeCourses();
+
+      this.collection = new myCourses.Entities.CourseCollection([], {itemsPerPage: 5});
+      this.collection.on('sync', this.checkUi, this);
+      this.collection.fetchMore();
+    },
+    fetchMore: function () {
+      this.collection.fetchMore();
+    },
+    checkUi: function () {
+      this.ui.coursesTable.toggleClass('hidden', !this.collection.hasItems());
+      this.ui.noItems.toggleClass('hidden', this.collection.hasItems());
+      this.ui.showMore.toggleClass('hidden', !this.collection.hasMore());
+
+      this.checkTableWidth();
     },
     checkTableWidth: function() {  // todo: make it on resize?
       var tableWidth = this.$('.js-courses-table').width();
@@ -113,21 +112,6 @@ myCourses.module('Views', function (Views, myCourses, Backbone, Marionette, $, _
 
       if (diff > 0)
         this.$('.js-courses-table').addClass((diff < progressColWidth) ? 'hide-progress' : 'hide-status');
-    },
-    takeCourses: function() {
-      this.page++;
-
-      var that = this;
-      this.fetchedCollection.fetch({
-        page: this.page,
-        success: function() {
-          that.fetchedCollection.each(function(item) {
-            that.collection.add(_.extend({tpe: ROW_TYPE.COURSE}, item.toJSON()));
-            that.collection.add({tpe: ROW_TYPE.DETAILS, courseId: item.get('id')});
-          });
-          that.checkTableWidth();
-        }
-      });
     },
     toggleDetails: function(e) {
       var targetTr = $(e.target).parents('tr');

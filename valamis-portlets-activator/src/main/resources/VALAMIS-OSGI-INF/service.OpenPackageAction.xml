@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<component name="com.arcusys.valamis.web.service.OpenPackageAction" immediate="true">
+    <implementation class="com.arcusys.valamis.web.service.OpenPackageAction"/>
+    <service>
+        <provide interface="com.liferay.portal.kernel.struts.StrutsAction"/>
+    </service>
+    <property name="path" type="String">/portal/learn-portlet/open_package</property>
+</component>

@@ -1,6 +1,6 @@
 package com.arcusys.learn.liferay.update.version300.certificate
 
-import com.arcusys.valamis.certificate.model.goal.{GoalStatuses, GoalType}
+import com.arcusys.valamis.certificate.model.goal.{GoalStatuses}
 import com.arcusys.valamis.persistence.common.DbNameUtils._
 import com.arcusys.valamis.persistence.common.{SlickProfile, TypeMapper}
 import org.joda.time.DateTime

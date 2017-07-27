@@ -19,16 +19,19 @@ class LessonStudioView extends GenericPortlet with PortletBase {
   override def doView(request: RenderRequest, response: RenderResponse) {
     //in case class SlideSetModel not defined in ClassName table
     PortalUtilHelper.getClassNameId(classOf[SlideSet].getName)
+    implicit val companyId = PortalUtilHelper.getCompanyId(request)
 
     val scope = getSecurityData(request)
-    val googleClientId = settingManager.getGoogleClientId()
-    val googleAppId = settingManager.getGoogleAppId()
-    val googleApiKey = settingManager.getGoogleApiKey()
-    val ltiLaunchPresentationReturnUrl = settingManager.getLtiLaunchPresentationReturnUrl()
-    val ltiMessageType = settingManager.getLtiMessageType()
-    val ltiVersion = settingManager.getLtiVersion()
-    val ltiOauthVersion = settingManager.getLtiOauthVersion()
-    val ltiOauthSignatureMethod = settingManager.getLtiOauthSignatureMethod()
+    val googleClientId = settingManager.getGoogleClientId
+    val googleAppId = settingManager.getGoogleAppId
+    val googleApiKey = settingManager.getGoogleApiKey
+    val ltiLaunchPresentationReturnUrl = settingManager.getLtiLaunchPresentationReturnUrl
+    val ltiMessageType = settingManager.getLtiMessageType
+    val ltiVersion = settingManager.getLtiVersion
+    val ltiOauthVersion = settingManager.getLtiOauthVersion
+    val ltiOauthSignatureMethod = settingManager.getLtiOauthSignatureMethod
+    val betaStudioUrl = settingManager.getBetaStudioUrl
+
     val permission = new PortletPermissionUtil(request, this)
 
     val contentPermission = PermissionUtil.hasPermissionApi(scope.courseId, PermissionUtil.getLiferayUser,
@@ -51,7 +54,8 @@ class LessonStudioView extends GenericPortlet with PortletBase {
         permission.hasPermission(EditThemePermission.name),
       "permissionUnlockLesson" ->
         permission.hasPermission(UnlockLessonPermission.name),
-      "permissionCMToModify" -> (contentPermission || studioPermission)
+      "permissionCMToModify" -> (contentPermission || studioPermission),
+      "betaStudioUrl" -> betaStudioUrl
 
     ) ++ scope.data
 

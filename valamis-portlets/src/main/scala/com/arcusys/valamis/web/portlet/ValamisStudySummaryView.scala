@@ -2,11 +2,14 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet.{RenderRequest, RenderResponse}
 
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
 import com.arcusys.valamis.user.model.UserInfo
 import com.arcusys.valamis.user.service.UserService
-import com.arcusys.valamis.web.portlet.base.{HideStatisticPermission, OAuthPortlet, PermissionUtil, PortletBase}
+import com.arcusys.valamis.web.portlet.base._
 
 class ValamisStudySummaryView extends OAuthPortlet with PortletBase {
+
   override def doView(request: RenderRequest, response: RenderResponse): Unit = {
     val userService = inject[UserService]
     implicit val out = response.getWriter

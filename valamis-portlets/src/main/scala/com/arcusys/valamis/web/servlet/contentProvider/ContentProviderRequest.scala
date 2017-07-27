@@ -19,6 +19,8 @@ object ContentProviderRequest extends BaseCollectionFilteredRequest {
   val CustomerKey = "customerKey"
   val CustomerSecret = "customerSecret"
   val IsPrivate = "isPrivate"
+  val Offset = "offset"
+  val IsSelective = "isSelective"
 
   def apply(controller: ScalatraServlet) = new Model(controller)
 
@@ -42,6 +44,10 @@ object ContentProviderRequest extends BaseCollectionFilteredRequest {
     def isPrivate = Parameter(IsPrivate).booleanRequired
 
     def imageUrl = Parameter(ImageUrl).option
+
+    def offset = Parameter(Offset).intOption.getOrElse(0)
+
+    def isSelective = Parameter(IsSelective).booleanOption
   }
 
 }

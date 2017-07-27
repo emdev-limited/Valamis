@@ -10,6 +10,7 @@ import com.arcusys.valamis.slide.model.{SlideEntityType, _}
 import com.arcusys.valamis.util.FileSystemUtil
 import com.arcusys.valamis.util.serialization.JsonHelper._
 
+import scala.util.Try
 import scala.util.matching.Regex
 
 case class QuestionResponse(tpe: Int, json: String, answersJson:Option[String])
@@ -246,23 +247,29 @@ object SlideSetHelper {
 
 trait SlideSetExportUtils {
   protected def categoryService: CategoryService
+
   protected def questionService: QuestionService
+
   protected def plainTextService: PlainTextService
+
   protected def fileService: FileService
 
-  protected def getQuestions(slides: Seq[Slide]): Seq[(Question,Seq[Answer])] = {
+  protected def getQuestions(slides: Seq[Slide]): Seq[(Question, Seq[Answer])] = {
     slides.flatMap { slide =>
       slide.slideElements
-        .filter { e => e.slideEntityType == SlideEntityType.Question || e.slideEntityType == SlideEntityType.RandomQuestion}
-        .filterNot { _.content.isEmpty }
+        .filter { e => e.slideEntityType == SlideEntityType.Question || e.slideEntityType == SlideEntityType.RandomQuestion }
+        .filterNot {
+          _.content.isEmpty
+        }
         .flatMap {
-          case e if e.slideEntityType == SlideEntityType.Question => Seq(questionService.getWithAnswers(e.content.toLong))
+          case e if e.slideEntityType == SlideEntityType.Question =>
+            Try(Seq(questionService.getWithAnswers(e.content.toLong))).getOrElse(Seq())
           case e if e.slideEntityType == SlideEntityType.RandomQuestion =>
             val qIdList = e.content
               .split(",")
               .filter(_.startsWith(SlideConstants.QuestionIdPrefix))
               .map(_.replace(SlideConstants.QuestionIdPrefix, "").toLong)
-            qIdList.map(questionService.getWithAnswers)
+            Try(qIdList.map(questionService.getWithAnswers).toSeq).getOrElse(Seq())
         }
     } distinct
   }
@@ -275,13 +282,16 @@ trait SlideSetExportUtils {
           _.content.isEmpty
         }
         .flatMap {
-          case e if e.slideEntityType == SlideEntityType.PlainText => Seq(plainTextService.getById(e.content.toLong))
+          case e if e.slideEntityType == SlideEntityType.PlainText =>
+            Try(Seq(plainTextService.getById(e.content.toLong))).getOrElse(Seq())
           case e if e.slideEntityType == SlideEntityType.RandomQuestion =>
             val qIdList = e.content
               .split(",")
               .filter(_.startsWith(SlideConstants.PlainTextIdPrefix))
               .map(_.replace(SlideConstants.PlainTextIdPrefix, "").toLong)
-            qIdList.map(plainTextService.getById)
+            Try {
+              qIdList.map(plainTextService.getById).toSeq
+            }.getOrElse(Seq())
         }
     } distinct
   }
@@ -296,7 +306,7 @@ trait SlideSetExportUtils {
         else if (content.contains("/learn-portlet/preview-resources/pdf/"))
           ".+/(.+)/(.+)$".r
         else if (content.contains("/documents/")) {
-          if(content.contains("groupId"))
+          if (content.contains("groupId"))
             ".+/(.+)/.+/(.+)/(.+)\\?groupId=(.+).*".r
           else
             ".+/(.+)/.+/(.+)/\\?version=(.+).*entryId=(.+).*&ext=(.+)".r
@@ -308,17 +318,17 @@ trait SlideSetExportUtils {
   }
 
   protected def getFileTuple(
-    content: String,
-    folderPrefix: String,
-    regex: Regex): Option[(String, String)] = content match {
-      case regex(fileName)                                                => Some((folderPrefix, fileName))
-      case regex(pdfFolderName, pdfFileName)                              => Some((pdfFolderName, pdfFileName))
-      case regex(courseId, fileName, uuid, groupId)                       => Some((uuid, fileName))
-      case regex(courseId, fileName, fileVersion, entryId, fileExtension) => {
-          Some((entryId, fileName))
-      }
+                              content: String,
+                              folderPrefix: String,
+                              regex: Regex): Option[(String, String)] = content match {
+    case regex(fileName) => Some((folderPrefix, fileName))
+    case regex(pdfFolderName, pdfFileName) => Some((pdfFolderName, pdfFileName))
+    case regex(courseId, fileName, uuid, groupId) => Some((uuid, fileName))
+    case regex(courseId, fileName, fileVersion, entryId, fileExtension) => {
+      Some((entryId, fileName))
+    }
 
-      case _ => throw new IllegalArgumentException("Content didn't match any of the regular expressions.")
+    case _ => throw new IllegalArgumentException("Content didn't match any of the regular expressions.")
   }
 
   protected def getSlideFile(slide: Slide): Option[(String, InputStream)] = {
@@ -327,6 +337,7 @@ trait SlideSetExportUtils {
         getFromPath(filename.takeWhile(_ != ' '), SlideSetHelper.filePathPrefix(slide))
           .map(getPathAndInputStream))
   }
+
   protected def getElementFile(element: SlideElement): Option[(String, InputStream)] = {
     Some(element.content)
       .flatMap(filename =>
@@ -386,5 +397,29 @@ trait SlideSetExportUtils {
 
   protected def omitFileDuplicates(files: Seq[(String, InputStream)]): Seq[(String, InputStream)] = {
     files.groupBy(_._1).map(_._2.head).toList
+  }
+
+  protected def getSlideWithOutDeletedQuestions(slidesWithDeletedQuestions: Seq[Slide],
+                                                questions: Seq[(Question, Seq[Answer])],
+                                                plaintexts: Seq[PlainText]) = {
+    val slides = slidesWithDeletedQuestions.map { slide =>
+
+      val newSlideElements = slide.slideElements.filterNot { e =>
+        val isQuestionDeleted = e.slideEntityType == "question" &&
+          !questions.exists(_._1.id.contains(e.content.toLong))
+
+        val isPlaintextDeleted =
+          e.slideEntityType == "plaintext" &&
+            !plaintexts.exists(_.id.contains(e.content.toLong))
+
+        isQuestionDeleted || isPlaintextDeleted
+
+      }
+
+
+      slide.copy(slideElements = newSlideElements)
+
+    }
+    slides
   }
 }

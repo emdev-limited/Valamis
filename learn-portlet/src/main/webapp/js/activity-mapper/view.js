@@ -4,8 +4,9 @@ ActivityMapperApp.module("ViewModule", function(ViewModule, ActivityMapperApp, B
 
   ViewModule.ActivityMapperRowView = Marionette.ItemView.extend({
     tagName: 'tr',
-    template: function (data) {
-        return Mustache.to_html(jQuery('#activitySocialMapperRow').html(), _.extend(language, {activityName: data.title}))
+    template: '#activitySocialMapperRow',
+    templateHelpers: function() {
+      return _.extend(language, {activityName: this.model.get('title')});
     },
     events: {
       'change .js-mapped-activity-verb': 'updateEntry'

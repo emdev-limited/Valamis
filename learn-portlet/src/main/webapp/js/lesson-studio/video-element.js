@@ -48,8 +48,9 @@ var videoElementModule = slidesApp.module('VideoElementModule', {
                                 courseId: Liferay.ThemeDisplay.getScopeGroupId()
                             },
                             complete: function (data) {
-                                if(data.responseText === 'false')
-                                    that.$('.warning').show()
+                                if(data.responseText === 'false') {
+                                    that.$('.js-not-allow').show();
+                                }
                             }
                         });
                     }

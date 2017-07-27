@@ -109,14 +109,8 @@
 </script>
 <script type="text/html" id="textElementTemplate">
     <div class="item-border no-pointer-events"></div>
-    <div class="ui-resizable-handle hidden ui-resizable-n"></div>
     <div class="ui-resizable-handle hidden ui-resizable-e"></div>
-    <div class="ui-resizable-handle hidden ui-resizable-s"></div>
     <div class="ui-resizable-handle hidden ui-resizable-w"></div>
-    <div class="ui-resizable-handle hidden ui-resizable-ne"></div>
-    <div class="ui-resizable-handle hidden ui-resizable-se"></div>
-    <div class="ui-resizable-handle hidden ui-resizable-sw"></div>
-    <div class="ui-resizable-handle hidden ui-resizable-nw"></div>
     <div class="item-content shift-left">{{{content}}}</div>
     <div class="item-controls shift-right">
         <div class="val-row">
@@ -354,7 +348,7 @@
         <div class="js-content-icon-pdf">
             <span class="val-icon-pdf"></span>
         </div>
-        <div class="warning">
+        <div class="warning js-not-allow">
             {{errorIframeLabel}}
         </div>
         <div class="warning js-no-lti">
@@ -427,7 +421,10 @@
 <script type="text/template" id="iframeThirdPartySelector">
     <div class="thumbnail-container">
         <div class="js-third-party-list"></div>
-        <div class="js-third-party-frame-area" style="margin-left:auto;margin-right:auto;"></div>
+        <div class="js-third-party-frame-area" style="margin-left:auto; margin-right:auto;">
+            <iframe id="iframe-{{guidForThirdParty}}" class="js-third-party-iframe-name third-party-iframe11 iframe-item"
+                    name="iframe-{{guidForThirdParty}}" style="display: inline; width: 100%; height: 100%; min-height: 500px;"></iframe>
+        </div>
     </div>
 </script>
 
@@ -441,7 +438,11 @@
             </span>
             <div class="image-title">{{name}}</div>
             {{#description}}
-            <div class="image-title">{{description}}</div>
+            <div class="description-short-view ellipsis js-description-size">{{description}}</div>
+            <div class="show-more cursor-pointer js-toggle-description-size">
+                <div class="js-show-more">{{showMoreDescriptionLabel}}</div>
+                <div class="js-show-less hidden">{{showLessDescriptionLabel}}</div>
+            </div>
             {{/description}}
         </div>
 </script>
@@ -763,7 +764,7 @@
                             <div class="div-col">
                                 <div class="div-row settings-learning">
                                     <span class="div-col">
-                                        <span>The User</span>
+                                        <span>{{valUserLabel}}</span>
                                         <select class="page-statement" name="" id="page-statement-verb-selector"></select>
                                     </span>
                                     <input class="div-col statement-object-input" type="text" id="js-slide-statement-object" placeholder="">
@@ -908,8 +909,8 @@
         </div>
     </div>
     <div class="bbm-modal__bottombar">
-        <button class="button big neutral modal-close">{{quizCancelUpdateButtonTooltipLabel}}</button>
-        <button class="button big primary js-submit-button">{{selectQuestionLabel}}</button>
+        <button class="button medium primary js-submit-button">{{selectQuestionLabel}}</button>
+        <button class="button medium simple modal-close">{{quizCancelUpdateButtonTooltipLabel}}</button>
     </div>
 </script>
 <script type="text/template" id="CategorizationQuestionTemplate">
@@ -1123,7 +1124,7 @@
                 {{/isButton}}
                 {{^isButton}}
                 <div class="title" style="font-family: {{fontFamily}}; font-size: {{fontSize}}; color: {{fontColor}};">
-                    {{title}}
+                    {{titleThemeLabel}}
                 </div>
                 {{/isButton}}
             </div>
@@ -1296,9 +1297,9 @@
         <label class="shift-left" for="js-player-title">{{valBadgePlayerTitle}}</label>
         <select name="" id="js-player-title"></select>
     </div>
-    <div class="bbm-modal__buttonbar">
-        <button class="button big neutral modal-close">{{cancelLabel}}</button>
+    <div class="bbm-modal__buttonbar text-left">
         <button class="button big primary js-save-settings">{{saveLabel}}</button>
+        <button class="button big neutral simple modal-close">{{cancelLabel}}</button>
     </div>
 </script>
 <script type="text/template" id="fileSelectMethodViewTemplate">
@@ -1408,7 +1409,7 @@
         <div class="modal-close val-icon-exit"></div>
     </div>
     <div class="bbm-modal__section js-modal-content">
-        <table class="val-table medium list">
+        <table class="val-table">
             <tbody id="articleList">
             <tr>
                 <th>{{titleLabel}}</th>
@@ -1425,7 +1426,7 @@
 </script>
 
 <script type="template/mustache" id="articleTemplate">
-<td>
+<td class="title">
     {{title}}
 </td>
 <td>
@@ -1448,13 +1449,13 @@
         <div class="modal-close val-icon-exit"></div>
     </div>
     <div class="bbm-modal__section js-modal-content">
-        <table class="val-table medium list">
+        <table class="val-table">
             <tbody>
             <tr>
                 <td colspan="2">
                     <div class="val-paginator" id="videoPaginator"></div>
                     <div id="dlVideoContainer">
-                        <table id="dlvideo" class="val-table small list">
+                        <table id="dlvideo" class="val-table">
                         </table>
                     </div>
                 </td>
@@ -1470,7 +1471,7 @@
 </script>
 
 <script type="text/template" id="videoTemplate">
-    <td>{{title}}</td>
+    <td class="title">{{title}}</td>
     <td>{{mimeType}}</td>
     <td class="narrow-col">
         <button class="button medium {{^selected}} neutral {{/selected}} {{#selected}} primary {{/selected}} no-text js-toggleButton">

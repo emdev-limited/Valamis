@@ -38,6 +38,8 @@ myLessons.module('Views', function (Views, myLessons, Backbone, Marionette, $, _
           ? Valamis.language[state.name + 'Label']
           : Valamis.language['notStartedLabel'];
 
+      var statusClass = (state && state.name == 'inReview') ? 'inprogress' : '';
+
       return {
         lessonItemStatusLabel: lessonItemStatusLabel,
         colorClass: colorClass,
@@ -45,7 +47,8 @@ myLessons.module('Views', function (Views, myLessons, Backbone, Marionette, $, _
         completedLessons: this.options.completedLessons,
         isSuccess: isSuccess,
         title: this.model.get('lesson').title,
-        description: this.model.get('lesson').description
+        description: this.model.get('lesson').description,
+        statusClass: statusClass
       }
     }
   });

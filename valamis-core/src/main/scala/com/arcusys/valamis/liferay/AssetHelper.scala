@@ -13,9 +13,9 @@ class AssetHelper[T: Manifest] {
     AssetEntryLocalServiceHelper.fetchAssetEntry(className, classPK)
   }
 
-  def deleteAssetEntry(classPK: Long): Unit = {
+  def deleteAssetEntry(classPK: Long, obj: T): Unit = {
     for (entry <- AssetEntryLocalServiceHelper.fetchAssetEntry(className, classPK)) {
-      deleteIndex(entry)
+      deleteIndex(obj)
       AssetEntryLocalServiceHelper.deleteAssetEntry(entry.getEntryId)
     }
   }
@@ -88,6 +88,7 @@ class AssetHelper[T: Manifest] {
       indexer.reindex(obj)
   }
 
+  @deprecated("fail on lr7, delete waits element with type T")
   private def deleteIndex(entry: LAssetEntry) = {
     for (indexer <- Option(IndexerRegistryUtilHelper.getIndexer[LAssetEntry](entry.getClassName)))
       indexer.delete(entry)

@@ -2,7 +2,8 @@ package com.arcusys.learn.liferay.update.version300
 
 import java.sql.Connection
 
-import com.arcusys.valamis.certificate.model.goal.{GoalStatuses, GoalType}
+import com.arcusys.learn.liferay.update.migration.GoalType
+import com.arcusys.valamis.certificate.model.goal.{GoalStatuses}
 import com.arcusys.valamis.model.PeriodTypes
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.joda.time.DateTime

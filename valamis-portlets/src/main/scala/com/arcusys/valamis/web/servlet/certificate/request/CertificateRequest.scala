@@ -41,8 +41,6 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
   val TincanStmnts = "tincanStmnts"
   val PackageId = "packageId"
   val PackageIds = "packageIds"
-  val AssignmentId = "assignmentId"
-  val AssignmentIds = "assignmentIds"
   val TrainingEventId = "trainingEventId"
   val TrainingEventIds = "trainingEventIds"
   val PeriodValue = "periodValue"
@@ -120,8 +118,6 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
 
     def packageId = Parameter(PackageId).longRequired
     def packageIds = Parameter(PackageIds).multiRequired.map(_.toInt)
-    def assignmentId = Parameter(AssignmentId).longRequired
-    def assignmentIds = Parameter(AssignmentIds).multiRequired.map(_.toInt)
     def trainingEventId = Parameter(TrainingEventId).longRequired
     def trainingEventIds = Parameter(TrainingEventIds).multiRequired.map(_.toLong)
     def periodValue = Parameter(PeriodValue).intOption.getOrElse(0)

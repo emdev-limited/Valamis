@@ -1,21 +1,20 @@
 package com.arcusys.valamis.web.servlet.user
 
 import com.arcusys.learn.liferay.LiferayClasses.LGroup
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.certificate.model.CertificateStatuses
 import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.model.Order
 import com.arcusys.valamis.ratings.RatingService
 import com.arcusys.valamis.user.model.{UserFilter, UserSort}
 import com.arcusys.valamis.web.servlet.base.BaseJsonApiController
-import com.arcusys.valamis.web.servlet.certificate.facade.CertificateResponseFactory
 import com.arcusys.valamis.web.servlet.course.CourseConverter
 import org.json4s.ext.EnumNameSerializer
 import org.json4s.{DefaultFormats, Formats}
 
 class UserServlet
   extends BaseJsonApiController
-  with UserPolicy
-  with CertificateResponseFactory {
+  with UserPolicy {
 
   private lazy val userFacade = inject[UserFacadeContract]
   private lazy val courseService = inject[CourseService]
@@ -25,6 +24,7 @@ class UserServlet
   override implicit val jsonFormats: Formats = DefaultFormats + new EnumNameSerializer(CertificateStatuses)
 
   get("/users(/)") {
+    checkPermissions()
     val filter = UserFilter(
       Some(getCompanyId),
       Some(req.filter).filter(_.nonEmpty),
@@ -41,12 +41,19 @@ class UserServlet
   }
 
   get("/users/:userID(/)") {
+    checkPermissions()
     userFacade.getById(req.requestedUserId)
   }
 
   get("/users/:userID/courses(/)"){
+    checkPermissions()
     implicit val userId = req.requestedUserId.toLong
     courseService.getByUserId(req.requestedUserId, req.skipTake)
       .map(CourseConverter.toResponse).map(CourseConverter.addRating)
+  }
+
+  get("/users/authenticated(/)") {
+    val user = Option { PortalUtilHelper.getUser(request) }
+    Map("authenticated" -> user.isDefined)
   }
 }

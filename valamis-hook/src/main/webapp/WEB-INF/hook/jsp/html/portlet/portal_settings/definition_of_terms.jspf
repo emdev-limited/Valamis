@@ -19,6 +19,8 @@
 <dl>
     <c:if test='<%= !sectionName.equals("valamis-certificate-user-added") &&
                     !sectionName.equals("valamis-certificate-user-achieved") &&
+                    !sectionName.equals("valamis-training-event-reminder") &&
+                    !sectionName.equals("valamis-event-user-added") &&
                     !sectionName.equals("valamis-certificate-user-deactivated") &&
                     !sectionName.equals("valamis-course-lesson-available-added") &&
                     !sectionName.equals("valamis-course-user-added") &&
@@ -125,7 +127,7 @@
         </c:if>
         <c:if test='<%=sectionName.equals("valamis-certificate-user-added") ||
                        sectionName.equals("valamis-certificate-expires") ||
-                       sectionName.equals("valamis-certificate-expored")%>'>
+                       sectionName.equals("valamis-certificate-expired")%>'>
           <dt>
                 [$CERTIFICATE_LINK$]
             </dt>

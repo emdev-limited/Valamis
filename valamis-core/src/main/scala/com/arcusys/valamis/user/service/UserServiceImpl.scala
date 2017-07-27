@@ -109,7 +109,7 @@ abstract class UserServiceImpl extends UserService {
   def getWithDeleted(id: Long): User = {
     userLocalService.fetchUser(id)
       .map(new User(_))
-      .getOrElse(new User(id, s"$removedUserPrefix $id", isDeleted = true))
+      .getOrElse(User(id, s"$removedUserPrefix $id", isDeleted = true))
   }
 
   def getByCourses(courseIds: Seq[Long],

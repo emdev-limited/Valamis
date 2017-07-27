@@ -47,5 +47,5 @@ case class CertificateItemsCount(
     statementsCount: Int,
     activitiesCount: Int,
     packagesCount: Int,
-    assignmentsCount: Int,
+    trainingEventsCount: Int,
     deletedCount: Int)

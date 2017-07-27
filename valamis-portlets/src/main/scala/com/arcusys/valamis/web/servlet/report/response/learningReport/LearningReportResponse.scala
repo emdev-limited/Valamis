@@ -2,7 +2,7 @@ package com.arcusys.valamis.web.servlet.report.response.learningReport
 
 import com.arcusys.learn.liferay.LiferayClasses.{LOrganization, LUser}
 import com.arcusys.valamis.lesson.model.Lesson
-import com.arcusys.valamis.lrs.service.util.TinCanActivityType
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanActivityType
 import com.arcusys.valamis.reports.model.{ActivitiesStatuses, ActivityStatus, DateTime, LessonStatus, PathReportResult, PatternReportStatus}
 import com.arcusys.valamis.web.servlet.user.UserResponse
 import org.joda.time.DateTime
@@ -88,13 +88,6 @@ case class LessonGoalPathsResponse(id: Long,
                                    lessonId: Long
                                   )
 
-case class AssignmentGoalPathsResponse(id: Long,
-                                       goalType: PathsGoalType.Value,
-                                       isOptional: Boolean,
-                                       title: String,
-                                       assignmentId: Long
-                                      )
-
 case class EventGoalPathsResponse(id: Long,
                                   goalType: PathsGoalType.Value,
                                   isOptional: Boolean,
@@ -122,8 +115,8 @@ object PathsGoalType extends Enumeration {
   val Course = Value(2)
   val Statement = Value(3)
   val Package = Value(4)
-  val Assignment = Value(5)
   val Event = Value(6)
+  val WebContent = Value(7)
 }
 
 case class TotalResponse[T](id: Long, total: Map[T, Int])

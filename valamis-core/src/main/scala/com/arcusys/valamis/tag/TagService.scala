@@ -26,7 +26,10 @@ class TagService[T: Manifest] {
         AssetVocabularyLocalServiceHelper.addAssetVocabulary(companyId, vocabularyName).getVocabularyId
     }
 
-    AssetCategoryLocalServiceHelper.getVocabularyRootCategories(vocabularyId).map(toTag)
+    AssetCategoryLocalServiceHelper
+      .getVocabularyRootCategories(vocabularyId)
+      .map(toTag)
+      .sortBy(_.text.toLowerCase)
   }
 
   def getByItemId(itemId: Long): Seq[ValamisTag] = {

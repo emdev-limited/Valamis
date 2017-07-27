@@ -2,7 +2,8 @@ package com.arcusys.valamis.web.servlet.contentProvider
 
 import com.arcusys.valamis.slide.service.contentProvider.ContentProviderService
 import com.arcusys.valamis.slide.service.contentProvider.model.ContentProvider
-import com.arcusys.valamis.web.servlet.base.BaseApiController
+import com.arcusys.valamis.slide.service.contentProvider.util.EduAppsHelper
+import com.arcusys.valamis.web.servlet.base.{BaseApiController, PermissionUtil}
 import com.arcusys.valamis.web.servlet.response.CollectionResponse
 
 /**
@@ -16,10 +17,18 @@ class ContentProviderServlet extends BaseApiController {
   private lazy val providerRequest = ContentProviderRequest(this)
 
   get("/content-providers(/)")(jsonAction {
-    val contentProviders = providerService.getAll(providerRequest.skipTake, providerRequest.textFilter, providerRequest.ascending)
+    val contentProviders = providerService.getAll(providerRequest.skipTake,
+      providerRequest.textFilter,
+      providerRequest.ascending,
+      PermissionUtil.getCompanyId)
 
     CollectionResponse(providerRequest.page, contentProviders.records, contentProviders.total)
   })
+
+  get("/content-providers/edu-apps(/)") {
+    EduAppsHelper.getApps(providerRequest.offset)
+  }
+
 
   post("/content-providers(/)")(jsonAction {
     providerService.add(
@@ -50,7 +59,9 @@ class ContentProviderServlet extends BaseApiController {
       providerRequest.height.getOrElse(0),
       providerRequest.isPrivate,
       providerRequest.customerKey.getOrElse(""),
-      providerRequest.customerSecret.getOrElse("")
+      providerRequest.customerSecret.getOrElse(""),
+      PermissionUtil.getCompanyId,
+      providerRequest.isSelective.getOrElse(false)
     )
   }
 }

@@ -15,7 +15,7 @@
 <script type="text/template" id="lessonStudioLayoutTemplate">
     <div id="lessonStudioToolbar"></div>
     <div id="lessonStudioLessons"></div>
-    <div id="lessonStudioPaginator" class="val-paginator text-center"></div>
+    <div id="lessonStudioPaginator" class="val-paginator"></div>
     <div id="lessonStudioMain"></div>
     <div id="lessonStudioEditModalRegion"></div>
     <div id="lessonStudioModalRegion"></div>
@@ -29,8 +29,8 @@
             </button>
         </div>
         <div class="filter-element shift-left">
-            <div class="val-search">
-                <input type="text" class="js-search" placeholder="{{searchLabel}}">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
             </div>
         </div>
     </div>
@@ -59,6 +59,31 @@
     </div>
 </script>
 
+<script type="text/html" id="lessonStudioLimitedItemView">
+    <div class="tile-content with-action">
+        <div class="image"
+             {{#logo}}
+             style="background-image: url('/delegate/slide-sets/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
+             {{/logo}} >
+        </div>
+        <ul>
+            <li class="title">{{title}}</li>
+            <li class="categories">{{tagList}}</li>
+            <li class="description">{{description}}</li>
+            <li class="categories"> {{slidesCount}} {{pagesLabel}}</li>
+            <li>
+                <span class="val-label {{statusClass}}">
+                    {{statusLabel}}
+                </span>
+                <span>{{versionLabel}} {{formattedVersion}}</span>
+            </li>
+            {{#migrated}}
+            <li>{{migratedInfoLabel}}</li>
+            {{/migrated}}
+        </ul>
+    </div>
+</script>
+
 <script type="text/html" id="lessonStudioItemView">
     <div class="tile-content with-action">
         <div class="image cursor-pointer js-lesson-image"
@@ -71,9 +96,9 @@
             <li class="categories">{{tagList}}</li>
             <li class="description">{{description}}</li>
             <li class="categories"> {{slidesCount}} {{pagesLabel}}</li>
-            <li class="status">
-                <span class="val-label">
-                    {{status}}
+            <li>
+                <span class="val-label {{statusClass}}">
+                    {{statusLabel}}
                 </span>
                 <span>{{versionLabel}} {{formattedVersion}}</span>
                 {{#lockUserId}}
@@ -93,6 +118,14 @@
                 <li class="js-lesson-publish" data-value="publish:true"> {{publishTincanLabel}} </li>
                 <li class="js-lesson-export" data-value="publish:true"> {{exportLabel}} </li>
                 <li class="js-lesson-clone" data-value="clone:true"> {{cloneLabel}} </li>
+
+                {{^hasBetaStudioUrl}}
+                <li class="js-lesson-migrate" data-value="migrate:false">{{moveToBetaLabel}}</li>
+                {{/hasBetaStudioUrl}}
+                {{#hasBetaStudioUrl}}
+                <li class="js-lesson-migrate" data-value="migrate:true">{{openInBetaLabel}}</li>
+                {{/hasBetaStudioUrl}}
+
                 {{/lockUserId}}
                 {{#canUnlockLesson}}
                 {{#lockUserId}}
@@ -141,7 +174,7 @@
                     <button class="button medium primary js-upload-image inline">
                         {{uploadLabel}}
                     </button>
-                    <button class="button medium simple no-text val-icon-trash danger-color inline js-delete-logo">
+                    <button class="button medium simple no-text val-icon-trash danger inline js-delete-logo">
                         {{deleteLogoLabel}}
                     </button>
                     <button class="button medium neutral js-select-from-media-gallery">
@@ -188,11 +221,11 @@
         </div>-->
     </div>
     <div class="bbm-modal__bottombar">
-        <button class="button big neutral modal-close js-cancel-slide">
-            {{cancelLabel}}
-        </button>
-        <button class="button big primary js-save-lesson js-submit-button ">
+        <button class="button medium primary js-save-lesson js-submit-button">
             {{saveLabel}}
+        </button>
+        <button class="button medium simple modal-close js-cancel-slide">
+            {{cancelLabel}}
         </button>
     </div>
 </script>
@@ -254,5 +287,5 @@
         </div>
     </div>
 
-    <button class="button big primary js-publish-lesson"> {{publishLessonLabel}} </button>
+    <button class="button medium primary js-publish-lesson"> {{publishLessonLabel}} </button>
 </script>

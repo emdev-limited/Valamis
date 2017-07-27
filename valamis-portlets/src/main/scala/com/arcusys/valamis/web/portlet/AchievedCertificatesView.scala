@@ -2,7 +2,9 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet.{RenderRequest, RenderResponse}
 
-import com.arcusys.valamis.web.portlet.base.{OAuthPortlet, PortletBase}
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
+import com.arcusys.valamis.web.portlet.base.PortletBase
 
 class AchievedCertificatesView extends OAuthPortlet with PortletBase {
 

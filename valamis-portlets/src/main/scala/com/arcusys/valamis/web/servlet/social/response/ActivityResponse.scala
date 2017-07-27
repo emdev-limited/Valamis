@@ -2,19 +2,19 @@ package com.arcusys.valamis.web.servlet.social.response
 
 import com.arcusys.learn.liferay.model.Activity
 import com.arcusys.valamis.model.{Order, SkipTake}
+import com.arcusys.valamis.reports.model.DateTime
 import com.arcusys.valamis.social.model._
 import com.arcusys.valamis.social.service.{CommentService, LikeService}
 import com.arcusys.valamis.user.model.UserInfo
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.web.service.ActivityInterpreter
-import org.ocpsoft.prettytime.PrettyTime
 
 import scala.util.Try
 
 case class ActivityResponse(id: Long,
                             user: Option[UserInfo],
                             verb: String,
-                            date: String,
+                            date: DateTime,
                             obj: ActivityObjectResponse,
                             comments: Seq[CommentResponse],
                             userLiked: Set[UserInfo],
@@ -26,7 +26,6 @@ trait ActivityConverter extends CommentConverter {
   protected def likeService: LikeService
   protected def activityInterpreter: ActivityInterpreter
 
-  val prettyTime = new PrettyTime()
 
   def toResponse(activity: Activity,
                  plId: Option[Long] = None,
@@ -65,7 +64,7 @@ trait ActivityConverter extends CommentConverter {
           activity.id,
           user = Try(userService.getById(activity.userId.toInt)).toOption.map(u => new UserInfo(u)),
           verb = activityInterpreter.getVerb(activity.className, activity.activityType),
-          date = prettyTime.format(activity.createDate.toDate),
+          date = activity.createDate,
           obj = obj,
           comments = comments.map(toResponse),
           userLiked = userLiked.map(u => new UserInfo(u)).toSet

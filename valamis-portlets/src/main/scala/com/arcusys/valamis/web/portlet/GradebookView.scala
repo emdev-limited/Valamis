@@ -2,14 +2,14 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet.{RenderRequest, RenderResponse}
 
-import com.arcusys.valamis.certificate.service.AssignmentService
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.valamis.lrs.serializer.AgentSerializer
-import com.arcusys.valamis.lrs.service.util.TincanHelper._
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
+import com.arcusys.valamis.utils.TincanHelper._
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.portlet.base._
 
 class GradebookView extends OAuthPortlet with PortletBase {
-  private lazy val assignmentService = inject[AssignmentService]
 
   override def doView(request: RenderRequest, response: RenderResponse) {
     implicit val out = response.getWriter
@@ -31,7 +31,7 @@ class GradebookView extends OAuthPortlet with PortletBase {
       "tincanActor" -> tincanActor,
       "endpointData" -> endpoint,
       "viewAllPermission" -> viewAllPermission,
-      "assignmentDeployed" -> assignmentService.isAssignmentDeployed
+      "assignmentDeployed" -> false
     ) ++ securityScope.data
 
     sendMustacheFile(data, "gradebook.html")

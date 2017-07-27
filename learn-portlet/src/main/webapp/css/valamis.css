@@ -789,7 +789,7 @@ th {
   line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 30px;
+  font-size: 20px;
   vertical-align: middle;
 }
 
@@ -859,17 +859,11 @@ th {
 
 .valamis a {
   transition: color 0.1s linear;
-  color: #2974A6;
   text-decoration: none;
   cursor: pointer;
 }
 
-.valamis a:hover {
-  color: #1a4969;
-}
-
 .valamis a:active, .valamis a:focus {
-  color: #1a4969;
   outline: none;
 }
 
@@ -921,6 +915,10 @@ th {
 
 .valamis .valamis-info-label.shifted {
   padding: 18.2px;
+}
+
+.valamis .valamis-info-label.no-items {
+  padding: 91px 18.2px;
 }
 
 .valamis .wrapper {
@@ -1744,6 +1742,15 @@ th {
   min-height: 100px;
 }
 
+.valamis a {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.valamis a:hover {
+  color: inherit;
+}
+
 .valamis input[type="text"], .valamis .val-search {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1760,7 +1767,7 @@ th {
   padding: 0;
 }
 
-.valamis .val-search:before {
+.valamis .val-search.cleartext:before {
   font-family: valamis-icons !important;
   font-style: normal !important;
   font-weight: normal !important;
@@ -1770,7 +1777,8 @@ th {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 20px;
-  content: 'M';
+  content: 'J';
+  cursor: pointer;
   top: 6px;
   right: 6px;
   position: absolute;
@@ -1782,6 +1790,10 @@ th {
   outline: none;
   -webkit-appearance: none;
   height: 32px;
+}
+
+.valamis .val-search input::-ms-clear {
+  display: none;
 }
 
 .valamis input[type="text"] {
@@ -1965,15 +1977,16 @@ th {
   display: none;
   position: absolute;
   background-color: #FFF;
-  border: 1px solid #CCCCCC;
+  border: 1px solid rgba(0, 0, 0, 0.24);
   border-radius: 0;
   padding: 6.06667px;
   padding-right: 18.2px;
-  box-shadow: 0 0 0 3px rgba(228, 228, 228, 0.6);
-  margin: 5px 0 0 3px;
+  box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+  margin: 5px 0px 0px;
   z-index: 1000;
   min-width: 0;
   font-size: inherit;
+  border-radius: 3px;
 }
 
 .valamis .dropdown ul.dropdown-menu.dropdown-visible {
@@ -1997,13 +2010,11 @@ th {
 }
 
 .valamis .dropdown ul.dropdown-menu li:before {
-  font-size: 1.5em;
-  content: "6";
-  font-family: valamis-icons;
+  font-size: 1.3em;
+  content: "";
   vertical-align: middle;
   height: 100%;
-  color: transparent;
-  margin-right: 4.55px;
+  margin-right: 8px;
 }
 
 .valamis .dropdown ul.dropdown-menu li.selected {
@@ -2011,7 +2022,7 @@ th {
 }
 
 .valamis .dropdown ul.dropdown-menu li.selected:before {
-  color: #598000;
+  outline: 2px solid #2974A6;
 }
 
 .valamis .dropdown.actions ul.dropdown-menu li {
@@ -2117,6 +2128,46 @@ th {
   box-shadow: none;
 }
 
+.valamis .dropdown ul.dropdown-menu {
+  padding-left: 1px;
+}
+
+.valamis .dropdown ul.dropdown-menu:before {
+  bottom: 100%;
+  right: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis .dropdown ul.dropdown-menu:after {
+  bottom: 100%;
+  right: 50%;
+  border: solid #f10202;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis .dropdown ul.dropdown-menu:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #CCCCCC;
+  border-width: 6px;
+  margin-right: -6px;
+}
+
+.valamis .dropdown ul.dropdown-menu:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #FFF;
+  border-width: 5px;
+  margin-right: -5px;
+}
+
 .valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element {
   width: inherit;
 }
@@ -2128,22 +2179,51 @@ th {
 .valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul {
   position: absolute;
   border: 1px solid #CCCCCC;
-  box-shadow: 0 0 0 3px rgba(228, 228, 228, 0.6);
+  padding-left: 2px;
+  left: 50%;
+  -ms-transform: translateX(-50%);
+      transform: translateX(-50%);
+  right: auto;
+}
+
+.valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul:before {
+  bottom: 100%;
+  right: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul:after {
+  bottom: 100%;
+  right: 50%;
+  border: solid #f10202;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #CCCCCC;
+  border-width: 6px;
+  margin-right: -6px;
+}
+
+.valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #FFF;
+  border-width: 5px;
+  margin-right: -5px;
 }
 
 .valamis .portlet[min-width~="480px"] .filters-row .dropdown.filter-element ul li {
   font-weight: bold;
-}
-
-.valamis .portlet[min-width~="768px"] .filters-row .dropdown.actions .button span {
-  display: inline-block;
-  text-indent: 0px;
-}
-
-.valamis .portlet[min-width~="768px"] .filters-row .button > [class^="val-icon-"],
-.valamis .portlet[min-width~="768px"] .filters-row .button > [class*=" val-icon-"] {
-  display: inline-block;
-  text-indent: 0px;
 }
 
 .valamis input.onlyDigits {
@@ -2151,10 +2231,6 @@ th {
   height: 34px;
   text-align: center;
   box-shadow: none !important;
-}
-
-.valamis input.onlyDigits:focus {
-  border-color: #CCCCCC !important;
 }
 
 .valamis .val-during-period {
@@ -2194,6 +2270,25 @@ th {
   background-size: contain;
 }
 
+.valamis .thumbnail-container .thumbnail-item.thumbnail-provider-item .image-title {
+  font-weight: bold;
+}
+
+.valamis .thumbnail-container .thumbnail-item.thumbnail-provider-item .description-short-view {
+  height: 20px;
+  line-height: 20px;
+}
+
+.valamis .thumbnail-container .thumbnail-item.thumbnail-provider-item .show-more {
+  color: #2974A6;
+}
+
+.valamis .thumbnail-container .item {
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  word-wrap: break-word;
+}
+
 .valamis .able-to-run-container input {
   width: 100px;
   margin-right: 9.1px;
@@ -2206,43 +2301,20 @@ th {
 .valamis .toggle-container {
   cursor: pointer;
   text-align: center;
-  background: #F2F2F2;
   font-size: 13px;
   font-weight: bold;
-  color: #777;
+  color: #555;
   padding: 12.13333px;
 }
 
 .valamis .toggle-container [class*="val-icon-"] {
-  color: #AAA;
+  color: #777;
 }
 
 .valamis .loading-container {
   width: 100%;
   height: 50px;
   background: transparent url("../img/loading.gif") center no-repeat;
-}
-
-.valamis .status-label {
-  background: #DEDEDE;
-  color: #555;
-  text-transform: uppercase;
-  font-weight: bold;
-  font-size: 10px;
-  line-height: 10px;
-  padding: 4px 8px;
-  display: inline-block;
-  border-radius: 2px;
-}
-
-.valamis .status-label.success {
-  background: #598000;
-  color: #FFF;
-}
-
-.valamis .status-label.failed {
-  background: #CC4233;
-  color: #FFF;
 }
 
 .valamis .val-rounded-icon:before {
@@ -2340,6 +2412,107 @@ th {
   height: 100%;
 }
 
+.valamis input[type=radio].val-radio {
+  display: none;
+}
+
+.valamis input[type=radio].val-radio + label {
+  border-radius: 3px;
+  margin: 0;
+  padding: 10px 20px 10px 0;
+}
+
+.valamis input[type=radio].val-radio + label .radio-icon {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #CCCCCC;
+  float: left;
+  margin: 0 10px 0 0;
+  border-radius: 50%;
+}
+
+.valamis input[type=radio].val-radio + label .radio-icon:before {
+  content: '.';
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  margin-left: 4px;
+  background-color: #3c3c3c;
+  color: transparent;
+  display: none;
+}
+
+.valamis input[type=radio].val-radio + label .radio-label {
+  line-height: 20px;
+  float: left;
+}
+
+.valamis input[type=radio].val-radio:checked + label .radio-icon:before {
+  display: block;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox, .valamis .custom-choice input[type=radio].radio {
+  display: none;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox + label, .valamis .custom-choice input[type=radio].radio + label {
+  border-radius: 3px;
+  margin: 0;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox + label,
+.valamis .custom-choice input[type=radio].radio + label {
+  position: relative;
+  height: 20px;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox + label .item,
+.valamis .custom-choice input[type=radio].radio + label .item {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #CCCCCC;
+  float: left;
+  background-color: transparent;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox + label .item[class*="val-icon-"]:before,
+.valamis .custom-choice input[type=radio].radio + label .item[class*="val-icon-"]:before {
+  display: none;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox:checked + label .item[class*="val-icon-"]:before,
+.valamis .custom-choice input[type=radio].radio:checked + label .item[class*="val-icon-"]:before {
+  display: block;
+  margin: 1px;
+  font-size: 17px;
+}
+
+.valamis .custom-choice input[type=radio].radio + label .item {
+  border-radius: 50%;
+}
+
+.valamis .custom-choice input[type=radio].radio:checked + label .item.val-icon-radio:before {
+  content: '.';
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  margin-left: 4px;
+  background-color: #2c2c2c;
+  color: #F8F8F8;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox + label .item {
+  border-radius: 2px;
+}
+
+.valamis .custom-choice input[type=checkbox].checkbox + label .item.val-icon-checkmark:before {
+  margin: 1px;
+}
+
 .valamis .item-info {
   line-height: initial;
 }
@@ -2375,199 +2548,141 @@ th {
   padding-bottom: 5px;
 }
 
-.valamis .val-table {
-  border-collapse: collapse;
-  margin: 9.1px 0;
-  width: 100%;
-  background: #FFF;
-  border: 1px solid #CCCCCC;
-}
-
-.valamis .val-table.small {
-  font-size: 100%;
-}
-
-.valamis .val-table.no-out-margin {
+.valamis .val-switch {
+  display: block;
+  position: relative;
+  width: 39px;
+  height: 20px;
+  background: #EAEAEA;
+  box-shadow: 0 0 0 1px #CCCCCC inset;
+  border-radius: 10px;
+  cursor: pointer;
   margin: 0;
 }
 
-.valamis .val-table.no-border {
-  border: none;
+.valamis .val-switch input.switch-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
 }
 
-.valamis .val-table.no-border th, .valamis .val-table.no-border tr, .valamis .val-table.no-border td {
-  border: none;
+.valamis .val-switch input.switch-input:checked ~ .switch-handle {
+  left: 19px;
+  background-color: #2974A6;
+  border-color: #2974A6;
 }
 
-.valamis .val-table.no-side-border {
-  border: none;
-}
-
-.valamis .val-table.no-top-border {
-  border-top: none;
-}
-
-.valamis .val-table.no-top-border tr:first-child {
-  border-top: none;
-}
-
-.valamis .val-table.no-top-border tr:first-child td, .valamis .val-table.no-top-border tr:first-child th {
-  border-top: none;
-}
-
-.valamis .val-table.no-bottom-border {
-  border-bottom: none;
-}
-
-.valamis .val-table.no-bottom-border tr:last-child {
-  border-bottom: none;
-}
-
-.valamis .val-table.no-bottom-border tr:last-child td, .valamis .val-table.no-bottom-border tr:last-child th {
-  border-bottom: none;
-}
-
-.valamis .val-table th {
-  background-color: #F2F2F2;
-  border-bottom: 1px solid #CCCCCC;
-  font-weight: bold;
-  padding: 9.1px 18.2px;
-  text-align: left;
-  color: #555;
-  line-height: 20px;
-}
-
-.valamis .val-table th.narrow-col {
-  white-space: nowrap;
-  width: 1%;
-}
-
-.valamis .val-table td {
-  border-bottom: 1px solid #CCCCCC;
-  padding: 9.1px 0;
-  font-weight: bold;
-}
-
-.valamis .val-table td.buttons {
-  text-align: right;
-}
-
-.valamis .val-table td.buttons button {
-  float: none;
-}
-
-.valamis .val-table td.narrow-col {
-  white-space: nowrap;
-  width: 1%;
-}
-
-.valamis .val-table td > p,
-.valamis .val-table td > span {
-  line-height: 1.4;
-}
-
-.valamis .val-table td a {
-  color: inherit;
-  font-weight: inherit;
-}
-
-.valamis .val-table td .val-icon-sort {
-  color: #AAA;
-}
-
-.valamis .val-table tr,
-.valamis .val-table td,
-.valamis .val-table th {
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-all;
-  vertical-align: middle;
-  border: 1px solid #CCCCCC;
-}
-
-.valamis .val-table tr, .valamis .val-table li {
+.valamis .val-switch .switch-handle {
+  position: absolute;
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  left: 0;
+  top: 0;
   background-color: #FFF;
+  border: 1px solid #CCCCCC;
+  cursor: pointer;
+  transition: left 0.15s ease-out, background-color 0.15s;
 }
 
-.valamis .val-table tr:nth-child(even) {
+.valamis .val-switch[disabled] {
+  cursor: auto;
+}
+
+.valamis .val-switch[disabled] .switch-handle {
+  cursor: auto;
+}
+
+.valamis .val-table-wrapper {
+  padding: 0 20px;
+  border-top: 1px solid #CCCCCC;
+}
+
+.valamis .val-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-weight: normal;
+  line-height: 1.5;
+}
+
+.valamis .val-table .info {
+  color: #555;
+  font-size: 13px;
+}
+
+.valamis .val-table .title {
+  font-weight: bold;
+}
+
+.valamis .val-table th, .valamis .val-table td {
+  overflow-wrap: normal;
+  word-wrap: normal;
+  word-break: normal;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #DEDEDE;
+}
+
+.valamis .val-table th.narrow-col, .valamis .val-table td.narrow-col {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.valamis .val-table tbody tr:last-child th, .valamis .val-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.valamis .val-table tr:hover td {
   background-color: #FAFAFA;
 }
 
-.valamis .val-table tr.selected {
-  border: 2px solid #598000;
+.valamis .val-table td {
+  padding: 16px 10px;
 }
 
-.valamis .val-table.neutral tr {
-  background-color: #F2F2F2;
+.valamis .val-table th {
+  padding: 8px 10px;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: bold;
+  color: #555;
+  border-bottom: 2px solid #DEDEDE;
 }
 
-.valamis .val-table.simple {
-  border: none;
+.valamis .val-table td:first-child, .valamis .val-table th:first-child {
+  padding-left: 16px;
 }
 
-.valamis .val-table.simple tr {
-  border: none;
-  background-color: #FFF;
+.valamis .val-table td:last-child, .valamis .val-table th:last-child {
+  padding-right: 16px;
 }
 
-.valamis .val-table.simple tr td {
-  border-left: none;
-  border-right: none;
+.valamis .val-table-wrapper .val-table td:first-child, .valamis .val-table-wrapper .val-table td:last-child, .valamis .val-table-wrapper .val-table th:first-child, .valamis .val-table-wrapper .val-table th:last-child {
+  padding-right: 10px;
+  padding-left: 10px;
 }
 
-.valamis .val-table.simple tr:first-child td {
-  border-top: none;
+.valamis .val-table.simple th, .valamis .val-table.simple td {
+  padding: 5px;
 }
 
-.valamis .val-table.simple tr:last-child td {
-  border-bottom: none;
+.valamis .val-table.simple th:first-child, .valamis .val-table.simple td:first-child {
+  padding-left: 0;
 }
 
-.valamis .list th {
-  border: none;
-  border-bottom: 1px solid #CCCCCC;
-  font-size: inherit;
-}
-
-.valamis .list td, .valamis .list tr {
-  border-right: none;
-  border-left: none;
-}
-
-.valamis .big td {
-  line-height: 34px;
-  padding: 12.13333px 9.1px;
-}
-
-.valamis .big td.buttons {
-  white-space: nowrap;
+.valamis .val-table.simple th:last-child, .valamis .val-table.simple td:last-child {
   padding-right: 0;
 }
 
-.valamis .medium td {
-  line-height: 30px;
-  padding: 9.1px;
+.valamis .val-table.simple th {
+  letter-spacing: 0.5px;
 }
 
-.valamis .small td {
-  line-height: 26px;
-  padding: 6.06667px;
-}
-
-.valamis .big td.item-info, .valamis .medium td.item-info, .valamis .small td.item-info {
-  line-height: initial;
-}
-
-.valamis .big td:first-child, .valamis .medium td:first-child, .valamis .small td:first-child {
-  padding-left: 18.2px;
-}
-
-.valamis .big td:last-child, .valamis .medium td:last-child, .valamis .small td:last-child {
-  padding-right: 18.2px;
-}
-
-.valamis .big td.buttons, .valamis .medium td.buttons, .valamis .small td.buttons {
-  padding-right: 9.1px;
+.valamis .val-table.simple td {
+  font-size: 13px;
 }
 
 .valamis .div-table {
@@ -2588,7 +2703,7 @@ th {
 }
 
 .valamis .val-info-table .div-row {
-  border-bottom: 1px solid #CCCCCC;
+  border-bottom: 1px solid #DEDEDE;
 }
 
 .valamis .val-info-table .div-row:last-child {
@@ -2649,37 +2764,6 @@ th {
 .valamis .val-info-table.small-width .content-col {
   width: 75%;
   padding-right: 5%;
-}
-
-.valamis td.checkbox-col {
-  width: 16px;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.valamis td.checkbox-col label {
-  margin: 0;
-}
-
-.valamis td.checkbox-col label:before {
-  margin-right: 0;
-}
-
-.valamis td.thin {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-.valamis td.handle {
-  cursor: move;
-}
-
-.valamis .new-packages-list-table td:first-child {
-  width: 1%;
-}
-
-.valamis .new-packages-list-table .name-col {
-  padding-left: 0;
 }
 
 .valamis .div-table.no-content-table {
@@ -2779,18 +2863,21 @@ th {
   margin: 0;
   background-color: #F2F2F2;
   border-bottom: 1px solid #CCCCCC;
-  padding: 0 18.2px;
+  padding: 0 16px;
+  text-align: left;
 }
 
 .valamis .val-tabs .nav-tabs > li {
-  float: left;
+  display: inline-block;
+  vertical-align: bottom;
+  float: none;
 }
 
 .valamis .val-tabs .nav-tabs > li > a {
   font-size: 13px;
-  padding: 0 12.13333px;
-  margin: 4px 0 0 0;
-  color: #555;
+  margin: 4px 16px 0 16px;
+  padding: 0;
+  color: #2c2c2c;
   display: inline-block;
   border: none;
   border-bottom: 4px solid transparent;
@@ -2801,7 +2888,7 @@ th {
 }
 
 .valamis .val-tabs .nav-tabs > li > a:hover {
-  color: #598000;
+  color: #2c2c2c;
   background-color: transparent;
   border-color: transparent;
 }
@@ -2814,10 +2901,9 @@ th {
   border: none;
   border-radius: 0;
   font-weight: bold;
-  color: #598000;
-  border-bottom: 4px solid #507400;
+  color: #2c2c2c;
+  border-bottom: 4px solid #598000;
   background-color: transparent;
-  margin: 4px 0 0 0;
 }
 
 .valamis .val-tabs .nav-tabs.centered {
@@ -3000,7 +3086,6 @@ th {
 
 @media screen and (min-width: 45.71429em) {
   .valamis .val-modal .modal-inner .modal-content {
-    -moz-columns: 2 8em;
     columns: 2 8em;
   }
 }
@@ -3182,15 +3267,13 @@ th {
 }
 
 .valamis .bbm-modal .bbm-modal__bottombar {
-  background: #F2F2F2;
-  border-top: 1px solid #CCCCCC;
-  padding: 18.2px;
-  text-align: right;
+  background: #FFF;
+  text-align: left;
 }
 
 .valamis .bbm-modal .bbm-modal__bottombar .button {
-  margin-right: 0;
-  margin-left: 10px;
+  margin-right: 10px;
+  margin-left: 0px;
 }
 
 .valamis .bbm-modal .modal-content {
@@ -3366,24 +3449,6 @@ th {
   font-size: 13px;
 }
 
-.valamis .tile .tile-content .status {
-  color: #AAA;
-  font-size: 11.14286px;
-}
-
-.valamis .tile .tile-content .status.success .val-label {
-  color: #FFF;
-  background-color: #598000;
-}
-
-.valamis .tile .tile-content .status.failed .val-label {
-  color: #FFF;
-}
-
-.valamis .tile .tile-content .status.failed .val-label, .valamis .tile .tile-content .status.overdue .val-label {
-  background-color: #CC4233;
-}
-
 .valamis .tile .val-icon-drag {
   display: block;
   position: absolute;
@@ -3441,6 +3506,13 @@ th {
   margin-right: 9.1px;
 }
 
+.valamis .list .tile .tile-content.with-action > .dropdown.actions {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  margin-top: -17px;
+}
+
 .valamis .list .tile .tile-content.with-action > ul {
   max-width: 900px;
 }
@@ -3461,13 +3533,6 @@ th {
 
 .valamis .list .tile:last-child {
   border-bottom: none;
-}
-
-.valamis .list .tile .dropdown.actions, .valamis .list .tile .action-buttons {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  margin-top: -17px;
 }
 
 .valamis .simple-list .tile {
@@ -3512,7 +3577,7 @@ th {
   padding-top: 9.1px;
 }
 
-.valamis .tiles .tile .dropdown.actions, .valamis .tiles .tile .action-buttons {
+.valamis .tiles .tile .tile-content > .dropdown.actions {
   position: absolute;
   right: 10px;
   top: 10px;
@@ -4227,7 +4292,13 @@ th {
   color: #555;
 }
 
-.valamis .button.simple.danger-color {
+.valamis .button.simple.danger:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #CC4233;
+}
+
+.valamis .button.simple.danger:hover > span {
   color: #CC4233;
 }
 
@@ -4243,7 +4314,7 @@ th {
 
 .valamis .button > [class^="val-icon-"]:before,
 .valamis .button > [class*=" val-icon-"]:before {
-  margin: -2px 10px 0 -4px;
+  margin: -2px 4px 0 -4px;
   vertical-align: middle;
   display: inline-block;
   width: 20px;
@@ -4422,6 +4493,19 @@ th {
   border-color: #CCCCCC;
 }
 
+.valamis .back-button {
+  height: 44px;
+  font-size: 13px;
+  line-height: 44px;
+}
+
+.valamis .back-button:before {
+  color: #AAA;
+  float: left;
+  margin-right: 5px;
+  line-height: 44px;
+}
+
 .valamis .text-left {
   text-align: left !important;
 }
@@ -4528,6 +4612,10 @@ th {
   display: inline !important;
 }
 
+.valamis .display-inline-block {
+  display: inline-block !important;
+}
+
 .valamis .cursor-pointer {
   cursor: pointer;
 }
@@ -4547,6 +4635,24 @@ th {
 
 .valamis .arrow-icon-indent {
   padding-left: 25px;
+}
+
+.valamis .centered-x-block {
+  position: absolute;
+  left: 50%;
+  -ms-transform: translateX(-50%);
+      transform: translateX(-50%);
+}
+
+.valamis .centered-y-block {
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
+}
+
+.valamis .val-percent-sign {
+  font-size: 80%;
 }
 
 .valamis #playerRegion {
@@ -4586,6 +4692,10 @@ th {
   background: #FFF;
 }
 
+.valamis .val-paginator {
+  text-align: center;
+}
+
 .valamis .val-paginator .paginator-showing {
   display: inline;
 }
@@ -4603,8 +4713,10 @@ th {
   visibility: hidden;
 }
 
-.valamis .val-paginator.top-shifted .pagination-group {
-  padding-top: 18.2px;
+.valamis .val-modal .val-paginator .pagination-group {
+  padding: 18.2px 0;
+  margin: 0 18.2px;
+  border-top: 1px solid #CCCCCC;
 }
 
 .valamis .val-modal .val-paginator .pagination-group li.full-view {
@@ -4613,7 +4725,7 @@ th {
 }
 
 .valamis .portlet[min-width~="480px"] .val-paginator .pagination-group li.full-view {
-  display: initial;
+  display: inline;
   visibility: visible;
 }
 
@@ -4969,6 +5081,37 @@ th {
   display: block;
 }
 
+.valamis .portraits {
+  position: relative;
+  width: 40px;
+}
+
+.valamis .portraits .img-circle {
+  position: absolute;
+  top: 50%;
+  -ms-transform: translate(0, -50%);
+      transform: translate(0, -50%);
+  border: 1px solid #f8f8f8;
+}
+
+.valamis .portraits.group {
+  width: 60px;
+}
+
+.valamis .portraits.group .img-circle:nth-child(1) {
+  z-index: 3;
+}
+
+.valamis .portraits.group .img-circle:nth-child(2) {
+  left: 10px;
+  z-index: 2;
+}
+
+.valamis .portraits.group .img-circle:nth-child(3) {
+  left: 20px;
+  z-index: 1;
+}
+
 .valamis .portlet[min-width~="480px"] .val-img-logo {
   max-width: 150px;
   max-height: 100px;
@@ -5089,9 +5232,10 @@ th {
   display: block;
   position: relative;
   padding: 3px 18.2px;
-  border-bottom: 1px solid #CCCCCC;
+  border-bottom: 2px solid #CCCCCC;
   height: 40px;
-  background-color: #F2F2F2;
+  text-transform: uppercase;
+  font-size: 11px;
   color: #555;
   vertical-align: baseline;
 }
@@ -5162,13 +5306,6 @@ th {
 
 .valamis .val-lesson-content .lesson-item-li {
   line-height: 17px;
-}
-
-.valamis .val-lesson-content .lesson-item-li:nth-child(odd) {
-  background-color: #f8f8f8;
-}
-
-.valamis .val-lesson-content .lesson-item-li:nth-child(even) {
   background-color: #FFF;
 }
 
@@ -5295,6 +5432,35 @@ th {
   max-width: 300px;
 }
 
+.valamis #contentManagerAppRegion .val-table td.thin, .valamis .content-edit-modal .val-table td.thin {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.valamis #contentManagerAppRegion .val-table td.handle, .valamis .content-edit-modal .val-table td.handle {
+  cursor: move;
+}
+
+.valamis #contentManagerAppRegion .val-table tr:hover, .valamis .content-edit-modal .val-table tr:hover {
+  background-color: transparent;
+}
+
+.valamis #contentManagerAppRegion .val-table.answers-table, .valamis .content-edit-modal .val-table.answers-table {
+  background: #FFF;
+  margin: 9.1px 0;
+  font-size: 13px;
+  font-weight: bold;
+  border: 1px solid #DEDEDE;
+}
+
+.valamis #contentManagerAppRegion .val-table.answers-table th, .valamis .content-edit-modal .val-table.answers-table th {
+  background-color: #F2F2F2;
+}
+
+.valamis #contentManagerAppRegion .val-table.answers-table tr:nth-child(even), .valamis .content-edit-modal .val-table.answers-table tr:nth-child(even) {
+  background-color: #FAFAFA;
+}
+
 .valamis .ui-sortable-helper {
   cursor: move;
   -ms-transform: rotate(-2deg);
@@ -5341,6 +5507,10 @@ th {
 
 .valamis #questionBankBody .val-tree .ui-state-highlight {
   background-color: #777;
+}
+
+.valamis #questionBankBody.val-portlet .portlet-wrapper .content-wrapper .content-header {
+  border-bottom: none;
 }
 
 .valamis #questionBankBody.val-portlet .portlet-wrapper .lesson-items {
@@ -5446,12 +5616,23 @@ th {
   font-weight: bold;
 }
 
-.valamis #questionBankBody.val-portlet .portlet-wrapper #contentManagerContentPreview .small td:first-child {
+.valamis #questionBankBody.val-portlet .portlet-wrapper #contentManagerContentPreview .val-table td {
+  font-weight: bold;
+  line-height: 26px;
+  padding: 6.06667px;
+  border-bottom: none;
+}
+
+.valamis #questionBankBody.val-portlet .portlet-wrapper #contentManagerContentPreview .val-table td.preview-normal-text {
+  font-weight: normal;
+}
+
+.valamis #questionBankBody.val-portlet .portlet-wrapper #contentManagerContentPreview .val-table td:first-child {
   padding-left: 0px;
   white-space: nowrap;
 }
 
-.valamis #questionBankBody.val-portlet .portlet-wrapper #contentManagerContentPreview .small td:first-child img {
+.valamis #questionBankBody.val-portlet .portlet-wrapper #contentManagerContentPreview .val-table td:first-child img {
   width: auto !important;
   height: auto !important;
 }
@@ -5518,7 +5699,8 @@ th {
 }
 
 .valamis .content-edit-modal .cke .cke_toolbar,
-.valamis .content-edit-modal .bbm-modal__bottombar .button {
+.valamis .content-edit-modal .bbm-modal__bottombar .button,
+.valamis .content-edit-modal .checkbox-label {
   -webkit-transform: translate3d(0, 0, 0);
 }
 
@@ -5538,46 +5720,6 @@ th {
 
 .valamis .content-manager-new-category .bbm-modal.bbm-modal--open .bbm-modal__topbar .modal-close {
   right: -40px;
-}
-
-.valamis .curriculum-modal.bbm-modal.bbm-modal--open {
-  min-height: 250px;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open {
-  width: 480px !important;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content {
-  padding: 36.4px;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content label {
-  color: #2c2c2c;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content label.group-label {
-  font-weight: bold;
-  padding-bottom: 5px;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table {
-  padding-bottom: 18.2px;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table .div-col {
-  padding: 0 5px;
-  vertical-align: top;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table input, .valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table label {
-  margin: 0;
-}
-
-.valamis .curriculum-modal.certificate-activate-modal .bbm-modal.bbm-modal--open .modal-content .display-options-table .hint-text {
-  font-size: 12px;
-  color: #555;
-  padding-bottom: 10px;
 }
 
 .valamis .lesson-studio-modal.bbm-modal.bbm-modal--open {
@@ -5884,6 +6026,14 @@ th {
   display: inline-block;
 }
 
+.valamis .portlet[min-width~="1024px"] #questionBankBody.val-portlet .portlet-wrapper .content-wrapper .content-header .content-controls .dropdown.actions .dropdown-menu {
+  padding-left: 6.06667px;
+}
+
+.valamis .portlet[min-width~="1024px"] #questionBankBody.val-portlet .portlet-wrapper .content-wrapper .content-header .content-controls .dropdown .dropdown-menu {
+  padding-left: 2px;
+}
+
 .valamis .portlet[min-width~="1024px"] #questionBankBody.val-portlet .portlet-wrapper .content-wrapper .content-header .content-controls .val-search {
   width: 240px;
 }
@@ -5940,234 +6090,13 @@ th {
   line-height: 26px;
 }
 
-.valamis .val-competences td.fix-col-width {
-  width: 40%;
-}
-
-.valamis .val-competences .portlet-wrapper .content-wrapper {
+.valamis .show-permission-message {
   min-height: 200px;
-  border: none;
-}
-
-.valamis .val-competences #competencesAdminSidebar .val-tree .selected-entity .tree-item-title {
-  font-weight: bold;
-}
-
-.valamis .val-competences table.competences-list-table {
-  margin: 0;
-}
-
-.valamis .val-competences .settings-table .name-col label {
-  color: #555;
-  font-weight: bold;
-}
-
-.valamis .val-competences .competences-list-header button {
-  margin: 10px;
-}
-
-.valamis .val-competences #mySkillsTable {
-  border: none;
-  margin: 0;
-}
-
-.valamis .val-competences #mySkillsTable tr td {
-  overflow-wrap: normal;
-  word-wrap: normal;
-  word-break: normal;
-}
-
-.valamis .val-competences #mySkillsTable tr td a {
-  color: #2974A6;
-  cursor: pointer;
-}
-
-.valamis .val-competences #mySkillsTable tr td a:hover {
-  color: #1a4969;
-}
-
-.valamis .val-competences #mySkillsTable tr td a:active, .valamis .val-competences #mySkillsTable tr td a:focus {
-  color: #1a4969;
-  outline: none;
-}
-
-.valamis .val-competences #mySkillsTable tr td:not(:first-child) {
-  text-align: center;
-}
-
-.valamis .val-competences #mySkillsTable tr.competence-category {
-  background-color: #F2F2F2 !important;
-  border-right: 1px solid #CCCCCC;
-}
-
-.valamis .val-competences #mySkillsTable tr.competence-category.depth-3 {
-  background-color: #EAEAEA !important;
-}
-
-.valamis .val-competences #mySkillsTable tr.competence-category.depth-2 {
-  background-color: #DEDEDE !important;
-}
-
-.valamis .val-competences #mySkillsTable tr.competence-category.depth-1 {
-  background-color: #AAA !important;
-}
-
-.valamis .val-competences #mySkillsTable tr:not(.competence-category) td:first-child {
-  padding-left: 27.3px;
-}
-
-.valamis .val-competences .new-item-button {
-  min-width: 130px;
-  margin: 9.1px;
-}
-
-.valamis .val-competences .block-margin {
-  margin: 0 18.2px;
-  height: 100%;
-}
-
-.valamis .val-competences .block-margin .groupItem {
-  padding-right: 36.4px;
-}
-
-.valamis .val-competences .block-margin .groupItem:last-child {
-  padding-right: 0;
-}
-
-.valamis .val-competences .block-header {
-  background-color: #EAEAEA;
-  padding: 0 9.1px;
-  line-height: 40px;
-}
-
-.valamis .val-competences ul.competences-list {
-  list-style-type: disc;
-  margin-bottom: 9.1px;
-  padding-left: 18.2px;
-}
-
-.valamis .val-competences ul.competences-list li {
-  line-height: 1.4;
-}
-
-.valamis .val-competences .select-button {
-  width: 100px;
   position: relative;
 }
 
-.valamis .val-competences .select-button div {
-  overflow: hidden;
-  width: 80px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-right: 24px;
-}
-
-.valamis .val-competences .select-button span {
-  position: absolute;
-  top: 0;
-  right: 18.2px;
-}
-
-.valamis .val-competences .user-experience-table td:first-child {
-  width: 200px;
-  text-align: left;
-}
-
-.valamis .val-competences .user-experience-table span {
-  font-weight: normal;
-}
-
-.valamis #competencesUserToolbar #competencesSearchPrompt {
-  background-color: white;
-  top: auto;
-  cursor: pointer;
-  width: 240px;
-  box-shadow: 0px 0px 13px 0px rgba(40, 40, 40, 0.44);
-}
-
-.valamis #competencesUserToolbar #competencesSearchPrompt li {
-  padding: 3px;
-  font-weight: normal;
-}
-
-.valamis #competencesUserToolbar #competencesSearchPrompt li .prompt-right {
-  position: absolute;
-  right: 5px;
-}
-
-.valamis #competencesUserToolbar #competencesSearchPrompt li .prompt-left {
-  display: inline-block;
-  width: 170px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.valamis .competence-user-summary-region {
-  width: 50%;
-  vertical-align: top;
-  background-color: #FFF;
-}
-
-.valamis .competence-user-summary-region .users-wrapper {
-  max-height: 620px;
-  overflow-y: auto;
-}
-
-.valamis .competence-user-summary-region h3 {
-  height: 50px;
-  line-height: 50px;
-  background: #F2F2F2;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 18.0px;
-  color: #2c2c2c;
-  padding-left: 15px;
-  margin-bottom: 0;
-}
-
-.valamis .competence-user-summary-region h3.header-users-without-skills {
-  border-right: solid 1px #DEDEDE;
-}
-
-.valamis .competence-user-summary-region ol {
-  list-style-type: decimal;
-  margin-left: 35px;
-  padding-top: 20px;
-}
-
-.valamis .competence-user-summary-region ol li {
-  padding-left: 10px;
-  height: 60px;
-  font-size: 15px;
-  line-height: 20px;
-}
-
-.valamis .competence-user-summary-region ol li img.img-circle {
-  margin-right: 6px;
-}
-
-.valamis .competence-user-summary-region ol li .info {
-  display: inline-block;
-  width: calc(100% - 65px);
-  border-bottom: 1px solid #DEDEDE;
-  height: 40px;
-  font-weight: bold;
-}
-
-.valamis .competence-user-summary-region ol li .info .user-name,
-.valamis .competence-user-summary-region ol li .info .user-name:hover {
-  color: #2c2c2c;
-}
-
-.valamis .competence-user-summary-region ol li .date {
-  color: #555;
-  font-weight: normal;
-  text-align: right;
-}
-
-.valamis .competence-user-summary-region ol li .skills {
-  width: 90px;
-  text-align: right;
+.valamis .show-permission-message > div {
+  top: 50%;
 }
 
 .valamis .resent-lessons {
@@ -6203,6 +6132,12 @@ th {
   padding-bottom: 0;
 }
 
+.valamis .learning-paths-settings .filter-element .val-radio,
+.valamis .learning-paths-settings .filter-element .radio-label {
+  display: inline;
+  cursor: pointer;
+}
+
 .valamis .achieved-certificates .tile {
   padding: 18px 15px 17px 15px;
   height: 87px;
@@ -6224,6 +6159,24 @@ th {
   float: left;
   text-align: center;
   margin-right: 18.2px;
+}
+
+.valamis .achieved-certificates .div-table.no-content-table .div-col-center {
+  font-weight: normal;
+  font-size: 15px;
+}
+
+.valamis .achieved-certificates .div-table.no-content-table .div-col-center a {
+  color: #2974a6;
+}
+
+.valamis .achieved-certificates .div-table.no-content-table .div-col-center .get-certificate-image {
+  background: transparent url("../img/certificate_cover_empty.svg") no-repeat;
+  background-size: contain;
+  display: inline-block;
+  width: 80px;
+  height: 62px;
+  margin: 0 0 10px;
 }
 
 .valamis .valamis-activities-users-liked .bbm-modal.bbm-modal--open {
@@ -6258,6 +6211,17 @@ th {
 
 .valamis #packageScopeRuleList input[type="checkbox"] {
   float: left;
+}
+
+.valamis .category-filter .name-col {
+  text-align: right;
+  vertical-align: middle;
+  font-weight: bolder;
+}
+
+.valamis .category-filter .content-col {
+  width: 25%;
+  padding: 0 18.2px;
 }
 
 .valamis .portlet[id*="RecentLessons"] .portlet-content, .valamis .portlet[id*="AchievedCertificates"] .portlet-content {
@@ -6313,156 +6277,36 @@ th {
   font-size: 12px;
 }
 
-.valamis .add-site-members-modal .paging-showing-label .show-items-buttons {
-  font-weight: normal;
-}
-
-.valamis .add-site-members-modal .bbm-modal {
-  max-width: 480px;
-  margin-top: 20px;
-}
-
-.valamis .add-site-members-modal #valamisBaseToolbar .table-header-row {
-  border: none;
-  padding: 0px;
-}
-
-.valamis .add-site-members-modal #valamisBaseToolbar table {
-  border: none;
-}
-
-.valamis .add-site-members-modal #valamisBaseToolbar table tr {
-  border: none;
-}
-
-.valamis .add-site-members-modal #valamisBaseToolbar table tr td {
-  color: #555;
-  font-size: 11px;
-  text-transform: uppercase;
-  border-top: none;
-}
-
-.valamis .add-site-members-modal #valamisBaseList table {
-  border: none;
-}
-
-.valamis .add-site-members-modal #valamisBaseList table tr {
-  background-color: #FFF;
-}
-
-.valamis .add-site-members-modal #valamisBaseList table tr .name-col {
-  font-size: 15.0px;
-  word-break: keep-all;
-  line-height: 20px;
-}
-
-.valamis .add-site-members-modal #valamisBaseList table tr .role-col {
-  font-weight: normal;
-  line-height: 17px;
-  word-break: keep-all;
-}
-
-.valamis .add-site-members-modal #valamisBaseList table tr:last-child {
-  border-bottom: 0px;
-}
-
-.valamis .add-site-members-modal #valamisBaseList table tr:last-child td {
-  border-bottom: 0px;
-}
-
-.valamis .add-site-roles-modal .checkbox-col {
-  padding-right: 5px;
-}
-
 .valamis .add-site-roles-modal .bbm-modal {
   max-width: 640px;
   margin-top: 20px;
 }
 
-.valamis .add-site-roles-modal #valamisBaseToolbar .table-header-row {
-  padding: 0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseToolbar .table-header-row .val-table {
-  border: 0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseToolbar .table-header-row tbody tr {
-  border: 0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseToolbar .table-header-row tbody tr .name-col {
-  width: 30%;
-}
-
-.valamis .add-site-roles-modal #valamisBaseToolbar .table-header-row tbody tr td {
-  border-top: 0px;
-  color: #555;
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table {
-  border: 0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table tbody tr {
-  background-color: #FFF;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table tbody tr .name-col {
-  width: 30%;
-  font-size: 15.0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table tbody tr .description-col {
-  font-weight: normal;
-  line-height: 17px;
-  word-break: keep-all;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table tbody tr td {
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table tbody tr:last-child {
-  border-bottom: 0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseList table tbody tr:last-child td {
-  border-bottom: 0px;
-}
-
-.valamis .add-site-roles-modal #valamisBaseListPaginator {
-  display: none;
-}
-
-.valamis #editCourseMembers .paging-showing-label .show-items-buttons {
+.valamis #editCourseMembers .paging-showing-label .show-items-buttons, .valamis .add-site-members-modal .paging-showing-label .show-items-buttons, .valamis .add-site-roles-modal .paging-showing-label .show-items-buttons {
   font-weight: normal;
 }
 
-.valamis #editCourseMembers .js-global-assign-role {
+.valamis #editCourseMembers .js-global-assign-role, .valamis .add-site-members-modal .js-global-assign-role, .valamis .add-site-roles-modal .js-global-assign-role {
   margin: 0px;
 }
 
-.valamis #editCourseMembers .js-assign-role {
+.valamis #editCourseMembers .js-assign-role, .valamis .add-site-members-modal .js-assign-role, .valamis .add-site-roles-modal .js-assign-role {
   margin: 0px;
 }
 
-.valamis #editCourseMembers .picture-placeholder {
-  width: 58px;
+.valamis #editCourseMembers .picture-placeholder, .valamis .add-site-members-modal .picture-placeholder, .valamis .add-site-roles-modal .picture-placeholder {
+  width: 60px;
 }
 
-.valamis #editCourseMembers .name-col {
+.valamis #editCourseMembers .name-col, .valamis .add-site-members-modal .name-col, .valamis .add-site-roles-modal .name-col {
   width: 25%;
 }
 
-.valamis #editCourseMembers .button .simple {
+.valamis #editCourseMembers .button .simple, .valamis .add-site-members-modal .button .simple, .valamis .add-site-roles-modal .button .simple {
   margin: 0px;
 }
 
-.valamis #editCourseMembers .display-on-selection {
+.valamis #editCourseMembers .display-on-selection, .valamis .add-site-members-modal .display-on-selection, .valamis .add-site-roles-modal .display-on-selection {
   padding-right: 0px;
   padding-left: 0px;
   margin-left: 20px;
@@ -6470,61 +6314,22 @@ th {
   border-top: 0px;
 }
 
-.valamis #editCourseMembers .display-on-selection .user-selection-count-label {
+.valamis #editCourseMembers .display-on-selection .user-selection-count-label, .valamis .add-site-members-modal .display-on-selection .user-selection-count-label, .valamis .add-site-roles-modal .display-on-selection .user-selection-count-label {
   font-weight: bold;
 }
 
-.valamis #editCourseMembers .display-on-selection .deselect-all-label {
+.valamis #editCourseMembers .display-on-selection .deselect-all-label, .valamis .add-site-members-modal .display-on-selection .deselect-all-label, .valamis .add-site-roles-modal .display-on-selection .deselect-all-label {
   cursor: pointer;
   color: #268bd2;
 }
 
-.valamis #editCourseMembers #valamisBaseToolbar .table-header-row {
+.valamis #editCourseMembers #valamisBaseToolbar .table-header-row, .valamis .add-site-members-modal #valamisBaseToolbar .table-header-row, .valamis .add-site-roles-modal #valamisBaseToolbar .table-header-row {
   border: none;
-  padding: 0px;
+  padding: 0 32px;
 }
 
-.valamis #editCourseMembers #valamisBaseToolbar table {
+.valamis #editCourseMembers .val-table-wrapper, .valamis .add-site-members-modal .val-table-wrapper, .valamis .add-site-roles-modal .val-table-wrapper {
   border: none;
-}
-
-.valamis #editCourseMembers #valamisBaseToolbar table tr {
-  border: none;
-}
-
-.valamis #editCourseMembers #valamisBaseToolbar table tr td {
-  color: #555;
-  font-size: 11px;
-  text-transform: uppercase;
-  border-top: none;
-}
-
-.valamis #editCourseMembers #valamisBaseList table {
-  border: none;
-}
-
-.valamis #editCourseMembers #valamisBaseList table tr {
-  background-color: #FFF;
-}
-
-.valamis #editCourseMembers #valamisBaseList table tr .name-col {
-  font-size: 15.0px;
-  word-break: keep-all;
-  line-height: 20px;
-}
-
-.valamis #editCourseMembers #valamisBaseList table tr .role-col {
-  font-weight: normal;
-  line-height: 17px;
-  word-break: keep-all;
-}
-
-.valamis #editCourseMembers #valamisBaseList table tr:last-child {
-  border-bottom: 0px;
-}
-
-.valamis #editCourseMembers #valamisBaseList table tr:last-child td {
-  border-bottom: 0px;
 }
 
 .valamis #editCourseTabs #editRequestsTab {
@@ -6544,7 +6349,7 @@ th {
 }
 
 .valamis #editCourseDetails .course-certificates li {
-  line-height: 1.7;
+  line-height: 2;
 }
 
 .valamis #editCourseDetails .course-certificates li span:before {
@@ -6555,50 +6360,12 @@ th {
   text-decoration: none;
   color: #2c2c2c;
   padding-left: 3px;
+  line-height: 16px;
 }
 
 .valamis #editCourseDetails .course-certificates li a:focus, .valamis #editCourseDetails .course-certificates li a:hover {
   text-decoration: underline;
   font-weight: bold;
-}
-
-.valamis #editRequests #valamisBaseList,
-.valamis #editQueues #valamisBaseList {
-  border: 0px;
-}
-
-.valamis #editRequests #valamisBaseList .val-table,
-.valamis #editQueues #valamisBaseList .val-table {
-  border: 0px;
-}
-
-.valamis #editRequests #valamisBaseList .val-table tr,
-.valamis #editQueues #valamisBaseList .val-table tr {
-  background: #FFF;
-}
-
-.valamis #editRequests #valamisBaseList .val-table tr .name-col .name-field,
-.valamis #editQueues #valamisBaseList .val-table tr .name-col .name-field {
-  display: block;
-  line-height: 5px;
-  padding-top: 15px;
-  font-size: 15.0px;
-}
-
-.valamis #editRequests #valamisBaseList .val-table tr .name-col .email-field,
-.valamis #editQueues #valamisBaseList .val-table tr .name-col .email-field {
-  font-weight: normal;
-  color: #555;
-}
-
-.valamis #editRequests #valamisBaseList .val-table tr:last-child,
-.valamis #editQueues #valamisBaseList .val-table tr:last-child {
-  border-bottom: 0px;
-}
-
-.valamis #editRequests #valamisBaseList .val-table tr:last-child td,
-.valamis #editQueues #valamisBaseList .val-table tr:last-child td {
-  border-bottom: 0px;
 }
 
 .valamis #allCourseCourseList .js-courses-list.list .hidden-list {
@@ -6653,20 +6420,6 @@ th {
   line-height: 20px;
 }
 
-.valamis table#valamisSocialActivities {
-  width: 100%;
-}
-
-.valamis table#valamisSocialActivities tr td, .valamis table#valamisSocialActivities tr th {
-  padding: 10px;
-}
-
-.valamis table#valamisSocialActivities tr td:first-child, .valamis table#valamisSocialActivities tr td:last-child, .valamis table#valamisSocialActivities tr th:first-child, .valamis table#valamisSocialActivities tr th:last-child {
-  width: 50%;
-  border-left: none;
-  border-right: none;
-}
-
 .valamis table#valamisSocialActivities .val-select {
   width: 250px;
 }
@@ -6677,10 +6430,6 @@ th {
 
 .valamis #valamisLrsToActivityRules .add-new {
   margin: 10px;
-}
-
-.valamis #valamisLrsToActivityRules table {
-  border: 1px solid #CCCCCC;
 }
 
 .valamis #valamisLrsToActivityRules .activity-rule-name {
@@ -6695,29 +6444,312 @@ th {
   padding-right: 10px;
 }
 
-.valamis table#valamisSocialActivities tr:nth-child(even),
-.valamis #valamisLrsToActivityRules table tr:nth-child(even) {
-  background-color: #F8F8F8;
-}
-
-.valamis table#valamisSocialActivities tr td,
-.valamis #valamisLrsToActivityRules table tr td {
-  border: 1px solid #CCCCCC;
-}
-
-.valamis table#valamisSocialActivities tr th,
-.valamis #valamisLrsToActivityRules table tr th {
-  padding-left: 20px;
-  box-shadow: inset 0px -30px 30px 0px rgba(0, 0, 0, 0.1);
-  color: #777;
-  font-size: 13px;
-  text-transform: uppercase;
-  font-weight: bold;
-  text-align: left;
-}
-
 .valamis .provider-image {
   margin-top: 20px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container {
+  height: 94px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .chart-container {
+  position: static;
+  border: none;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .chart-container .chart {
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container {
+  right: 16px;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container > div:first-child, .valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container > div:last-child {
+  padding: 0 12px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container > div:last-child {
+  padding-right: 0;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container .legend-number {
+  float: none;
+  line-height: 24px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container .legend-hint {
+  letter-spacing: 0;
+  line-height: 14px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container .delimiter {
+  margin-top: 0;
+  background: #d8d8d8;
+  width: 1px;
+  height: 42px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container div.legend-wrapper {
+  width: auto;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container div.legend-wrapper > div {
+  padding-left: 0;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .results-container .legend-container div.legend-wrapper > div > div {
+  display: block;
+  -ms-transform: inherit;
+      transform: inherit;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .items-container {
+  padding: 12px 0;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .items-container:not(.one-column) .expiration-item {
+  width: 50%;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .items-container .expiration-item img {
+  display: block;
+  margin: 0 12px;
+}
+
+.valamis .portlet[min-width~="768px"] .certificate-expiration-tracker .items-container .expiration-item .item-info {
+  padding-left: 68px;
+}
+
+.valamis .certificate-expiration-tracker .results-container {
+  height: 115px;
+  width: 100%;
+  position: relative;
+  background: rgba(230, 226, 226, 0.24);
+  border-radius: 4px;
+  padding: 0 16px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container {
+  height: 67px;
+  position: relative;
+  border-bottom: 1px solid #d8d8d8;
+  font-size: 15px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart {
+  left: 18px;
+  margin-right: 1px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart .pieColors circle {
+  fill: transparent;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart .pieColors g:nth-child(2).arc {
+  fill: #f7ac1d;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart .pieColors g:nth-child(3).arc {
+  fill: #cc4233;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart .expiration-pie-graphic {
+  height: 62px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart-legend {
+  left: 92px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart-legend .amount {
+  font-size: 44px;
+  line-height: 44px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .chart-container .chart-legend .legend {
+  padding: 4px 10px;
+  color: #020202;
+  line-height: 18px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container {
+  position: relative;
+  -ms-transform: translateY(0%);
+      transform: translateY(0%);
+  top: 0;
+  height: 48px;
+  right: initial;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container .legend-number {
+  float: left;
+  margin-right: 5px;
+  font-size: 28px;
+  letter-spacing: 0;
+  display: block;
+  text-align: center;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container .legend-hint {
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container .legend-number,
+.valamis .certificate-expiration-tracker .results-container .legend-container .legend-hint {
+  line-height: 48px;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container .delimiter {
+  margin-top: 4.5px;
+  margin-right: -1px;
+  width: 1px;
+  height: 39px;
+  line-height: 48px;
+  background: #d8d8d8;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container div.legend-wrapper {
+  width: 50%;
+  padding: 0;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container div.legend-wrapper > div {
+  padding-left: 50%;
+}
+
+.valamis .certificate-expiration-tracker .results-container .legend-container div.legend-wrapper > div > div {
+  display: inline-block;
+  -ms-transform: translateX(-50%);
+      transform: translateX(-50%);
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item {
+  width: 100%;
+  float: left;
+  height: 74px;
+  padding: 12px 18px;
+  position: relative;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item img {
+  display: none;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .item-info {
+  font-size: 15px;
+  line-height: 20px;
+  padding-left: 0;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .item-info .item-name {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .item-info .certificate-name {
+  display: block;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .item-info .certificate-info {
+  font-size: 13px;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .val-icon-bell {
+  color: #AAA;
+  padding: 7px 5px 0 5px;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .val-icon-bell:hover {
+  color: #555;
+}
+
+.valamis .certificate-expiration-tracker .items-container .expiration-item .decorate-line {
+  width: 100%;
+  padding-right: 20px;
+  border-bottom: 1px solid #DEDEDE;
+  margin-top: 61px;
+}
+
+.valamis .certificate-expiration-tracker .dropdown-selector {
+  overflow: visible;
+  display: inline-block;
+}
+
+.valamis .certificate-expiration-tracker .dropdown-selector .dropdown-wrapper {
+  visibility: visible;
+}
+
+.valamis .certificate-expiration-tracker .filters-row {
+  padding: 12.13333px 12.13333px;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .current-selection,
+.valamis .certificate-expiration-tracker .filters-row .notify-all {
+  color: #555;
+  font-weight: bold;
+  line-height: 34px;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .dropdown-selector .dropdown-wrapper {
+  width: 200px;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .dates-selector {
+  font-weight: normal;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .dates-selector table th {
+  border-radius: 50%;
+  padding: 3px 0 4px;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .notify-all:hover .current-selection,
+.valamis .certificate-expiration-tracker .filters-row .dropdown-selector:hover .current-selection {
+  color: #2c2c2c;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .notify-all:hover .val-icon-arrow-down,
+.valamis .certificate-expiration-tracker .filters-row .dropdown-selector:hover .val-icon-arrow-down {
+  color: #2c2c2c;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .notify-all .val-icon-bell {
+  color: #AAA;
+  padding: 0 5px;
+}
+
+.valamis .certificate-expiration-tracker .filters-row .notify-all:hover .val-icon-bell {
+  color: #555;
+}
+
+.valamis .certificate-expiration-tracker .expired-color {
+  color: #cc4233;
+}
+
+.valamis .certificate-expiration-tracker .expiring-color {
+  color: #f7ac1d;
+}
+
+.valamis .certificate-expiration-tracker .expiration-settings {
+  min-height: 200px;
+  padding: 20px;
+}
+
+.valamis .certificate-expiration-tracker .expiration-settings .scope {
+  line-height: 40px;
+  margin-right: 20px;
 }
 
 .valamis .valamis-tooltip:not(.button) {
@@ -6730,12 +6762,14 @@ th {
   z-index: 1030;
   display: block;
   background: #121212;
+  white-space: normal;
   word-break: normal;
   border: 1px solid rgba(255, 255, 255, 0.18);
   opacity: 0;
   border-radius: 4px;
   padding: 0;
   visibility: visible;
+  text-transform: none;
   font-size: 13px;
   font-weight: bold;
   pointer-events: none;
@@ -7131,6 +7165,20 @@ th {
   display: block;
 }
 
+.valamis .val-activities .activity-item .expand {
+  color: #AAA;
+  cursor: pointer;
+  padding: 5px 15px 0;
+}
+
+.valamis .val-activities .activity-item .expand .val-icon-toggle:before {
+  content: "t";
+}
+
+.valamis .val-activities .activity-item .expand.open > .val-icon-toggle:before {
+  content: "1";
+}
+
 @font-face {
   .valamis {
     font-family: "HelveticaNeue-Light";
@@ -7252,7 +7300,7 @@ th {
   width: auto;
   position: absolute;
   right: 0;
-  top: 30px;
+  top: 10px;
 }
 
 .valamis .portlet[min-width~="480px"] .val-statistic .chart-container {
@@ -7279,59 +7327,15 @@ th {
 }
 
 .valamis .val-statistic-table {
-  border-collapse: collapse;
   /* Canvas */
   /* Users list */
 }
 
-.valamis .val-statistic-table a {
-  color: inherit;
-  font-weight: inherit;
-}
-
-.valamis .val-statistic-table thead .valamis-tooltip {
+.valamis .val-statistic-table .valamis-tooltip {
   border-bottom: none;
 }
 
-.valamis .val-statistic-table thead tr {
-  background: #F2F2F2;
-}
-
-.valamis .val-statistic-table thead tr th {
-  padding: 15px;
-  color: #555;
-  font-weight: bold;
-  text-align: left;
-}
-
-.valamis .val-statistic-table tbody tr {
-  background-color: #FFF;
-}
-
-.valamis .val-statistic-table tbody tr:nth-child(4n+3) {
-  background-color: #FAFAFA;
-}
-
-.valamis .val-statistic-table tr {
-  border-bottom: 1px solid #CCCCCC;
-  position: relative;
-}
-
-.valamis .val-statistic-table td {
-  padding: 20px 15px;
-  font-weight: bold;
-}
-
-.valamis .val-statistic-table th.expand, .valamis .val-statistic-table td.expand {
-  cursor: pointer;
-  text-align: center;
-  padding-right: 0;
-  color: #AAA;
-  font-weight: bold;
-  width: 1%;
-}
-
-.valamis .val-statistic-table th.expand .val-icon-toggle:before, .valamis .val-statistic-table td.expand .val-icon-toggle:before {
+.valamis .val-statistic-table .val-icon-toggle:before {
   content: "t";
 }
 
@@ -7339,35 +7343,24 @@ th {
   border-bottom: none;
 }
 
-.valamis .val-statistic-table tr.open td.expand .val-icon-toggle:before {
+.valamis .val-statistic-table tr.open .val-icon-toggle:before {
   content: "1";
 }
 
-.valamis .val-statistic-table th.status, .valamis .val-statistic-table td.status {
-  width: 1%;
-  white-space: nowrap;
+.valamis .val-statistic-table tr.details {
+  background-color: transparent;
+}
+
+.valamis .val-statistic-table th.narrow-col, .valamis .val-statistic-table td.narrow-col {
+  text-align: center;
 }
 
 .valamis .val-statistic-table th.status > .val-progress-bar, .valamis .val-statistic-table td.status > .val-progress-bar {
   padding-right: 30px;
 }
 
-.valamis .val-statistic-table th.status > .status-label, .valamis .val-statistic-table td.status > .status-label {
-  width: 100%;
-  text-align: center;
-}
-
-.valamis .val-statistic-table th.summary, .valamis .val-statistic-table td.summary {
-  text-align: center;
-  width: 50px;
-}
-
-.valamis .val-statistic-table th.summary:last-child, .valamis .val-statistic-table td.summary:last-child {
-  padding-right: 50px;
-}
-
-.valamis .val-statistic-table th.summary .val-icon, .valamis .val-statistic-table td.summary .val-icon {
-  color: #AAA;
+.valamis .val-statistic-table th.status.progress-col, .valamis .val-statistic-table td.status.progress-col {
+  text-align: left;
 }
 
 .valamis .val-statistic-table.hide-progress th.status.progress-col, .valamis .val-statistic-table.hide-progress td.status.progress-col {
@@ -7409,17 +7402,12 @@ th {
 
 .valamis .val-statistic-table .details {
   width: 100%;
-  background: #FFF;
-  font-weight: normal;
+  font-size: 13px;
 }
 
 .valamis .val-statistic-table .details .header {
   margin-bottom: 20px;
   color: #555;
-}
-
-.valamis .val-statistic-table .details .header .title {
-  font-weight: bold;
 }
 
 .valamis .val-statistic-table .details .column-left, .valamis .val-statistic-table .details .column-right {
@@ -7453,31 +7441,10 @@ th {
 }
 
 .valamis .val-statistic-table .details ul.user-list .user-img {
-  width: 40px;
-  height: 40px;
-  background: #dedede;
-  border-radius: 50%;
   float: left;
   margin-right: 20px;
   position: relative;
   margin-left: 5px;
-}
-
-.valamis .val-statistic-table .details ul.user-list .user-img.user-completed {
-  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #598000;
-  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #598000;
-}
-
-.valamis .val-statistic-table .details ul.user-list .user-img.user-expired {
-  -o-box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
-  box-shadow: 0px 0px 0px 3px white, 0px 0px 0px 5px #CC4233;
-}
-
-.valamis .val-statistic-table .details ul.user-list .user-img img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  border-radius: 20px;
 }
 
 .valamis .val-statistic-table .details ul.user-list .user-name {
@@ -7632,25 +7599,30 @@ th {
   display: none;
 }
 
-.valamis .val-learning-paths .learning-path-item .val-progress-bar {
-  margin: 18.2px 0;
+.valamis .val-learning-paths .learning-path-item {
+  border-bottom: 1px solid #CCCCCC;
 }
 
-.valamis .val-learning-paths .learning-path-item .tile {
-  border: none;
-  padding: 30px;
+.valamis .val-learning-paths .learning-path-item .val-table {
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.valamis .val-learning-paths .learning-path-item .val-table tr:hover td {
+  background-color: transparent;
 }
 
 .valamis .val-learning-paths .learning-path-item .image {
   margin-right: 18.2px;
 }
 
-.valamis .val-learning-paths .learning-path-item .toggle-container {
-  border-bottom: 1px solid #CCCCCC;
+.valamis .val-learning-paths .learning-path-item .tile .val-progress-bar {
+  margin-top: 20px;
 }
 
-.valamis .val-learning-paths .learning-path-item:last-child .toggle-container {
-  border: none;
+.valamis .val-learning-paths .learning-path-item .tile .toggle-container {
+  text-align: left;
+  padding: 20px 0 0 0;
 }
 
 .valamis .val-learning-paths .learning-path-item > table {
@@ -7675,114 +7647,183 @@ th {
   padding: 18.2px 36.4px 0 0;
 }
 
-.valamis .val-table.learning-path-table td {
-  padding: 12px 10px 12px;
+.valamis .val-learning-paths .val-list-table {
+  padding: 0;
 }
 
-.valamis .val-table.learning-path-table td.progress-col {
-  vertical-align: top;
+.valamis .val-learning-paths .val-list-table .val-list-table-header {
+  margin-top: 12px;
 }
 
-.valamis .val-table.learning-path-table td:first-child {
-  border: none;
+.valamis .val-learning-paths .val-list-table .goal-title .input-container {
+  overflow: hidden;
+  display: block;
 }
 
-.valamis .val-table.learning-path-table td:last-child {
-  font-weight: normal;
+.valamis .val-learning-paths .val-list-table .goal-title .input-container input {
+  width: 100%;
 }
 
-.valamis .val-table.learning-path-table td:last-child a {
-  font-weight: normal;
-}
-
-.valamis .val-table.learning-path-table tr.goal-group .group-label {
-  font-weight: bold;
-}
-
-.valamis .val-table.learning-path-table tr.goal-group .learning-path-table td {
-  background-position: 50% 0;
-  background-repeat: no-repeat;
-  background-size: 2px 12px;
-}
-
-.valamis .val-table.learning-path-table tr:first-child td {
-  padding: 0px 10px 12px;
-}
-
-.valamis .val-table.learning-path-table tr:first-child td.progress-col {
-  vertical-align: top;
-}
-
-.valamis .val-table.learning-path-table tr:last-child td {
-  padding: 12px 10px 0px;
-}
-
-.valamis .val-table.learning-path-table tr:last-child td.progress-col {
-  vertical-align: bottom;
-}
-
-.valamis .val-table.learning-path-table tr:last-child td.progress-col > div {
-  vertical-align: bottom;
-}
-
-.valamis .val-table.learning-path-table .progress-col {
-  vertical-align: top;
-  text-align: center;
-  background-image: linear-gradient(180deg, #DEDEDE, #DEDEDE);
-  background-position: 50%;
-  background-repeat: repeat-y;
-  background-size: 2px auto;
-}
-
-.valamis .val-table.learning-path-table .progress-col .val-rounded-icon:before {
-  font-size: 25px;
-}
-
-.valamis .val-table.learning-path-table .progress-col .val-rounded-div {
-  width: 25px;
-  height: 25px;
-}
-
-.valamis .val-table.learning-path-table .progress-col.success {
-  background-image: linear-gradient(180deg, #598000, #598000);
-}
-
-.valamis .val-table.learning-path-table .progress-col.failed {
-  background-image: linear-gradient(180deg, #CC4233, #CC4233);
-}
-
-.valamis .val-table.learning-path-table tr:only-child td.progress-col {
-  background: none;
-  vertical-align: middle;
-}
-
-.valamis .val-table.learning-path-table table.learning-path-table tr td {
-  vertical-align: middle !important;
-  padding: 5px 10px 0 5px;
-  font-weight: normal;
-  border: none;
-}
-
-.valamis .val-table.learning-path-table table.learning-path-table tr td.progress-col {
-  background: none;
-}
-
-.valamis .val-table.learning-path-table table.learning-path-table tr td:last-child {
-  padding-right: 0;
-}
-
-.valamis .val-table.learning-path-table table.learning-path-table tr td a {
-  font-weight: normal;
-}
-
-.valamis .val-table.learning-path-table table.learning-path-table .progress-col .val-rounded-icon:before {
+.valamis .val-learning-paths .val-list-table .goal-title > div .val-rounded-div,
+.valamis .val-learning-paths .val-list-table .goal-title > div .val-rounded-icon {
+  margin: 0 4px;
+  height: 20px;
+  width: 20px;
   font-size: 20px;
 }
 
-.valamis .val-table.learning-path-table table.learning-path-table .progress-col .val-rounded-div {
+.valamis .val-learning-paths .val-list-table .goal-title > div .val-rounded-div {
   vertical-align: middle;
-  width: 20px;
-  height: 20px;
+  margin-top: -4px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li:not(:last-child) {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .list-table-row .goal-title {
+  font-weight: bold;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .list-table-row .val-rounded-div,
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .list-table-row .val-rounded-icon {
+  height: 25px;
+  width: 25px;
+  margin-left: 0;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .list-table-row .val-rounded-icon:before {
+  font-size: 18px;
+  padding: 3px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li .group.goal-title {
+  font-weight: bold;
+}
+
+.valamis .val-learning-paths .val-list-table .placeholder {
+  outline: 1px dashed #4183C4;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li .list-table-row > span:first-child {
+  padding-left: 0px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li.placeholder {
+  margin-left: 0px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 28px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 28px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 56px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 56px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 84px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 84px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 112px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 112px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 140px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 140px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 168px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 168px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 196px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 196px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 224px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 224px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 252px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 252px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 280px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 280px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li .list-table-row > span:first-child {
+  padding-left: 308px;
+}
+
+.valamis .val-learning-paths .val-list-table .val-list-table-body > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li > .group-children > ul > li.placeholder {
+  margin-left: 308px;
+}
+
+.valamis .val-learning-paths .val-list-table .list-table-row .val-switch {
+  margin-top: 16px;
+}
+
+.valamis .val-learning-paths .val-list-table .list-table-row .button {
+  margin-top: 8px;
+}
+
+.valamis .val-learning-paths .val-list-table .list-table-row .deadline {
+  margin-top: 8px;
+}
+
+.valamis .val-learning-paths .val-list-table .list-table-row label {
+  line-height: inherit;
+}
+
+.valamis .val-learning-paths .val-list-table .list-table-row .dropdown .button .dropdown-label {
+  color: #2c2c2c;
+  font-weight: normal;
+}
+
+.valamis .val-learning-paths .val-list-table .list-table-row .dropdown .button [class^="val-icon"]:before {
+  margin-left: 0;
 }
 
 .valamis #gradebookAppRegion .tab-side {
@@ -7808,6 +7849,10 @@ th {
   padding: 18.2px;
 }
 
+.valamis #gradebookAppRegion ul.dropdown-menu {
+  padding-left: 2px;
+}
+
 .valamis #gradebookAppRegion .tab-content h3 {
   font-weight: bold;
 }
@@ -7830,6 +7875,11 @@ th {
 
 .valamis #gradebookAppRegion .items-header {
   padding: 18.2px 0;
+}
+
+.valamis #gradebookAppRegion .items-header .popover-region {
+  position: relative;
+  margin-top: 0;
 }
 
 .valamis #gradebookAppRegion .items-header .popover-region .button {
@@ -7870,30 +7920,9 @@ th {
   font-size: 30px;
 }
 
-.valamis #gradebookAppRegion table.simple {
-  margin: 0;
-  min-width: 912px;
-}
-
-.valamis #gradebookAppRegion table.simple th {
-  text-align: left;
-  background-color: white;
-  border-top: 1px solid #CCCCCC;
-  border-bottom: 2px solid #CCCCCC;
-  text-transform: uppercase;
-  font-size: 11px;
-  color: #777;
-  padding: 9.1px 18.2px;
-}
-
-.valamis #gradebookAppRegion table.simple th.border-right {
-  border-right: 1px solid #CCCCCC;
-}
-
-.valamis #gradebookAppRegion table.simple td {
-  font-size: 15px;
-  font-weight: normal;
-  padding: 16px 18.2px;
+.valamis #gradebookAppRegion .popover-region {
+  position: absolute;
+  margin-top: -17px;
 }
 
 .valamis #gradebookAppRegion .popover-region > .button {
@@ -7962,97 +7991,101 @@ th {
   margin: 0;
 }
 
-.valamis #gradebookAppRegion .toggle-container {
-  background: none;
+.valamis #gradebookAppRegion table.val-table .lesson-attempts {
+  background-color: transparent;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td {
   position: relative;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div {
   padding: 40px 0;
   width: 912px;
   margin: 0 auto;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table {
   width: 100%;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table tr td {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table tr td {
   border-bottom: none;
   padding: 12.13333px 9.1px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table tr:not(.lesson-header) td {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table tr:not(.lesson-header) td {
   vertical-align: top;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table tr.lesson-header td:not(:first-child):not(:last-child) {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table tr.lesson-header {
+  background-color: transparent;
+}
+
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table tr.lesson-header td:not(:first-child):not(:last-child) {
   padding-right: 18.2px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table tr:not(.attempt) td {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table tr:not(.attempt) td {
   border: none;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .item-info .item-title {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .item-info .item-title {
   font-size: 18px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .block-title {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .block-title {
   font-weight: bold;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .block-footer {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .block-footer {
   font-size: 13px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .button.grade {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .button.grade {
   min-width: 80px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .correct-answer-block {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .correct-answer-block {
   border: 1px solid #598000;
   padding: 10px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .correct-answer-block .correct-answer-label {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .correct-answer-block .correct-answer-label {
   color: #598000;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .attempt-comments {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .attempt-comments {
   font-size: 13px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .attempt-comments.collapsed .item-info:not(:last-child) {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .attempt-comments.collapsed .item-info:not(:last-child) {
   display: none;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .attempt-comments .item-info {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .attempt-comments .item-info {
   padding-bottom: 10px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .new-comment {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .new-comment {
   display: table;
   width: 100%;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .new-comment > div {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .new-comment > div {
   display: table-cell;
   vertical-align: top;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .new-comment > div:first-child {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .new-comment > div:first-child {
   width: 1%;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .new-comment > div img {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .new-comment > div img {
   margin-right: 10px;
 }
 
-.valamis #gradebookAppRegion table.simple .lesson-attempts > td > div table .new-comment > div .button {
+.valamis #gradebookAppRegion table.val-table .lesson-attempts > td > div table .new-comment > div .button {
   margin-top: 5px;
 }
 
@@ -8133,10 +8166,6 @@ th {
   color: #CC4233;
 }
 
-.valamis #learningTranscriptAppRegion .val-percent-sign {
-  font-size: 80%;
-}
-
 .valamis #learningTranscriptAppRegion #transcriptUserInfo {
   border-bottom: 1px solid #CCCCCC;
   background: #F8F8F8;
@@ -8189,49 +8218,6 @@ th {
   text-align: right;
 }
 
-.valamis #learningTranscriptAppRegion .simple-table {
-  width: 100%;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table th {
-  text-transform: uppercase;
-  color: #777;
-  letter-spacing: 0.5px;
-  font-size: 11px;
-  font-weight: bold;
-  border-bottom: 2px solid #CCCCCC;
-  text-align: left;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table td {
-  border-bottom: 1px solid #CCCCCC;
-  text-align: left;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table th, .valamis #learningTranscriptAppRegion .simple-table td {
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-all;
-  padding: 8px;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table th:first-child, .valamis #learningTranscriptAppRegion .simple-table td:first-child {
-  padding-left: 0;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table th:last-child, .valamis #learningTranscriptAppRegion .simple-table td:last-child {
-  padding-right: 0;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table th.bold, .valamis #learningTranscriptAppRegion .simple-table td.bold {
-  font-weight: bold;
-}
-
-.valamis #learningTranscriptAppRegion .simple-table th.narrow-col, .valamis #learningTranscriptAppRegion .simple-table td.narrow-col {
-  white-space: nowrap;
-  width: 1%;
-}
-
 .valamis #learningTranscriptAppRegion .certificates-list .certificate-item {
   position: relative;
   width: 260px;
@@ -8278,12 +8264,12 @@ th {
   color: #CC4233;
 }
 
-.valamis #learningTranscriptAppRegion .certificates-list .certificate-item:hover {
+.valamis #learningTranscriptAppRegion .certificates-list .certificate-item:not(.openbadges):hover {
   cursor: pointer;
   border-color: #2974A6;
 }
 
-.valamis #learningTranscriptAppRegion .certificates-list .certificate-item:hover .title {
+.valamis #learningTranscriptAppRegion .certificates-list .certificate-item:not(.openbadges):hover .title {
   color: #2974A6;
 }
 
@@ -8380,6 +8366,514 @@ th {
 .valamis .portlet[min-width~="1024px"] #learningTranscriptAppRegion .certificates-list .certificate-item:nth-child(3n+2) {
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.valamis .dropdown-selector {
+  position: relative;
+  overflow: hidden;
+}
+
+.valamis .dropdown-selector.show-dropdown-menu {
+  overflow: visible;
+}
+
+.valamis .dropdown-selector.show-dropdown-menu .dropdown-wrapper {
+  visibility: visible;
+}
+
+.valamis .dropdown-selector .current-selection {
+  font-size: 13px;
+  line-height: 1.4;
+  width: 260px;
+  border: 1px solid #CCCCCC;
+  position: relative;
+  cursor: pointer;
+}
+
+.valamis .dropdown-selector .current-selection span,
+.valamis .dropdown-selector .current-selection strong {
+  display: inline-block;
+}
+
+.valamis .dropdown-selector .current-selection .cs-label {
+  padding: 10px 30px 10px 10px;
+}
+
+.valamis .dropdown-selector .current-selection:after {
+  content: 'y';
+  font-family: valamis-icons;
+  font-size: 24px;
+  line-height: 36px;
+  font-weight: normal;
+  color: #AAA;
+  position: absolute;
+  top: 0;
+  margin-top: 1px;
+  width: 32px;
+  right: 0;
+  text-align: center;
+}
+
+.valamis .dropdown-selector .dropdown-wrapper {
+  width: 260px;
+  padding: 5px 0 10px;
+  position: absolute;
+  left: 0;
+  top: 39px;
+  background: #FFF;
+  border: 1px solid #CCCCCC;
+  box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, 0.1);
+  z-index: 300;
+  visibility: hidden;
+}
+
+.valamis .dropdown-selector .dates-selector {
+  padding: 5px 14px;
+}
+
+.valamis .dropdown-selector .dates-selector form {
+  margin: 0;
+}
+
+.valamis .dropdown-selector .dates-selector .date-inputs {
+  white-space: nowrap;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+  box-pack: justify;
+  -moz-justify-content: space-between;
+  -ms-justify-content: space-between;
+  -o-justify-content: space-between;
+  justify-content: space-between;
+  -ms-flex-pack: justify;
+  padding-bottom: 5px;
+}
+
+.valamis .dropdown-selector .dates-selector input[type="text"] {
+  color: #2c2c2c;
+  width: 48%;
+  text-align: center;
+}
+
+.valamis .dropdown-selector .dates-selector input[type="text"] + input[type="text"] {
+  margin-left: 4px;
+}
+
+.valamis .dropdown-selector .dates-selector input[type="text"].focus {
+  border-color: #2974A6;
+  box-shadow: none;
+}
+
+.valamis .dropdown-selector .dates-selector .submit-button {
+  margin: 3px 0;
+}
+
+.valamis .dropdown-selector .dates-selector .submit-button .button.medium {
+  height: 30px;
+  line-height: 20px;
+  padding: 0 10px 2px;
+}
+
+.valamis .dropdown-selector .dropdown-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  background: #FFF;
+}
+
+.valamis .dropdown-selector .dropdown-options > li {
+  display: block;
+  padding: 0;
+  margin: 6px 0 0 0;
+  line-height: 20px;
+}
+
+.valamis .dropdown-selector .dropdown-options > li > span {
+  display: block;
+  padding: 2px 20px 2px 14px;
+  cursor: pointer;
+}
+
+.valamis .dropdown-selector .dropdown-options > li > span:hover {
+  font-weight: bold;
+}
+
+.valamis .dropdown-selector .dropdown-options > li.active > span {
+  border-left: 4px solid #2974A6;
+  padding-left: 10px;
+  font-weight: bold;
+}
+
+.valamis .dropdown-selector .dropdown-options > li.disabled > span {
+  cursor: default;
+  color: #777;
+}
+
+.valamis .dropdown-selector .dropdown-options > li.disabled > span:hover {
+  background: transparent;
+  font-weight: normal;
+}
+
+.valamis .dropdown-selector .dropdown-options > li.group-first-item {
+  border-top: 1px solid #CCCCCC;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.valamis .dropdown-selector .dropdown-submenu {
+  padding: 2px 0 0 0;
+  margin: 0;
+}
+
+.valamis .dropdown-selector .dropdown-submenu > li {
+  display: block;
+  padding: 0;
+  margin: 2px 0 0 0;
+  position: relative;
+}
+
+.valamis .dropdown-selector .dropdown-submenu > li > span {
+  display: block;
+  padding: 2px 20px 2px 30px;
+  cursor: pointer;
+  position: relative;
+}
+
+.valamis .dropdown-selector .dropdown-submenu > li > span:hover {
+  font-weight: bold;
+}
+
+.valamis .dropdown-selector .dropdown-submenu > li.active span:before {
+  content: '6';
+  display: block;
+  font-family: valamis-icons;
+  color: #598000;
+  font-size: 16px;
+  line-height: 26px;
+  position: absolute;
+  left: 8px;
+  top: 0;
+}
+
+.valamis .dropdown-selector .dropdown-submenu > li.disabled > span {
+  cursor: default;
+  color: #AAA;
+}
+
+.valamis .dropdown-selector .dropdown-submenu > li.disabled > span:hover {
+  font-weight: normal;
+}
+
+.valamis .report-selector .dropdown-selector {
+  z-index: 100;
+}
+
+.valamis .report-selector .dropdown-selector.show-dropdown-menu {
+  z-index: 1000;
+}
+
+.valamis .report-selector .dropdown-selector .current-selection {
+  display: inline-block;
+  color: #555;
+  width: auto;
+  border: none;
+  white-space: nowrap;
+}
+
+.valamis .report-selector .dropdown-selector .current-selection:after {
+  content: '';
+  display: none;
+}
+
+.valamis .report-selector .dropdown-selector .current-selection .cs-label {
+  padding: 0 0 0 5px;
+}
+
+.valamis .report-selector .dropdown-selector .current-selection .val-icon-arrow-down {
+  color: #AAA;
+}
+
+.valamis .report-selector .dropdown-selector .current-selection:hover {
+  color: #2c2c2c;
+}
+
+.valamis .report-selector .dropdown-selector .current-selection:hover .val-icon-arrow-down {
+  color: #555;
+}
+
+.valamis .report-selector .dropdown-selector .dropdown-wrapper {
+  width: 195px;
+  padding: 5px 0;
+  top: 25px;
+  border-radius: 3px;
+}
+
+.valamis .report-selector .dropdown-selector .dropdown-wrapper:after, .valamis .report-selector .dropdown-selector .dropdown-wrapper:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis .report-selector .dropdown-selector .dropdown-wrapper:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #FFF;
+  border-width: 5px;
+  margin-left: -5px;
+}
+
+.valamis .report-selector .dropdown-selector .dropdown-wrapper:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #CCCCCC;
+  border-width: 6px;
+  margin-left: -6px;
+}
+
+.valamis .report-selector .dropdown-selector .dates-selector input[type="text"] + input[type="text"] {
+  margin-left: 2px;
+}
+
+.valamis .dropdown-filter {
+  position: relative;
+  overflow: hidden;
+}
+
+.valamis .dropdown-filter.show-dropdown-filter {
+  overflow: visible;
+}
+
+.valamis .dropdown-filter.show-dropdown-filter .dropdown-wrapper {
+  visibility: visible;
+}
+
+.valamis .dropdown-filter .filter-toggle-button {
+  display: inline-block;
+  background: #EAEAEA;
+  border: 1px solid #CCCCCC;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0 3px 0 10px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.valamis .dropdown-filter .filter-toggle-button:hover {
+  background-color: #F8F8F8;
+}
+
+.valamis .dropdown-filter .filter-toggle-button span {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 13px;
+  line-height: 30px;
+  font-weight: bold;
+  color: #555;
+}
+
+.valamis .dropdown-filter .filter-toggle-button:after {
+  display: inline-block;
+  vertical-align: middle;
+  content: 'y';
+  font-family: valamis-icons;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: normal;
+  color: #777;
+  width: 20px;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.valamis .dropdown-filter.disabled .filter-toggle-button {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.valamis .dropdown-filter.disabled .filter-toggle-button:hover {
+  background: #EAEAEA;
+}
+
+.valamis .dropdown-filter .dropdown-wrapper {
+  width: 195px;
+  padding: 20px 0 6px;
+  position: absolute;
+  right: 0;
+  top: 42px;
+  background: #FFF;
+  border: 1px solid #C1C1C1;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+  z-index: 300;
+  visibility: hidden;
+}
+
+.valamis .dropdown-filter .dropdown-wrapper:after, .valamis .dropdown-filter .dropdown-wrapper:before {
+  bottom: 100%;
+  right: 25px;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.valamis .dropdown-filter .dropdown-wrapper:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #FFF;
+  border-width: 5px;
+  margin-right: 1px;
+}
+
+.valamis .dropdown-filter .dropdown-wrapper:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #C1C1C1;
+  border-width: 6px;
+}
+
+.valamis .dropdown-filter .filter-section {
+  margin-bottom: 10px;
+}
+
+.valamis .dropdown-filter .filter-section-title {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: bold;
+  padding: 0 20px 0 11px;
+  margin-bottom: 4px;
+  cursor: default;
+}
+
+.valamis .dropdown-filter .filter-option-list ul {
+  list-style: none;
+  margin: 0;
+}
+
+.valamis .dropdown-filter .filter-option-list li {
+  display: block;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.valamis .dropdown-filter .filter-option-list li span {
+  display: block;
+  line-height: 18px;
+  padding: 3px 20px 3px 33px;
+  cursor: pointer;
+}
+
+.valamis .dropdown-filter .filter-option-list li span:hover {
+  font-weight: bold;
+}
+
+.valamis .dropdown-filter .filter-option-list li.active:before {
+  content: '6';
+  display: inline-block;
+  font-family: valamis-icons;
+  color: #598000;
+  font-size: 16px;
+  line-height: 26px;
+  position: absolute;
+  left: 10px;
+  top: 0;
+}
+
+.valamis .dropdown-filter .filter-option-list li.active span:hover {
+  font-weight: normal;
+}
+
+.valamis .dropdown-filter .filter-option-list li.disabled span {
+  cursor: default;
+  color: #AAA;
+}
+
+.valamis .dropdown-filter .filter-option-list li.disabled span:hover {
+  font-weight: normal;
+}
+
+.valamis .dropdown-filter .filter-toggle-switch {
+  width: 100%;
+  overflow: hidden;
+  padding-top: 4px;
+}
+
+.valamis .dropdown-filter .filter-toggle-switch .filter-section-title {
+  float: left;
+  min-width: 100px;
+  max-width: 120px;
+  padding-right: 0;
+  padding-top: 2px;
+}
+
+.valamis .dropdown-filter .filter-toggle-switch .val-switch {
+  margin: 0 12px 0 0;
+  float: right;
+}
+
+.valamis .dropdown-filter .filter-toggle-switch .val-switch .switch-handle {
+  box-sizing: border-box;
+}
+
+.valamis .dropdown-filter .filter-search-field {
+  padding: 0 12px 5px 11px;
+}
+
+.valamis .dropdown-filter .val-search {
+  height: 30px;
+}
+
+.valamis .dropdown-filter .val-search input {
+  height: 28px;
+}
+
+.valamis .dropdown-filter .val-search:before {
+  font-size: 16px;
+  top: 5px;
+  right: 5px;
+}
+
+.valamis .dropdown-selector-export {
+  float: right;
+}
+
+.valamis .dropdown-selector-export .dropdown-selector form {
+  margin-left: 14px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.valamis .dropdown-selector-export .dropdown-selector form .limit-input {
+  padding-top: 12px;
+}
+
+.valamis .dropdown-selector-export .dropdown-selector form .limit-input input {
+  display: inline;
+  width: 60px;
+  margin-left: 8px;
+}
+
+.valamis .dropdown-selector-export .submit-button {
+  margin-top: 16px;
+}
+
+.valamis .dropdown-selector-export .loading-message {
+  display: none;
+  margin-top: 16px;
+  margin-bottom: 0;
+  height: 34px;
+}
+
+.valamis .dropdown-selector-export .dropdown-wrapper:after, .valamis .dropdown-selector-export .dropdown-wrapper:before {
+  left: 93%;
 }
 
 .valamis * {

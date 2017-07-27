@@ -45,9 +45,7 @@
             {{/description}}
             <li>
                 {{^completedLessons}}
-                <span class="status">
-                    <span class="val-label"> {{lessonItemStatusLabel}} </span>
-                </span>
+                <span class="val-label {{statusClass}}"> {{lessonItemStatusLabel}} </span>
                 {{/completedLessons}}
 
                 <div class="val-progress-bar">

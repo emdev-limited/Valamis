@@ -100,6 +100,12 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
                 }
             });
 
+            _.each(this.model.get('tags'), function (i) {
+                if (i.id == i.text) {
+                    i.id = (_.find(selectTags, {text: i.text}).id);
+                }
+            });
+
             var modelTags = _(this.model.get('tags')).map(function(tag) { return tag.id });
 
             var selectize = this.$('.js-lesson-tags').selectize({
@@ -177,12 +183,15 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
 
     Views.ToolbarView = Marionette.ItemView.extend({
         template: '#lessonStudioToolbarTemplate',
+        ui: {
+            searchField: '.js-search > input[type="text"]'
+        },
         templateHelpers: function() {
             return { sortByTypes: lessonStudioCollections.SORT_BY_TYPES }
         },
         events: {
             'click .dropdown-menu > li.js-sort': 'changeSort',
-            'keyup .js-search': 'changeSearchText',
+            'keyup @ui.searchField': 'changeSearchText',
             'click .js-list-view': 'listDisplayMode',
             'click .js-tile-view': 'tilesDisplayMode',
             'click .js-create-lesson': 'createLesson'
@@ -196,7 +205,7 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
         initialize: function(){},
         onValamisControlsInit: function(){
             this.$('.js-sort-filter').valamisDropDown('select', this.model.get('sort'));
-            this.$('.js-search').val(this.model.get('searchtext'));
+            this.ui.searchField.val(this.model.get('searchtext')).trigger('input');
 
             var displayMode = lessonStudio.settings.get('displayMode');
             if (displayMode === DISPLAY_TYPE.TILES)
@@ -233,8 +242,18 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
     });
 
     Views.LessonItemView = Marionette.ItemView.extend({
-        template: '#lessonStudioItemView',
+        getTemplate: function() {
+            var limitedView = !!this.model.get('migrated');
+
+            if (limitedView || !this.migrationChecked) {
+                return '#lessonStudioLimitedItemView';
+            }
+            else {
+                return '#lessonStudioItemView';
+            }
+        },
         templateHelpers: function () {
+            var STATUS_LABEL_POSTFIX = 'StatusLabel';
             var lockDate  = new Date(this.model.get('lockDate'));
             return {
                 'courseId': Utils.getCourseId,
@@ -242,8 +261,10 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
                 'timestamp': Date.now(),
                 'formattedVersion': parseFloat(this.model.get('version')).toFixed(1),
                 "lockedDate": $.datepicker.formatDate("dd MM yy", lockDate) + " " + lockDate.toLocaleTimeString(),
-                "canUnlockLesson": Valamis.permissions.LessonStudio.CAN_UNLOCK_LESSON
-
+                "canUnlockLesson": Valamis.permissions.LessonStudio.CAN_UNLOCK_LESSON,
+                "statusClass": (this.model.get('status') == 'draft') ? 'inactive' : '',
+                'statusLabel': Valamis.language[this.model.get('status')+STATUS_LABEL_POSTFIX],
+                'hasBetaStudioUrl': !!lessonStudio.betaStudioUrl
             }
         },
         className: 'tile s-12 m-4 l-2',
@@ -256,7 +277,8 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
             'click .dropdown-menu > li.js-lesson-clone': 'cloneLesson',
             'click .dropdown-menu > li.js-lesson-save-template': 'saveLessonTemplate',
             'click .js-lesson-image': 'composeLesson',
-            'click .dropdown-menu > li.js-lesson-unlock': 'unlockLesson'
+            'click .dropdown-menu > li.js-lesson-unlock': 'unlockLesson',
+            'click .dropdown-menu > li.js-lesson-migrate': 'migrateLessonConfirmation'
         },
         behaviors: {
             ValamisUIControls: {}
@@ -265,11 +287,31 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
         modelEvents: {
           'lesson:saved': 'render',
           'change:status': 'render',
-          'change:lockUserId': 'render'
+          'change:lockUserId': 'render',
+          'change:migrated': 'render'
         },
         /* used to show the order in which these method are called */
-        initialize: function(options){},
+        initialize: function(options){
+            this.migrationChecked = false;
+        },
         onRender: function(){
+            if (!!this.model.get('migrated')) {
+                this.$el.addClass('unpublished');
+            }
+
+            if (!this.migrationChecked) {
+                this.migrationChecked = true;
+
+                var that = this;
+                this.model.getByActivityId().then(
+                    function() {
+                        that.model.set('migrated', true);
+                    },
+                    function() {
+                        that.model.set('migrated', false);
+                    }
+                );
+            }
         },
         onShow: function(){},
         editLesson: function(){
@@ -305,6 +347,46 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
 
         saveLessonTemplate: function() {
             this.triggerMethod('lessonList:saveTemplate:lesson', this.model);
+        },
+
+        migrateLessonConfirmation: function (e) {
+            var openInBeta = eval($(e.target).data('value').split(':')[1]);
+
+            var that = this;
+            valamisApp.execute('valamis:confirm', {message: Valamis.language['migrationConfirmationLabel']}, function () {
+                that.migrateLesson(openInBeta);
+            });
+        },
+
+        migrateLesson: function (openInBeta) {
+            valamisApp.execute('notify', 'info', Valamis.language['processingLabel'], {
+                'timeOut': '0',
+                'extendedTimeOut': '0'
+            });
+
+            var that = this;
+            // use ajax because Studio Beta uses Backbone.emulateJSON = false
+            $.ajax({
+                method: 'post',
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                url: '/' + path.api.betaStudio + 'slide-sets/import-legacy/',
+                headers: {
+                    'X-Valamis-Plid': Utils.getPlid(),
+                    'X-CSRF-Token': Liferay.authToken
+                },
+                data: '{"oldId": ' + this.model.get('id') + '}',
+            }).done(function () {
+                that.model.set('migrated', true);
+                valamisApp.execute('notify', 'success', Valamis.language['migrationSuccessfulLabel']);
+                if (openInBeta) {
+                    window.location = lessonStudio.betaStudioUrl
+                        + '?lesson-title=' + encodeURIComponent(that.model.get('title'));
+                }
+            }).fail(function () {
+                valamisApp.execute('notify', 'error', Valamis.language['failedStatusLabel']);
+            });
+
         }
     });
 
@@ -652,7 +734,7 @@ lessonStudio.module("Views", function (Views, lessonStudio, Backbone, Marionette
             e.preventDefault();
             var isSelected = this.$el.is('.active');
             var selected = this.$el.parent().find('li.active');
-            if(isSelected && selected.size() == 1){
+            if(isSelected && selected.length == 1){
                 return;
             }
             this.$el.toggleClass('active', !isSelected);

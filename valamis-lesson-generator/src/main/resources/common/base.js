@@ -19,7 +19,9 @@ var TinCanCourseModules = {},
     TinCanCourseQuestionsAll = {},
     TinCanCourseQuestionsContent = {};
 
-var AttemptStatementId = '';
+var AttemptStatementId = '',
+    PreviousDuration = 0,
+    StartTimestamp;
 
 var tincan = null;
 
@@ -274,12 +276,12 @@ function PrepareMatchingAnswersView(idWithQuestionNumber) {
         revert: 'invalid',
         revertDuration: 100,
         start: function() {
-            Reveal.configure({ touch: false });
+            jQuery(this).attr('data-prevent-swipe', '');
             jQuery(this).addClass('ui-state-highlight highlight-previous-position');
             jQuery('.ui-draggable-dragging').addClass('dragging-answer-item');
         },
         stop: function() {
-            Reveal.configure({ touch: true });
+            jQuery(this).removeAttr('data-prevent-swipe');
             jQuery(this).removeClass('ui-state-highlight highlight-previous-position');
             jQuery('.ui-draggable-dragging').removeClass('dragging-answer-item');
         }
@@ -339,13 +341,12 @@ function PrepareCategorizationQuestionView(idWithQuestionNumber) {
         revert: 'invalid',
         revertDuration: 100,
         start: function() {
-            Reveal.configure({ touch: false });
+            jQuery(this).attr('data-prevent-swipe', '');
             jQuery(this).addClass('ui-state-highlight highlight-previous-position');
             jQuery('.ui-draggable-dragging').addClass('dragging-answer-item');
         },
         stop: function() {
-            Reveal.configure({ touch: true });
-            jQuery(window).trigger('resize');//Trigger on resize events
+            jQuery(this).removeAttr('data-prevent-swipe');
             jQuery(this).removeClass('ui-state-highlight highlight-previous-position');
             jQuery('.ui-draggable-dragging').removeClass('dragging-answer-item');
         }
@@ -424,12 +425,12 @@ function PreparePositioningQuestionView(idWithQuestionNumber) {
         revert: 'invalid',
         revertDuration: 100,
         start: function() {
-            Reveal.configure({ touch: false });
+            jQuery(this).attr('data-prevent-swipe', '');
             jQuery(this).addClass('ui-state-highlight highlight-previous-position');
             jQuery('.ui-draggable-dragging').addClass('dragging-answer-item');
         },
         stop: function() {
-            Reveal.configure({ touch: true });
+            jQuery(this).removeAttr('data-prevent-swipe');
             jQuery(window).trigger('resize');//Trigger on resize events
             jQuery(this).removeClass('ui-state-highlight highlight-previous-position');
             jQuery('.ui-draggable-dragging').removeClass('dragging-answer-item');
@@ -474,37 +475,23 @@ function packageBegin() {
         }
     });
 
-    prepareAttemptedStatement();
+    if(!isUserAnonymous(tincan.actor) && CAN_PAUSE) {
+        packageResume();
+    } else {
+        startNewAttempt();
+    }
 }
 
 function isUserAnonymous(actor){
     return actor && actor.account && actor.account.name && actor.account.name == 'anonymous';
 }
 
-function prepareAttemptedStatement() {
+function startNewAttempt() {
 
-    if(!isUserAnonymous(tincan.actor)) {
-        var lastAttemptStatement = getLastStatement(ROOT_ACTIVITY_ID, "http://adlnet.gov/expapi/verbs/attempted");
-
-        if (lastAttemptStatement) {
-            var lastResultByActivityId = getLastStatement(ROOT_ACTIVITY_ID);
-
-            // for support both old and new valamis packages (will be fixed with VALAMIS-3367)
-            var lastResult = (lastResultByActivityId)
-                ? lastResultByActivityId
-                : getLastStatement(lastAttemptStatement.id);
-
-            var wasSuspended = (lastResult && lastResult.verb.id == "http://adlnet.gov/expapi/verbs/suspended");
-            var isLastAttempt = (lastResultByActivityId)
-                ? (lastResultByActivityId.context.statement && lastResultByActivityId.context.statement.id == lastAttemptStatement.id)
-                : true;
-
-            if (wasSuspended && isLastAttempt) {
-                packageResume(lastAttemptStatement, lastResult);
-                return;
-            }
-        }
-    }
+    TinCanCourseResults = {};
+    TinCanUserAnswers = {};
+    PreviousDuration = 0;
+    StartTimestamp = new Date();
 
     AttemptStatementId = tincan.sendStatement(GetPackageAttemptedStatement()).statement.id;
 }
@@ -521,18 +508,10 @@ function packageEnd(currentTinCanState) {
     tincan.sendStatement(GetPackageCompletedStatement(score, success));
 }
 
-function packageResume(lastAttemptStatement, lastSuspendedStatement) {
-    AttemptStatementId = lastAttemptStatement.id;
+function packageResume() {
 
-    var stateResult = tincan.getState(
-            ROOT_ACTIVITY_ID + "/_state",
-        {
-            agent: tincan.actor,
-            registration: lastSuspendedStatement.id
+    var stateResult = tincan.getState(ROOT_ACTIVITY_ID + "/_state");
 
-        }
-    );
-    
     if (stateResult
         && stateResult.state
         && stateResult.state.contents) {
@@ -544,6 +523,12 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
 
         if (stateContent.answers) {
             TinCanUserAnswers = stateContent.answers;
+        }
+        if (stateContent.attemptStatementId) {
+            AttemptStatementId = stateContent.attemptStatementId;
+        }
+        if (stateContent.duration) {
+            PreviousDuration = stateContent.duration;
         }
 
         onOpenToastr();
@@ -566,16 +551,14 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
             onToastrDecline();
             onCloseToastr();
         });
+    } else {
+        startNewAttempt();
     }
 
-    tincan.deleteState(
-        ROOT_ACTIVITY_ID + "/_state",
-        {
-            agent: tincan.actor
-        }
-    );
+    tincan.deleteState(ROOT_ACTIVITY_ID + "/_state");
 
     function onToastrConfirm() {
+
         setStoredUserAnswers();
         if (stateContent.viewedSlides) {
             TinCanViewedSlides = stateContent.viewedSlides;
@@ -590,15 +573,17 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
             toggleNavigation(stateContent.slide.h, stateContent.slide.v);
         }
         checkIsLessonSummary();
-        tincan.sendStatement(getResumeStatement(lastSuspendedStatement.result.duration));
+        tincan.sendStatement(getResumeStatement());
 
-        jQuery('#packageDuration').trigger('setTimer', [DURATION * 60 - lastSuspendedStatement.result.duration]);
+        StartTimestamp = new Date();
+
+        jQuery('#packageDuration').trigger('setTimer', [DURATION * 60 - PreviousDuration]);
     }
 
     function onToastrDecline() {
         //We start new attempt as old one is declined
         packageEnd(currentTinCanState);
-        AttemptStatementId = tincan.sendStatement(GetPackageAttemptedStatement()).statement.id;
+        startNewAttempt();
     }
 
     function onOpenToastr(){
@@ -634,12 +619,10 @@ function packageSuspend(currentTinCanState) {
             slide: Reveal.getIndices(),
             results: TinCanCourseResults,
             answers: TinCanUserAnswers,
-            viewedSlides: TinCanViewedSlides
-        }),
-        {
-            agent: tincan.actor,
-            registration: suspendedStmt.id
-        }
+            viewedSlides: TinCanViewedSlides,
+            attemptStatementId: AttemptStatementId,
+            duration: getTotalDuration()
+        })
     );
 
     tincan.sendStatement(suspendedStmt);
@@ -722,7 +705,7 @@ function GetPackageCompletedStatement(score, success) {
         result: {
             score: { scaled: score },
             success: success,
-            duration: getDurationFromStatements()
+            duration: getTotalDuration()
         },
         context: {
             contextActivities: context.contextActivities,
@@ -847,7 +830,7 @@ function getSuspendStatement() {
         },
         result: {
             //Saving in seconds
-            duration: getDurationFromStatements()
+            duration: getTotalDuration()
         },
         context: {
             contextActivities: context.contextActivities,
@@ -857,7 +840,7 @@ function getSuspendStatement() {
     };
 }
 
-function getResumeStatement(duration) {
+function getResumeStatement() {
     var context =  getContext(ROOT_ACTIVITY_ID);
     return {
         verb: {
@@ -872,7 +855,7 @@ function getResumeStatement(duration) {
             }
         },
         result: {
-            duration: duration
+            duration: PreviousDuration
         },
         context: {
             contextActivities: context.contextActivities,
@@ -913,39 +896,8 @@ function getContext(parentActivityId, category) {
     };
 }
 
-function getLastStatement(activityId, verbId) {
-    var result = tincan.getStatements({params: {
-        activity: {id: activityId},
-        agent: tincan.actor,
-        related_activities: true,
-        limit: 1,
-        verb: {id: verbId || ""},
-        until: new Date().toISOString()}
-    });
-
-    try {
-        return result.statementsResult.statements[0];
-    } catch (e) {
-        return null;
-    }
-}
-
-function getDurationFromStatements() {
-    var startTime = new Date();
-    var duration = 0;
-
-    //Check last resumed statement send or attempted one
-    var lastResumed = getLastStatement(AttemptStatementId, "http://adlnet.gov/expapi/verbs/resumed");
-    if(lastResumed) {
-        duration = parseInt(lastResumed.result.duration);
-        startTime = new Date(lastResumed.timestamp);
-    } else {
-        var lastAttempted = getLastStatement(ROOT_ACTIVITY_ID, "http://adlnet.gov/expapi/verbs/attempted");
-        if(lastAttempted)
-            startTime = new Date(lastAttempted.timestamp);
-    }
-
-    return Math.round((new Date() - startTime) / 1000) + duration
+function getTotalDuration() {
+    return (!!StartTimestamp?Math.round((new Date() - StartTimestamp) / 1000):0) + PreviousDuration
 }
 
 function startTimer(duration, display){

@@ -12,4 +12,6 @@ trait CourseCertificateRepository {
   def isExist(courseId: Long, certificateId: Long): Boolean
 
   def deleteCertificates(courseId: Long): Unit
+
+  def deleteByCertificateId(certificateId: Long): Unit
 }

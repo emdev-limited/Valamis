@@ -28,6 +28,6 @@ class LessonNotificationHandler extends LBaseUserNotificationHandler {
 
   private def getParams(notification: LessonNotificationModel) = {
     Map("title" -> notification.title,
-        "course" -> CourseUtilHelper.getName(notification.courseId))
+        "course" -> CourseUtilHelper.getName(notification.courseId).getOrElse(""))
   }
 }

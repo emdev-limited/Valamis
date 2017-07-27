@@ -1,0 +1,29 @@
+<script type="text/template" id="certificateExpirationTrackerSettingsTemplate">
+    <div class="certificate-expiration-tracker">
+        <div id="certificateExpirationTrackerSettingsRegion"></div>
+    </div>
+</script>
+
+<script type="text/template" id="expirationSettingsTemplate">
+    <div class="expiration-settings">
+        <div class="text-bold shift-left scope">{{scopeLabel}}</div>
+        <div class="field-type-dropdown dropdown-selector js-dropdown-selector">
+            <div class="current-selection js-current-selection">
+                <div class="ellipsis cs-label js-label">{{trackerActiveScopeLabel}}
+                </div>
+            </div>
+
+            <div class="dropdown-wrapper hidden">
+                <ul class="dropdown-options js-dropdown-options">
+                    {{#extOptions}}
+                    <li data-value="{{id}}" class="{{#active}}active{{/active}}">
+                        <span>
+                            {{label}}
+                        </span>
+                    </li>
+                    {{/extOptions}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</script>

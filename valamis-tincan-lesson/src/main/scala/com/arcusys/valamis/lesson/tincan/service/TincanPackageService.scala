@@ -2,7 +2,7 @@ package com.arcusys.valamis.lesson.tincan.service
 
 import com.arcusys.valamis.lesson.service.CustomLessonService
 import com.arcusys.valamis.lesson.tincan.model.TincanActivity
-import com.arcusys.valamis.lrs.service.util.TinCanActivityType
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanActivityType
 
 import scala.tools.nsc.interpreter.InputStream
 

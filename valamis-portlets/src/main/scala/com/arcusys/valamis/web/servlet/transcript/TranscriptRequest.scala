@@ -1,7 +1,5 @@
 package com.arcusys.valamis.web.servlet.transcript
 
-import com.arcusys.valamis.certificate.AssignmentSort
-import com.arcusys.valamis.certificate.model.AssignmentSortBy
 import com.arcusys.valamis.model.Order
 import com.arcusys.valamis.user.model.UserSortBy
 import com.arcusys.valamis.web.servlet.request.{BaseCollectionRequest, BaseRequest, BaseSortableCollectionFilteredRequestModel, Parameter}

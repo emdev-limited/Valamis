@@ -10,12 +10,11 @@ import org.apache.commons.codec.CharEncoding
 import org.apache.http.HttpHeaders._
 
 import scala.collection.JavaConverters._
+import ProxyConstants._
 
 
 trait MethodOverrideFilter {
-  private val Method = "method"
-  private val Content = "content"
-  private val TincanHeaders = Seq("authorization", "content-type", "x-experience-api-version", Content)
+
 
   def doFilter(req: HttpServletRequest,
                         res: HttpServletResponse) : HttpServletRequest = {
@@ -38,45 +37,47 @@ trait MethodOverrideFilter {
     private val enc = if (encoding == null || encoding.trim.length == 0) "UTF-8" else encoding
     private final val bodyContent = URLDecoder.decode(scala.io.Source.fromInputStream(req.getInputStream).mkString, enc)
 
-    private val newParameters = bodyContent.split("&")
-      .map(_.split("=", 2))
-      .map(p => (p(0), p(1))).toMap
+    private val contentParameters = bodyContent
+      .parseParameters(enc, decode = false)
+      .filterKeys(_ != Method)
 
-    private def getNewParameter(name: String): Option[String] = {
-      newParameters.find(_._1.equalsIgnoreCase(name)).map(_._2)
+    private val newHeaders = contentParameters.filterKeys(HttpHeaders.contains)
+    private val newParams = (contentParameters -- newHeaders.keys).filterKeys(_ != Content)
+
+    private def getContentParameter(name: String): Option[String] = {
+      contentParameters.find(_._1.equalsIgnoreCase(name)).map(_._2)
     }
-
 
     override def getMethod = method.toUpperCase
 
     override def getHeader(name: String): String = {
       name.toLowerCase match {
         case "content-length" => getContentLength.toString
-        case _ => getNewParameter(name).getOrElse(super.getHeader(name))
+        case _ => getContentParameter(name).getOrElse(super.getHeader(name))
       }
     }
 
     override def getHeaderNames: util.Enumeration[Any] = {
-      (super.getHeaderNames.asScala ++ newParameters.keys).toSeq.distinct.iterator.asJavaEnumeration
+      (super.getHeaderNames.asScala ++ newHeaders.keys).toSeq.distinct.iterator.asJavaEnumeration
     }
 
     override def getParameterMap: util.Map[String, Array[String]] = {
-      newParameters.map(p => (p._1, Array(p._2))).asJava
+      newParams.map(p => (p._1, Array(p._2))).asJava
     }
 
     override def getParameter(name: String): String =
-      newParameters.find(_._1.equalsIgnoreCase(name)).map(_._2).orNull
+      getContentParameter(name).orNull
 
     override def getContentType: String = {
       getHeader(CONTENT_TYPE)
     }
 
     override def getContentLength: Int = {
-      getNewParameter(Content).map(_.length).getOrElse(0)
+      getContentParameter(Content).map(_.length).getOrElse(0)
     }
 
     override def getInputStream = {
-      val content = getNewParameter(Content).getOrElse("")
+      val content = getContentParameter(Content).getOrElse("")
 
       val byteArrayInputStream = new ByteArrayInputStream(content.getBytes(CharEncoding.UTF_8))
       new ServletInputStream {
@@ -91,14 +92,30 @@ trait MethodOverrideFilter {
     }
 
     override def getQueryString: String = {
-      val originalParametersPairs = super.getQueryString.split("&")
-
-      val newParametersPairs = newParameters
-        .filterNot(p => TincanHeaders.contains(p._1.toLowerCase))
+      val newParametersString = newParams
         .filterNot(_._1 == "registration") // fix for articulate packages
-        .map(p => p._1 + "=" + URLEncoder.encode(p._2, enc))
+        .toQueryString(enc)
 
-      (originalParametersPairs ++ newParametersPairs).mkString("&")
+      val sourceParams = super.getQueryString.parseParameters(enc).filterKeys(!_.equalsIgnoreCase(Method))
+
+      if (sourceParams.isEmpty)
+        newParametersString
+      else {
+        sourceParams.toQueryString(enc) + "&" + newParametersString
+      }
     }
+  }
+
+  implicit class ParameterStringExtension(str: String){
+    def parseParameters(enc: String, decode: Boolean = true): Map[String, String] = str.split("&")
+      .map(_.split("=", 2))
+      .map(p => (p(0), if(decode) URLDecoder.decode(p(1), enc) else p(1)))
+      .toMap
+  }
+
+  implicit class ParameterMapExtension(params: Map[String, String]){
+    def toQueryString(enc: String): String = params
+      .map(p => p._1 + "=" + URLEncoder.encode(p._2, enc))
+      .mkString("&")
   }
 }

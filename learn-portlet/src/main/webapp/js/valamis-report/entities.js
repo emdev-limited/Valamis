@@ -1,4 +1,4 @@
-valamisReport.module('Entities', function(Entities, valamisReport, Backbone, Marionette, $, _) {
+valamisReport.module('Entities', function (Entities, valamisReport, Backbone, Marionette, $, _) {
 
     var reportModelService = new Backbone.Service({
         targets: {
@@ -10,11 +10,47 @@ valamisReport.module('Entities', function(Entities, valamisReport, Backbone, Mar
                     return options.data
                 },
                 'method': 'get'
+            },
+            'exportReport': {
+                'path': function (model, options) {
+                    var reportTypes = model.get('availableReportTypes');
+                    var url = '/';
+                    switch (model.get("reportType")) {
+                        case reportTypes.certificates:
+                            url += path.api.reportExport.certificates;
+                            break;
+                        case reportTypes.topLessons:
+                            url += path.api.reportExport.lessons;
+                            break;
+                        case reportTypes.mostActiveUsers:
+                            url += path.api.reportExport.users;
+                            break;
+                        case reportTypes.averagePassingGrade:
+                            url += path.api.reportExport.averageGrades;
+                            break;
+                        case reportTypes.numberOfLessonsAttempted:
+                            url += path.api.reportExport.attemptedLessons;
+                            break;
+                    }
+                    return url;
+                },
+                'data': function (model) {
+                    return {
+                        courseId: Utils.getCourseId(),
+                        startDate: model.get('startDate'),
+                        endDate: model.get('endDate'),
+                        userIds: model.get('userIds'),
+                        reportsScope: model.get('reportsScope'),
+                        format: model.get('format'),
+                        top: model.get('top')
+                    }
+                },
+                'method': 'post'
             }
         }
     });
 
-    Entities.reportModel  = Backbone.Model.extend({
+    Entities.reportModel = Backbone.Model.extend({
         defaults: {
             reportType: 'reportTypeCertificates'
         },
@@ -28,11 +64,44 @@ valamisReport.module('Entities', function(Entities, valamisReport, Backbone, Mar
             else if (this.get('reportType') == 'reportTypeMostActiveUsers') {
                 this.set({'url': path.root + path.api.report + 'most-active-users'});
             }
+            else if (this.get('reportType') == 'reportTypeAveragePassingGrade') {
+                this.set({'url': path.root + path.api.report + 'average-grades'});
+            }
+            else if (this.get('reportType') == 'reportTypeNumberOfLessonsAttempted') {
+                this.set({'url': path.root + path.api.report + 'attempted-lessons'});
+            }
         }
     }).extend(reportModelService);
+
+    Entities.CourseModel = Backbone.Model.extend();
+
+    var CoursesCollectionService = new Backbone.Service({
+        url: path.root,
+        sync: {
+            'read': {
+                'path': function () {
+                    return path.api.courses + 'list/mySites';
+                },
+                'data': {
+                    courseId: Utils.getCourseId()
+                },
+                'method': 'get'
+            }
+        }
+    });
+
+    Entities.CoursesCollection = Backbone.Collection.extend({
+        model: Backbone.Model,
+        parse: function(response) {
+            var records = response.records;
+            records.unshift({ id: '', title: Valamis.language['allCoursesLabel'] });
+
+            return records;
+        }
+    }).extend(CoursesCollectionService);
 });
 
-valamisReportSettings.module('Entities', function(Entities, valamisReportSettings, Backbone, Marionette, $, _) {
+valamisReportSettings.module('Entities', function (Entities, valamisReportSettings, Backbone, Marionette, $, _) {
 
     Entities.ReportOptionModel = Backbone.Model.extend({});
 
@@ -53,13 +122,16 @@ valamisReportSettings.module('Entities', function(Entities, valamisReportSetting
                 'path': function (model, options) {
                     return Utils.getContextPath() + 'js/valamis-report/defaultSettings.json'
                 },
-                'data': function (collection, options) {},
+                'data': function (collection, options) {
+                },
                 'method': 'get'
             }
         },
         targets: {
             'updateSettings': {
-                'path': valamisReportSettings.actionURL,
+                'path': function() {
+                    return valamisReportSettings.actionURL
+                },
                 'data': function (collection, options) {
                     return {
                         reportType: options.currentTypeId,
@@ -77,8 +149,8 @@ valamisReportSettings.module('Entities', function(Entities, valamisReportSetting
 
     Entities.ReportSettingsModel = Backbone.Collection.extend({
         model: Entities.ReportSettingModel,
-        parse : function(response, options) {
-            if(response === undefined) return response;
+        parse: function (response, options) {
+            if (response === undefined) return response;
             return response.report_settings;
         }
 
@@ -117,10 +189,10 @@ valamisReportSettings.module('Entities', function(Entities, valamisReportSetting
 
                     var organizationId = options.filter.orgId;
                     if (organizationId) {
-                        _.extend(params, { orgId: organizationId });
+                        _.extend(params, {orgId: organizationId});
                     }
                     var userIds = options.userIds;
-                    _.extend(params, { userIds: (userIds) ? options.userIds : collection.userIds });
+                    _.extend(params, {userIds: (userIds) ? options.userIds : collection.userIds});
 
                     return params;
                 },
@@ -132,11 +204,13 @@ valamisReportSettings.module('Entities', function(Entities, valamisReportSetting
     Entities.UsersCollection = Backbone.Collection.extend({
         model: Entities.UserModel,
         parse: function (response) {
-            this.trigger('userCollection:updated', { total: response.total, currentPage: response.currentPage });
+            this.trigger('userCollection:updated', {total: response.total, currentPage: response.currentPage});
             return response.records;
         },
-        getSelected: function() {
-            return this.filter(function(item) { return item.get('selected') });
+        getSelected: function () {
+            return this.filter(function (item) {
+                return item.get('selected')
+            });
         }
     }).extend(UsersCollectionService);
 

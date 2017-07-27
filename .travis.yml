@@ -8,7 +8,7 @@ jdk:
 
 sbt_args: -J-XX:MaxPermSize=1024m -J-Xmx4096M -J-Xms2048M -J-Xss8M
 
-script: sbt clean portlet/compile
+script: sbt clean portlet/compile test
 
 # Workaround for https://github.com/travis-ci/travis-ci/issues/5227
 # Buffer overflow in Java_java_net_Inet4AddressImpl_getLocalHostName

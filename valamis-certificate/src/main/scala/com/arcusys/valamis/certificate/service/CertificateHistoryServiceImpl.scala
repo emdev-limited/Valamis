@@ -17,24 +17,6 @@ class CertificateHistoryServiceImpl(val db: JdbcBackend#DatabaseDef, val driver:
 
   import driver.api._
 
-  def add(certificate: Certificate, isDelete: Boolean): Unit = {
-    val now = DateTime.now
-
-      val insertQ = certificatesHistoryTQ += CertificateHistory(
-        certificate.id,
-        now,
-        isDelete,
-        certificate.title,
-        certificate.isPermanent,
-        certificate.companyId,
-        certificate.validPeriodType,
-        certificate.validPeriod,
-        certificate.isActive,
-        certificate.scope
-      )
-
-    Await.result(db.run(insertQ), Duration.Inf)
-  }
 
   def get(companyId: Long,
           date: DateTime): Future[Seq[CertificateHistory]] = {

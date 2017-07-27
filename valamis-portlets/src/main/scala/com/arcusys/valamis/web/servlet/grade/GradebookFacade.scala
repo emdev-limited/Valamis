@@ -7,7 +7,7 @@ import com.arcusys.valamis.gradebook.service._
 import com.arcusys.valamis.lesson.model._
 import com.arcusys.valamis.lesson.service._
 import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
 import com.arcusys.valamis.lrs.tincan.StatementResult
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.tag.model.ValamisTag
@@ -31,7 +31,6 @@ class GradebookFacade(implicit val bindingModule: BindingModule)
   private lazy val courseGradeService = inject[TeacherCourseGradeService]
   private lazy val courseService = inject[CourseService]
   private lazy val gradeBookService = inject[GradeBookService]
-  private lazy val userFacade = inject[UserFacadeContract]
   private lazy val tagService = inject[TagService[Lesson]]
   private lazy val lrsClient = inject[LrsClientManager]
   private lazy val statementReader = inject[LessonStatementReader]

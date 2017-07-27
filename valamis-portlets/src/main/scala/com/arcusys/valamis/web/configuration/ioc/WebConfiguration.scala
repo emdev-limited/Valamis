@@ -1,27 +1,25 @@
 package com.arcusys.valamis.web.configuration.ioc
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
-import com.arcusys.valamis.certificate.service.{AssignmentService, AssignmentServiceImpl, CertificateGoalService, CertificateStatusChecker}
-import com.arcusys.valamis.certificate.storage.{CertificateGoalStateRepository, CertificateRepository, CertificateStateRepository}
+import com.arcusys.valamis.certificate.service._
 import com.arcusys.valamis.export.service.ExportService
 import com.arcusys.valamis.gradebook.service.{LessonGradeService, UserCourseResultService}
 import com.arcusys.valamis.lesson.service._
 import com.arcusys.valamis.lesson.tincan.service.TincanPackageService
 import com.arcusys.valamis.liferay.{CacheUtil, CacheUtilMultiVMPoolImpl}
-import com.arcusys.valamis.lrs.service.util.StatementChecker
 import com.arcusys.valamis.member.service.MemberService
 import com.arcusys.valamis.persistence.common.SlickDBInfo
-import com.arcusys.valamis.reports.service.{LearningPathsReportService, LearningPathsReportServiceImpl, LearningPatternReportService, LearningPatternReportServiceImpl}
+import com.arcusys.valamis.reports.service.{LearningPatternReportService, LearningPatternReportServiceImpl}
 import com.arcusys.valamis.settings.service.SettingService
 import com.arcusys.valamis.slide.convert.PresentationProcessor
 import com.arcusys.valamis.slide.model.SlideSet
 import com.arcusys.valamis.slide.service._
 import com.arcusys.valamis.social
+import com.arcusys.valamis.statements.StatementChecker
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.web.listener.LessonListener
 import com.arcusys.valamis.web.service._
 import com.arcusys.valamis.web.service.export.ExportServiceImpl
-import com.arcusys.valamis.web.servlet.certificate.facade.{CertificateFacade, CertificateFacadeContract}
 import com.arcusys.valamis.web.servlet.course.{CourseFacade, CourseFacadeContract}
 import com.arcusys.valamis.web.servlet.file.{FileFacade, FileFacadeContract}
 import com.arcusys.valamis.web.servlet.grade.notification.GradebookNotificationHelper
@@ -41,6 +39,7 @@ class WebConfiguration(dbInfo: => SlickDBInfo) extends NewBindingModule(fn = imp
   module <~ new QuestionBankConfiguration(dbInfo)
   module <~ new SlideConfiguration(dbInfo)
   module <~ new TranscriptConfiguration
+  module <~ new StoryTreeConfiguration(dbInfo)
 
   bind[GradebookNotificationHelper] toSingle new GradebookNotificationHelper {
     val lessonService = inject[LessonService](None)
@@ -55,19 +54,10 @@ class WebConfiguration(dbInfo: => SlickDBInfo) extends NewBindingModule(fn = imp
     val lessonPlayerService = inject[LessonPlayerService](None)
   }
 
-  bind[LearningPathsReportService] toSingle new LearningPathsReportServiceImpl {
-    val certificateToUserRepository = inject[CertificateStateRepository](None)
-    val certificateRepository = inject[CertificateRepository](None)
-    val goalService = inject[CertificateGoalService](None)
-    val certificateStatusService = inject[CertificateStatusChecker](None)
-    val userGoalStatusRepository = inject[CertificateGoalStateRepository](None)
-  }
-
   bind[ImageProcessor] toSingle new ImageProcessorImpl
   bind[PresentationProcessor] toSingle new PresentationProcessorImpl
 
   // -------------FACADES----------------------------------
-  bind[CertificateFacadeContract].toSingle(new CertificateFacade)
   bind[FileFacadeContract].toSingle(new FileFacade)
   bind[GradebookFacadeContract].toSingle(new GradebookFacade)
   bind[CourseFacadeContract].toSingle(new CourseFacade)
@@ -105,15 +95,12 @@ class WebConfiguration(dbInfo: => SlickDBInfo) extends NewBindingModule(fn = imp
 
   bind[CacheUtil].toSingle(new CacheUtilMultiVMPoolImpl)
 
-  bind[AssignmentService] toSingle new AssignmentServiceImpl
-
   bind[SlideSetAssetHelper] toSingle new SlideSetAssetHelperImpl
   bind[MemberService] toSingle new MemberService
   bind[LessonListener] toSingle new LessonListener {
     lazy val lessonService = inject[LessonService](None)
     lazy val lessonGradeService = inject[LessonGradeService](None)
     lazy val lessonResultService = inject[UserLessonResultService](None)
-    lazy val certificateChecker = inject[CertificateStatusChecker](None)
     lazy val teacherGradeService = inject[TeacherLessonGradeService](None)
     lazy val userCourseService = inject[UserCourseResultService](None)
     lazy val gradeService = inject[LessonGradeService](None)

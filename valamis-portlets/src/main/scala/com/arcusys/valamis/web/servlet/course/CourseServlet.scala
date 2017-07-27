@@ -1,13 +1,14 @@
 package com.arcusys.valamis.web.servlet.course
 
 import javax.servlet.http.HttpServletResponse
+
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.learn.liferay.services.{LayoutSetPrototypeServiceHelper, ThemeLocalServiceHelper, UserGroupRoleLocalServiceHelper, UserLocalServiceHelper}
-import com.arcusys.valamis.certificate.service.CertificateUserService
+import com.arcusys.learn.liferay.services._
 import com.arcusys.valamis.course.CourseMemberService
 import com.arcusys.valamis.course.exception._
-import com.arcusys.valamis.course.service.{CertificateService, CourseService, CourseUserQueueService, InstructorService}
+import com.arcusys.valamis.course.service.{CourseCertificateService, CourseService, CourseUserQueueService, InstructorService}
 import com.arcusys.valamis.course.model.CourseMembershipType
+import com.arcusys.valamis.course.model.CourseMembershipType.CourseMembershipType
 import com.arcusys.valamis.member.model.MemberTypes
 import com.arcusys.valamis.model.RangeResult
 import com.arcusys.valamis.ratings.RatingService
@@ -18,6 +19,7 @@ import com.arcusys.valamis.web.servlet.user.UserRequest
 import com.thoughtworks.paranamer.ParameterNamesNotFoundException
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
@@ -32,9 +34,8 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
   private implicit lazy val courseUserQueueService = inject[CourseUserQueueService]
 
   override implicit val jsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
-  private implicit lazy val certificateService = inject[CertificateService]
+  private implicit lazy val courseCertificateService = inject[CourseCertificateService]
   private implicit lazy val instructorService = inject[InstructorService]
-  private implicit lazy val certificateUserService = inject[CertificateUserService]
   private implicit lazy val courseValidator = new CourseValidator
 
   def await[T](f: Future[T]): T = Await.result(f, Duration.Inf)
@@ -68,7 +69,6 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
 
     RangeResult(courses.total, courses.records)
   }
-
   get("/courses/list/:option(/)") {
     val courseResponses = Symbol(params("option")) match {
       case 'all => //Every course with the correct types.
@@ -77,7 +77,8 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
           None,
           courseRequest.skipTake,
           courseRequest.filter,
-          courseRequest.ascending
+          courseRequest.ascending,
+          withGuestSite = courseRequest.withGuestSite
         )
       case 'visible => //Every course with the correct types that the user can see.
         courseService.getAllForUser(
@@ -94,14 +95,16 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
           PermissionUtil.getLiferayUser,
           courseRequest.skipTake,
           courseRequest.filter,
-          courseRequest.ascending
+          courseRequest.ascending,
+          withGuestSite = courseRequest.withGuestSite
         )
       case 'my => //Every course with the correct types that the user is member of.
         courseService.getByUserAndName(
           PermissionUtil.getLiferayUser,
           courseRequest.skipTake,
           courseRequest.textFilter,
-          courseRequest.isSortDirectionAsc
+          courseRequest.isSortDirectionAsc,
+          withGuestSite = courseRequest.withGuestSite
         )
       case 'mySites => //All my site courses
         courseService.getSitesByUserId(
@@ -143,7 +146,7 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
       courseRequest.themeId,
       courseRequest.templateId)
 
-    certificateService.updateCertificates(newCourse.id, courseRequest.certificateIds)
+    courseCertificateService.updateCertificates(newCourse.id, courseRequest.certificateIds)
     instructorService.updateInstructors(newCourse.id, courseRequest.instructorIds)
 
     addInfo(CourseConverter.toResponse(newCourse))
@@ -151,11 +154,14 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
 
   put("/courses/:id(/)") {
     withCourseExistenceCheck {
+      val membershipType: CourseMembershipType =
+        courseRequest.membershipType.getOrElse(CourseMembershipType.OPEN)
       courseValidator.validateDateInterval(courseRequest.beginDate, courseRequest.endDate)
       courseValidator.validateThemeId(PermissionUtil.getCompanyId, courseRequest.themeId)
       courseValidator.validateCertificateIds(PermissionUtil.getCompanyId, courseRequest.certificateIds)
       courseValidator.validateUserIds(courseRequest.instructorIds)
       courseValidator.validateUserLimit(courseRequest.id, courseRequest.userLimit)
+      courseValidator.validateMembershipType(courseRequest.id, membershipType)
 
       val updatedCourse = courseService.update(
         courseRequest.id,
@@ -172,7 +178,7 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
         courseRequest.endDate,
         courseRequest.themeId)
 
-      certificateService.updateCertificates(updatedCourse.id, courseRequest.certificateIds)
+      courseCertificateService.updateCertificates(updatedCourse.id, courseRequest.certificateIds)
       instructorService.updateInstructors(updatedCourse.id, courseRequest.instructorIds)
 
       addInfo(CourseConverter.toResponse(updatedCourse)).copy(hasLogo = courseRequest.hasLogo)
@@ -197,7 +203,7 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
     withCourseExistenceCheck {
       val courseId = courseRequest.id
       courseService.delete(courseId)
-      certificateService.deleteCertificates(courseId)
+      courseCertificateService.deleteCertificates(courseId)
       instructorService.deleteInstructors(courseId)
     }
   }
@@ -264,7 +270,7 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
             courseRequest.skipTake,
             courseRequest.orgIdOption
           )
-            .map(row => UserResponse(row, certificateService.prerequisitesCompleted(courseId, row.getUserId)))
+            .map(row => UserResponse(row, courseCertificateService.prerequisitesCompleted(courseId, row.getUserId)))
         case _ =>
           courseMemberService.getAvailableMembers(
             courseId,
@@ -306,7 +312,7 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
   get("/courses/requests(/)") {
     val courseId = courseRequest.id
     courseMemberService.getPendingMembershipRequests(courseId, courseRequest.ascending, courseRequest.skipTake)
-      .map(row => UserResponse(row, certificateService.prerequisitesCompleted(courseId, row.getUserId)))
+      .map(row => UserResponse(row, courseCertificateService.prerequisitesCompleted(courseId, row.getUserId)))
   }
 
   get("/courses/requests/count(/)") {
@@ -372,7 +378,7 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
       val users = await {
         courseUserQueueService.get(courseId)
       }.map(row => UserResponse(UserLocalServiceHelper().getUser(row.userId),
-        certificateService.prerequisitesCompleted(courseId, row.userId)))
+        courseCertificateService.prerequisitesCompleted(courseId, row.userId)))
       RangeResult(users.length, users)
     }
   }
@@ -441,6 +447,9 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
     case e: UserNotFoundException =>
       halt(HttpServletResponse.SC_BAD_REQUEST, ErrorDetails("instructorIds", "not-found"))
 
+    case e: MembershipTypeRequestsNotEmptyException =>
+      halt(HttpServletResponse.SC_BAD_REQUEST, ErrorDetails("membershipType", "requests-not-empty"))
+
     // It does not work with LF7
     //case e: LGroupNameException => halt(HttpServletResponse.SC_BAD_REQUEST, ErrorDetails("name", "invalid"))
 
@@ -466,6 +475,6 @@ class CourseServlet extends BaseJsonApiController with CoursePolicy {
     }
 
   private def addPermissions(course: CourseResponse): CourseResponse =
-    course.copy(canEditCourse = Some(courseValidator.canEditCourse),
+    course.copy(canEditCourse = Some(courseValidator.canEditCourse(course, userId)),
       canEditMembers = Some(courseValidator.canEditMembers(course.id, userId)))
 }

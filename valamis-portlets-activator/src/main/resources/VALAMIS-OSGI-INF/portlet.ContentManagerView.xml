@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<component name="com.arcusys.valamis.web.portlet.ContentManagerView" immediate="true">
+
+    <implementation class="com.arcusys.valamis.web.portlet.ContentManagerView"/>
+
+    <service>
+        <provide interface="javax.portlet.Portlet"/>
+    </service>
+
+    <property name="javax.portlet.portlet-name" type="String" value="com_arcusys_valamis_web_portlet_ContentManagerView"/>
+    <property name="com.liferay.portlet.display-category" type="String" value="Valamis Lesson tools"/>
+    <property name="javax.portlet.info.title" type="String" value="Content Management"/>
+    <property name="javax.portlet.display-name" type="String" value="Content Management"/>
+    <property name="javax.portlet.resource-bundle" type="String" value="content.Language"/>
+
+    <property name="javax.portlet.portlet-mode" type="String" value="text/html;view,edit"/>
+    <property name="javax.portlet.security-role-ref" type="String" value="power-user,user"/>
+    <property name="javax.portlet.expiration-cache" type="Integer" value="0"/>
+
+
+    <property name="com.liferay.portlet.requires-namespaced-parameters" type="Boolean" value="false"/>
+    <property name="com.liferay.portlet.add-default-resource" type="Boolean" value="true"/>
+
+    <property name="com.liferay.portlet.ajaxable" type="String" value="false"/>
+    <property name="com.liferay.portlet.show-portlet-access-denied" type="Boolean" value="false"/>
+
+    <property name="com.liferay.portlet.header-portlet-css" type="String">
+        /css/backbone.modal.css
+        /css/backbone.modal.theme.css
+        /css/toastr.css
+    </property>
+
+    <property name="com.liferay.portlet.header-portlet-javascript" type="String">
+
+        /js/content-manager-all.js
+
+    </property>
+
+
+
+    <property name="com.liferay.portlet.footer-portlet-css" type="String" value="/css/valamis.css"/>
+    <property name="com.liferay.portlet.footer-portlet-javascript" type="String">
+        /js/ckeditor-all.js
+    </property>
+
+    <property name="com.liferay.portlet.css-class-wrapper" type="String" value="valamis"/>
+
+</component>

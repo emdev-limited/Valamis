@@ -6,7 +6,7 @@ import com.arcusys.valamis.web.servlet.base.{BaseApiController, PermissionUtil}
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
   * Url checks
@@ -32,8 +32,12 @@ class UrlServlet extends BaseApiController {
         client.close()
 
         headers
-      }.toOption
-        .exists(_.length == 0)
+      } match {
+        case Success(headers) => headers.length == 0
+        case Failure(ex) => log.warn(ex.getMessage)
+          false
+      }
+
     } else false
   }
 }

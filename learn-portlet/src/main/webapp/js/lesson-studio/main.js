@@ -58,6 +58,32 @@ function showSlideSet(slideSetModel) {
         slidesApp.slideCollection.on('sync', function () {
 
             if (!slidesApp.isRunning && slidesApp.slideCollection && slidesApp.slideElementCollection) {
+                //TODO check broken reference in collection and try repair it
+                _.forEach(slidesApp.slideCollection.models, function(slide){
+                    var refSlides = slidesApp.slideCollection.where({leftSlideId: slide.id});
+                    if(refSlides.length > 1){
+                        var chainLength = [],
+                            lastInChain = [],
+                            rightSlide;
+                        _.forEach(refSlides, function (refSlide, index) {
+                            chainLength[index] = 1;
+                            rightSlide = slidesApp.slideCollection.findWhere({leftSlideId: refSlide.id});
+                            while (!!rightSlide) {
+                                lastInChain[index] = rightSlide.id;
+                                chainLength[index]++;
+                                rightSlide = slidesApp.slideCollection.findWhere({leftSlideId: rightSlide.id});
+                            }
+                        });
+                        var mainChainIndex = chainLength.indexOf(_.max(chainLength));
+                        _.forEach(refSlides, function (slide, index) {
+                            if(index != mainChainIndex) {
+                                slide.set('leftSlideId', lastInChain[mainChainIndex]);
+                                lastInChain[mainChainIndex] = lastInChain[index];
+                            }
+                        });
+                    }
+                });
+
                 jQueryValamis.when(revealModule.start()).then(function() {
                     deferred.resolve();
                 });
@@ -271,6 +297,7 @@ slidesApp.save = function(options) {
 
                     function saveSubmit(){
                         slideElementModel.save().then(function (newSlideElementModel) {
+                            slideElementModel.set('isSave', true);
                             slideElementModel.set('id', newSlideElementModel.id);
                             var registeredModelView =
                                 Marionette.ItemView.Registry.getByModelId(slideElementModel.get('tempId')) ||
@@ -343,6 +370,15 @@ slidesApp.save = function(options) {
                     }
                     else onSlideModelSaved();
 
+                    if (!!slideModelTempId && slidesApp.mode == 'arrange') {
+                        arrangeModule.slideOrder =_.map(arrangeModule.slideOrder, function (val) {
+                               return _.map(val, function (slideId) {
+                                   return slideId == slideModelTempId ? slideModelId : slideId
+                               })
+                            });
+                        slidesApp.slideSetModel.set('slideOrder', arrangeModule.slideOrder);
+                    }
+
                     function onSlideModelSaved() {
                         if(slideModelTempId) {
                             _.each(slidesApp.slideCollection.where({leftSlideId: slideModelTempId}), function (slide) {
@@ -372,17 +408,28 @@ slidesApp.save = function(options) {
 
                         // Update linked slide ids
                         var elementsWithCorrectLinkedSlides =
-                            slidesApp.slideElementCollection.where({ correctLinkedSlideId: slideModelId })
-                                .concat(slidesApp.slideElementCollection.where({ correctLinkedSlideId: slideModelTempId }));
+                            slidesApp.slideElementCollection.where({ correctLinkedSlideId: slideModelTempId });
 
                         var elementsWithIncorrectLinkedSlides =
-                            slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: slideModelId })
-                                .concat(slidesApp.slideElementCollection.where({ incorrectLinkedSlideId:slideModelTempId }));
+                            slidesApp.slideElementCollection.where({ incorrectLinkedSlideId: slideModelTempId });
+                        
                         _.each(elementsWithCorrectLinkedSlides, function(slideElementModel) {
-                            slideElementModel.set('correctLinkedSlideId', slideModelId);
+                            if (!!slideElementModel.get('correctLinkedSlideId')) {
+                                slideElementModel.set('correctLinkedSlideId', slideModelId);
+                                if(slideElementModel.has('isSave')){
+                                    slideElementModel.unset('isSave');
+                                    slideElementModel.save();
+                                }
+                            }
                         });
                         _.each(elementsWithIncorrectLinkedSlides, function(slideElementModel) {
-                            slideElementModel.set('incorrectLinkedSlideId', slideModelId);
+                            if (!!slideElementModel.get('incorrectLinkedSlideId')) {
+                                slideElementModel.set('incorrectLinkedSlideId', slideModelId);
+                                if(slideElementModel.has('isSave')){
+                                    slideElementModel.unset('isSave');
+                                    slideElementModel.save();
+                                }
+                            }
                         });
 
                         if (formData) {
@@ -444,7 +491,7 @@ slidesApp.save = function(options) {
                                                 deferred.resolve();
                                             });
                                         }
-                                        if (totalSlideCount == slidesApp.slideCollection.size() && totalSlideElementCount == slidesApp.slideElementCollection.size()) {
+                                        if (totalSlideCount == slidesApp.slideCollection.length && totalSlideElementCount == slidesApp.slideElementCollection.length) {
                                             deferred.resolve(slidesApp.slideSetModel);
                                         }
                                     });
@@ -669,19 +716,24 @@ slidesApp.getSlideElementModel = function (id) {
 slidesApp.getFileUrl = function(model, filename) {
     var url = filename || '';
     var folderPrefix, modelId;
-    if(url && url.indexOf('/') == -1) {
-        if (model.get('slideSetId')) {//is slide model
-            modelId = model.get('id') || model.get('slideId');
-            folderPrefix = 'slide_';
-        } else {
-            modelId = model.get('id') || model.get('clonedId');
-            folderPrefix = model.get('isTheme') ? 'slide_theme_' : 'slide_item_';
-        }
-        var elementType = model.get('slideEntityType');
-        if (elementType === 'pdf')
+    var elementType = model.get('slideEntityType');
+    if (model.get('slideSetId')) {//is slide model
+        modelId = model.get('id') || model.get('slideId');
+        folderPrefix = 'slide_';
+    } else {
+        modelId = model.get('id') || model.get('clonedId');
+        folderPrefix = model.get('isTheme') ? 'slide_theme_' : 'slide_item_';
+    }
+
+    if (elementType === 'pdf') {
+        if (url.indexOf('blob') == -1) {
             url = Utils.getContextPath() + 'preview-resources/pdf/web/viewer.html?file=' +
                 getServletContextPath() + '/SCORMData/files/slideData' + modelId + '/' + filename;
-        else if (elementType === 'audio')
+        } else {
+            url = Utils.getContextPath() + 'preview-resources/pdf/web/viewer.html?file='+ filename;
+        }
+    } else if(url && url.indexOf('/') == -1) {
+        if (elementType === 'audio')
             url = path.root + path.api.files + 'audio?folderId=' + folderPrefix + modelId + '&file=' + filename;
         else
             url = path.root + path.api.files + 'images?folderId=' + folderPrefix + modelId + '&file=' + filename;
@@ -827,7 +879,7 @@ slidesApp.layoutResizeInit = function(){
     var workAreaMarginBottom = parseInt(workArea.css('margin-top')) + parseInt(workArea.css('margin-bottom'));
 
     versionSidebar.css('height', parseInt(workArea.css('height')) + workAreaMarginBottom);
-    if( jQueryValamis(lessonStudio.slidesWrapper + ' .layout-resizable-handle', workArea).size() > 0 ){
+    if( jQueryValamis(lessonStudio.slidesWrapper + ' .layout-resizable-handle', workArea).length > 0 ){
         return;
     }
 
@@ -1209,6 +1261,11 @@ var TopbarView = Marionette.CompositeView.extend({
 
                 slidesApp.savedIndex = slidesApp.actionStack.length;
                 slidesApp.historyManager.setSaved();
+                slidesApp.historyManager.historyReset();
+
+                if (slidesApp.mode == 'arrange') {
+                    arrangeModule.renderSortableLists(arrangeModule.slideOrder);
+                }
                 if (options.close) {
                     view.closeEditor(true);
                 }
@@ -1246,8 +1303,9 @@ var TopbarView = Marionette.CompositeView.extend({
 
         if(slidesApp.editorArea){
             var wrapper = slidesApp.editorArea.$el.closest('.slides-work-area-wrapper');
-            $('.reveal-wrapper').removeClass(wrapper.attr('data-layout'));
-            $('.reveal-wrapper').addClass(deviceLayout.get('name'));
+            slidesApp.editorArea.$el
+                .removeClass(wrapper.attr('data-layout'))
+                .addClass(deviceLayout.get('name'));
             wrapper.attr('data-layout', deviceLayout.get('name'));
         }
         slidesApp.RevealModule.configure({

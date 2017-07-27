@@ -1,8 +1,7 @@
 package com.arcusys.valamis.web.configuration.ioc
 
-import com.arcusys.valamis.certificate.service.{CertificateStatusChecker, CertificateUserService}
-import com.arcusys.valamis.certificate.storage.CertificateRepository
-import com.arcusys.valamis.course.service.{CertificateService, CertificateServiceImpl}
+import com.arcusys.valamis.certificate.service.LearningPathService
+import com.arcusys.valamis.course.service.{CourseCertificateService, CourseCertificateServiceImpl}
 import com.arcusys.valamis.file.storage.FileStorage
 import com.arcusys.valamis.lesson.scorm.model.manifest.{ExitConditionRule, PostConditionRule, PreConditionRule}
 import com.arcusys.valamis.lesson.scorm.storage._
@@ -13,12 +12,14 @@ import com.arcusys.valamis.persistence.impl.contentProviders.ContentProviderRepo
 import com.arcusys.valamis.course.storage.{CourseCertificateRepository, CourseExtendedRepository, CourseInstructorRepository}
 import com.arcusys.valamis.persistence.impl.course.{CourseCertificateRepositoryImpl, CourseExtendedRepositoryImpl, CourseInstructorRepositoryImpl}
 import com.arcusys.valamis.persistence.impl.file.FileRepositoryImpl
+import com.arcusys.valamis.persistence.impl.lti.LTIDataRepositoryImpl
 import com.arcusys.valamis.persistence.impl.scorm.storage._
-import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementStorageImpl, SettingStorageImpl, StatementToActivityStorageImpl}
+import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementStorageImpl, StatementToActivityStorageImpl}
 import com.arcusys.valamis.persistence.impl.slide._
 import com.arcusys.valamis.persistence.impl.social.{CommentRepositoryImpl, LikeRepositoryImpl}
 import com.arcusys.valamis.persistence.impl.uri.TincanUriStorageImpl
-import com.arcusys.valamis.settings.storage.{ActivityToStatementStorage, SettingStorage, StatementToActivityStorage}
+import com.arcusys.valamis.settings.{SettingStorage, SettingStorageImpl}
+import com.arcusys.valamis.settings.storage.{ActivityToStatementStorage, StatementToActivityStorage}
 import com.arcusys.valamis.slide.storage._
 import com.arcusys.valamis.social.storage.{CommentRepository, LikeRepository}
 import com.arcusys.valamis.uri.storage.TincanURIStorage
@@ -74,6 +75,10 @@ class PersistenceSlickConfiguration(dbInfo: => SlickDBInfo)(implicit configurati
 
     bind[ContentProviderRepository].toSingle{
       new ContentProviderRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
+    }
+
+    bind[LTIDataRepository].toSingle{
+      new LTIDataRepositoryImpl(dbInfo.slickProfile)
     }
 
     bind[StatementToActivityStorage] toSingle {
@@ -211,12 +216,10 @@ class PersistenceSlickConfiguration(dbInfo: => SlickDBInfo)(implicit configurati
       new CourseInstructorRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
-    bind[CertificateService] toSingle {
-      new CertificateServiceImpl {
-        lazy val certificateRepository = inject[CertificateRepository](None)
+    bind[CourseCertificateService] toSingle {
+      new CourseCertificateServiceImpl {
         lazy val courseCertificateRepository = inject[CourseCertificateRepository](None)
-        lazy val certificateUserService = inject[CertificateUserService](None)
-        lazy val certificateStatusChecker = inject[CertificateStatusChecker](None)
+        lazy val learningPathService = inject[LearningPathService](None)
       }
     }
 })

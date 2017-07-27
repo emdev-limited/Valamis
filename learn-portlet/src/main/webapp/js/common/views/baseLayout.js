@@ -68,8 +68,7 @@ valamisApp.module('Views.BaseLayout', function (BaseLayout, valamisApp, Backbone
     },
     onItemSelectedChange: function() {
       var isSelected = this.model.get('itemSelected');
-      this.ui.selectItem.toggleClass('primary', isSelected);
-      this.ui.selectItem.toggleClass('neutral', !isSelected);
+      this.ui.selectItem.prop('checked', isSelected);
 
       var idIndex;
       var modelId = this.model.get(this.model.idAttribute);
@@ -109,6 +108,7 @@ valamisApp.module('Views.BaseLayout', function (BaseLayout, valamisApp, Backbone
 
   BaseLayout.ListView = Marionette.CompositeView.extend({
     template: '#valamisBaseListViewTemplate',
+    className: 'val-table-wrapper',
     ui: {
       noItemsLabel: '.js-no-items-label'
     },

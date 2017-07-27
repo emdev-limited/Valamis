@@ -82,7 +82,10 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 that.verbs = [];
                 that.categories = [];
                 that.verbUriCollection.each(function(verb) {
-                    that.verbs.push({ id: verb.get('uri').slice(verb.get('uri').lastIndexOf('_') + 1), text: verb.get('title') });
+                    that.verbs.push({ id: verb.get('uri').slice(verb.get('uri').lastIndexOf('_') + 1),
+                        text: !!(Valamis.language[verb.get('uri')])
+                            ? Valamis.language[verb.get('uri')]
+                            : verb.get('title') });
                 });
                 that.uriCollection.each(function(uri) {
                     if(uri.get('uri').indexOf(path.root + path.api.uri + 'category') != -1 && !!uri.get('content'))
@@ -161,8 +164,8 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                     .unset('fileModel')
                     .unset('fileUrl');
                 this.bgImageUpdate('', '');
-                slidesApp.activeSlideModel.set('bgImageSizeChange', false, {silent: true});
-                slidesApp.activeSlideModel.set('bgImageChange', false, {silent: true});
+                slidesApp.activeSlideModel.set('bgImageSizeChange', true, {silent: true});
+                slidesApp.activeSlideModel.set('bgImageChange', true, {silent: true});
             }
         },
         bgImageUpdate: function(image, size) {
@@ -208,8 +211,9 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             slidesApp.pagePlayerTitle.setValue(slidesApp.activeSlideModel.get('playerTitle') || 'lessonSetting');
         },
         openSlideTemplatesPanel: function (isDirectionDown) {
+            var PAGE_LABEL_POSTFIX = 'PageLabel';
             var classList = 'lesson-studio-modal slide-templates-modal light-val-modal overflow-visible';
-            var blankSlide = new lessonStudio.Entities.LessonPageTemplateModel({'title': 'Blank page'});
+            var blankSlide = new lessonStudio.Entities.LessonPageTemplateModel({'title': Valamis.language['blankPageLabel']});
             var templateCollection = new lessonStudio.Entities.LessonPageCollection(blankSlide);
             var slideElements = slidesApp.activeSlideModel.getSlideElementsFromCollection();
             var isRandom = _.find(slideElements, function (el) {
@@ -221,11 +225,17 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
                 copySlide
                     .set('isSlideCopy', true)
                     .set('bgImage', 'copy-slide.png')
-                    .set('title', 'Copy page')
+                    .set('title', Valamis.language['copyPageLabel'])
                     .set('oldBgImage', slidesApp.activeSlideModel.get('bgImage'));
                 templateCollection.add(copySlide);
             }
             templateCollection.add(slidesApp.slideTemplateCollection.models);
+            templateCollection.add(slidesApp.slideTemplateCollection.models.map(function(e){
+                var langKey = Utils.getLangKey(e.get('title'), PAGE_LABEL_POSTFIX);
+                if(!!Valamis.language[langKey])
+                    e.set('title', Valamis.language[langKey]);
+                return e;
+            }));
             classList += ' ' + (isDirectionDown ? 'downPosition' : 'rightPosition');
             var templatesView = new RevealControlsModule.SlideTemplatesGridView({
                 collection: templateCollection,
@@ -688,18 +698,23 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             'click .js-action-delete': "deleteTheme"
         },
         templateHelpers: function() {
+            var THEME_LABEL_POSTFIX = 'ThemeLabel';
             var isButton = this.model.get('type') == 'item-button';
             var isSelected = slidesApp.slideSetModel.get('themeId') && this.model.get('id') == slidesApp.slideSetModel.get('themeId');
             var canDelete = (themeCollection.mode == 'default' || (themeCollection.mode == 'public' && !Valamis.permissions.LessonStudio.CAN_EDIT_THEME))
                 ? false
                 : !isButton;
             var srcImage = slidesApp.getFileUrl(this.model, this.model.getBackgroundImageName());
+            var langKey = Utils.getLangKey(this.model.get('title'), THEME_LABEL_POSTFIX);
             return {
                 isButton: isButton,
                 canDelete: canDelete,
                 canUnlockLesson: Valamis.permissions.LessonStudio.CAN_UNLOCK_LESSON,
                 isSelected: isSelected,
-                srcImage: srcImage
+                srcImage: srcImage,
+                titleThemeLabel: !!(Valamis.language[langKey])
+                    ? Valamis.language[langKey]
+                    : this.model.get('title')
             }
         },
         onRender: function () {
@@ -721,7 +736,7 @@ var revealControlsModule = slidesApp.module('RevealControlsModule', function (Re
             return (bgColor.r * 299 + bgColor.g * 587 + bgColor.b * 114) / 1000;
         },
         selectTheme: function() {
-            if( this.$('.item-button').size() > 0 ){
+            if( this.$('.item-button').length > 0 ){
                 slidesApp.execute('controls:theme:save');
             }
             else {

@@ -62,7 +62,7 @@
 </script>
 
 <script type="text/template" id="transcriptLessonsCollectionTemplate">
-    <table class="simple-table">
+    <table class="val-table simple">
         <thead>
             <tr>
                 <th>{{lessonsLabel}}</th>
@@ -82,12 +82,12 @@
 
 <script type="text/template" id="transcriptLessonsItemTemplate">
     <td>{{lesson.title}}</td>
-    <td class="bold text-right narrow-col">
+    <td class="text-bold text-right narrow-col">
         {{#teacherGradeValue}}
         {{teacherGradeValue}}<span class="val-percent-sign">%</span>
         {{/teacherGradeValue}}
     </td>
-    <td class="bold text-right narrow-col">
+    <td class="text-bold text-right narrow-col">
         {{#autoGradeValue}}
         {{autoGradeValue}}<span class="val-percent-sign">%</span>
         {{/autoGradeValue}}
@@ -95,7 +95,7 @@
 </script>
 
 <script type="text/template" id="transcriptAssignmentsCollectionTemplate">
-    <table class="simple-table">
+    <table class="val-table simple">
         <thead>
         <tr>
             <th>{{assignmentsLabel}}</th>
@@ -111,7 +111,7 @@
 
 <script type="text/template" id="transcriptAssignmentItemTemplate">
     <td>{{title}}</td>
-    <td class="bold text-right narrow-col">
+    <td class="text-bold text-right narrow-col">
         {{#submission.grade}}
             {{submission.grade}}<span class="val-percent-sign">%</span>
         {{/submission.grade}}
@@ -125,20 +125,20 @@
 
 <script type="text/template" id="transcriptCertificateItemTemplate">
     <div class="image certificate img-rect big"
-         {{#logo}}
-         style="background-image: url('{{logoUrl}}')"
-         {{/logo}}
+         {{#fullLogoUrl}}
+         style="background-image: url('{{fullLogoUrl}}')"
+         {{/fullLogoUrl}}
     ></div>
 
 
     <div class="title">{{title}}</div>
 
     <div class="info">
-    {{#isOpenbadges}}
+    {{#isOpenBadges}}
         {{openbadgesLabel}}
-    {{/isOpenbadges}}
+    {{/isOpenBadges}}
 
-    {{^isOpenbadges}}
+    {{^isOpenBadges}}
 
         {{achievementDateFormatted}} &mdash;
 
@@ -149,6 +149,6 @@
         {{permanentLabel}}
         {{/expirationDateFormatted}}
 
-    {{/isOpenbadges}}
+    {{/isOpenBadges}}
     </div>
 </script>

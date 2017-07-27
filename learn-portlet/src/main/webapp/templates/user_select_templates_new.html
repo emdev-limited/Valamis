@@ -1,0 +1,157 @@
+<script type="text/html" id="liferayUserDialogView">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search js-search">
+                <input type="text" id="searchUsers" placeholder="{{searchPlaceholderLabel}}">
+            </div>
+        </div>
+        <div class="dropdown filter-element shift-left js-user-type" id="userOrganization" data-value="">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{allOrganizationsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="">{{allOrganizationsLabel}}</li>
+            </ul>
+        </div>
+        <div id="sortUsers" class="dropdown filter-element shift-right" data-value="name:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+    <div class="filters-row clearfix">
+        <div class="filter-element paging-showing-label shift-left" id="userListPagingShowing"></div>
+        {{^singleSelect}}
+        <div class="filter-element shift-right">
+            <button id="selectAllUsers" class="button medium neutral">
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
+            </button>
+        </div>
+        {{/singleSelect}}
+    </div>
+
+    <label id="noUsersLabel" class="valamis-info-label no-items" style="display: none;"> {{noAvailableUsersLabel}}</label>
+    <div class="val-table-wrapper">
+        <table class="val-table">
+            <tbody id="userList"></tbody>
+        </table>
+    </div>
+
+    <div class="val-paginator" id="userListPaginator"></div>
+
+    {{^singleSelect}}
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{cancelLabel}}</a>
+
+        <button class="button big primary js-addUsers">
+            {{addUsersLabel}}
+        </button>
+    </div>
+    {{/singleSelect}}
+</script>
+
+
+<script type="text/html" id="selectUsers">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="dropdown js-user-type" data-value="">
+                <button class="button medium neutral">
+                    <span class="dropdown-text">{{usersLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="selected" data-value="{{userTypeObject.USER}}">{{groupedUsersLabel}}</li>
+                    <li data-value="{{userTypeObject.ORGANIZATION}}">{{groupedOrganizationsLabel}}</li>
+                    <li data-value="{{userTypeObject.GROUP}}">{{groupedUserGroupsLabel}}</li>
+                    <li data-value="{{userTypeObject.ROLE}}">{{groupedRolesLabel}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters-row clearfix">
+        <div class="filter-element paging-showing-label shift-left" id="userListPagingShowing"></div>
+
+        <div id="sortUsers" class="dropdown filter-element shift-right" data-value="name">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="name"> {{byNameAscLabel}} </li>
+                <li data-value="-name"> {{byNameDescLabel}} </li>
+                <li data-value="surname" class="js-for-users"> {{bySurnameAscLabel}} </li>
+                <li data-value="-surname" class="js-for-users"> {{bySurnameDescLabel}} </li>
+                <li data-value="skillCount" class="js-for-users"> {{bySkillCountAscLabel}} </li>
+                <li data-value="-skillCount" class="js-for-users"> {{bySkillCountDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+
+    <label id="noUsersLabel" class="valamis-info-label no-items" style="display: none;"> {{noAvailableGroupsLabel}}</label>
+    <div class="val-table-wrapper">
+        <table class="val-table">
+            <tbody id="userList"></tbody>
+        </table>
+    </div>
+
+    <div class="val-paginator" id="userListPaginator"></div>
+</script>
+
+<script type="text/html" id="liferayAdminUserElementView">
+    <td class="narrow-col"> {{#pageUrl}}
+        <a href="{{pageUrl}}" target="_blank">
+            {{/pageUrl}}
+            <img src="{{picture}}" alt="{{name}}" class="img-circle">
+            {{#pageUrl}}
+        </a>
+        {{/pageUrl}}
+    </td>
+    <td class="title"> {{name}}</td>
+</script>
+
+<script type="text/html" id="liferayUserUserElementView">
+    <td class="narrow-col">
+        {{#pageUrl}}
+        <a href="{{pageUrl}}" target="_blank">
+        {{/pageUrl}}
+            {{#picture}}
+            <img src="{{picture}}" alt="{{name}}" class="img-circle">
+            {{/picture}}
+        {{#pageUrl}}
+        </a>
+        {{/pageUrl}}
+    </td>
+    <td>
+        <div class="title">{{name}}</div>
+        {{#memberInfo}}
+        <div class="additional-info"> {{memberInfo}}</div>
+        {{/memberInfo}}
+    </td>
+    <td class="text-right title">
+        {{skillsCount}} {{skillHintLabel}}
+    </td>
+</script>
+
+<script type="text/html" id="liferayUserGroupElementView">
+    <td class="narrow-col">
+        {{#pageUrl}}
+        <a href="{{pageUrl}}" target="_blank">
+            {{/pageUrl}}
+            {{#picture}}
+            <img src="{{picture}}" alt="{{name}}" class="img-circle">
+            {{/picture}}
+            {{#pageUrl}}
+        </a>
+        {{/pageUrl}}
+        {{#userPortraits}}<div class="portraits group">{{/userPortraits}}
+        {{#userPortraits}}
+        <img src="{{{.}}}" alt="{{name}}" class="img-circle">
+        {{/userPortraits}}
+        {{#userPortraits}}</div>{{/userPortraits}}
+    </td>
+    <td class="title"> {{name}}</td>
+</script>

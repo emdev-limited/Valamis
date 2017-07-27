@@ -8,7 +8,10 @@ import com.arcusys.learn.liferay.constants.FieldHelper
 import com.arcusys.learn.liferay.util.{StringUtilHelper, ValidatorHelper}
 import com.liferay.portal.kernel.search.BaseIndexer
 
-abstract class ValamisBaseIndexer extends BaseIndexer {
+import scala.reflect.{ClassTag, _}
+
+
+abstract class ValamisBaseIndexer[T: ClassTag] extends BaseIndexer {
 
   override def postProcessSearchQuery(searchQuery: LBooleanQuery, searchContext: LSearchContext) {
     addSearchTerm(searchQuery, searchContext, FieldHelper.CONTENT, true)
@@ -35,5 +38,20 @@ abstract class ValamisBaseIndexer extends BaseIndexer {
     new LSummary(title, content, portletURL)
   }
 
-  def getClassName: String
+  def getClassName: String = classTag[T].runtimeClass.getName
+
+  override def getClassNames: Array[String] = Array(getClassName)
+
+
+  override def doGetDocument(o: Object): LDocument = proxyGetDocument(o.asInstanceOf[T])
+
+  override def doReindex(o: Object): Unit = proxyReindex(o.asInstanceOf[T])
+
+  override def doDelete(o: Object): Unit = proxyDelete(o.asInstanceOf[T])
+
+  protected def proxyGetDocument(t: T): LDocument
+
+  protected def proxyReindex(t: T): Unit
+
+  protected def proxyDelete(t: T): Unit
 }

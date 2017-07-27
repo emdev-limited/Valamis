@@ -15,7 +15,7 @@ trait HTTPMethodsSupport extends Handler with ServletApiImplicits {
   abstract override def handle(req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val req2 = req.requestMethod match {
       case Put | Delete | Patch =>
-        if (req.getContentType.toLowerCase.contains("application/x-www-form-urlencoded")) {
+        if (Option(req.getContentType).exists(_.toLowerCase.contains("application/x-www-form-urlencoded"))) {
           new HttpServletRequestWrapper(req) {
             val bodyParams = HttpUtilsHelper.parsePostData(req.getContentLength, req.getInputStream, req.getCharacterEncoding)
             override def getParameter(name: String) = {

@@ -26,7 +26,10 @@ class TagService[T: Manifest] {
         AssetVocabularyLocalServiceHelper.addAssetVocabulary(companyId, vocabularyName).getVocabularyId
     }
 
-    AssetCategoryLocalServiceHelper.getVocabularyRootCategories(vocabularyId).map(toTag)
+    AssetCategoryLocalServiceHelper
+      .getVocabularyRootCategories(vocabularyId)
+      .map(toTag)
+      .sortBy(_.text.toLowerCase)
   }
 
   def getByItemId(itemId: Long): Seq[ValamisTag] = {
@@ -51,10 +54,8 @@ class TagService[T: Manifest] {
     val existingTags = getAll(companyId)
 
     for (tagKey <- tagKeys) yield {
-      if (existingTags.exists(_.id.toString == tagKey)) {
-        // tagKey is id of exist tag
-        tagKey.toLong
-      } else {
+      val keyId = existingTags.find(t => t.id.toString == tagKey || t.text == tagKey).map(_.id)
+      keyId.getOrElse {
         // tagKey is name of new tag
         val assetCategory = AssetCategoryLocalServiceHelper.addAssetCategory(companyId, tagKey)
         assetCategory.getCategoryId

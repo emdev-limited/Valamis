@@ -10,8 +10,9 @@ class RatingService[T: Manifest] extends RatingHelper {
 
   protected val classname = manifest[T].runtimeClass.getName
 
-  def updateRating(userId: Long, score: Double, objId: Long): LRatingsEntry = {
+  def updateRating(userId: Long, score: Double, objId: Long): Rating = {
     updateRatingEntry(userId, classname, objId, score)
+    getRating(userId, objId)
   }
 
   def getRating(userId: Long, objId: Long): Rating = {

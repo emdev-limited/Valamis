@@ -4,7 +4,6 @@ import com.arcusys.valamis.content.exceptions.NoPlainTextException
 import com.arcusys.valamis.content.model.{PlainText, PlainTextNode}
 import com.arcusys.valamis.content.storage.{CategoryStorage, PlainTextStorage}
 import com.arcusys.valamis.persistence.common.DatabaseLayer
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,14 +34,11 @@ trait PlainTextService {
 
 }
 
-class PlainTextServiceImpl(implicit val bindingModule: BindingModule)
-  extends PlainTextService
-    with Injectable {
+abstract class PlainTextServiceImpl extends PlainTextService {
 
-  lazy val plainTexts = inject[PlainTextStorage]
-
-  lazy val cats = inject[CategoryStorage]
-  lazy val dbLayer = inject[DatabaseLayer]
+  def plainTexts: PlainTextStorage
+  def cats: CategoryStorage
+  def dbLayer: DatabaseLayer
 
   import DatabaseLayer._
 

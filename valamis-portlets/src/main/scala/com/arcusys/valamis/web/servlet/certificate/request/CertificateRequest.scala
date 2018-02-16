@@ -41,12 +41,13 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
   val TincanStmnts = "tincanStmnts"
   val PackageId = "packageId"
   val PackageIds = "packageIds"
-  val AssignmentId = "assignmentId"
-  val AssignmentIds = "assignmentIds"
+  val TrainingEventId = "trainingEventId"
+  val TrainingEventIds = "trainingEventIds"
   val PeriodValue = "periodValue"
   val PeriodType = "periodType"
   val ScopeId = "scopeId"
-  val IsPublished = "isPublished"
+  val IsActive = "isActive"
+  val IsAchieved = "isAchieved"
   val ArrangementIndex = "arrangementIndex"
 
   val DefaultTitle = "New certificate"
@@ -58,13 +59,18 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
   val StatusesExcluded = "statusesExcluded"
   val OptionalGoals = "optionalGoals"
   val IsOptional = "isOptional"
+  val IsDeleted = "isDeleted"
   val MemberIds = "memberIds"
   val MemberType = "memberType"
   val GoalId = "goalId"
   val GoalIds = "goalIds"
   val GroupId = "groupId"
+  val OldGroupId = "oldGroupId"
   val GoalCount = "goalCount"
-  val DeletedContent = "deletedContent"
+  val DeleteContent = "deleteContent"
+  val Available = "available"
+  val WithOpenBadges = "withOpenBadges"
+  val RestoreGoalIds = "restoreGoalIds"
 
   def apply(scalatra: ScalatraBase) = new Model(scalatra)
 
@@ -112,8 +118,8 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
 
     def packageId = Parameter(PackageId).longRequired
     def packageIds = Parameter(PackageIds).multiRequired.map(_.toInt)
-    def assignmentId = Parameter(AssignmentId).longRequired
-    def assignmentIds = Parameter(AssignmentIds).multiRequired.map(_.toInt)
+    def trainingEventId = Parameter(TrainingEventId).longRequired
+    def trainingEventIds = Parameter(TrainingEventIds).multiRequired.map(_.toLong)
     def periodValue = Parameter(PeriodValue).intOption.getOrElse(0)
     def periodType = PeriodTypes(Parameter(PeriodType).required)
 
@@ -129,7 +135,8 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
       case None        => false
     }
 
-    def isPublished: Option[Boolean] = Parameter(IsPublished).booleanOption
+    def isActive: Option[Boolean] = Parameter(IsActive).booleanOption
+    def isAchieved: Option[Boolean] = Parameter(IsAchieved).booleanOption
     def scopeId: Option[Long] = Parameter(ScopeId).longOption
 
     def rootUrl = if (Parameter(RootURL).required.contains("http://"))
@@ -168,7 +175,14 @@ object CertificateRequest extends BaseCollectionFilteredRequest with BaseRequest
     def goalIds = Parameter(GoalIds).multiLongRequired
     def groupId = Parameter(GroupId).longRequired
     def goalGroupId = Parameter(GroupId).longOption
+    def goalOldGroupId = Parameter(OldGroupId).longOption
     def goalCount = Parameter(GoalCount).intRequired
-    def deletedContent = Parameter(DeletedContent).booleanOption.getOrElse(false)
+    def deleteContent = Parameter(DeleteContent).booleanOption.getOrElse(false)
+    def isDeleted = Parameter(IsDeleted).booleanOption.getOrElse(false)
+
+    def available = Parameter(Available).booleanOption.getOrElse(false)
+    def withOpenBadges = Parameter(WithOpenBadges).booleanOption.getOrElse(false)
+
+    def restoreGoalIds = Parameter(RestoreGoalIds).multiWithEmpty.map(_.toLong)
   }
 }

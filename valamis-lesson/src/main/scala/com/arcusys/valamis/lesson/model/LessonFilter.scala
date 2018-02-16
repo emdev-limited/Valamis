@@ -2,6 +2,7 @@ package com.arcusys.valamis.lesson.model
 
 import com.arcusys.valamis.lesson.model.LessonType.LessonType
 
+
 /**
   * Created by mminin on 17.02.16.
   */

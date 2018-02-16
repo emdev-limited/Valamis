@@ -5,18 +5,16 @@ import java.sql.Connection
 import com.arcusys.learn.liferay.update.version260.slide.{SlideTableComponent => OldTableComponent}
 import com.arcusys.learn.liferay.update.version270.slide.{SlideTableComponent => NewTableComponent}
 import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-import scala.slick.driver.{H2Driver, JdbcDriver, JdbcProfile}
+import scala.slick.driver.{JdbcDriver, JdbcProfile}
 import scala.slick.jdbc.JdbcBackend
 
-class DeleteElementAttributesTest extends FunSuite with BeforeAndAfter{
+class DeleteElementAttributesTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
-  val driver = H2Driver
   import driver.simple._
-  val db = Database.forURL("jdbc:h2:mem:deleteelementattributes", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val bindingModule = new NewBindingModule({ implicit module =>
     module.bind[SlickDBInfo] toSingle new SlickDBInfo {
@@ -27,15 +25,15 @@ class DeleteElementAttributesTest extends FunSuite with BeforeAndAfter{
   })
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     oldTable.createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val oldTable = new OldTableComponent {
-    protected val driver: JdbcProfile = H2Driver
+    protected val driver: JdbcProfile = DeleteElementAttributesTest.this.driver
 
     def createSchema(): Unit = db.withSession { implicit s =>
       import driver.simple._
@@ -43,7 +41,7 @@ class DeleteElementAttributesTest extends FunSuite with BeforeAndAfter{
   }
 
   val newTable = new NewTableComponent {
-    protected val driver: JdbcProfile = H2Driver
+    protected val driver: JdbcProfile = DeleteElementAttributesTest.this.driver
   }
 
   val updater = new DBUpdater2710(bindingModule)

@@ -19,7 +19,9 @@ var TinCanCourseModules = {},
     TinCanCourseQuestionsAll = {},
     TinCanCourseQuestionsContent = {};
 
-var AttemptStatementId = '';
+var AttemptStatementId = '',
+    PreviousDuration = 0,
+    StartTimestamp;
 
 var tincan = null;
 
@@ -41,8 +43,7 @@ function ProcessTinCan(id) {
 }
 
 function moveAnswers(questionNumber) {
-    var answersContainer = jQuery("#slideEntity_" + questionNumber);
-
+    var answersContainer = jQuery('#slideEntity_' + questionNumber);
     var leftIndent = Math.max((jQuery('.slides').width() - answersContainer.width()) / 2, 0),
         topIndent = Math.max((jQuery('.slides').height() - answersContainer.height()) / 2, 0);
 
@@ -82,7 +83,7 @@ function disableQuestion(revealSlide) {
 
        if(isViewed) {
             var type = $slide.data('state').split('_')[0];
-            var answer = $question.find('.SCORMPlayerContentDisplay .playerMainArea *');
+            var answer = $question.find('.js-valamis-question .js-answers-options *');
             if (_.contains(['matching', 'categorization'], type)){
                 answer.draggable({disabled: true});
             } else if (type == 'positioning') {
@@ -95,31 +96,152 @@ function disableQuestion(revealSlide) {
     }
 }
 
-function prepareLessonSummary() {
+function getLessonSuccess() {
+    var questionsStatistic = getLessonQuestionsStatistic();
+    var totalProgress = getLessonTotalProgressPercent();
+    var score = (questionsStatistic.hasQuestion) ? questionsStatistic.questionsProgressPercent : totalProgress;
+    var success = (score >= SCORE_LIMIT*100);
+
+    return success;
+}
+
+function getLessonQuestionsStatistic() {
     var totalQuestions = _.keys(TinCanCourseQuestions).length;
-    var correctQuestions = _.values(TinCanCourseResults).filter(function(item) {return item == 1}).length;
-
     var hasQuestions = (totalQuestions > 0);
-    var questionsProgress = (hasQuestions) ? correctQuestions / totalQuestions : 0;
-    var totalProgress = getTotalProgress();
-
-    var score = (hasQuestions) ? questionsProgress : totalProgress;
-
-    var success = (score >= SCORE_LIMIT);
+    var numberOfCorrectAnswers = hasQuestions ? _.values(TinCanCourseResults).filter(function(item) {return item == 1}).length : 0;
+    var questionsProgressPercent = (hasQuestions) ? (numberOfCorrectAnswers / totalQuestions * 100)|0 : 0;
 
     return {
-        score: score,
-        progress: totalProgress,
+        totalQuestions: totalQuestions,
         hasQuestion: hasQuestions,
-        success: success
+        numberOfCorrectAnswers: numberOfCorrectAnswers,
+        questionsProgressPercent: questionsProgressPercent
     }
 }
 
-function getTotalProgress(){
-    var viewedSlides = _.keys(TinCanViewedSlides).length;
-    var summarySlidesAmount = jQuery('.slides section > section:has(div#lesson-summary)').length;
-    var totalSlides = Reveal.getTotalSlides() - summarySlidesAmount;
-    return viewedSlides / totalSlides;
+function getLessonPagesStatistic() {
+    var viewedPages = _.keys(TinCanViewedSlides).length;
+    var summaryPagesAmount = jQuery('.slides section > section:has(div#lesson-summary)').length;
+    var totalPages = Reveal.getTotalSlides() - summaryPagesAmount;
+    var pagesProgressPercent = viewedPages / totalPages * 100|0;
+    var viewedPagesSuccess = (pagesProgressPercent >= SCORE_LIMIT*100);
+    var fullCompleted = pagesProgressPercent == 100;
+
+    return {
+        viewedPages: viewedPages,
+        totalPages: totalPages,
+        pagesProgressPercent: pagesProgressPercent,
+        success: viewedPagesSuccess,
+        fullCompleted: fullCompleted
+    }
+}
+
+function getLessonTotalProgressPercent() {
+    var lessonPages = getLessonPagesStatistic();
+    var lessonQuestions = getLessonQuestionsStatistic();
+    var totalProgress = lessonQuestions.hasQuestion ? lessonQuestions.questionsProgressPercent : lessonPages.pagesProgressPercent;
+
+    return totalProgress;
+}
+
+function cretePagesStatiticPie(rate) {
+    var lessonPagesStatistic = getLessonPagesStatistic();
+    var success = lessonPagesStatistic.success;
+    var resultColor = success ? 'success' : 'fail';
+
+    var options = {
+        rate: rate,
+        resultColor: resultColor,
+        pieContainer: '.js-pages-pie-graphic'
+    };
+
+    createPie(options);
+}
+
+function createQuestionsStatisticPie(rate) {
+    var success = getLessonSuccess();
+    var resultColor = success ? 'success' : 'fail';
+
+    jQuery('#lesson-summary .lesson-statistic').addClass('both-pies');
+
+    var options = {
+        rate: rate,
+        resultColor: resultColor,
+        pieContainer : '.js-questions-pie-graphic'
+    };
+
+    createPie(options);
+}
+
+function createPie(options) {
+    var height = 80,
+        width = 80,
+        margin = 2,
+        lineWidth = 4;
+
+    var defaultOptions = {
+        rate: 0,
+        resultColor: 'success',
+        pieContainer : '.js-questions-pie-graphic'
+    };
+
+    options = options || {};
+    options.rate = options.rate || defaultOptions.rate;
+
+    var data=[
+                {proposal: "proposal1", rate: options.rate, legend: options.rate, unitSign: '%' },
+                {proposal: "proposal2", rate: 100 - options.rate, legend : '', unitSign: ''}
+            ];
+    
+    var radius = Math.min(width- 2*margin, height- 2*margin) / 2;
+
+    var arc = d3.svg.arc()
+        .outerRadius(function (d) {
+            if(d.data.radius) return radius*d.data.radius;
+            return radius;})
+        .innerRadius(Math.min(width- 2*margin, height- 2*margin) / 2 - lineWidth);
+
+    var pie = d3.layout.pie()
+        .sort(null)
+        .value(function(d) { return d.rate; });
+
+    var svgPie = $(options.pieContainer + ' svg');
+    svgPie.remove();
+
+    var svg = d3.select(options.pieContainer)
+        .append("svg")
+        .attr("class", "axis pie-circle")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr('class', options.resultColor)
+        .attr("transform", "translate(" +(width / 2) + "," + (height / 2 ) + ")");
+    
+    svg.append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", width / 2);
+
+    var g = svg.selectAll(".arc")
+        .data(pie(data))
+        .enter().append("g")
+        .attr("class", "arc");
+
+    g.append("path")
+        .attr("d", arc);
+
+    var text = g.append('text')
+        .attr('x', 0)
+        .attr('y', 10)
+        .attr('text-anchor', 'middle');
+
+        text.append("tspan")
+            .attr('class', 'rate-value')
+            .text(function(d) { return d.data.legend;});
+
+        text.append("tspan")
+            .attr("class", "rate-unit-sign")
+            .text(function(d) { return d.data.unitSign;});
 }
 
 (function($){
@@ -147,73 +269,178 @@ function getTotalProgress(){
 
 })(jQuery);
 
-function PrepareMatchingAnswersView(id) {
-    jQuery("li.acceptable.categorization"+id).draggable({
-        connectToSortable:'.answerContainer.container' + id,
+function PrepareMatchingAnswersView(idWithQuestionNumber) {
+    jQuery('li.js-acceptable.categorization' + idWithQuestionNumber).draggable({
+        helper: 'clone',
         cursor:'pointer',
-        revert:true,
-        hoverClass:'hover',
-        opacity:0.4,
-        revertDuration: 0,
+        revert: 'invalid',
+        revertDuration: 100,
         start: function() {
-           Reveal.configure({ touch: false });
+            jQuery(this).attr('data-prevent-swipe', '');
+            jQuery(this).addClass('ui-state-highlight highlight-previous-position');
+            jQuery('.ui-draggable-dragging').addClass('dragging-answer-item');
         },
         stop: function() {
-            Reveal.configure({ touch: true });
+            jQuery(this).removeAttr('data-prevent-swipe');
+            jQuery(this).removeClass('ui-state-highlight highlight-previous-position');
+            jQuery('.ui-draggable-dragging').removeClass('dragging-answer-item');
         }
     });
-    jQuery('.answerContainer.container' + id).droppable({
-        accept:'li.acceptable.categorization'+id,
+    jQuery('.js-answer-container.container' + idWithQuestionNumber).droppable({
+        accept:'li.js-acceptable.categorization' + idWithQuestionNumber,
+        over:function (event, ui) {
+            jQuery(this).parent()
+                .addClass('hoverBox')
+                .removeClass('noHoverBox');
+            if (!jQuery(this).find('li').is('.js-answer-item')) {
+                showShadow(this);
+            }
+        },
+        out:function (event, ui) {
+            jQuery(this).parent()
+                .addClass('noHoverBox')
+                .removeClass('hoverBox');
+            deleteShadow(this);
+        },
         drop:function (event, ui) {
-            if ($(this).find('li').size() == 0)
-            {
-                jQuery(this).append(ui.draggable);
+            if (jQuery(this).find('li[id^="matchingAnswer"]').size() == 0) {
+                jQuery(this)
+                    .append(ui.draggable)
+                    .parent().removeClass('hoverBox');
+                deleteShadow(this);
             }
         }
     });
-}
-
-function PrepareCategorizationQuestionView(id) {
-    jQuery("li.acceptable.categorization"+id).draggable({
-        connectToSortable:'.answerContainer.container' + id,
-        cursor:'pointer',
-        revert:true,
-        opacity:0.4,
-        revertDuration: 0,
-        start: function() {
-            Reveal.configure({ touch: false });
-        },
-        stop: function() {
-            Reveal.configure({ touch: true });
-            jQuery(window).trigger('resize');//Trigger on resize events
-        }
-    });
-    jQuery('.answerContainer.container' + id).droppable({
-        accept:'li.acceptable.categorization'+id,
+    jQuery('.js-answer-container-source.container' + idWithQuestionNumber).droppable({
+        accept:'li.js-acceptable.categorization' + idWithQuestionNumber,
         over:function (event, ui) {
-            jQuery(this).parent().addClass('hoverBox');
-            jQuery(this).parent().removeClass('noHoverBox');
+            jQuery(this).parent()
+                .addClass('hoverBox')
+                .removeClass('noHoverBox');
+                showShadow(this);
         },
         out:function (event, ui) {
-            jQuery(this).parent().addClass('noHoverBox');
-            jQuery(this).parent().removeClass('hoverBox');
+            jQuery(this).parent()
+                .addClass('noHoverBox')
+                .removeClass('hoverBox');
+            deleteShadow(this);
         },
         drop:function (event, ui) {
-            jQuery(this).parent().removeClass('hoverBox');
-            jQuery(this).append(ui.draggable);
+                jQuery(this)
+                    .append(ui.draggable)
+                    .parent().removeClass('hoverBox');
+                deleteShadow(this);
         }
     });
 }
 
-function PreparePositioningQuestionView(id) {
-    jQuery("#sortable"+id).sortable({
-        placeholder: 'ui-state-highlight',
-        revert:true,
+function PrepareCategorizationQuestionView(idWithQuestionNumber) {
+    jQuery('li.js-acceptable.categorization' + idWithQuestionNumber).draggable({
+        helper: 'clone',
+        cursor:'pointer',
+        revert: 'invalid',
+        revertDuration: 100,
         start: function() {
-            Reveal.configure({ touch: false });
+            jQuery(this).attr('data-prevent-swipe', '');
+            jQuery(this).addClass('ui-state-highlight highlight-previous-position');
+            jQuery('.ui-draggable-dragging').addClass('dragging-answer-item');
         },
         stop: function() {
-            Reveal.configure({ touch: true });
+            jQuery(this).removeAttr('data-prevent-swipe');
+            jQuery(this).removeClass('ui-state-highlight highlight-previous-position');
+            jQuery('.ui-draggable-dragging').removeClass('dragging-answer-item');
+        }
+    });
+    jQuery('.js-answer-container.container' + idWithQuestionNumber).droppable({
+        accept:'li.js-acceptable.categorization' + idWithQuestionNumber,
+        over:function (event, ui) {
+            jQuery(this).parent()
+                .addClass('hoverBox')
+                .removeClass('noHoverBox');
+            showShadow(this);
+        },
+        out:function (event, ui) {
+            jQuery(this).parent()
+                .addClass('noHoverBox')
+                .removeClass('hoverBox');
+            deleteShadow(this);
+        },
+        drop:function (event, ui) {
+            jQuery(this)
+                .append(ui.draggable)
+                .parent().removeClass('hoverBox');
+            deleteShadow(this);
+        }
+    });
+    jQuery('.js-answer-container-source.container' + idWithQuestionNumber).droppable({
+        accept:'li.js-acceptable.categorization' + idWithQuestionNumber,
+        over:function (event, ui) {
+            jQuery(this).parent()
+                .addClass('hoverBox')
+                .removeClass('noHoverBox');
+            showShadow(this);
+        },
+        out:function (event, ui) {
+            jQuery(this).parent()
+                .addClass('noHoverBox')
+                .removeClass('hoverBox');
+            deleteShadow(this);
+        },
+        drop:function (event, ui) {
+            jQuery(this)
+                .append(ui.draggable)
+                .parent().removeClass('hoverBox');
+            deleteShadow(this);
+        }
+    });
+}
+
+function showShadow(categoryContainer) {
+    var categoryDroppableContainer = jQuery(categoryContainer);
+    if (!categoryDroppableContainer.find('li').is('.ui-state-highlight')) {
+        var shadowDragElement = '<li class="categorization-answer-item highlight-previous-position js-shadow-drag-element"></li>';
+        jQuery(categoryContainer).append(shadowDragElement);
+        resizeCategoryContainer(categoryDroppableContainer);
+    }
+}
+
+function deleteShadow(categoryContainer) {
+    var categoryDroppableContainer = jQuery(categoryContainer);
+    if (categoryDroppableContainer) {
+        categoryDroppableContainer.find('.js-shadow-drag-element').remove();
+    }
+}
+
+function resizeCategoryContainer(categoryDroppableContainer) {
+    var answerDraggableHeight = jQuery('.ui-draggable-dragging').outerHeight();
+    categoryDroppableContainer.find('.js-shadow-drag-element').outerHeight(answerDraggableHeight);
+}
+
+function PreparePositioningQuestionView(idWithQuestionNumber) {
+    jQuery('#sortable' + idWithQuestionNumber).sortable({
+        placeholder: 'ui-state-highlight',
+        // revert:true,
+        helper: 'clone',
+        cursor:'pointer',
+        revert: 'invalid',
+        revertDuration: 100,
+        start: function() {
+            jQuery(this).attr('data-prevent-swipe', '');
+            jQuery(this).addClass('ui-state-highlight highlight-previous-position');
+            jQuery('.ui-draggable-dragging').addClass('dragging-answer-item');
+        },
+        stop: function() {
+            jQuery(this).removeAttr('data-prevent-swipe');
+            jQuery(window).trigger('resize');//Trigger on resize events
+            jQuery(this).removeClass('ui-state-highlight highlight-previous-position');
+            jQuery('.ui-draggable-dragging').removeClass('dragging-answer-item');
+        }
+    });
+    jQuery('#sortable' + idWithQuestionNumber).droppable({
+        accept:'li.ui-sortable-handle',
+        over:function (event, ui) {
+            var answerDraggableHeight = jQuery('.ui-sortable-helper').outerHeight();
+            jQuery(this).find('.ui-state-highlight').outerHeight(answerDraggableHeight);
         }
     });
 }
@@ -248,37 +475,23 @@ function packageBegin() {
         }
     });
 
-    prepareAttemptedStatement();
+    if(!isUserAnonymous(tincan.actor) && CAN_PAUSE) {
+        packageResume();
+    } else {
+        startNewAttempt();
+    }
 }
 
 function isUserAnonymous(actor){
     return actor && actor.account && actor.account.name && actor.account.name == 'anonymous';
 }
 
-function prepareAttemptedStatement() {
+function startNewAttempt() {
 
-    if(!isUserAnonymous(tincan.actor)) {
-        var lastAttemptStatement = getLastStatement(ROOT_ACTIVITY_ID, "http://adlnet.gov/expapi/verbs/attempted");
-
-        if (lastAttemptStatement) {
-            var lastResultByActivityId = getLastStatement(ROOT_ACTIVITY_ID);
-
-            // for support both old and new valamis packages (will be fixed with VALAMIS-3367)
-            var lastResult = (lastResultByActivityId)
-                ? lastResultByActivityId
-                : getLastStatement(lastAttemptStatement.id);
-
-            var wasSuspended = (lastResult && lastResult.verb.id == "http://adlnet.gov/expapi/verbs/suspended");
-            var isLastAttempt = (lastResultByActivityId)
-                ? (lastResultByActivityId.context.statement && lastResultByActivityId.context.statement.id == lastAttemptStatement.id)
-                : true;
-
-            if (wasSuspended && isLastAttempt) {
-                packageResume(lastAttemptStatement, lastResult);
-                return;
-            }
-        }
-    }
+    TinCanCourseResults = {};
+    TinCanUserAnswers = {};
+    PreviousDuration = 0;
+    StartTimestamp = new Date();
 
     AttemptStatementId = tincan.sendStatement(GetPackageAttemptedStatement()).statement.id;
 }
@@ -286,24 +499,19 @@ function prepareAttemptedStatement() {
 function packageEnd(currentTinCanState) {
     ProcessTinCan(currentTinCanState);
 
-    var summary = prepareLessonSummary();
-
     var slideId = $(Reveal.getCurrentSlide()).attr('id');
     var slideTitle = $(Reveal.getCurrentSlide()).attr('title');
+    var score = getLessonTotalProgressPercent()/100;
+    var success = getLessonSuccess();
 
     tincan.sendStatement(GetExperiencedStatement(slideId, slideTitle));
-    tincan.sendStatement(GetPackageCompletedStatement(summary.score, summary.success));
+    tincan.sendStatement(GetPackageCompletedStatement(score, success));
 }
 
-function packageResume(lastAttemptStatement, lastSuspendedStatement) {
-    AttemptStatementId = lastAttemptStatement.id;
+function packageResume() {
 
-    var stateResult = tincan.getState(
-            ROOT_ACTIVITY_ID + "/_state",
-        {
-            agent: tincan.actor
-        }
-    );
+    var stateResult = tincan.getState(ROOT_ACTIVITY_ID + "/_state");
+
     if (stateResult
         && stateResult.state
         && stateResult.state.contents) {
@@ -315,7 +523,12 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
 
         if (stateContent.answers) {
             TinCanUserAnswers = stateContent.answers;
-            setStoredUserAnswers();
+        }
+        if (stateContent.attemptStatementId) {
+            AttemptStatementId = stateContent.attemptStatementId;
+        }
+        if (stateContent.duration) {
+            PreviousDuration = stateContent.duration;
         }
 
         onOpenToastr();
@@ -338,17 +551,15 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
             onToastrDecline();
             onCloseToastr();
         });
+    } else {
+        startNewAttempt();
     }
 
-    tincan.deleteState(
-        ROOT_ACTIVITY_ID + "/_state",
-        {
-            agent: tincan.actor
-        }
-    );
+    tincan.deleteState(ROOT_ACTIVITY_ID + "/_state");
 
     function onToastrConfirm() {
 
+        setStoredUserAnswers();
         if (stateContent.viewedSlides) {
             TinCanViewedSlides = stateContent.viewedSlides;
             _.keys(TinCanViewedSlides).forEach(function (item) {
@@ -361,17 +572,18 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
             Reveal.slide(stateContent.slide.h, stateContent.slide.v, stateContent.slide.f);
             toggleNavigation(stateContent.slide.h, stateContent.slide.v);
         }
-
         checkIsLessonSummary();
-        tincan.sendStatement(getResumeStatement(lastSuspendedStatement.result.duration));
+        tincan.sendStatement(getResumeStatement());
 
-        jQuery('#packageDuration').trigger('setTimer', [DURATION * 60 - lastSuspendedStatement.result.duration]);
+        StartTimestamp = new Date();
+
+        jQuery('#packageDuration').trigger('setTimer', [DURATION * 60 - PreviousDuration]);
     }
 
     function onToastrDecline() {
         //We start new attempt as old one is declined
         packageEnd(currentTinCanState);
-        AttemptStatementId = tincan.sendStatement(GetPackageAttemptedStatement()).statement.id;
+        startNewAttempt();
     }
 
     function onOpenToastr(){
@@ -390,7 +602,7 @@ function packageResume(lastAttemptStatement, lastSuspendedStatement) {
 
 function setStoredUserAnswers() {
     _.each(TinCanUserAnswers, function(value, key) {
-        if(TinCanCourseSetAnswers.hasOwnProperty(key) && value){
+        if (TinCanCourseSetAnswers.hasOwnProperty(key) && value) {
             TinCanCourseSetAnswers[key](value);
         }
     })
@@ -399,20 +611,21 @@ function setStoredUserAnswers() {
 function packageSuspend(currentTinCanState) {
     ProcessTinCan(currentTinCanState);
 
+    var suspendedStmt = getSuspendStatement();
+
     tincan.setState(
         ROOT_ACTIVITY_ID + "/_state",
         JSON.stringify({
             slide: Reveal.getIndices(),
             results: TinCanCourseResults,
             answers: TinCanUserAnswers,
-            viewedSlides: TinCanViewedSlides
-        }),
-        {
-            agent: tincan.actor
-        }
+            viewedSlides: TinCanViewedSlides,
+            attemptStatementId: AttemptStatementId,
+            duration: getTotalDuration()
+        })
     );
 
-    tincan.sendStatement(getSuspendStatement());
+    tincan.sendStatement(suspendedStmt);
 }
 
 function onPackageSlideEnd(slideId, slideTitle) {
@@ -444,7 +657,10 @@ function GetQuestionAnswerStatement(id, questionText, title, questionType, learn
 
     var parser = document.createElement('a');
     parser.href = ROOT_ACTIVITY_ID;
-    var url = parser.protocol + '//' + parser.host + '/question/score';
+    var rootUrl = parser.protocol + '//' + parser.host + '/question/score';
+
+    var extObject = {};
+    extObject[rootUrl] = questionScore || 0;
 
     return {
         verb: {
@@ -463,9 +679,7 @@ function GetQuestionAnswerStatement(id, questionText, title, questionType, learn
             },
             response: String(replaceStringTags(learnerResponse)),
             success: wasCorrect,
-            extensions: {
-                url: questionScore || 0
-            }
+            extensions: extObject
         },
         context: getContext(ROOT_ACTIVITY_ID)
     };
@@ -491,7 +705,7 @@ function GetPackageCompletedStatement(score, success) {
         result: {
             score: { scaled: score },
             success: success,
-            duration: getDurationFromStatements()
+            duration: getTotalDuration()
         },
         context: {
             contextActivities: context.contextActivities,
@@ -588,9 +802,21 @@ function GetVideoStatement(verbName, videoId, videoTitle, videoDuration, start, 
     return stmnt;
 }
 
+function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+}
+
 function getSuspendStatement() {
     var context = getContext(ROOT_ACTIVITY_ID);
+    var id = guid();
     return {
+        id: id,
         verb: {
             "id": "http://adlnet.gov/expapi/verbs/suspended",
             "display": {"en-US": "suspended"}
@@ -604,7 +830,7 @@ function getSuspendStatement() {
         },
         result: {
             //Saving in seconds
-            duration: getDurationFromStatements()
+            duration: getTotalDuration()
         },
         context: {
             contextActivities: context.contextActivities,
@@ -614,7 +840,7 @@ function getSuspendStatement() {
     };
 }
 
-function getResumeStatement(duration) {
+function getResumeStatement() {
     var context =  getContext(ROOT_ACTIVITY_ID);
     return {
         verb: {
@@ -629,7 +855,7 @@ function getResumeStatement(duration) {
             }
         },
         result: {
-            duration: duration
+            duration: PreviousDuration
         },
         context: {
             contextActivities: context.contextActivities,
@@ -662,7 +888,7 @@ function getContext(parentActivityId, category) {
     var statementRef = new TinCan.StatementRef({
         "objectType": "StatementRef",
         "id": AttemptStatementId
-    })
+    });
 
     return {
         contextActivities: contextActivities,
@@ -670,38 +896,8 @@ function getContext(parentActivityId, category) {
     };
 }
 
-function getLastStatement(activityId, verbId) {
-    var result = tincan.getStatements({params: {
-        activity: {id: activityId},
-        agent: tincan.actor,
-        related_activities: true,
-        limit: 1,
-        verb: {id: verbId || ""}}
-    });
-
-    try {
-        return result.statementsResult.statements[0];
-    } catch (e) {
-        return null;
-    }
-}
-
-function getDurationFromStatements() {
-    var startTime = new Date();
-    var duration = 0;
-
-    //Check last resumed statement send or attempted one
-    var lastResumed = getLastStatement(AttemptStatementId, "http://adlnet.gov/expapi/verbs/resumed");
-    if(lastResumed) {
-        duration = parseInt(lastResumed.result.duration);
-        startTime = new Date(lastResumed.timestamp);
-    } else {
-        var lastAttempted = getLastStatement(ROOT_ACTIVITY_ID, "http://adlnet.gov/expapi/verbs/attempted");
-        if(lastAttempted)
-            startTime = new Date(lastAttempted.timestamp);
-    }
-
-    return Math.round((new Date() - startTime) / 1000) + duration
+function getTotalDuration() {
+    return (!!StartTimestamp?Math.round((new Date() - StartTimestamp) / 1000):0) + PreviousDuration
 }
 
 function startTimer(duration, display){
@@ -730,15 +926,7 @@ var escapeArray = {
     '"': "&quot;",
     '\'': "&#39;",
     '\\': "&#92;",
-    '\\\\\\\"': "\\\\\"", //Small fix if str has \"
-
-    //Scandinavian letters
-    'Ä': "&Auml;",
-    'Ö': "&Ouml;",
-    'Å': "&Aring;",
-    'ä': "&auml;",
-    'ö': "&ouml;",
-    'å': "&aring;"
+    '\\\\\\\"': "\\\\\"" //Small fix if str has \"
 };
 
 var unescapeElement = function(str) {
@@ -753,6 +941,20 @@ var escapeElement = function(str) {
         str = str.split(key).join(value)
     });
     return str;
+};
+
+var answersToJSON = function(answers) {
+    // Escape all html quotes in answers to be correctly parsed into JSON
+    // Replace all tags with /> to >, as we get not closed tags in answer
+    return JSON.parse(unescapeElement(answers.split('&amp;quot;').join('\\"')).replace(/[\s]+\/>/gi, '>'));
+};
+
+// ugly hack for checking matching and categorization questions
+// problems are caused by differences between encodings in dataToCompare object
+// and user answer (that is gotten from html element)
+var htmlDecode = function(str) {
+    str = unescapeElement(str);
+    return jQuery('<textarea />').html(str).text();
 };
 
 var replaceStringTags = function(str) { // replace tags in string by space to exclude sticking words
@@ -774,4 +976,39 @@ function getParameterByName(name) {
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
       results = regex.exec(location.search);
     return results === null ? "" : results[1].replace(/\+/g, " ");
+}
+
+function recalculateFeedbackSlideHeight(id, questionNumber) {
+    var answersContainer = jQuery('#slideEntity_' + questionNumber);
+    var userAnswers = answersContainer.find('.js-question-feedback');
+
+    var itemContent = answersContainer.find('.js-item-content');
+    var slideContainer = jQuery('.slides');
+    var explanationContainer = userAnswers.find('.js-question-explanation');
+    var correctnessAnswerContainer = jQuery('#answerCorrectness' + id + '_' + questionNumber);
+
+    answersContainer.css('height', 'auto');
+    itemContent.css('height', 'auto');
+
+    var answerCorrectnessContainerHeight = (correctnessAnswerContainer && correctnessAnswerContainer.height()) || 0;
+    var slideHeight = (slideContainer && slideContainer.height()) || 0;
+    var explanationHeight = (explanationContainer && explanationContainer.height()) || 0;
+
+    var heightAdditionalInformation = slideHeight + answerCorrectnessContainerHeight + explanationHeight;
+
+    //for old view of questions
+    var answersContainerTop = parseFloat(answersContainer.css('top'));
+    var additionalHeight = answersContainer.outerHeight() + answersContainerTop;
+    if (additionalHeight > heightAdditionalInformation) {
+        heightAdditionalInformation = additionalHeight;
+    }
+
+    slideContainer.css('height', heightAdditionalInformation);
+    jQuery('.reveal-scroll-container').css('height', heightAdditionalInformation);
+}
+
+function refreshStatusDiv() {
+    var dom = document.querySelector('.reveal'),
+        currentSlide = dom.querySelector('.slides>section.present');
+    document.getElementById('aria-status-div').textContent = currentSlide.innerText;
 }

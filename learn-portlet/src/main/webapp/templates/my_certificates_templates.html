@@ -1,0 +1,83 @@
+<script type="text/template" id="myCertificatesLayoutTemplate">
+    <table class="val-table val-statistic-table js-items-table">
+        <thead>
+        <tr>
+            <th class="narrow-col"></th>
+            <th>{{certificateLabel}}</th>
+            <th class="narrow-col text-center">
+                <span class="val-icon val-icon-user valamis-tooltip" data-placement="bottom" title="{{certificateUserTooltipDescription}}"></span>
+            </th>
+            <th class="narrow-col text-center">
+                <span class="val-icon val-icon-checkmark valamis-tooltip" data-placement="bottom" title="{{certificateCheckbuttonTooltipDescription}}"></span>
+            </th>
+            <th class="narrow-col text-center">
+                <span class="val-icon val-icon-alert valamis-tooltip" data-placement="bottom" title="{{certificateAlertTooltipDescription}}"></span>
+            </th>
+        </tr>
+        </thead>
+        <tbody id="certificatesTable">
+        </tbody>
+    </table>
+    <div class="div-table no-content-table hidden js-no-items">
+        <div class="div-col div-col-center">{{noCertificatesLabel}}</div>
+    </div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}} </span>
+    </div>
+</script>
+
+<script type="text/template" id="myCertificatesRowViewTemplate">
+        <td class="narrow-col cursor-pointer js-toggle-details"> <span class="val-icon-toggle"></span> </td>
+        <td class="title"><a href="{{url}}"> {{title}} </a></td>
+        <td class="narrow-col text-center"> {{totalUsers}} </td>
+        <td class="narrow-col text-center"> {{successUsers}} </td>
+        <td class="narrow-col text-center"> {{overdueUsers}} </td>
+</script>
+
+<script type="text/template" id="myCertificatesDetailsViewTemplate">
+        <td colspan="5">
+            <div class="details">
+                <div class="header clearfix">
+                    <div class="column-left title"> {{studentProgressionLabel}} </div>
+                    <div class="column-right text-center">
+                        <span class="val-legend-block success"></span> {{achievedLabel}}
+                        <span class="val-legend-block inprogress"></span> {{inProgressLabel}}
+                        <span class="val-legend-block failed"></span> {{failedLabel}}
+                    </div>
+                </div>
+                <div id="canvas-labels"></div>
+                <div style="position: relative;" class="js-scroll-div">
+                    <canvas id="canvas-grid" width="0" height="0"></canvas>
+                    <div class="user-list-layout js-scroll-bounded">
+                        <ul class="user-list js-users-list js-scroll-list"></ul>
+                    </div>
+                    <div class="loading-container js-loading-gif"></div>
+                </div>
+            </div>
+
+        </td>
+</script>
+
+<script type="text/template" id="myCertificatesUsersItemViewTemplate">
+    <div class="column-left">
+        <div class="user-img">
+            <img src="{{logo}}" alt="{{name}}" class="img-circle {{#isExpired}} failed {{/isExpired}}">
+        </div>
+        <div>
+            <div>
+                <span class="user-name"> {{name}} </span>
+                {{#isExpired}} <span class="val-label failed">{{expiredLabel}}</span> {{/isExpired}}
+            </div>
+            {{successCount}} {{ofLabel}} {{totalGoals}} {{goalsAchievedLabel}}
+        </div>
+    </div>
+
+    <div class="column-right">
+        <div class="val-progress-chart">
+            <div class="progress-success" style="width: {{successProgress}};"></div>
+            <div class="progress-inprogress" style="width: {{inProgress}};"></div>
+            <div class="progress-failed" style="width: {{failedProgress}};"></div>
+        </div>
+    </div>
+</script>

@@ -33,7 +33,12 @@ trait ActivityService {
 
   def share(companyId: Long, userId: Long, packageId: Long, comment: Option[String]): Option[Activity]
 
-  def getBy(companyId: Long, userId: Option[Long], skipTake: Option[SkipTake], showAll: Boolean, lActivitiesToBeShown: Option[Set[String]]): Seq[Activity]
+  def getBy(companyId: Long,
+            userId: Option[Long],
+            skipTake: Option[SkipTake],
+            showAll: Boolean,
+            lActivitiesToBeShown: Option[Set[String]],
+            themeDisplay: LThemeDisplay): Seq[Activity]
 
   def getById(activityId: Long): Activity
 

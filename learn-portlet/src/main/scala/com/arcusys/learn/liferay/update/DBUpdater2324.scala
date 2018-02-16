@@ -1,6 +1,7 @@
 package com.arcusys.learn.liferay.update
 
 import com.arcusys.learn.liferay.LiferayClasses.LUpgradeProcess
+import com.arcusys.learn.liferay.update.version240.storyTree.StoryTreeTableComponent
 import com.arcusys.valamis.lesson.tincan.storage.LessonCategoryGoalTableComponent
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
 import com.arcusys.valamis.web.configuration.ioc.Configuration
@@ -8,6 +9,7 @@ import com.escalatesoft.subcut.inject.Injectable
 
 
 class DBUpdater2324 extends LUpgradeProcess
+  with StoryTreeTableComponent
   with LessonCategoryGoalTableComponent
   with SlickProfile
   with Injectable {
@@ -22,8 +24,8 @@ class DBUpdater2324 extends LUpgradeProcess
   override def doUpgrade(): Unit = {
     import driver.simple._
 
-    db.withSession { implicit session =>
-       lessonCategoryGoals.ddl.create
+    db.withTransaction { implicit session =>
+      (packages.ddl ++ lessonCategoryGoals.ddl).create
     }
 
   }

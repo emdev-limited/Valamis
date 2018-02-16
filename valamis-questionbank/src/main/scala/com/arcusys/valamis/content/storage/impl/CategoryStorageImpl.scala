@@ -58,6 +58,9 @@ class CategoryStorageImpl(val db: JdbcBackend#DatabaseDef,
   override def getByCourse(courseId: Long) =
     questionCategories.filter(_.courseId === courseId).result
 
+  override def getByCategory(categoryId: Long) =
+    questionCategories.filter(cat => cat.parentId === categoryId).result
+
   override def getByCategory(categoryId: Option[Long], courseId: Long) =
     questionCategories.filter(cat => optionFilter(cat.parentId, categoryId) && cat.courseId === courseId).result
 

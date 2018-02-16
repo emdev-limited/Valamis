@@ -1,9 +1,9 @@
 <section data-state="plain_{{id}}">
-<div class="SCORMPlayerContentDisplay">
+<div class="valamis-question js-valamis-question">
     <div class="playerHeader">
         <h2 class="SCORMPlayerQuestionTitle">{{{title}}}</h2>
     </div>
-    <div class="playerMainArea">
+    <div class="answers-options js-answers-options">
         {{{text}}}
     </div>
 </div>
@@ -13,6 +13,11 @@
     TinCanCourseModules['plain_{{id}}'] = function(tincan) {
         var activityID = 'activity{{id}}';
         tincan.sendStatement(GetExperiencedStatement(activityID, '{{title}}'));
+
+        var questionId = {{id}};
+        var questionNumber = {{questionNumber}};
+        recalculateFeedbackSlideHeight(questionId, questionNumber);
+
         return 1;
     }
 </script>

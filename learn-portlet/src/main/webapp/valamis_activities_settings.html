@@ -9,10 +9,10 @@
 
 
     <script type="text/javascript">
-        var jQuerySettings = jQuery.noConflict();
+
 
         var ActivitiesSettingsLayout = Backbone.Marionette.LayoutView.extend({
-            template: _.template(Mustache.to_html(jQuery('#activities-modals-template').html())),
+            template: _.template(Mustache.to_html(jQueryValamis('#activities-modals-template').html())),
             regions: {
                 modals: {
                     selector: '.activities-settings-modals-container',
@@ -21,37 +21,47 @@
             }
         });
 
-        var vaSettingsLayout = new ActivitiesSettingsLayout();
+        var valamisActivitiesSettingsLayout = new ActivitiesSettingsLayout();
 
-        jQuerySettings(function () {
-            jQuery('#va-settings-layout').append(vaSettingsLayout.render().el);
-            if ('{{showBlogs}}' == 'true') {
-                jQuery('#showBlogs').attr('checked', 'checked');
-            }
-            if ('{{showBookmarks}}' == 'true') {
-                jQuery('#showBookmarks').attr('checked', 'checked');
-            }
-            if ('{{showEvents}}' == 'true') {
-                jQuery('#showEvents').attr('checked', 'checked');
-            }
-            if ('{{showDocuments}}' == 'true') {
-                jQuery('#showDocuments').attr('checked', 'checked');
-            }
-            if ('{{showWebContents}}' == 'true') {
-                jQuery('#showWebContents').attr('checked', 'checked');
-            }
+        jQueryValamis(function () {
+            jQueryValamis('#valamis-activities-settings-layout').append(valamisActivitiesSettingsLayout.render().el);
+            var showBlogs = !!eval('{{showBlogs}}'),
+                    showBookmarks = !!eval('{{showBookmarks}}'),
+                    showEvents = !!eval('{{showEvents}}'),
+                    showDocuments = !!eval('{{showDocuments}}'),
+                    showWebContents = !!eval('{{showWebContents}}');
+
+            jQueryValamis('#showBlogs').prop('checked', showBlogs);
+            jQueryValamis('#showBookmarks').prop('checked', showBookmarks);
+            jQueryValamis('#showEvents').prop('checked', showEvents);
+            jQueryValamis('#showDocuments').prop('checked', showDocuments);
+            jQueryValamis('#showWebContents').prop('checked', showWebContents);
+
+            jQueryValamis('.js-digits-only').valamisDigitsOnly();
+
+            jQueryValamis('.js-show-checkbox').change(function() {
+                jQueryValamis('.js-save-settings').prop('disabled', false);
+            });
+
+            jQueryValamis('#feedActivitiesCount').keyup(function() {
+                jQueryValamis('.js-save-settings').prop('disabled', false);
+            });
         });
 
         function saveSettings() {
-            window.LearnAjax.post('{{actionURL}}', {
-                saveSettings: "true",
-                showBlogs: jQuery("#showBlogs").is(':checked'),
-                showBookmarks: jQuery("#showBookmarks").is(':checked'),
-                showEvents: jQuery("#showEvents").is(':checked'),
-                showDocuments: jQuery("#showDocuments").is(':checked'),
-                showWebContents: jQuery("#showWebContents").is(':checked'),
-                activitiesCount: jQuery("#feedActivitiesCount").val()
+            window.LearnAjax.post('{{{actionURL}}}', {
+                action: "saveSettings",
+                showBlogs: jQueryValamis('#showBlogs').is(':checked'),
+                showBookmarks: jQueryValamis('#showBookmarks').is(':checked'),
+                showEvents: jQueryValamis('#showEvents').is(':checked'),
+                showDocuments: jQueryValamis('#showDocuments').is(':checked'),
+                showWebContents: jQueryValamis('#showWebContents').is(':checked'),
+                activitiesCount: jQueryValamis('#feedActivitiesCount').val(),
             }).done(function () {
+                jQueryValamis('.js-save-settings').prop('disabled', true);
+                toastr.success('{{activitySettingsSaveCompletedLabel}}');
+            }).fail(function () {
+                toastr.error('{{activitySettingsSaveFailedLabel}}');
             });
         }
 
@@ -71,36 +81,45 @@
             <input type="text" class="onlyDigits js-digits-only" id="feedActivitiesCount" value="{{activitiesCount}}"/>
         </div>
     </div>
-
-    <div class="div-col">
-        {{activitiesSettingsLabel}}
+    <div class="div-row">
+        {{activityTypeSettingsLabel}}
     </div>
 
-    <input type="checkbox" id="showBlogs" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showBlogs"></label>
-    <label for="showBlogs"> {{showBlogsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showBlogs" class="val-checkbox  js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showBlogs"></label>
+        <label for="showBlogs"> {{showBlogsLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showBookmarks" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showBookmarks"></label>
-    <label for="showBookmarks"> {{showBookmarksLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showBookmarks" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showBookmarks"></label>
+        <label for="showBookmarks"> {{showBookmarksLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showEvents" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showEvents"></label>
-    <label for="showEvents"> {{showEventsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showEvents" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showEvents"></label>
+        <label for="showEvents"> {{showEventsLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showDocuments" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showDocuments"></label>
-    <label for="showDocuments"> {{showDocumentsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showDocuments" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showDocuments"></label>
+        <label for="showDocuments"> {{showDocumentsLabel}} </label>
+    </div>
 
-    <input type="checkbox" id="showWebContents" class="val-checkbox"/>
-    <label class="checkbox-label shift-left" for="showWebContents"></label>
-    <label for="showWebContents"> {{showWebContentsLabel}} </label>
+    <div class="clearfix">
+        <input type="checkbox" id="showWebContents" class="val-checkbox js-show-checkbox"/>
+        <label class="checkbox-label shift-left" for="showWebContents"></label>
+        <label for="showWebContents"> {{showWebContentsLabel}} </label>
+    </div>
 
-    <button class="button valamis big primary val-icon-save-next" onclick="saveSettings()">
+    <button class="button big primary js-save-settings" disabled="disabled" onclick="saveSettings()">
         {{saveSettingsLabel}}
     </button>
 </div>
 
-<div id="va-settings-layout"></div>
+<div id="valamis-activities-settings-layout"></div>
 </body>
 </html>

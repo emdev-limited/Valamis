@@ -1,15 +1,13 @@
 package com.arcusys.valamis.web.servlet.request
 
-import java.util.Date
 import javax.servlet.http.HttpServletResponse
-
+import com.arcusys.valamis.web.util.DateTimeUtil
 import com.thoughtworks.paranamer.ParameterNamesNotFoundException
 import org.apache.http.ParseException
 import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import org.scalatra.ScalatraBase
-
 import scala.util.{Failure, Success, Try}
+
 
 object Parameter {
   def apply(name: String)(implicit kernel: ScalatraBase): Parameter = new Parameter(name, kernel)
@@ -144,15 +142,19 @@ class Parameter(name: String, kernel: ScalatraBase) {
       throw new ParseException(s"BigDecimal parameter '$name' could not be parsed")
   }
 
-  def dateTimeOption(none: String): Option[DateTime] = {
-    val value = params.getOrElse(name, none)
-    val parser = ISODateTimeFormat.dateParser()
-    if (value == none) None
-    else Some(parser.parseDateTime(value).toDateTime)
+  def dateTimeOption: Option[DateTime] = {
+    params.get(name) match {
+      case None => None
+      case Some("") => None
+      case Some(str) => Some(DateTimeUtil.parseDateWithTime(str))
+    }
   }
-  def dateOption(none: String): Option[Date] = {
-    val value = params.getOrElse(name, none)
-    if (value == none) None
-    else Some(new DateTime(value).toDate)
+
+  def dateOption: Option[DateTime] = {
+    params.get(name) match {
+      case None => None
+      case Some("") => None
+      case Some(str) => Some(DateTimeUtil.parseDate(str))
+    }
   }
 }

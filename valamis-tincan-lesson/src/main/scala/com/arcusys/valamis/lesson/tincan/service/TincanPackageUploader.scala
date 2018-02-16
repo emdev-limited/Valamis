@@ -4,14 +4,11 @@ import java.io.File
 import java.util.zip.ZipFile
 
 import com.arcusys.valamis.lesson.model.{Lesson, LessonType}
-import com.arcusys.valamis.lesson.service.{LessonLimitService, CustomPackageUploader, LessonService}
-import com.arcusys.valamis.lesson.tincan.TinCanParserException
-import com.arcusys.valamis.lesson.tincan.model.TincanActivity
-import com.arcusys.valamis.util.XMLImplicits._
+import com.arcusys.valamis.lesson.service.{CustomPackageUploader, LessonLimitService, LessonService}
 import com.arcusys.valamis.util.{FileSystemUtil, StreamUtil, ZipUtil}
 import org.joda.time.DateTime
 
-import scala.xml.XML
+import scala.collection.JavaConverters._
 
 abstract class TincanPackageUploader extends CustomPackageUploader {
 
@@ -23,37 +20,43 @@ abstract class TincanPackageUploader extends CustomPackageUploader {
 
   override def isValidPackage(fileName: String, packageFile: File): Boolean = {
     fileName.toLowerCase.endsWith(".zip") &&
-      ZipUtil.zipContains(ManifestFileName, packageFile)
+      ZipUtil.findInZip(packageFile, _.endsWith(ManifestFileName)).isDefined
   }
 
   override def upload(title: String,
                       description: String,
                       packageFile: File,
                       courseId: Long,
-                      userId: Long): Lesson = {
-    upload(title, description, packageFile, courseId, userId, None)
+                      userId: Long,
+                      fileName: String): Lesson = {
+
+    val (tempDirectory, rootOffset) = extractManifest(packageFile)
+    val (rootActivityId, activities) = readActivities(tempDirectory, rootOffset)
+
+    val lesson = lessonService.create(LessonType.Tincan, courseId, title, description, userId)
+
+    tincanPackageService.addActivities(activities.map(_.copy(lessonId = lesson.id)))
+    uploadResources(packageFile, tempDirectory, rootOffset, lesson)
+
+    lesson
   }
 
-  def upload(title: String,
-             description: String,
-             packageFile: File,
-             courseId: Long,
-             userId: Long,
-             existLessonId: Option[Long],
-             scoreLimit: Option[Double] = None): Lesson = {
+  def updateLesson(title: String,
+                   description: String,
+                   packageFile: File,
+                   courseId: Long,
+                   userId: Long,
+                   scoreLimit: Double,
+                   requiredReview: Boolean
+                  ): (Lesson, Option[Long]) = {
 
-    val tempDirectory = FileSystemUtil.getTempDirectory("tincanupload")
-    ZipUtil.unzipFile(ManifestFileName, tempDirectory, packageFile)
+    val (tempDirectory, rootOffset) = extractManifest(packageFile)
+    val (rootActivityId, activities) = readActivities(tempDirectory, rootOffset)
 
-    val activities = getActivities(new File(tempDirectory, ManifestFileName))
-
-    if (!activities.exists(_.launch.isDefined)) {
-      throw new scala.RuntimeException("launch not found")
-    }
-
-    val lesson = existLessonId match {
-      case None =>
-        lessonService.create(LessonType.Tincan, courseId, title, description, userId, scoreLimit)
+    val oldLessonId = tincanPackageService.getActivity(rootActivityId).map(_.lessonId)
+    val lesson = oldLessonId match {
+      case None => lessonService.create(LessonType.Tincan, courseId, title, description, userId,
+        Some(scoreLimit), requiredReview)
 
       case Some(id) =>
         val oldLesson = lessonService.getLessonRequired(id)
@@ -63,60 +66,84 @@ abstract class TincanPackageUploader extends CustomPackageUploader {
           description = description,
           ownerId = userId,
           creationDate = DateTime.now,
-          scoreLimit = scoreLimit.getOrElse(0.7)
+          scoreLimit = scoreLimit,
+          requiredReview = requiredReview
         ))
 
         tincanPackageService.deleteResources(id)
-
         lessonService.getLessonRequired(id)
     }
 
-    tincanPackageService.addActivities(activities.map(_.copy(lessonId = lesson.id)))
+    for (logo <- ZipUtil.findInZip(packageFile, _.startsWith("logo.")) ) {
+      val zip = new ZipFile(packageFile)
+      try {
+        val stream = zip.getInputStream(zip.getEntry(logo))
+        lessonService.setLogo(lesson.id, logo, StreamUtil.toByteArray(stream))
+      }
+      finally {
+        zip.close()
+      }
+    }
 
-    uploadFiles(lesson.id, packageFile)
+    tincanPackageService.addActivities(activities.map(_.copy(lessonId = lesson.id)))
+    uploadResources(packageFile, tempDirectory, rootOffset, lesson)
+
+    (lesson, oldLessonId)
+  }
+
+  private def uploadResources(packageFile: File, tempDirectory: File, rootOffset: String, lesson: Lesson) = {
+
+    uploadFiles(lesson.id, packageFile, rootOffset)
 
     FileSystemUtil.deleteFile(packageFile)
     FileSystemUtil.deleteFile(tempDirectory)
-
-    lesson
   }
 
-  private def getActivities(manifest: File): Seq[TincanActivity] = {
-    val root = XML.loadFile(manifest)
+  private def readActivities(tempDirectory: File, rootOffset: String) = {
+    val activities = ManifestReader.getActivities(
+      lessonId = -1, // lessonId will be defined and configured after
+      new File(tempDirectory, rootOffset + ManifestFileName)
+    )
 
-    if (!root.label.equals("tincan")) {
-      throw new TinCanParserException("Root element of manifest is not <tincan>")
-    }
-
-
-    val activitiesElement = root childElem "activities" required element
-
-    activitiesElement.children("activity")
-      .map(activityElement => TincanActivity(
-        lessonId = -1, // lessonId will be defined and configured after
-        activityElement.attr("id").required(string),
-        activityElement.attr("type").required(string),
-        activityElement.childElem("name").required(string),
-        activityElement.childElem("description").required(string),
-        activityElement.childElem("launch").optional(string),
-        activityElement.childElem("resource").optional(string)
-      ))
+    val rootActivityId = activities
+      .find(_.launch.isDefined)
+      .map(_.activityId)
+      .getOrElse(
+        throw new scala.RuntimeException("launch not found")
+      )
+    (rootActivityId, activities)
   }
 
-  private def uploadFiles(lessonId: Long, zipFile: File) {
+  private def extractManifest(packageFile: File) = {
+    val tempDirectory = FileSystemUtil.getTempDirectory("tincanupload")
+
+    val manifestPath = ZipUtil.findInZip(packageFile, _.endsWith(ManifestFileName))
+      .getOrElse(throw new Exception(s"no $ManifestFileName in the package"))
+
+    val rootOffset = manifestPath.replace(ManifestFileName, "")
+
+
+    ZipUtil.unzipFile(ManifestFileName, tempDirectory, packageFile)
+    (tempDirectory, rootOffset)
+  }
+
+  private def uploadFiles(lessonId: Long, zipFile: File, packageRootPath: String) {
     val zip = new ZipFile(zipFile)
-    val entries = zip.entries
+    try {
+      zip.entries.asScala
+        .filterNot(_.isDirectory)
+        .foreach { file =>
+          val stream = zip.getInputStream(file)
+          val content = StreamUtil.toByteArray(stream)
+          stream.close()
 
-    while (entries.hasMoreElements) {
-      val entry = entries.nextElement
+          val fileName = file.getName.replaceFirst(packageRootPath, "")
 
-      if (!entry.isDirectory) {
-        val stream = zip.getInputStream(entry)
-        val content = StreamUtil.toByteArray(stream)
-        stream.close()
-        tincanPackageService.addFile(lessonId, entry.getName, content)
-      }
+          tincanPackageService.addFile(lessonId, fileName, content)
+        }
     }
-    zip.close()
+    finally {
+      zip.close()
+    }
   }
 }

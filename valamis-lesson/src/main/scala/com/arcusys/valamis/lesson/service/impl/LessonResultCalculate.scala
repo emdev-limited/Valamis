@@ -2,7 +2,7 @@ package com.arcusys.valamis.lesson.service.impl
 
 import com.arcusys.valamis.lesson.model.{UserLessonResult, Lesson}
 import com.arcusys.valamis.lesson.service.{LessonStatementReader, LessonService}
-import com.arcusys.valamis.lrs.service.util.TinCanVerbs
+import com.arcusys.valamis.lrssupport.lrs.service.util._
 import com.arcusys.valamis.lrs.tincan.{Activity, Statement, Agent}
 
 abstract class LessonResultCalculate {
@@ -19,7 +19,7 @@ abstract class LessonResultCalculate {
     val completeStatements = statementReader.getCompleted(agent, activityId)
 
     val attemptsCount = completeStatements.size
-    val isFinished = hasFinished(completeStatements)
+    val isFinished = statementReader.hasFinished(completeStatements)
 
     val lastAttemptDate = completeStatements.headOption.map(_.timestamp)
 
@@ -41,7 +41,7 @@ abstract class LessonResultCalculate {
     val attempted = statements.filter(s => s.verb.id == attemptedVerb)
 
     val attemptsCount = completed.size
-    val isFinished = hasFinished(completed)
+    val isFinished = statementReader.hasFinished(completed)
 
     val lastAttemptDate = completed.headOption.map(_.timestamp)
 
@@ -52,20 +52,14 @@ abstract class LessonResultCalculate {
     UserLessonResult(lessonId, userId, attemptsCount, lastAttemptDate, isSuspended, isFinished, score)
   }
 
-  def getLessonToStatements(newStatements: Seq[Statement]): Map[Option[Long], Seq[Statement]] = {
+  def getLessonToStatements(newStatements: Seq[Statement]): Map[Seq[Long], Seq[Statement]] = {
     newStatements
       .filter { s =>
         s.obj.isInstanceOf[Activity] && (s.verb.id == attemptedVerb || completedVerbs.contains(s.verb.id))
       }
       .groupBy { s => s.obj.asInstanceOf[Activity].id }
       .map { case (id, s) => (lessonService.getByRootActivityId(id), s) }
-      .filterKeys { s => s.isDefined }
-  }
-
-  private def hasFinished(completedStatements: Seq[Statement]): Boolean = {
-    completedStatements.exists { s =>
-      s.result.exists(r => r.success.contains(true) || r.completion.contains(true))
-    }
+      .filterKeys { s => s.nonEmpty }
   }
 
   private def isAttemptCompleted(attemptStatement: Option[Statement],

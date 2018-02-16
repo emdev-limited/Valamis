@@ -1,0 +1,199 @@
+<script type="text/template" id="activitiesLayoutTemplate">
+    <div id="statusRegion"></div>
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="activitiesTabs">
+            <li class="active"><a href="#activitiesRegion" class="js-all-activities" data-toggle="tab">{{allLabel}}</a></li>
+            <li><a href="#myActivitiesRegion" class="js-my-activities" data-toggle="tab">{{myActivitiesLabel}}</a></li>
+        </ul>
+
+        <div class="tab-content" style="position: relative">
+            <div id="activitiesRegion" class="tab-pane active"> </div>
+            <div id="myActivitiesRegion" class="tab-pane"> </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="userStatusViewTemplate">
+    <div class="user-logo">
+        <img class="img-circle" src="{{picture}}" alt="{{name}}">
+    </div>
+    <div class="activity-block">
+        <textarea rows="2" class="js-user-status" placeholder="{{updateStatusLabel}}" aria-label="{{updateStatusLabel}}"></textarea>
+        <div class="text-right">
+            <button class="button medium primary post-button js-post-status"> {{postLabel}} </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="valamisActivityCollectionViewTemplate">
+    <div>
+        <div class="js-list-view list {{#isGroup}}group{{/isGroup}}">
+            <div class="div-table no-content-table js-no-activities hidden">
+                <div class="div-col div-col-center">{{noRecentLabel}}</div>
+            </div>
+        </div>
+        {{^isGroup}}
+        <div class="toggle-container hidden js-show-more">
+            <span class="val-icon-arrow-down val-icon-right"></span>
+            <span> {{showMoreLabel}} </span>
+        </div>
+        {{/isGroup}}
+    </div>
+</script>
+
+<script type="text/template" id="valamisActivityItemViewTemplate">
+    {{^isGroup}}
+    <div class="user-logo">
+        <img class="img-circle" src="{{user.picture}}" alt="{{user.name}}">
+    </div>
+    {{/isGroup}}
+    {{#isGroup}}
+    <div class="expand shift-left js-toggle-details">
+        <span class="val-icon-toggle"></span>
+    </div>
+    {{/isGroup}}
+    <div class="activity-block">
+        <div class="activity-label">
+
+            {{#obj.liferayEntry}}
+                {{{activityTitle}}}
+            {{/obj.liferayEntry}}
+
+            {{^obj.liferayEntry}}
+                <span class="user-label"> {{userName}} </span>
+                {{activityStmnt}}
+                {{#obj.course}} {{inLabel}}
+                    {{#obj.course.url}} <a href="{{obj.course.url}}" target="_blank" class="title-label"> {{/obj.course.url}}
+                    {{^obj.course.url}} <span class="title-label"> {{/obj.course.url}}
+                            {{obj.course.title}} {{courseLabel}}
+                    {{^obj.course.url}} </span> {{/obj.course.url}}
+                    {{#obj.course.url}} </a> {{/obj.course.url}}
+
+                {{/obj.course}}
+            {{/obj.liferayEntry}}
+
+        </div>
+
+        <div class="time-label">
+            {{date}}
+        </div>
+
+        <div class="activity-content clearfix {{#withImage}} with-image {{/withImage}}">
+            {{#obj.comment}}
+            <div class="activity-comment"> {{{objectComment}}} </div>
+            {{/obj.comment}}
+
+            {{#withImage}}
+            <div class="activity-image">
+                <div class="image {{objectClassName}} "
+                     {{#obj.logo}}
+                     style="background-image: url('{{imageApi}}')"
+                     {{/obj.logo}}
+                     {{#obj.logoCourse}} {{#imageApi}}
+                     style= "background-image: url('{{imageApi}}')"
+                     {{/imageApi}}{{/obj.logoCourse}}>
+                     {{#link}}
+                     <a href="{{{link}}}"></a>
+                     {{/link}}
+                </div>
+            </div>
+            {{/withImage}}
+
+            <div class="activity-content-label">
+                {{#obj.liferayEntry}}
+                    {{{obj.body}}}
+                {{/obj.liferayEntry}}
+
+                {{^obj.liferayEntry}}
+                    {{#link}}
+                    <a href="{{{link}}}">
+                        {{/link}}
+                        {{obj.title}}
+                        {{#link}}
+                    </a>
+                    {{/link}}
+                {{/obj.liferayEntry}}
+            </div>
+
+    </div>
+
+        {{#id}}
+        <div class="activity-actions">
+            {{#currentUserLike}}
+            <span class="js-action-like"> {{unlikeLabel}} </span>
+            {{/currentUserLike}}
+            {{^currentUserLike}}
+            <span class="js-action-like"> {{likeLabel}} </span>
+            {{/currentUserLike}}
+
+            {{^isGroup}}• <span class="js-action-comment"> {{commentText}} </span>{{/isGroup}}
+
+            {{#canShare}} • <span class="js-action-share"> {{shareLabel}} </span> {{/canShare}}
+            {{#canDelete}} • <span class="js-action-delete"> {{deleteLabel}} </span> {{/canDelete}}
+        </div>
+
+        {{#userLiked.length}}
+        <div class="comment-item activity-like-item">
+            <span class="val-icon-heart"></span>
+            {{#actLike.firstItem}}<span class="title-label"> {{actLike.firstItem}} </span> {{andLabel}} {{/actLike.firstItem}}
+            <span class="title-label {{#actLike.isLink}} cursor-pointer js-show-liked-users {{/actLike.isLink}}"> {{actLike.secondItem}} </span>
+            {{actLike.verb}}
+        </div>
+        {{/userLiked.length}}
+        {{/id}}
+
+        <div class="js-activity-comments clearfix"></div>
+        {{#id}}
+        <div class="comment-item">
+            <div class="comment-item-cell">
+                <img class="img-circle small" src="{{currentUser.picture}}" alt="{{currentUser.name}}">
+            </div>
+            <div>
+                <input class="js-my-comment-field" type="text" placeholder="{{writeCommentLabel}}" aria-label="{{writeCommentLabel}}">
+                <div class="text-right">
+                    <button class="button medium primary post-button hidden js-post-my-comment"> {{postLabel}} </button>
+                </div>
+            </div>
+        </div>
+        {{/id}}
+    </div>
+    {{#isGroup}}
+    <div class="activity-group js-items hidden"></div>
+    {{/isGroup}}
+</script>
+
+<script type="text/template" id="valamisActivityGroupViewTemplate">
+</script>
+
+<script type="text/template" id="valamisCommentItemViewTemplate">
+    <div class="comment-item-cell">
+        {{^isDeleted}}
+        <img class="img-circle" src="{{user.picture}}" alt="{{user.name}}">
+        {{/isDeleted}}
+    </div>
+    <div>
+        <div class="title-label"> {{user.name}} </div>
+        <div class="time-label"> {{creationDate}} </div>
+        <div> {{{commentContent}}} </div>
+    </div>
+    {{#canDelete}}
+    <div class="comment-item-cell text-right">
+        <button class="button small simple no-text js-delete-comment">
+            <span class="val-icon-trash"></span>  Delete
+        </button>
+    </div>
+    {{/canDelete}}
+</script>
+
+<script type="text/template" id="valamisActivityUsersLikedItemViewTemplate">
+    <td class="narrow-col">
+        {{#pageUrl}}
+        <a href="{{pageUrl}}" target="_blank">
+        {{/pageUrl}}
+            <img src="{{picture}}" alt="{{name}}" class="img-circle">
+        {{#pageUrl}}
+        </a>
+        {{/pageUrl}}
+    </td>
+    <td> {{name}}</td>
+</script>

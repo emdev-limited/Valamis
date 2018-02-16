@@ -1,9 +1,11 @@
 package com.arcusys.valamis.web.servlet.base
 
-import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import org.json4s.JsonAST.JString
-import org.json4s.{DefaultFormats, Formats}
+import com.arcusys.valamis.web.servlet.base.model.ErrorCodes.NoCode
+import com.arcusys.valamis.web.servlet.base.model.ErrorResponse
+import org.json4s.JsonAST.{JNothing, JNull, JString}
+import org.json4s.{DefaultFormats, Formats, JValue}
 import org.scalatra._
 import org.scalatra.json._
 
@@ -22,6 +24,13 @@ trait JacksonJsonServletBase extends JacksonJsonSupport {
     org.scalatra.halt(status, newBody, headers, reason)
   }
 
+  override def parsedBody(implicit request: HttpServletRequest): JValue = super.parsedBody match {
+    case JNothing | JNull =>
+      halt(HttpServletResponse.SC_BAD_REQUEST, ErrorResponse(NoCode, "Bad JSON value", None))
+    case b => b
+  }
+
+
   before() {
     contentType = formats("json")
   }
@@ -34,7 +43,7 @@ trait JacksonJsonServletBase extends JacksonJsonSupport {
 
   options() {
     response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,HEAD,DELETE")
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type,Content-Length,Authorization,If-Match,If-None-Match,X-Experience-API-Version,X-Experience-API-Consistent-Through")
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type,Content-Length,Authorization,If-Match,If-None-Match,X-Experience-API-Version,X-Experience-API-Consistent-Through,X-Requested-With")
     response.setHeader("Access-Control-Expose-Headers", "ETag,Last-Modified,Cache-Control,Content-Type,Content-Length,WWW-Authenticate,X-Experience-API-Version,X-Experience-API-Consistent-Through")
   }
 

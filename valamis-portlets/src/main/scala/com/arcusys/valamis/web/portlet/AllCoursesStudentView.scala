@@ -15,9 +15,9 @@ class AllCoursesStudentView extends GenericPortlet with PortletBase {
     val securityScope = getSecurityData(request)
 
     implicit val out = response.getWriter
-    sendTextFile("/templates/2.0/all_courses_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
-    sendTextFile("/templates/2.0/paginator.html")
+    sendTextFile("/templates/all_courses_templates.html")
+    sendTextFile("/templates/common_templates.html")
+    sendTextFile("/templates/paginator.html")
     sendMustacheFile(securityScope.data, "all_courses_student.html")
   }
 }

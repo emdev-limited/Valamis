@@ -1,0 +1,83 @@
+
+<script type="text/template" id="visibilitySettingsToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+        <div class="filter-element shift-left">
+            <div class="dropdown js-viewer-type" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{usersLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="selected" data-value="{{viewerTypeObject.USER}}">{{usersLabel}}</li>
+                    <li data-value="{{viewerTypeObject.ORGANIZATION}}">{{organizationsLabel}}</li>
+                    <li data-value="{{viewerTypeObject.GROUP}}">{{groupsLabel}}</li>
+                    <li data-value="{{viewerTypeObject.ROLE}}">{{rolesLabel}}</li>
+                </ul>
+            </div>
+        </div>
+
+        {{#isViewerUser}}
+        <div class="filter-element shift-left">
+            <div class="dropdown js-organizations-filter" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{allOrganizationsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu edit-members-dropdown">
+                    <li class="selected" data-value="">{{allOrganizationsLabel}}</li>
+                    {{#organizations}}
+                    <li data-value="{{id}}">{{name}}</li>
+                    {{/organizations}}
+                </ul>
+            </div>
+        </div>
+        {{/isViewerUser}}
+
+        <div class="filter-element paging-showing-label shift-left js-paginator-showing"></div>
+
+        {{^available}}
+        <!-- LM_MODIFY LM_SET_VISIBLE todo: add checking -->
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-add-items" data-value="{{viewerType}}">
+                {{addButtonLabelText}}
+            </button>
+        </div>
+        <!-- LM_SET_VISIBLE LM_MODIFY -->
+        {{/available}}
+    </div>
+
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <button class="button medium neutral shift-left js-select-all">
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
+            </button>
+        </div>
+
+        {{^available}}
+        <!-- LM_MODIFY todo: add checking -->
+        <div class="dropdown actions filter-element shift-left">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionLabel}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-delete-items" data-value="1">{{deleteLabel}}</li>
+            </ul>
+        </div>
+        <!-- LM_MODIFY -->
+        {{/available}}
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>

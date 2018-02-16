@@ -6,7 +6,7 @@ package com.arcusys.valamis.lesson.service
 trait CustomLessonService {
   def getRootActivityId(lessonId: Long): String
 
-  def getLessonIdByRootActivityId(activityId: String): Option[Long]
+  def getLessonIdByRootActivityId(activityId: String): Seq[Long]
 
   def deleteResources(lessonId: Long): Unit
 }

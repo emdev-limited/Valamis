@@ -7,7 +7,8 @@ import com.arcusys.valamis.lesson.model.{Lesson, PackageActivityType}
 import com.arcusys.valamis.lesson.service.LessonService
 import com.arcusys.valamis.lesson.tincan.service.TincanPackageService
 import com.arcusys.valamis.liferay.SocialActivityHelper
-import com.arcusys.valamis.lrs.service.util.{TinCanVerbs, TincanHelper}
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanVerbs
+import com.arcusys.valamis.utils.TincanHelper
 import com.arcusys.valamis.lrs.tincan.{Activity, Statement}
 import com.arcusys.valamis.uri.service.TincanURIService
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}

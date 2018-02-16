@@ -1,0 +1,39 @@
+<script type="text/html" id="fileUploaderDropZone">
+    <div class="file-uploader-wrapper">
+        <div class="dropzone-wrapper">
+            <label id="dropzone" class="dropzone fileinput-button">
+                <div>
+                    <div class="upload-image"></div>
+                    <div> {{dropOrLabel}} <span class="upload-browse-label"> {{browseLabel}} </span> {{filesToUploadLabel}}</div>
+                    <span class="upload-info-label"> {{fileUploadAdditionalInfo}} </span>
+                </div>
+                <input id="fileupload" class="hidden js-file-uploader-input" type="file" name="files[]" data-url="{{fileUploadEndpoint}}" multiple>
+            </label>
+        </div>
+        <div class="progress progress-striped active hidden">
+            <div class="progress-bar bar bar-success progress-bar-success" role="progressbar"></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="fileUploaderItem">
+  <div class="file-uploader-item-wrapper">
+    <div class="loading-container">
+    </div>
+    <strong class="uploading-file-name">{{filename}}</strong>
+  </div>
+</script>
+
+<script type="text/html" id="fileUploaderDoneItemPackage">
+  <div>
+    <div id="dropzone" class="dropzone fileinput-button">
+      {{dropFilesToUploadLabel}}<br>{{orClickLabel}}
+      <input id="fileupload" type="file" name="files[]" data-url="{{fileUploadEndpoint}}" multiple>
+    </div>
+    <strong>{{filename}}</strong>
+
+    <div class="progress progress-striped active">
+      <div class="progress-bar bar bar-success" role="progressbar"></div>
+    </div>
+  </div>
+</script>

@@ -1,22 +1,21 @@
 package com.arcusys.valamis.web.listener
 
-import com.arcusys.learn.liferay.services.CompanyHelper
-import com.arcusys.valamis.certificate.service.CertificateStatusChecker
+import com.arcusys.learn.liferay.services.{CompanyHelper, MessageBusHelper}
 import com.arcusys.valamis.gradebook.model.CourseActivityType
 import com.arcusys.valamis.gradebook.service.{LessonGradeService, UserCourseResultService}
 import com.arcusys.valamis.lesson.model.{Lesson, PackageActivityType}
 import com.arcusys.valamis.lesson.service.{LessonService, TeacherLessonGradeService, UserLessonResultService}
 import com.arcusys.valamis.liferay.SocialActivityHelper
+import com.arcusys.valamis.log.LogSupport
 import org.joda.time.DateTime
 
-abstract class LessonListener {
+abstract class LessonListener extends LogSupport {
   def lessonService: LessonService
   def lessonResultService: UserLessonResultService
   def gradeService: LessonGradeService
   def teacherGradeService: TeacherLessonGradeService
   def lessonGradeService: LessonGradeService
   def userCourseService: UserCourseResultService
-  def certificateChecker: CertificateStatusChecker
   lazy val lessonSocialActivityHelper = new SocialActivityHelper[Lesson]
   lazy val courseSocialActivityHelper = new SocialActivityHelper(CourseActivityType)
   lazy val activityTimeout = 1000*60*60*24 //24 hours
@@ -39,8 +38,8 @@ abstract class LessonListener {
   }
 
   private def onLessonCompleted(lesson: Lesson, userId: Long, attemptDate: DateTime): Unit = {
+    sendLessonCompleted(lesson.id, userId)
     createLessonActivity(userId, lesson.id, lesson.courseId, attemptDate)
-    certificateChecker.updatePackageGoalState(userId, lesson.id, attemptDate)
     if (lessonGradeService.isCourseCompleted(lesson.courseId, userId)) {
       createCourseActivity(userId, lesson.courseId, attemptDate)
       userCourseService.set(lesson.courseId, userId, isCompleted = true)
@@ -73,6 +72,20 @@ abstract class LessonListener {
         `type` = Some(CourseActivityType.Completed.id),
         classPK = Some(courseId),
         createDate = attemptDate)
+    }
+  }
+
+  private def sendLessonCompleted(lessonId: Long, userId: Long): Unit = {
+    try {
+      val messageValues = new java.util.HashMap[String, AnyRef]()
+      messageValues.put("state", "completed")
+      messageValues.put("lessonId", lessonId.toString)
+      messageValues.put("userId", userId.toString)
+      MessageBusHelper.sendAsynchronousMessage("valamis/lessons/completed", messageValues)
+    } catch {
+      case ex: Throwable =>
+        log.error(s"Failed to send lesson completed event via MessageBus for " +
+          s"lessonId: $lessonId; userId: $userId ", ex)
     }
   }
 }

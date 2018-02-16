@@ -1,53 +1,77 @@
 package com.arcusys.valamis.persistence.impl.slide
 
-import com.arcusys.valamis.exception.EntityNotFoundException
-import com.arcusys.valamis.persistence.common.SlickProfile
-import com.arcusys.valamis.slide.model.SlideThemeModel
-import com.arcusys.valamis.slide.storage.SlideThemeRepositoryContract
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
+import com.arcusys.valamis.persistence.impl.slide.schema.SlideTableComponent
+import com.arcusys.valamis.slide.model.SlideTheme
+import com.arcusys.valamis.slide.storage.SlideThemeRepository
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
-
-class SlideThemeRepositoryImpl(db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
-  extends SlideThemeRepositoryContract
+class SlideThemeRepositoryImpl(val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
+  extends SlideThemeRepository
     with SlickProfile
-  with SlideTableComponent {
+    with DatabaseLayer
+    with SlideTableComponent {
 
-  import driver.simple._
+  import driver.api._
 
-  override def create(model: SlideThemeModel): SlideThemeModel = db.withSession { implicit s =>
-    val id = (slideThemes returning slideThemes.map(_.id)).insert(model)
-    slideThemes.filter(_.id === id).first
+  override def create(theme: SlideTheme): SlideTheme = execSync {
+    (slideThemes returning slideThemes.map(_.id)).into { (row, newId) =>
+      row.copy(id = newId)
+    } += theme
   }
 
-  override def update(model: SlideThemeModel): SlideThemeModel = db.withSession { implicit s =>
-    val changedRows = slideThemes.filter(_.id === model.id.get).map(_.update).update(model)
-    if (changedRows == 0) throw new EntityNotFoundException(s"Theme with id ${model.id} not found")
-    model
+  override def update(theme: SlideTheme): SlideTheme = {
+    val action = slideThemes.filter(_.id === theme.id)
+      .map(t => (
+        t.title,
+        t.bgColor,
+        t.font,
+        t.questionFont,
+        t.answerFont,
+        t.answerBg,
+        t.userId,
+        t.isDefault))
+      .update(theme.title,
+        theme.bgColor,
+        theme.font,
+        theme.questionFont,
+        theme.answerFont,
+        theme.answerBg,
+        theme.userId,
+        theme.isDefault)
+    execSync(action)
+    theme
   }
 
-  override def getAll: Seq[SlideThemeModel] =  db.withSession { implicit s =>
-    slideThemes.list
-  }
-
-  override def getBy(userId: Option[Long], isDefault: Boolean): Seq[SlideThemeModel] =  db.withSession { implicit s =>
+  override def getBy(userId: Option[Long], isDefault: Boolean): Seq[SlideTheme] = execSync {
     slideThemes
-      .list
-      .filter{ theme =>
-      (((theme.userId.isEmpty && userId.isEmpty) || theme.userId == userId)
-      && theme.isDefault == isDefault)}
+      .filter{theme => (((theme.userId.isEmpty && userId.isEmpty) || theme.userId === userId)
+        && theme.isDefault === isDefault)}.result
   }
 
-  override def get(id: Long): SlideThemeModel = db.withSession { implicit s =>
-    val model = slideThemes.filter(_.id === id).firstOption
-    model.getOrElse(throw new EntityNotFoundException(s"Theme with id ${id} not found"))
+  override def get(id: Long): Option[SlideTheme] = execSync {
+    slideThemes.filter(_.id === id).result.headOption
   }
 
-  override def delete(id: Long): Unit = db.withTransaction { implicit s =>
-    slideThemes.filter(_.id === id).delete
+  override def delete(id: Long): Unit = execSync {
+    val updateSlideSet = slideSets
+      .filter(_.themeId === id)
+      .map(_.themeId)
+      .update(None)
+
+    val deleteTheme = slideThemes.filter(_.id === id).delete
+    updateSlideSet >> deleteTheme
   }
 
-  override def isExist(id: Long): Boolean = db.withTransaction { implicit s =>
-    slideThemes.filter(_.id === id).exists.run
+  override def isExist(id: Long): Boolean =  execSync {
+    slideThemes.filter(_.id === id).exists.result
   }
+
+  override def updateBgImage(id: Long, bgImage: Option[String]): Unit = execSync {
+    slideThemes.filter(_.id === id)
+      .map(_.bgImage)
+      .update(bgImage)
+  }
+
 }

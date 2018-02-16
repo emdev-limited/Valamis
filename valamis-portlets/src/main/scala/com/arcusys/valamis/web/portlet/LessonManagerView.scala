@@ -21,12 +21,11 @@ class LessonManagerView extends GenericPortlet with PortletBase {
     ) ++ securityScope.data
 
     implicit val out = response.getWriter
-    sendTextFile("/templates/2.0/lesson_manager_templates.html")
-    sendTextFile("/templates/2.0/file_uploader.html")
-    sendTextFile("/templates/2.0/paginator.html")
-    sendTextFile("/templates/2.0/common_templates.html")
-    sendTextFile("/templates/2.0/edit_visibility_templates.html")
-    sendTextFile("/templates/2.0/image_gallery_templates.html")
+    sendTextFile("/templates/lesson_manager_templates.html")
+    sendTextFile("/templates/file_uploader.html")
+    sendTextFile("/templates/paginator.html")
+    sendTextFile("/templates/common_templates.html")
+    sendTextFile("/templates/edit_visibility_templates.html")
     sendMustacheFile(data, "lesson_manager.html")
   }
 
@@ -39,7 +38,7 @@ class LessonManagerView extends GenericPortlet with PortletBase {
       getSecurityData(request).data
 
     implicit val out = response.getWriter
-    sendTextFile("/templates/2.0/file_uploader.html")
+    sendTextFile("/templates/file_uploader.html")
     sendMustacheFile(data, "lesson_manager_settings.html")
   }
 }

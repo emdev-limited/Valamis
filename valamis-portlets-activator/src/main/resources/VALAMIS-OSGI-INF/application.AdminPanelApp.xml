@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="com.arcusys.valamis.web.application.AdminPanelApp" immediate="true">
+  <implementation class="com.arcusys.valamis.web.application.AdminPanelApp"/>
+  <service>
+    <provide interface="com.liferay.application.list.PanelApp"/>
+  </service>
+  <reference name="Portlet" interface="com.liferay.portal.kernel.model.Portlet" target="(javax.portlet.name=com_arcusys_valamis_web_portlet_AdminView)" bind="setPortlet"/>
+  <property name="service.ranking" type="Integer" value="1200"/>
+  <property name="panel.category.key" type="String" value="site_administration.content"/>
+</component>

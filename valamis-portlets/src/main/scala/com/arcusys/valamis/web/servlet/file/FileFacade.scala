@@ -3,19 +3,19 @@ package com.arcusys.valamis.web.servlet.file
 import java.io._
 
 import com.arcusys.json.JsonHelper
-import com.arcusys.valamis.certificate.service.export.CertificateImportProcessor
 import com.arcusys.valamis.content.export.{QuestionImportProcessor, QuestionMoodleImportProcessor}
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.lesson.service.export.PackageImportProcessor
 import com.arcusys.valamis.util.FileSystemUtil
-import com.arcusys.valamis.web.servlet.certificate.facade.CertificateFacadeContract
 import com.arcusys.valamis.web.servlet.file.request.FileRequest
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
 class FileFacade(implicit val bindingModule: BindingModule) extends FileFacadeContract with Injectable {
 
-  private val fileService = inject[FileService]
-  private val certificateFacade = inject[CertificateFacadeContract]
+  private lazy val fileService = inject[FileService]
+  private lazy val packageImportProcessor = inject[PackageImportProcessor]
+  private lazy val questionImportProcessor = inject[QuestionImportProcessor]
+  private lazy val questionMoodleImportProcessor = inject[QuestionMoodleImportProcessor]
 
   def saveFile(folder: String, name: String, content: Array[Byte]): FileResponse = {
     fileService.setFileContent(folder, name, content)
@@ -66,7 +66,7 @@ class FileFacade(implicit val bindingModule: BindingModule) extends FileFacadeCo
   override def importQuestions(courseId: Int, stream: InputStream): FileResponse = {
     val file = FileSystemUtil.streamToTempFile(stream, "Import", FileRequest.ExportExtension)
     stream.close()
-    new QuestionImportProcessor().importItems(file, courseId)
+    questionImportProcessor.importItems(file, courseId)
 
     FileResponse(-1, "Question", file.getName, "")
   }
@@ -76,7 +76,7 @@ class FileFacade(implicit val bindingModule: BindingModule) extends FileFacadeCo
     try {
       file = FileSystemUtil.streamToTempFile(stream, "Import", "xml")
       stream.close()
-      val res = new QuestionMoodleImportProcessor(courseId).importItems(file)
+      val res = questionMoodleImportProcessor.importItems(file)(courseId)
       FileResponse(-1, "Moodle question", file.getName, "",JsonHelper.toJson(res))
     } finally {
       if (file!=null)
@@ -87,17 +87,7 @@ class FileFacade(implicit val bindingModule: BindingModule) extends FileFacadeCo
   override def importPackages(courseId: Int, stream: InputStream, userId: Long): FileResponse = {
     val file = FileSystemUtil.streamToTempFile(stream, "Import", FileRequest.ExportExtension)
     stream.close()
-    new PackageImportProcessor().importItems(file, courseId, userId)
-
+    packageImportProcessor.importItems(file, courseId, userId)
     FileResponse(-1, "Package", file.getName, "")
-  }
-
-  override def importCertificates(companyId: Int, stream: InputStream): FileResponse = {
-    val file = FileSystemUtil.streamToTempFile(stream, "Import", FileRequest.ExportExtension)
-    stream.close()
-
-    new CertificateImportProcessor().importItems(file, companyId)
-
-    FileResponse(-1, "Certificate", file.getName, "")
   }
 }

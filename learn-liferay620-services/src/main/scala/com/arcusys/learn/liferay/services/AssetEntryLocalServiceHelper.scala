@@ -1,6 +1,5 @@
 package com.arcusys.learn.liferay.services
 
-import com.arcusys.learn.liferay.LiferayClasses.LAssetEntry
 import com.liferay.portal.kernel.dao.orm.{DynamicQuery, RestrictionsFactoryUtil}
 import com.liferay.portal.util.PortalUtil
 import com.liferay.portlet.asset.model.AssetEntry
@@ -15,7 +14,7 @@ object AssetEntryLocalServiceHelper {
 
   def getAssetEntry(entryId: Long): AssetEntry = AssetEntryLocalServiceUtil.getEntry(entryId)
 
-  def getAssetEntry(className: String, classPK: Long): LAssetEntry = AssetEntryLocalServiceUtil.getEntry(className, classPK)
+  def getAssetEntry(className: String, classPK: Long): AssetEntry = AssetEntryLocalServiceUtil.getEntry(className, classPK)
 
   def fetchAssetEntry(className: String, classPK: Long): Option[AssetEntry] = Option(AssetEntryLocalServiceUtil.fetchEntry(className, classPK))
 
@@ -38,29 +37,29 @@ object AssetEntryLocalServiceHelper {
 
   def getAssetEntriesByCategory(categoryId: Long, classNameId: Long): Seq[AssetEntry] = {
     AssetEntryLocalServiceUtil.getAssetCategoryAssetEntries(categoryId).asScala
-        .filter(_.getClassNameId == classNameId)
+      .filter(_.getClassNameId == classNameId)
   }
 
   def deleteAssetEntry(entryId: Long): AssetEntry = AssetEntryLocalServiceUtil.deleteAssetEntry(entryId)
 
-  def createAssetEntry(entryId: Long) =
+  def createAssetEntry(entryId: Long): AssetEntry =
     AssetEntryLocalServiceUtil.createAssetEntry(entryId)
 
   def updateAssetEntry(assetEntry: AssetEntry): AssetEntry = {
-    if(assetEntry.isNew) AssetEntryLocalServiceUtil.addAssetEntry(assetEntry)
+    if (assetEntry.isNew) AssetEntryLocalServiceUtil.addAssetEntry(assetEntry)
     else AssetEntryLocalServiceUtil.updateAssetEntry(assetEntry)
   }
 
   def setAssetCategories(entryId: Long, categoryIds: Array[Long]): Unit = {
     if (!categoryIds.isEmpty)
-      categoryIds.foreach(categoryId => AssetCategoryLocalServiceUtil.setAssetEntryAssetCategories(entryId, categoryIds))
+      AssetCategoryLocalServiceUtil.setAssetEntryAssetCategories(entryId, categoryIds)
     else
       AssetCategoryLocalServiceUtil.clearAssetEntryAssetCategories(entryId)
   }
 
   def addAssetCategories(entryId: Long, categoryIds: Array[Long]): Unit =
-    categoryIds.foreach(categoryId => AssetCategoryLocalServiceUtil.addAssetEntryAssetCategories(entryId, categoryIds))
+    AssetCategoryLocalServiceUtil.addAssetEntryAssetCategories(entryId, categoryIds)
 
   def removeAssetCategories(entryId: Long, categoryIds: Array[Long]): Unit =
-    categoryIds.foreach(categoryId => AssetCategoryLocalServiceUtil.deleteAssetEntryAssetCategories(entryId, categoryIds))
+    AssetCategoryLocalServiceUtil.deleteAssetEntryAssetCategories(entryId, categoryIds)
 }

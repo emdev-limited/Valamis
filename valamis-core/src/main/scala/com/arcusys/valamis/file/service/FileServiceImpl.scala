@@ -3,11 +3,10 @@ package com.arcusys.valamis.file.service
 import com.arcusys.learn.liferay.LiferayClasses.LDLFileEntry
 import com.arcusys.learn.liferay.services.FileEntryServiceHelper
 import com.arcusys.valamis.file.storage.FileStorage
-import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
 
-class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injectable with FileService {
+abstract class FileServiceImpl extends FileService {
 
-  private val fileStorage = inject[FileStorage]
+  def fileStorage: FileStorage
 
   private def getPath(folder: String, name: String): String =
     s"files/$folder/$name".replace("//", "/")
@@ -66,6 +65,13 @@ class FileServiceImpl(implicit val bindingModule: BindingModule) extends Injecta
                         deleteFolder: Boolean = true): Unit = {
     setFileContent(destFolder, destName, getFileContent(sourceFolder, sourceName), deleteFolder)
   }
+
+  @deprecated("""Shouldn't require "files/" in path. see deleteFile""")
+  override def deleteFileStoryTree(name: String): Unit =
+    fileStorage.delete(name, asDirectory = false)
+
+  override def deleteFile(folder: String, name: String): Unit =
+    fileStorage.delete(getPath(folder, name))
 
   override def deleteFile(name: String): Unit =
     fileStorage.delete(getPath(name))

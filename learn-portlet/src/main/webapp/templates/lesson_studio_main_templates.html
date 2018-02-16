@@ -1,0 +1,291 @@
+<script type="text/template" id="modal-clear-template">
+    <div class="bbm-modal__topbar">
+        <h3 class="bbm-modal__title valamis">{{headerLabel}}</h3>
+
+        <div class="modal-close val-icon-exit">
+        </div>
+    </div>
+
+    <div class="bbm-modal__section js-content-area"></div>
+</script>
+<script type="text/template" id="slide-modals">
+    <div class="js-slide-extra-modal-container"></div>
+</script>
+
+<script type="text/template" id="lessonStudioLayoutTemplate">
+    <div id="lessonStudioToolbar"></div>
+    <div id="lessonStudioLessons"></div>
+    <div id="lessonStudioPaginator" class="val-paginator"></div>
+    <div id="lessonStudioMain"></div>
+    <div id="lessonStudioEditModalRegion"></div>
+    <div id="lessonStudioModalRegion"></div>
+</script>
+
+<script type="text/template" id="lessonStudioToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-right">
+            <button class="button medium primary no-margin js-create-lesson">
+                <span class="val-icon-plus"></span>{{newLessonLabel}}
+            </button>
+        </div>
+        <div class="filter-element shift-left">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="lessonStudioToolbarShowing"></div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter">
+            <button class="button medium simple ">
+                <span class="dropdown-text"> {{newestLabel}} </span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+
+            <ul class="dropdown-menu">
+                <li class="js-sort" data-value="{{sortByTypes.DATE_DESC}}"> {{newestLabel}} </li>
+                <li class="js-sort" data-value="{{sortByTypes.DATE_ASC}}"> {{oldestLabel}} </li>
+                <li class="js-sort" data-value="{{sortByTypes.NAME_ASC}}"> {{byNameAscLabel}} </li>
+                <li class="js-sort" data-value="{{sortByTypes.NAME_DESC}}"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-tile-view">
+            <span class="val-icon-grid-view">Grid View</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option js-list-view">
+            <span class="val-icon-list-view">List View</span>
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="lessonStudioLimitedItemView">
+    <div class="tile-content with-action">
+        <div class="image"
+             {{#logo}}
+             style="background-image: url('/delegate/slide-sets/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
+             {{/logo}} >
+        </div>
+        <ul>
+            <li class="title">{{title}}</li>
+            <li class="categories">{{tagList}}</li>
+            <li class="description">{{description}}</li>
+            <li class="categories"> {{slidesCount}} {{pagesLabel}}</li>
+            <li>
+                <span class="val-label {{statusClass}}">
+                    {{statusLabel}}
+                </span>
+                <span>{{versionLabel}} {{formattedVersion}}</span>
+            </li>
+            {{#migrated}}
+            <li>{{migratedInfoLabel}}</li>
+            {{/migrated}}
+        </ul>
+    </div>
+</script>
+
+<script type="text/html" id="lessonStudioItemView">
+    <div class="tile-content with-action">
+        <div class="image cursor-pointer js-lesson-image"
+        {{#logo}}
+        style="background-image: url('/delegate/slide-sets/{{id}}/logo?courseId={{courseId}}&tmstamp={{timestamp}}')"
+        {{/logo}} ></div>
+
+        <ul>
+            <li class="title">{{title}}</li>
+            <li class="categories">{{tagList}}</li>
+            <li class="description">{{description}}</li>
+            <li class="categories"> {{slidesCount}} {{pagesLabel}}</li>
+            <li>
+                <span class="val-label {{statusClass}}">
+                    {{statusLabel}}
+                </span>
+                <span>{{versionLabel}} {{formattedVersion}}</span>
+                {{#lockUserId}}
+                <span>• {{lockedByLabel}} {{lockUserName}}, {{lockedDate}}</span>
+                {{/lockUserId}}
+            </li>
+        </ul>
+        <div class="dropdown actions shift-right">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionsButtonLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-lesson-edit" data-value="edit:true"> {{editButtonLabel}} </li>
+                <li class="js-lesson-compose" data-value="compose:true"> {{composeButtonLabel}} </li>
+                {{^lockUserId}}
+                <li class="js-lesson-delete" data-value="delete:true"> {{deleteButtonLabel}} </li>
+                <li class="js-lesson-publish" data-value="publish:true"> {{publishTincanLabel}} </li>
+                <li class="js-lesson-export" data-value="publish:true"> {{exportLabel}} </li>
+                <li class="js-lesson-clone" data-value="clone:true"> {{cloneLabel}} </li>
+
+                {{^hasBetaStudioUrl}}
+                <li class="js-lesson-migrate" data-value="migrate:false">{{moveToBetaLabel}}</li>
+                {{/hasBetaStudioUrl}}
+                {{#hasBetaStudioUrl}}
+                <li class="js-lesson-migrate" data-value="migrate:true">{{openInBetaLabel}}</li>
+                {{/hasBetaStudioUrl}}
+
+                {{/lockUserId}}
+                {{#canUnlockLesson}}
+                {{#lockUserId}}
+                <li class="js-lesson-unlock" data-value="lock:false"> {{unLockLabel}} </li>
+                {{/lockUserId}}
+                {{/canUnlockLesson}}
+
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="lessonStudioPackageList">
+</script>
+
+<script type="text/template" id="lessonStudioEmptyModalTemplate">
+    <div class="bbm-modal__topbar" style="margin-bottom: 0px;">
+        <h3 class="bbm-modal__title">{{header}}</h3>
+
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section modal-content">
+
+    </div>
+</script>
+
+<script type="text/template" id="lessonStudioEditItemView">
+    <div class="div-table val-info-table">
+        <div class="div-row">
+            <div class="div-col name-col">{{lessonTitleLabel}}</div>
+            <div class="div-col content-col">
+                <label>
+                    <input type="text"
+                           placeholder="{{defaultLessonTitleLabel}}"
+                           class="js-lesson-title"
+                           value="{{title}}" />
+                </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col">{{slidesetLogoLabel}}</div>
+            <div class="div-col content-col">
+                <img class="js-logo shift-left val-img-logo js-upload-image"
+                     src="{{#logo}}/delegate/slide-sets/{{id}}/logo?courseId={{courseId}} {{/logo}}" />
+                <div class="button-block shift-left">
+                    <button class="button medium primary js-upload-image inline">
+                        {{uploadLabel}}
+                    </button>
+                    <button class="button medium simple no-text val-icon-trash danger inline js-delete-logo">
+                        {{deleteLogoLabel}}
+                    </button>
+                    <button class="button medium neutral js-select-from-media-gallery">
+                        {{selectFromMediaGalleryLabel}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col">{{slidesetDescriptionLabel}}</div>
+            <div class="div-col content-col">
+                <label>
+                    <textarea class="js-lesson-description" placeholder="{{defaultLessonDescriptionLabel}}">{{description}}</textarea>
+                </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col">{{slidesetTagsLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <input type="text" class="js-lesson-tags val-tags demo-default selectized" title="Lesson tags" tabindex="-1" style="display: none;"/>
+            </div>
+        </div>
+        <!--<div class="div-row js-template-row">
+            <div class="div-col name-col">{{createFromTemplateLabel}}</div>
+            <div class="div-col content-col">
+                <div class="div-row">
+                    <div class="div-col">
+                        <input type="checkbox" value="None" id="toggleTemplates" name="check" class="val-checkbox js-toggle-templates"/>
+                        <label class="checkbox-label" for="toggleTemplates"></label>
+                    </div>
+                    <div class="div-col hidden">
+                        <select id="template-selector">
+                            {{#templates}}
+                            <option value="{{id}}">{{title}} - {{description}}</option>
+                            {{/templates}}
+                        </select>
+                    </div>
+                    <div class="div-col template-info hidden">
+                        <img src=""/>
+                        <label class="js-template-label"></label>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+    </div>
+    <div class="bbm-modal__bottombar">
+        <button class="button medium primary js-save-lesson js-submit-button">
+            {{saveLabel}}
+        </button>
+        <button class="button medium simple modal-close js-cancel-slide">
+            {{cancelLabel}}
+        </button>
+    </div>
+</script>
+
+<script type="text/template" id="lessonStudioSetVisibilityTemplate">
+    <label class="group-label"> {{setVisibilityLabel}} </label>
+
+    <div class="div-table display-options-table">
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="visibilitySettings" value="true" id="setPublic">
+            </div>
+            <div class="div-col">
+                <label for="setPublic"> {{visibilityPublicLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{visibilityPublicHintLabel}}
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="visibilitySettings" value="false" id="setHidden">
+            </div>
+            <div class="div-col">
+                <label for="setHidden"> {{visibilityHiddenLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{visibilityHiddenHintLabel}}
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col">
+                <input type="radio" name="visibilitySettings" value="some" id="setCustom">
+            </div>
+            <div class="div-col">
+                <label for="setCustom"> {{visibilityCustomLabel}} </label>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col"></div>
+            <div class="div-col hint-text">
+                {{#isFirstVersion}}
+                    {{firstVersionVisibilityCustomHintLabel}}
+                {{/isFirstVersion}}
+
+                {{^isFirstVersion}}
+                    {{notFirstVersionVisibilityCustomHintLabel}}
+                {{/isFirstVersion}}
+
+            </div>
+        </div>
+    </div>
+
+    <button class="button medium primary js-publish-lesson"> {{publishLessonLabel}} </button>
+</script>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE user-notification-definitions PUBLIC "-//Liferay//DTD User Notification Definitions 6.2.0//EN" "http://www.liferay.com/dtd/liferay-user-notification-definitions_6_2_0.dtd">
+<user-notification-definitions>
+    <definition>
+        <notification-type>My Courses</notification-type>
+        <!--Receive a message when someone -->
+        <description>adds you to a course.</description>
+        <delivery-type>
+            <name>website</name>
+            <type>10002</type> <!-- TYPE_WEBSITE-->
+            <default>true</default>
+            <modifiable>true</modifiable>
+        </delivery-type>
+    </definition>
+</user-notification-definitions>

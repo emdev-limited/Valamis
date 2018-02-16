@@ -7,7 +7,9 @@ trait TeacherLessonGradeService {
 
   def get(userId: Long, lessonIds: Seq[Long]): Seq[LessonGrade]
 
-  def set(userId: Long, lessonId: Long, grade: Option[Float], comment: Option[String]): Unit
+  def set(userId: Long, lessonId: Long, grade: Float, comment: Option[String]): Unit
+
+  def setComment(userId: Long, lessonId: Long, comment: String): Unit
 
   def get(userIds: Seq[Long], lessonIds: Seq[Long]): Seq[LessonGrade]
 

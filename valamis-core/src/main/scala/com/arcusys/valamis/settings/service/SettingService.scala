@@ -5,41 +5,51 @@ package com.arcusys.valamis.settings.service
  */
 trait SettingService {
 
-  def setIssuerName(value: String): Unit
+  def setIssuerName(value: String)(implicit companyId: Long): Unit
 
-  def getIssuerName(): String
+  def getIssuerName(implicit companyId: Long): String
 
-  def setIssuerOrganization(value: String): Unit
+  def setIssuerOrganization(value: String)(implicit companyId: Long): Unit
 
-  def getIssuerOrganization(): String
+  def getIssuerOrganization(implicit companyId: Long): String
 
-  def setIssuerURL(value: String): Unit
+  def setIssuerURL(value: String)(implicit companyId: Long): Unit
 
-  def getIssuerURL(): String
+  def getIssuerURL(implicit companyId: Long): String
 
-  def setIssuerEmail(value: String): Unit
+  def setIssuerEmail(value: String)(implicit companyId: Long): Unit
 
-  def getIssuerEmail(): String
+  def getIssuerEmail(implicit companyId: Long): String
 
-  def setSendMessages(value: Boolean): Unit
+  def setGoogleClientId(value: String)(implicit companyId: Long): Unit
 
-  def getSendMessages(): Boolean
+  def getGoogleClientId(implicit companyId: Long): String
 
-  def setGoogleClientId(value: String): Unit
+  def setGoogleAppId(value: String)(implicit companyId: Long): Unit
 
-  def getGoogleClientId(): String
+  def getGoogleAppId(implicit companyId: Long): String
 
-  def setGoogleAppId(value: String): Unit
+  def setGoogleApiKey(value: String)(implicit companyId: Long): Unit
 
-  def getGoogleAppId(): String
+  def getGoogleApiKey(implicit companyId: Long): String
 
-  def setGoogleApiKey(value: String): Unit
+  def setDBVersion(value: String)(implicit companyId: Long): Unit
 
-  def getGoogleApiKey(): String
+  def getLtiVersion(implicit companyId: Long): String
+  def setLtiVersion(value: String)(implicit companyId: Long): Unit
 
-  def setDBVersion(value: String): Unit
+  def getLtiMessageType(implicit companyId: Long): String
+  def setLtiMessageType(value: String)(implicit companyId: Long): Unit
 
-  def setLicense(value: String): Unit
+  def getLtiLaunchPresentationReturnUrl(implicit companyId: Long): String
+  def setLtiLaunchPresentationReturnUrl(value: String)(implicit companyId: Long): Unit
 
-  def getLicense: String
+  def getLtiOauthVersion(implicit companyId: Long): String
+  def setLtiOauthVersion(value: String)(implicit companyId: Long): Unit
+
+  def getLtiOauthSignatureMethod(implicit companyId: Long): String
+  def setLtiOauthSignatureMethod(value: String)(implicit companyId: Long): Unit
+
+  def getBetaStudioUrl(implicit companyId: Long): String
+  def setBetaStudioUrl(value: String)(implicit companyId: Long): Unit
 }

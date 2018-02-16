@@ -3,11 +3,10 @@ package com.arcusys.valamis.settings.service
 import com.arcusys.valamis.exception.EntityNotFoundException
 import com.arcusys.valamis.settings.model.StatementToActivity
 import com.arcusys.valamis.settings.storage.StatementToActivityStorage
-import com.escalatesoft.subcut.inject.{ BindingModule, Injectable }
 
-class LRSToActivitySettingServiceImpl(implicit val bindingModule: BindingModule) extends LRSToActivitySettingService with Injectable {
+abstract class LRSToActivitySettingServiceImpl extends LRSToActivitySettingService {
 
-  val lrsToActivitySettingStorage = inject[StatementToActivityStorage]
+  def lrsToActivitySettingStorage: StatementToActivityStorage
 
   def getByCourseId(courseId: Int): Seq[StatementToActivity] = {
     lrsToActivitySettingStorage.getByCourseId(courseId)

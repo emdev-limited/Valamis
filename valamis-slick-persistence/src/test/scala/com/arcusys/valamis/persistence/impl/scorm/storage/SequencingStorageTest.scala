@@ -6,11 +6,8 @@ import com.arcusys.valamis.lesson.scorm.model.manifest.{ExitConditionRule, PostC
 import com.arcusys.valamis.lesson.scorm.storage.sequencing.{ChildrenSelectionStorage, SequencingPermissionsStorage, _}
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.persistence.impl.scorm.schema._
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import org.scalatest.{BeforeAndAfter, FunSuite}
-
-import scala.slick.driver.H2Driver
-import scala.slick.driver.H2Driver.simple._
-
 
 /**
 * Created by eboystova on 10.05.16.
@@ -26,23 +23,19 @@ class SequencingStorageTest extends FunSuite
   with RollupContributionTableComponent
   with RollupRuleTableComponent
   with SlickProfile
-  with BeforeAndAfter {
+  with BeforeAndAfter
+  with SlickDbTestBase {
 
-  val db = Database.forURL("jdbc:h2:mem:SequencingTest", driver = "org.h2.Driver")
-  override val driver = H2Driver
   val storages = new StorageFactory(db, driver)
 
   val sequencingStorage = storages.getSequencingStorage
 
-  var connection: Connection = _
-
-  // db data will be released after connection close
   before {
-    connection = db.source.createConnection()
+    createDB()
     createSchema()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   def createSchema() {

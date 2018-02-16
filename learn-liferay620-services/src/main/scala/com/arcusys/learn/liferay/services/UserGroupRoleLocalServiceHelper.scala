@@ -1,6 +1,6 @@
 package com.arcusys.learn.liferay.services
 
-import com.liferay.portal.model.{RoleConstants, Role, UserGroupRole}
+import com.liferay.portal.model.{Role, RoleConstants, User, UserGroupRole}
 import com.liferay.portal.service.{RoleLocalServiceUtil, UserGroupRoleLocalServiceUtil}
 
 import scala.collection.JavaConverters._
@@ -28,6 +28,9 @@ object UserGroupRoleLocalServiceHelper {
     UserGroupRoleLocalServiceUtil.getUserGroupRoles(userId,groupId).asScala.map(_.getRole).filter(notSiteMember)
   }
 
+  def getUsersRolesByGroupAndRole(roleId: Long, groupId: Long): Seq[User] = {
+    UserGroupRoleLocalServiceUtil.getUserGroupRolesByGroupAndRole(groupId, roleId).asScala.map(_.getUser)
+  }
   def notSiteMember(role: Role): Boolean = role.getName != RoleConstants.SITE_MEMBER
   def isSiteRole(role: Role): Boolean = role.getType == RoleConstants.TYPE_SITE
 }

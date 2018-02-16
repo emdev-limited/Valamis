@@ -41,7 +41,7 @@
         .icheckbox_polaris, .icheckbox_polaris.checked {
             vertical-align: middle !important;
         }
-        .portlet-learn-scorm,
+        .valamis,
         .reveal-wrapper { height: 100%; }
         .reveal .progress { pointer-events: none }
         .reveal>.backgrounds { overflow: hidden }
@@ -56,7 +56,7 @@
         </div>
     </script>
     <script type="text/html" id="genericElementTemplate">
-        <div class="item-content shift-left"></div>
+        <div class="item-content shift-left js-item-content"></div>
     </script>
     <script type="text/html" id="startConfirmationView">
         <div id="start-package-confirmation">
@@ -87,12 +87,12 @@
     {{#includeVendorFiles}}
     <script src="{{{.}}}"></script>
     {{/includeVendorFiles}}
-    {{#includeCommonFiles}}
-    <script src="{{{.}}}"></script>
-    {{/includeCommonFiles}}
     {{#includeFiles}}
     <script src="{{{.}}}"></script>
     {{/includeFiles}}
+    {{#includeCommonFiles}}
+    <script src="{{{.}}}"></script>
+    {{/includeCommonFiles}}
     {{#includeCSS}}
     <link rel="stylesheet" href="{{{.}}}">
     {{/includeCSS}}
@@ -100,7 +100,7 @@
 </head>
 
 <body onunload="onUnload()" style="overflow-y: auto;">
-<div class="portlet-learn-scorm portlet-learn-scorm-slides reveal-scroll-wrapper">
+<div class="valamis valamis-slides reveal-scroll-wrapper">
     <div class="reveal-scroll-container">
         <div class="reveal-wrapper">
             {{^isSlideJsonAvailable}}
@@ -195,7 +195,7 @@
 
         {{/isSlideJsonAvailable}}
 
-        if (CAN_PAUSE && getTotalProgress()!= 1)
+        if (CAN_PAUSE && !getLessonPagesStatistic().fullCompleted)
             packageSuspend(currentTinCanState);
         else
             packageEnd(currentTinCanState);
@@ -267,6 +267,12 @@
         }
     }
 
+    function ltiSupportHandle($slide) {
+        if(top.ltiSupport) {
+            top.ltiSupport.handle($slide);
+        }
+    }
+
     function toggleNavigation(indexh, indexv) {
         {{#isSlideJsonAvailable}}
             if(top.navigationProxy != null){
@@ -292,6 +298,7 @@
                     slidesViews.push(currentSlideId);
                     revealAttachEvents('slidechanged');
 
+                    ltiSupportHandle($(event.currentSlide));
                     toggleNavigation(event.indexh, event.indexv);
                     checkIsLessonSummary();
 
@@ -338,6 +345,8 @@
                     handleBackground(event.currentSlide);
 
                     toggleNavigation(event.indexh, event.indexv);
+
+                    ltiSupportHandle($currentSlide);
 
                     {{#isSlideJsonAvailable}}
                     if(slidesApp && !slidesApp.initializing) {
@@ -416,7 +425,7 @@
             object: {
                 id: ROOT_ACTIVITY_ID +'/' + activityID,
                 definition: {
-                    type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+                    type: 'http://adlnet.gov/expapi/activities/module',
                     name: {
                         'en-US': object || title
                     }

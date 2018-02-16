@@ -14,15 +14,12 @@ class ContentManagerView extends GenericPortlet with PortletBase {
     val preferences = PortletPreferencesFactoryUtilHelper.getPortletSetup(request)
     val showGlobalBase = Try(preferences.getValue("showGlobalBase", "false")).getOrElse(false)
 
-    val data = Map(
-      "courseId" -> LiferayHelpers.getThemeDisplay(request).getScopeGroupId,
-      "showGlobalBase" -> showGlobalBase
-    ) ++ getSecurityData(request).data
+    val data = Map("showGlobalBase" -> showGlobalBase) ++ getSecurityData(request).data
 
-    sendTextFile("/templates/2.0/content_manager_templates.html")
-    sendTextFile("/templates/2.0/paginator.html")
-    sendTextFile("/templates/2.0/file_uploader.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/content_manager_templates.html")
+    sendTextFile("/templates/paginator.html")
+    sendTextFile("/templates/file_uploader.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(data, "content_manager.html")
   }
 
@@ -41,7 +38,6 @@ class ContentManagerView extends GenericPortlet with PortletBase {
       val language = LiferayHelpers.getLanguage(request)
       val preferences = PortletPreferencesFactoryUtilHelper.getPortletSetup(request)
       val showGlobalBase = preferences.getValue("showGlobalBase", "false")
-      val securityScope = getSecurityData(request)
 
       val translations = getTranslation("questionManager", language) // TODO: rename it
 
@@ -53,7 +49,7 @@ class ContentManagerView extends GenericPortlet with PortletBase {
         "permissionToModify" -> permission.hasPermission(ModifyPermission.name)
       ) ++ translations ++ getSecurityData(request).data
 
-      sendTextFile("/templates/2.0/file_uploader.html")
+      sendTextFile("/templates/file_uploader.html")
       sendMustacheFile(data, "content_manager_settings.html")
   }
 

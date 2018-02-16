@@ -34,8 +34,17 @@
 
         var servletContextPath = '{{servletContextPath}}';
 
+        var ltiVersion = '{{ltiVersion}}',
+            ltiMessageType = '{{ltiMessageType}}',
+            ltiLaunchPresentationReturnUrl = '{{ltiLaunchPresentationReturnUrl}}',
+            ltiOauthVersion = '{{ltiOauthVersion}}',
+            ltiOauthSignatureMethod = '{{ltiOauthSignatureMethod}}',
+            ltiFirstName = '{{ltiFirstName}}',
+            ltiLastName = '{{ltiLastName}}',
+            ltiEmail = '{{ltiEmail}}';
+
         var lessonViewerOptions = {
-            resourceName: 'lessonViewer',
+            resourceName: ['lessonViewer', 'common'],
             permissions: lessonViewerPermissions,
             app: lessonViewer,
             appOptions: {
@@ -45,12 +54,33 @@
                 lessonToStartType: '{{lessonToStartType}}',
                 tincanActor: '{{{tincanActor}}}',
                 endpointData: '{{{endpointData}}}',
-                servletContextPath: (!!servletContextPath) ? servletContextPath + '/' : ''
+                servletContextPath: (!!servletContextPath) ? servletContextPath + '/' : '',
+                ltiVersion: ltiVersion,
+                ltiMessageType: ltiMessageType,
+                ltiLaunchPresentationReturnUrl: ltiLaunchPresentationReturnUrl,
+                ltiOauthVersion: ltiOauthVersion,
+                ltiOauthSignatureMethod: ltiOauthSignatureMethod,
+                ltiFirstName: ltiFirstName,
+                ltiLastName: ltiLastName,
+                ltiEmail: ltiEmail
             }
         };
 
         valamisApp.execute('subapp:start', lessonViewerOptions);
 
+        var lessonViewerPortletId = '{{{portletId}}}';
+
+        // unset navigationProxy object manually otherwise it still exists on the page in LR7
+        // and causes error when open lesson in Learning paths portlet after
+        // visiting page with Lesson viewer portlet
+        var unsetNavigationProxy = function(event) {
+            if (event.portletId == lessonViewerPortletId) {
+                navigationProxy = null;
+                Liferay.detach('destroyPortlet', unsetNavigationProxy);
+            }
+        };
+
+        Liferay.on('destroyPortlet', unsetNavigationProxy);
     });
 
 </script>

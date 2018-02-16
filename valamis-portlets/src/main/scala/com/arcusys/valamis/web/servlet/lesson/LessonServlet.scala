@@ -1,10 +1,11 @@
 package com.arcusys.valamis.web.servlet.lesson
 
+import java.util.Locale
 import javax.servlet.http.HttpServletResponse
 
 import com.arcusys.learn.liferay.constants.QueryUtilHelper
-import com.arcusys.learn.liferay.services.GroupLocalServiceHelper
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.learn.liferay.services.{GroupLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.valamis.course.service.CourseService
 import com.arcusys.valamis.lesson.model._
 import com.arcusys.valamis.lesson.scorm.service.ActivityServiceContract
 import com.arcusys.valamis.lesson.service._
@@ -37,14 +38,23 @@ class LessonServlet
   lazy val courseService = inject[CourseService]
   lazy val scormActivityService = inject[ActivityServiceContract]
 
+  implicit def locale: Locale = request.getLocale
+
   implicit override val jsonFormats: Formats =
     DefaultFormats + new LessonInfoSerializer + new EnumNameSerializer(LessonType) + DateTimeSerializer
 
   get("/packages(/)", request.getParameter("action") == "VISIBLE") {
     def getSuspendedId(userId: Long, lesson: Lesson): Option[String] = {
       lesson.lessonType match {
-        case LessonType.Scorm   => scormActivityService.getSuspendedId(userId, lesson.id)
-        case LessonType.Tincan  => None
+        case LessonType.Tincan => None
+        case LessonType.Scorm => try {
+          scormActivityService.getSuspendedId(userId, lesson.id)
+        } catch {
+          case e: Throwable =>
+            // getSuspended checker must not broke request
+            log.error(e)
+            None
+        }
       }
     }
 
@@ -69,8 +79,7 @@ class LessonServlet
   get("/packages(/)", request.getParameter("action") == "ALL_AVAILABLE_FOR_PLAYER") {
     val courseId = req.courseIdRequired
     val sourceCourseIds = GroupLocalServiceHelper
-      .searchExceptPrivateSites(getCompanyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
-      .map(i => i.getGroupId)
+      .searchSiteIds(getCompanyId, QueryUtilHelper.ALL_POS, QueryUtilHelper.ALL_POS)
       .filterNot(_ == courseId)
 
     val filter = LessonFilter(
@@ -93,7 +102,7 @@ class LessonServlet
 
   get("/packages(/)", request.getParameter("action") == "ALL") {
     val courseIds = if(req.instanceScope) {
-      GroupLocalServiceHelper.searchIdsExceptPrivateSites(req.companyId)
+      GroupLocalServiceHelper.searchSiteIds(req.companyId)
     } else {
       Seq(req.courseIdRequired)
     }
@@ -105,7 +114,7 @@ class LessonServlet
       tagId = req.tagId
     )
 
-    lessonService.getAll(
+    lessonService.getLessonsWithData(
       filter,
       req.ascending,
       req.skipTake
@@ -146,6 +155,14 @@ class LessonServlet
       .setDefaultLessonId(lessonId)
   }
 
+  post("/packages(/)", request.getParameter("action") == "SET_LESSON_VISIBILITY") {
+    val lessonId = req.id
+    val playerId = req.playerId
+    val isHidden = req.isHidden
+
+    lessonPlayerService.setLessonVisibilityFromPlayer(playerId, lessonId, isHidden)
+  }
+
   post("/packages(/)", request.getParameter("action") == "UPDATE") {
     val lessonId = req.id
     val title = req.title
@@ -154,7 +171,7 @@ class LessonServlet
     val beginDate = req.beginDate
     val endDate = req.endDate
 
-    val limit = new LessonLimit(
+    val limit = LessonLimit(
       lessonId,
       req.passingLimit,
       req.rerunInterval,
@@ -179,10 +196,17 @@ class LessonServlet
   }
 
   get("/packages(/)", request.getParameter("action") == "MEMBERS") {
-    req.viewerType match  {
+    req.viewerType match {
       case MemberTypes.User =>
         lessonViewersService.getUserMembers(req.id, req.textFilter, req.ascending, req.skipTake, req.organizationId)
-          .map(u => new UserResponse(u))
+          .map { u =>
+            if (u.isDeleted) {
+              new UserResponse(u)
+            } else {
+              val user = UserLocalServiceHelper().getUser(u.id)
+              new UserResponse(user)
+            }
+          }
       case _ =>
         lessonViewersService.getMembers(req.id, req.viewerType, req.textFilter, req.ascending, req.skipTake)
     }
@@ -217,14 +241,16 @@ class LessonServlet
     val playerId = req.playerIdOption
     val courseId = req.courseId
 
-    if (playerId.isDefined && courseId.isDefined) {
+    val tags = if (playerId.isDefined && courseId.isDefined) {
       lessonPlayerService.getTagsFromPlayer(playerId.get, courseId.get)
     } else if (courseId.isDefined) {
       lessonService.getTagsFromCourse(courseId.get)
     } else {
-      val courseIds = GroupLocalServiceHelper.searchIdsExceptPrivateSites(req.companyId)
+      val courseIds = GroupLocalServiceHelper.searchSiteIds(req.companyId)
       lessonService.getTagsFromCourses(courseIds)
     }
+
+    tags.sortBy(_.text.toLowerCase)
   }
 
   post("/packages/rate(/)", request.getParameter("action") == "UPDATERATING") {

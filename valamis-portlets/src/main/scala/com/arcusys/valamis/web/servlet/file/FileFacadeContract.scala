@@ -54,10 +54,6 @@ trait FileFacadeContract {
                        courseId: Int,
                        stream: InputStream): FileResponse
 
-  def importCertificates(
-    companyId: Int,
-    stream: InputStream): FileResponse
-
   def importPackages(
     courseId: Int,
     stream: InputStream,

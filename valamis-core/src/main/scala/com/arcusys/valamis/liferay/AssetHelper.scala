@@ -13,25 +13,54 @@ class AssetHelper[T: Manifest] {
     AssetEntryLocalServiceHelper.fetchAssetEntry(className, classPK)
   }
 
-  def deleteAssetEntry(classPK: Long): Unit = {
+  def deleteAssetEntry(classPK: Long, obj: T): Unit = {
     for (entry <- AssetEntryLocalServiceHelper.fetchAssetEntry(className, classPK)) {
-      deleteIndex(entry)
+      deleteIndex(obj)
       AssetEntryLocalServiceHelper.deleteAssetEntry(entry.getEntryId)
     }
   }
 
-  protected def updateAssetEntry(classPK: Long,
-                                 userId: Option[Long],
-                                 groupId: Option[Long],
-                                 title: Option[String],
-                                 description: Option[String],
-                                 obj: T,
-                                 companyId: Option[Long] = None,
-                                 isVisible: Boolean = true): Long = {
+  def updateAssetEntry(classPK: Long,
+                       userId: Option[Long],
+                       groupId: Option[Long],
+                       title: Option[String],
+                       description: Option[String],
+                       obj: T,
+                       companyId: Option[Long] = None,
+                       isVisible: Boolean = true): Long = {
 
     val assetEntry = getEntry(classPK) getOrElse {
       AssetEntryLocalServiceHelper.createAssetEntry(CounterLocalServiceHelper.increment)
     }
+
+    fillAssetEntry(classPK, userId, groupId, title, description, companyId, isVisible, assetEntry)
+
+    try {
+      AssetEntryLocalServiceHelper.updateAssetEntry(assetEntry)
+    } catch {
+      // in case assetEntry was already created by other thread
+      case _: Exception =>
+        val entry = getEntry(classPK).get
+        fillAssetEntry(classPK, userId, groupId, title, description, companyId, isVisible, assetEntry)
+        AssetEntryLocalServiceHelper.updateAssetEntry(entry)
+    }
+
+    if (isVisible)
+      reindex(obj)
+    else
+      deleteIndex(obj)
+
+    assetEntry.getPrimaryKey
+  }
+
+  protected def fillAssetEntry(classPK: Long,
+                               userId: Option[Long],
+                               groupId: Option[Long],
+                               title: Option[String],
+                               description: Option[String],
+                               companyId: Option[Long],
+                               isVisible: Boolean,
+                               assetEntry: LAssetEntry): Unit = {
 
     assetEntry.setClassPK(classPK)
     assetEntry.setClassName(className)
@@ -52,15 +81,6 @@ class AssetHelper[T: Manifest] {
     })
     assetEntry.setMimeType(ContentTypesHelper.TEXT_HTML)
     assetEntry.setVisible(isVisible)
-
-    AssetEntryLocalServiceHelper.updateAssetEntry(assetEntry)
-
-    if (isVisible)
-      reindex(obj)
-    else
-      deleteIndex(obj)
-
-    assetEntry.getPrimaryKey
   }
 
   private def reindex(obj: T) = {
@@ -68,6 +88,7 @@ class AssetHelper[T: Manifest] {
       indexer.reindex(obj)
   }
 
+  @deprecated("fail on lr7, delete waits element with type T")
   private def deleteIndex(entry: LAssetEntry) = {
     for (indexer <- Option(IndexerRegistryUtilHelper.getIndexer[LAssetEntry](entry.getClassName)))
       indexer.delete(entry)

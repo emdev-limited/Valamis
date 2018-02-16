@@ -1,12 +1,10 @@
 package com.arcusys.valamis.gradebook.service
 
-import com.arcusys.learn.liferay.LiferayClasses.LUser
-
 trait UserCourseResultService {
 
   def set(courseId: Long, userId: Long, isCompleted: Boolean): Unit
 
-  def isCompleted(courseId: Long, user: LUser, packagesCount: Option[Long] = None): Boolean
+  def getCompletedCount(courseId: Long, userIds: Seq[Long]): Int
 
   def setCourseNotCompleted(courseId: Long): Unit
 

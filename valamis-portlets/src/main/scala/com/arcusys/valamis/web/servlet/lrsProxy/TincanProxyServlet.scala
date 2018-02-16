@@ -2,19 +2,20 @@ package com.arcusys.valamis.web.servlet.lrsProxy
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import com.arcusys.learn.liferay.LogFactoryHelper
-import com.arcusys.learn.liferay.services.ServiceContextHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, ServiceContextHelper}
 import com.arcusys.learn.liferay.util.PortalUtilHelper
-import com.arcusys.valamis.lrs.model.{AuthConstants, AuthInfo, OAuthAuthInfo}
+import com.arcusys.valamis.lrssupport.lrs.model.{AuthConstants, AuthInfo, OAuthAuthInfo}
 import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.service.util.StatementChecker
-import com.arcusys.valamis.lrs.service.{LrsRegistration, ProxyLrsInfo}
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsRegistration, ProxyLrsInfo}
 import com.arcusys.valamis.lrs.tincan.{Agent, AuthorizationScope, Statement}
-import com.arcusys.valamis.lrsEndpoint.model.{AuthType, LrsEndpoint}
-import com.arcusys.valamis.oauth.HttpClientPoolImpl
-import com.arcusys.valamis.oauth.util.OAuthUtils
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.oauth.HttpClientPoolImpl
+import com.arcusys.valamis.lrssupport.oauth.util.OAuthUtils
+import com.arcusys.valamis.statements.StatementChecker
 import com.arcusys.valamis.util.StreamUtil
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.configuration.ioc.Configuration
@@ -90,8 +91,9 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
   }
 
   private def doProxy(request: HttpServletRequest, response: HttpServletResponse) {
+    implicit val companyId = PortalUtilHelper.getCompanyId(request)
     val authHeader = request.getHeader(AUTHORIZATION) match {
-      case null => throw new NotAuthorizedException(s"$AUTHORIZATION header not found")
+      case null => throw NotAuthorizedException(s"$AUTHORIZATION header not found")
       case a => a.replace(AuthConstants.Basic, "").trim
     }
 
@@ -150,10 +152,12 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
     response.setStatus(responseCode)
 
     if (responseCode != HttpServletResponse.SC_NO_CONTENT) {
+      // TODO: replace literal to endpoint from database, it can be not related (full)
+      val responseBody = authResponse.readBodyAsString().replaceAll("valamis-lrs-portlet/xapi", "delegate/proxy")
+      response.setHeader(CONTENT_LENGTH, responseBody.getBytes(StandardCharsets.UTF_8).length.toString)
+
       val writer = response.getWriter
       try {
-        // TODO: replace literal to endpoint from database, it can be not related (full)
-        val responseBody = authResponse.readBodyAsString().replaceAll("valamis-lrs-portlet/xapi", "delegate/proxy")
         writer.write(responseBody)
         writer.flush()
       } catch {
@@ -208,7 +212,7 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
       case AuthType.INTERNAL => {
         val host = settings.customHost match {
           case Some(customHost) => customHost
-          case None => PortalUtilHelper.getLocalHostUrl(PortalUtilHelper.getCompanyId(request), request.isSecure)
+          case None => PortalUtilHelper.getLocalHostUrl(PortalUtilHelper.getCompanyId(request), request)
         }
         host.toString.stripSuffix("/") + settings.endpoint.stripSuffix("/")
       }
@@ -224,12 +228,14 @@ class TincanProxyServlet extends HttpServlet with MethodOverrideFilter with Inje
     if (request.getRequestURI contains "/statements") {
       try {
         authToken match {
-          case OAuthAuthInfo("","","") =>
+          case OAuthAuthInfo("", "", "") =>
             val context = ServiceContextHelper.getServiceContext
             if (context != null) {
               val request = context.getRequest
               val session = request.getSession
-              session.setAttribute("LRS_ENDPOINT_INFO", lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All))
+              implicit val companyId = context.getCompanyId
+              session.setAttribute("LRS_ENDPOINT_INFO", lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+                host = PortalUtilHelper.getLocalHostUrl))
             }
           case _ =>
         }

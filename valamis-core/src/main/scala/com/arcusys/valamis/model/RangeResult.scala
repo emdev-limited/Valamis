@@ -1,6 +1,6 @@
 package com.arcusys.valamis.model
 
-case class RangeResult[T](
+case class RangeResult[+T](
   total: Long,
   records: Seq[T]) {
   def map[T2](f: T => T2): RangeResult[T2] = {

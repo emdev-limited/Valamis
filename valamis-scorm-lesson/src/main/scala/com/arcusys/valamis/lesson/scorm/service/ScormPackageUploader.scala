@@ -31,7 +31,8 @@ abstract class ScormPackageUploader extends CustomPackageUploader {
                       description: String,
                       packageFile: File,
                       courseId: Long,
-                      userId: Long): Lesson = {
+                      userId: Long,
+                      fileName: String): Lesson = {
 
     val tempDirectory = FileSystemUtil.getTempDirectory("scormupload")
     ZipUtil.unzipFile(manifestFileName, tempDirectory, packageFile)

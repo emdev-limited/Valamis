@@ -1,0 +1,101 @@
+<script type="text/template" id="myCoursesLayoutTemplate">
+    <table class="val-table val-statistic-table js-courses-table">
+        <thead>
+        <tr>
+            <th class="narrow-col"></th>
+            <th>{{courseNameLabel}}</th>
+            <th class="narrow-col status js-status-col"><span>{{statusLabel}}</span></th>
+            <th class="narrow-col status progress-col js-progress-col"></th>
+            <th class="narrow-col">
+                <span class="val-icon val-icon-user valamis-tooltip" data-placement="bottom" title="{{courseUserTooltipDescription}}"></span>
+            </th>
+            <th class="narrow-col">
+                <span class="val-icon val-icon-checkmark valamis-tooltip" data-placement="bottom" title="{{courseCheckbuttonTooltipDescription}}"></span>
+            </th>
+        </tr>
+        </thead>
+        <tbody id="coursesTable">
+        </tbody>
+    </table>
+    <div class="div-table no-content-table hidden js-no-items">
+        <div class="div-col div-col-center">{{noCoursesLabel}}</div>
+    </div>
+    <div class="toggle-container hidden js-show-more">
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span> {{showMoreLabel}} </span>
+    </div>
+</script>
+
+<script type="text/template" id="myCoursesRowViewTemplate">
+    <td class="narrow-col cursor-pointer js-toggle-details">
+        <span class="val-icon-toggle"></span>
+    </td>
+    <td class="title">
+        {{#url}}<a href="{{url}}" target="_blank">{{/url}}
+        {{title}}
+        {{#url}}</a>{{/url}}
+    </td>
+    <td class="narrow-col status">
+        {{#isSuccess}}<span class="val-label success">{{completedLabel}}</span>{{/isSuccess}}
+        {{^isSuccess}}<span class="val-label">{{inProgressLabel}}</span>{{/isSuccess}}
+    </td>
+    <td class="narrow-col status progress-col">
+        <div class="val-progress-bar">
+            <div class="val-progress {{colorClass}}">
+                <span style="width: {{progress}};"
+                    {{#isSuccess}}
+                        class="full-progress-bar"
+                    {{/isSuccess}}
+                ></span>
+            </div>
+            <span class="val-percentage"> {{progress}} </span>
+        </div>
+    </td>
+    <td class="narrow-col"> {{users}} </td>
+    <td class="narrow-col"> {{completed}} </td>
+</script>
+
+<script type="text/template" id="myCoursesDetailsViewTemplate">
+    <td colspan="6">
+        <div class="details">
+            <div class="header clearfix">
+                <div class="column-left title"> {{studentProgressionLabel}} </div>
+                <div class="column-right text-center">
+                    <span class="val-legend-block success"></span> {{completedLabel}}
+                    <span class="val-legend-block inprogress"></span> {{inProgressLabel}}
+                    <span class="val-legend-block"></span> {{notStartedLabel}}
+                </div>
+            </div>
+            <div id="canvas-labels"></div>
+            <div style="position: relative;" class="js-scroll-div">
+                <canvas id="canvas-grid" width="0" height="0"></canvas>
+                <div class="user-list-layout js-scroll-bounded">
+                    <ul class="user-list js-users-list js-scroll-list"></ul>
+                </div>
+                <div class="loading-container js-loading-gif"></div>
+            </div>
+        </div>
+    </td>
+</script>
+
+<script type="text/template" id="myCoursesUsersItemViewTemplate">
+    <div class="column-left">
+        <div class="user-img">
+            <img src="{{user.picture}}" alt="{{user.name}}" class="img-circle {{#isCompleted}} success {{/isCompleted}}">
+        </div>
+        <div>
+            <div>
+                <span class="user-name"> {{user.name}} </span>
+            </div>
+            {{successProgress}} {{completedLabel}}
+        </div>
+    </div>
+
+    <div class="column-right">
+        <div class="val-progress-chart">
+            <div class="progress-success" style="width: {{successProgress}};"></div>
+            <div class="progress-inprogress" style="width: {{inProgress}};"></div>
+            <div class="progress-notstarted" style="width: {{notStarted}};"></div>
+        </div>
+    </div>
+</script>

@@ -13,6 +13,10 @@ import com.arcusys.valamis.web.service.ActivityInterpreter
 import com.arcusys.valamis.web.servlet.base.PermissionUtil
 import com.arcusys.valamis.web.servlet.request.ServletRequestHelper
 import ServletRequestHelper._
+import com.arcusys.learn.liferay.LiferayClasses.LThemeDisplay
+import com.arcusys.learn.liferay.constants.WebKeysHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, ServiceContextHelper}
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
 import com.arcusys.valamis.web.servlet.social.request.ActivityRequest
 import com.arcusys.valamis.web.servlet.social.response.ActivityConverter
 
@@ -33,8 +37,8 @@ class ValamisActivitiesView extends OAuthPortlet with PortletBase with ActivityC
 
     val preferences = PortletPreferencesFactoryUtilHelper.getPortletSetup(request)
 
-    sendTextFile("/templates/2.0/valamis_activities_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/valamis_activities_templates.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(
       securityScope.data ++
         Map("resourceURL" -> response.createResourceURL(),
@@ -58,7 +62,7 @@ class ValamisActivitiesView extends OAuthPortlet with PortletBase with ActivityC
     }
   }
 
-  private def saveSettings(request: RenderRequest): Unit = {
+  private def saveSettings(request: ResourceRequest): Unit = {
     val preferences = PortletPreferencesFactoryUtilHelper.getPortletSetup(request)
     val origRequest = PortalUtilHelper.getOriginalServletRequest(PortalUtilHelper.getHttpServletRequest(request))
 
@@ -71,51 +75,66 @@ class ValamisActivitiesView extends OAuthPortlet with PortletBase with ActivityC
   }
 
   override def doEdit(request: RenderRequest, response: RenderResponse) {
-    val origRequest = PortalUtilHelper.getOriginalServletRequest(PortalUtilHelper.getHttpServletRequest(request))
-    val needToSave = !origRequest.withDefault("saveSettings", "").isEmpty
-    if (needToSave) {
-      saveSettings(request)
-    } else {
-      implicit val out = response.getWriter
-      val language = LiferayHelpers.getLanguage(request)
-      val settings = loadSettings(request)
-      val securityScope = getSecurityData(request)
-      val translations = getTranslation("dashboard", language)
-      val permission = new PortletPermissionUtil(request, this)
+    implicit val out = response.getWriter
+    val language = LiferayHelpers.getLanguage(request)
+    val settings = loadSettings(request)
+    val securityScope = getSecurityData(request)
+    val translations = getTranslation("dashboard", language)
+    val permission = new PortletPermissionUtil(request, this)
 
-      val data = settings ++
-        Map(
-          "actionURL" -> response.createResourceURL(),
-          "permissionToModify" -> permission.hasPermission(ModifyPermission.name)
-        ) ++ translations ++ getSecurityData(request).data
-      sendMustacheFile(data, "valamis_activities_settings.html")
-    }
+    val data = settings ++
+      Map(
+        "actionURL" -> response.createResourceURL().toString,
+        "permissionToModify" -> permission.hasPermission(ModifyPermission.name)
+      ) ++ translations ++ securityScope.data
+    sendMustacheFile(data, "valamis_activities_settings.html")
   }
 
 
   override def serveResource(request: ResourceRequest, response: ResourceResponse): Unit = {
-    val servletRequest = PortalUtilHelper.getHttpServletRequest(request)
-    implicit val origRequest = PortalUtilHelper.getOriginalServletRequest(servletRequest)
-    val servletRequestExt = ServletRequestExt(origRequest)
+    val ctx = ServiceContextHelper.getServiceContext
+    val oldCurrentUrl = Option(ctx.getCurrentURL)
+    try {
+      oldCurrentUrl foreach { url =>
+        ctx.setCurrentURL(url.split("\\?").head)
+        //we have to delete all parameters from current url
+        //because it's used as a backUrl for CalendarBookingActivity entries
+      }
+      val servletRequest = PortalUtilHelper.getHttpServletRequest(request)
+      implicit val origRequest = PortalUtilHelper.getOriginalServletRequest(servletRequest)
 
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.ValamisActivities)
+      origRequest.withDefault("action", "") match {
+        case "saveSettings" => saveSettings(request)
+        case "getActivities" =>
+          val servletRequestExt = ServletRequestExt(origRequest)
+          PermissionUtil.requirePermissionApi(ViewPermission, PortletName.ValamisActivities)
 
-    val companyId = PortalUtilHelper.getCompanyId(servletRequest)
+          val themeDisplay = origRequest.getAttribute(WebKeysHelper.THEME_DISPLAY).asInstanceOf[LThemeDisplay]
+          val companyId = PortalUtilHelper.getCompanyId(servletRequest)
 
-    val myActivities = servletRequestExt.booleanOption(ActivityRequest.GetMyActivities).getOrElse(false)
-    val userId = if (myActivities) Some(PermissionUtil.getUserId) else None
+          val myActivities = servletRequestExt.booleanOption(ActivityRequest.GetMyActivities).getOrElse(false)
+          val userId = if (myActivities) Some(PermissionUtil.getUserId) else None
 
-    val showAll = PermissionUtil.hasPermissionApi(ShowAllActivities, PortletName.ValamisActivities)
+          val showAll = PermissionUtil.hasPermissionApi(ShowAllActivities, PortletName.ValamisActivities)
 
-    val plId = servletRequestExt.longRequired(ActivityRequest.PlId)
+          val plId = servletRequestExt.longRequired(ActivityRequest.PlId)
 
-    val preferences = Some(PortletPreferencesFactoryUtilHelper.getPortletSetup(request))
-    val lActivitiesToBeShown = Some(ValamisActivitiesSettings.getVisibleLiferayActivities(preferences))
+          val preferences = Some(PortletPreferencesFactoryUtilHelper.getPortletSetup(request))
+          val lActivitiesToBeShown = Some(ValamisActivitiesSettings.getVisibleLiferayActivities(preferences))
 
-    response.getWriter.println(JsonHelper.toJson(
-      socialActivityService.getBy(companyId, userId, servletRequestExt.skipTake, showAll, lActivitiesToBeShown)
-        .map(act => toResponse(act, Some(plId)))
-    ))
-
+          response.getWriter.println(JsonHelper.toJson(
+            socialActivityService.getBy(companyId,
+              userId,
+              servletRequestExt.skipTake,
+              showAll,
+              lActivitiesToBeShown,
+              themeDisplay).map(toResponse(_, Some(plId)))
+          ))
+        case _ => ()
+      }
+    } finally {
+      oldCurrentUrl foreach ctx.setCurrentURL
+    }
   }
+
 }

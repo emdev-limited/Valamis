@@ -1,0 +1,37 @@
+<div id="valamisReportAppRegion"></div>
+
+<input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+
+<script type="text/javascript">
+
+    var Valamis = Valamis || {};
+
+    jQueryValamis(function () {
+
+        if (!valamisApp.started) { valamisApp.start(); }
+
+        var valamisReportSettingsOptions = {
+            resourceName: 'valamisReport',
+            permissions: {},
+            app: valamisReportSettings,
+            appOptions: {
+                actionURL: '{{{actionURL}}}',
+                reportType: '{{reportType}}',
+                reportsScope: '{{reportsScope}}',
+                userIds: {{userIds}},
+                reportPeriodType: '{{reportPeriodType}}',
+                reportPeriodStart: '{{reportPeriodStart}}',
+                reportPeriodEnd: '{{reportPeriodEnd}}'
+            }
+        };
+
+        valamisApp.execute('subapp:start', valamisReportSettingsOptions);
+
+        jQueryValamis(this).click(function(event) {
+            if(jQueryValamis(event.target).closest('.js-dropdown-selector').length == 0) {
+                jQueryValamis('.dropdown-selector', jQueryValamis('#valamisReportSettings')).removeClass('show-dropdown-menu');
+            }
+        })
+    });
+
+</script>

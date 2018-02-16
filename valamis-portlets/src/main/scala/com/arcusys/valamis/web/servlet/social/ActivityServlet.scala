@@ -1,7 +1,10 @@
 package com.arcusys.valamis.web.servlet.social
 
+import com.arcusys.learn.liferay.LiferayClasses._
+import com.arcusys.learn.liferay.constants.WebKeysHelper
+import com.arcusys.learn.liferay.services.CompanyHelper
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
 import com.arcusys.valamis.social.service.{ActivityService, CommentService, LikeService}
 import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.web.portlet.base.{SharePermission, ShowAllActivities, ViewPermission, WriteStatusPermission}
@@ -30,24 +33,30 @@ class ActivityServlet extends BaseApiController with ActivityConverter {
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.ValamisActivities)
 
     val userId = if (activityRequest.getMyActivities) Some(activityRequest.userIdServer) else None
-
     val showAll = PermissionUtil.hasPermissionApi(ShowAllActivities, PortletName.ValamisActivities)
-
+    val themeDisplay = request.getAttribute(WebKeysHelper.THEME_DISPLAY).asInstanceOf[LThemeDisplay]
     val plId = activityRequest.plId
-
     val isSecure = request.isSecure
 
-    socialActivityService.getBy(activityRequest.companyIdServer, userId, activityRequest.skipTake,showAll, None).map(act => toResponse(act, Some(plId), isSecure))
+    socialActivityService.getBy(
+      activityRequest.companyIdServer,
+      userId,
+      activityRequest.skipTake,
+      showAll,
+      None,
+      themeDisplay).map(act => toResponse(act, Some(plId), isSecure))
   })
 
-  get("/activities/search(/)")(action {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.CertificateManager,  PortletName.CertificateViewer, PortletName.LearningTranscript)
+  get("/activities/search(/)") {
+    PermissionUtil.requirePermissionApi(
+      ViewPermission,
+      PortletName.LearningTranscript)
     response.setHeader("Content-Type", "application/json; charset=UTF-8")
-    lrsReader.activityApi(_.getActivities(params.getOrElse("activity", ""))) match {
+    lrsReader.activityApi(_.getActivities(params.getOrElse("activity", "")))(CompanyHelper.getCompanyId) match {
       case Success(value) => value
       case Failure(value) => throw new Exception("Fail:" + value)
     }
-  })
+  }
 
   post("/activities(/)")(jsonAction {
     val activityRequest = ActivityRequest(this)

@@ -48,22 +48,36 @@ object PortalUtilHelper {
 
   def getLocalHostUrl: String = {
     val companyId = CompanyThreadLocal.getCompanyId
+    getLocalHostUrlForCompany(companyId)
+  }
 
+  def getLocalHostUrlForCompany(companyId: Long): String = {
     val request = Option(ServiceContextThreadLocal.getServiceContext)
       .flatMap(s => Option(s.getRequest))
 
     request match {
-      case Some(r) => getLocalHostUrl(companyId, r.isSecure)
+      case Some(r) => getLocalHostUrl(companyId, r)
       case None => getLocalHostUrl(companyId)
     }
   }
 
-  def getLocalHostUrl(companyId: Long, isSecure : Boolean = false): String = {
+  def getLocalHostUrl(companyId: Long, request: HttpServletRequest): String = {
     lazy val company = CompanyLocalServiceUtil.getCompany(companyId)
-
     val hostName = company.getVirtualHostname
-    val port = PortalUtil.getPortalPort(isSecure)
-    PortalUtil.getPortalURL(hostName, port, isSecure) + PortalUtil.getPathContext
+    val port = request.getLocalPort
+
+    PortalUtil.getPortalURL(hostName, port, request.isSecure) + PortalUtil.getPathContext
+  }
+
+  def getLocalHostUrl(companyId: Long, isSecure : Boolean = false): String = {
+    getHostWithPort(companyId, isSecure) + PortalUtil.getPathContext
+  }
+
+  def getHostWithPort(companyId: Long, isSecure: Boolean = false): String = {
+    val company = CompanyLocalServiceUtil.getCompany(companyId)
+    val hostName = company.getVirtualHostname
+    val port = getPortalPort(isSecure)
+    getPortalURL(hostName, port, isSecure)
   }
 
   def getHostName(companyId: Long): String =

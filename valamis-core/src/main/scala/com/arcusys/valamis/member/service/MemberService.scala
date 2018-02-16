@@ -7,6 +7,7 @@ import com.arcusys.learn.liferay.services.{OrganizationLocalServiceHelper => Org
 import com.arcusys.learn.liferay.services.{RoleLocalServiceHelper => RoleHelper}
 import com.arcusys.learn.liferay.services.{UserGroupLocalServiceHelper => UserGroupHelper}
 import com.arcusys.learn.liferay.services.{UserLocalServiceHelper => UserHelper}
+import com.arcusys.valamis.utils.SeqCutExtension
 
 class MemberService {
 
@@ -64,24 +65,65 @@ class MemberService {
                      ascending: Boolean,
                      skipTake: Option[SkipTake],
                      organizationId: Option[Long]): RangeResult[LUser] = {
-    val nameLike = namePattern.filterNot(_.isEmpty).map(text => s"%$text%")
+
     val startEnd = skipTake.map(x => (x.skip, x.skip + x.take))
-
-    val totalCount = UserHelper().getCount(memberIds, contains, companyId, nameLike, organizationId)
-
-    val items = UserHelper().getUsers(memberIds, contains, companyId, nameLike, ascending, startEnd, organizationId)
+    val totalCount = UserHelper().getCount(memberIds, contains, companyId, nameLike(namePattern), organizationId)
+    val items = UserHelper().getUsers(memberIds,
+      contains,
+      companyId,
+      nameLike(namePattern),
+      ascending,
+      startEnd,
+      organizationId)
 
     RangeResult(totalCount, items)
   }
 
+  def getUserAndGroupMembers(memberIds: Seq[Long],
+                             groupsIds: Seq[Long],
+                             contains: Boolean,
+                             companyId: Long,
+                             namePattern: Option[String],
+                             ascending: Boolean,
+                             skipTake: Option[SkipTake],
+                             organizationId: Option[Long]): RangeResult[LUser] = {
+
+    val membersResult = UserHelper().getUsers(memberIds,
+      contains,
+      companyId,
+      nameLike(namePattern),
+      ascending,
+      None,
+      organizationId)
+
+
+    val groupMembers = groupsIds.flatMap {
+      getMembers(_, MemberTypes.UserGroup)
+    }
+
+    val members = (membersResult ++ groupMembers).distinct
+    val total = members.size
+    val items = if (ascending) {
+      members.sortBy(u => u.getFullName)
+    }
+    else {
+      members.sortBy(u => u.getFullName).reverse
+    }
+
+    RangeResult(total, items.skip(skipTake))
+  }
+
+
   def getMembers(viewerId: Long, viewerType: MemberTypes.Value): Seq[LUser] = {
     viewerType match {
-      case MemberTypes.User => Seq(UserHelper().getUser(viewerId))
+      case MemberTypes.User => UserHelper().fetchUser(viewerId).toSeq
       case MemberTypes.UserGroup =>
-        UserHelper().getGroupUsers(viewerId)
+        UserHelper().getUserGroupUsers(viewerId)
       case MemberTypes.Organization =>
         UserHelper().getOrganizationUsers(viewerId)
       case MemberTypes.Role => UserHelper().getRoleUsers(viewerId)
     }
   }
+
+  private def nameLike(namePattern: Option[String]) = namePattern.filterNot(_.isEmpty).map(text => s"%$text%")
 }

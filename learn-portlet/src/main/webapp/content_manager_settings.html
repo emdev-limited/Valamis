@@ -32,10 +32,12 @@
     </script>
 
     <script type="text/javascript">
-        var jQuerySettings = jQuery.noConflict();
+        var Valamis = Valamis || {};
+        Valamis.language = Valamis.language || {};
+
 
         var QuestionSettingsLayout = Backbone.Marionette.LayoutView.extend({
-            template: _.template(Mustache.to_html(jQuery('#questionsettings-modals-template').html())),
+            template: _.template(Mustache.to_html(jQueryValamis('#questionsettings-modals-template').html())),
             regions: {
                 modals: {
                     selector: '.questionsettings-modals-container',
@@ -48,7 +50,7 @@
         var questionSettingsLayout = new QuestionSettingsLayout();
 
         var UploadQuestionImportModal = Backbone.Modal.extend({
-            template: _.template(Mustache.to_html(jQuery('#questionsettings-import-modal-template').html())),
+            template: _.template(Mustache.to_html(jQueryValamis('#questionsettings-import-modal-template').html())),
             submitEl: '.bbm-button',
             cancelEl: '.modal-close',
             className: 'val-modal',
@@ -67,6 +69,7 @@
                 });
 
                 uploader.on('fileuploaddone', function (data) {
+                    toastr.success('{{overlayCompleteMessageLabel}}');
                     me.triggerCancel();
                 });
 
@@ -75,7 +78,7 @@
         });
 
         var MoodleQuestionImportModal = Backbone.Modal.extend({
-            template: _.template(Mustache.to_html(jQuery('#questionsettings-import-moodle-modal-template').html())),
+            template: _.template(Mustache.to_html(jQueryValamis('#questionsettings-import-moodle-modal-template').html())),
             submitEl: '.bbm-button',
             cancelEl: '.modal-close',
             className: 'val-modal',
@@ -129,16 +132,16 @@
             }
         });
 
-        jQuerySettings(function () {
-            jQuery('#qm-settings-layout').append(questionSettingsLayout.render().el);
+        jQueryValamis(function () {
+            jQueryValamis('#qm-settings-layout').append(questionSettingsLayout.render().el);
             if ('{{showGlobalBase}}' == 'true') {
-                jQuery('#showGlobalBase').attr('checked', 'checked');
+                jQueryValamis('#showGlobalBase').attr('checked', 'checked');
             }
         });
 
         function saveShowGlobalBaseSetting() {
             window.LearnAjax.post('{{{actionURL}}}', {
-                showGlobalBase: jQuery("#showGlobalBase").is(':checked')
+                showGlobalBase: jQueryValamis("#showGlobalBase").is(':checked')
             }).done(function () {
             });
         }

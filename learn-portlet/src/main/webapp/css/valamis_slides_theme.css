@@ -1,0 +1,1620 @@
+@charset "UTF-8";
+/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+/**
+ * 1. Set default font family to sans-serif.
+ * 2. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+html {
+  font-family: sans-serif;
+  /* 1 */
+  -ms-text-size-adjust: 100%;
+  /* 2 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+}
+
+/**
+ * Remove default margin.
+ */
+body {
+  margin: 0;
+}
+
+/* HTML5 display definitions
+   ========================================================================== */
+/**
+ * Correct `block` display not defined for any HTML5 element in IE 8/9.
+ * Correct `block` display not defined for `details` or `summary` in IE 10/11
+ * and Firefox.
+ * Correct `block` display not defined for `main` in IE 11.
+ */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+/**
+ * 1. Correct `inline-block` display not defined in IE 8/9.
+ * 2. Normalize vertical alignment of `progress` in Chrome, Firefox, and Opera.
+ */
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  /* 1 */
+  vertical-align: baseline;
+  /* 2 */
+}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+/**
+ * Address `[hidden]` styling not present in IE 8/9/10.
+ * Hide the `template` element in IE 8/9/11, Safari, and Firefox < 22.
+ */
+[hidden],
+template {
+  display: none;
+}
+
+/* Links
+   ========================================================================== */
+/**
+ * Remove the gray background color from active links in IE 10.
+ */
+a {
+  background-color: transparent;
+}
+
+/**
+ * Improve readability when focused and also mouse hovered in all browsers.
+ */
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * Address styling not present in IE 8/9/10/11, Safari, and Chrome.
+ */
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+/**
+ * Address style set to `bolder` in Firefox 4+, Safari, and Chrome.
+ */
+b,
+strong {
+  font-weight: bold;
+}
+
+/**
+ * Address styling not present in Safari and Chrome.
+ */
+dfn {
+  font-style: italic;
+}
+
+/**
+ * Address variable `h1` font-size and margin within `section` and `article`
+ * contexts in Firefox 4+, Safari, and Chrome.
+ */
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+/**
+ * Address styling not present in IE 8/9.
+ */
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+/**
+ * Address inconsistent and variable font size in all browsers.
+ */
+small {
+  font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` affecting `line-height` in all browsers.
+ */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Embedded content
+   ========================================================================== */
+/**
+ * Remove border when inside `a` element in IE 8/9/10.
+ */
+img {
+  border: 0;
+}
+
+/**
+ * Correct overflow not hidden in IE 9/10/11.
+ */
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/* Grouping content
+   ========================================================================== */
+/**
+ * Address margin not present in IE 8/9 and Safari.
+ */
+figure {
+  margin: 1em 40px;
+}
+
+/**
+ * Address differences between Firefox and other browsers.
+ */
+hr {
+  box-sizing: content-box;
+  height: 0;
+}
+
+/**
+ * Contain overflow in all browsers.
+ */
+pre {
+  overflow: auto;
+}
+
+/**
+ * Address odd `em`-unit font size rendering in all browsers.
+ */
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+/* Forms
+   ========================================================================== */
+/**
+ * Known limitation: by default, Chrome and Safari on OS X allow very limited
+ * styling of `select`, unless a `border` property is set.
+ */
+/**
+ * 1. Correct color not being inherited.
+ *    Known issue: affects color of disabled elements.
+ * 2. Correct font properties not being inherited.
+ * 3. Address margins set differently in Firefox 4+, Safari, and Chrome.
+ */
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+  margin: 0;
+  /* 3 */
+}
+
+/**
+ * Address `overflow` set to `hidden` in IE 8/9/10/11.
+ */
+button {
+  overflow: visible;
+}
+
+/**
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Firefox, IE 8/9/10/11, and Opera.
+ * Correct `select` style inheritance in Firefox.
+ */
+button,
+select {
+  text-transform: none;
+}
+
+/**
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
+ *    and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type
+ *    `input` and others.
+ */
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  /* 2 */
+  cursor: pointer;
+  /* 3 */
+}
+
+/**
+ * Re-set default cursor for disabled elements.
+ */
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+/**
+ * Remove inner padding and border in Firefox 4+.
+ */
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/**
+ * Address Firefox 4+ setting `line-height` on `input` using `!important` in
+ * the UA stylesheet.
+ */
+input {
+  line-height: normal;
+}
+
+/**
+ * It's recommended that you don't attempt to style these elements.
+ * Firefox's implementation doesn't respect box-sizing, padding, or width.
+ *
+ * 1. Address box sizing set to `content-box` in IE 8/9/10.
+ * 2. Remove excess padding in IE 8/9/10.
+ */
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+ * Fix the cursor style for Chrome's increment/decrement buttons. For certain
+ * `font-size` values of the `input`, it causes the cursor style of the
+ * decrement button to change from `default` to `text`.
+ */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/**
+ * 1. Address `appearance` set to `searchfield` in Safari and Chrome.
+ * 2. Address `box-sizing` set to `border-box` in Safari and Chrome
+ *    (include `-moz` to future-proof).
+ */
+input[type="search"] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  /* 2 */
+  box-sizing: content-box;
+}
+
+/**
+ * Remove inner padding and search cancel button in Safari and Chrome on OS X.
+ * Safari (but not Chrome) clips the cancel button when the search input has
+ * padding (and `textfield` appearance).
+ */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/**
+ * Define consistent border, margin, and padding.
+ */
+/**
+ * 1. Correct `color` not being inherited in IE 8/9/10/11.
+ * 2. Remove padding so people aren't caught out if they zero out fieldsets.
+ */
+legend {
+  border: 0;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+ * Remove default vertical scrollbar in IE 8/9/10/11.
+ */
+textarea {
+  overflow: auto;
+}
+
+/**
+ * Don't inherit the `font-weight` (applied by a rule above).
+ * NOTE: the default cannot safely be changed in Chrome and Safari on OS X.
+ */
+optgroup {
+  font-weight: bold;
+}
+
+/* Tables
+   ========================================================================== */
+/**
+ * Remove most spacing between table cells.
+ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+/**
+ *
+ * @author Lassi Vehviläinen, Yury Gatilin, Lubov Potakhina
+ *
+ * @name Valamis Sass Theme
+ *
+ *
+ */
+.valamis .reveal-wrapper {
+  /* Bitters 0.10.0
+ * http://bitters.bourbon.io
+ * Copyright 2013–2014 thoughtbot, inc.
+ * MIT License */
+  /* Neat 1.7.0
+ * http://neat.bourbon.io
+ * Copyright 2012-2014 thoughtbot, inc.
+ * MIT License */
+  /**
+ * Valamis Slides Editor theme for reveal.js.
+ * Author: Lassi Vehviläinen
+ */
+  /**
+ * Slides Editor colors by Lassi Vehviläinen
+ */
+  /*********************************************
+ * GLOBAL STYLES
+ *********************************************/
+  /******************* LINKS *******************/
+  /******************* TEXT FORMATS *******************/
+  /******************* IMAGES *******************/
+  /******************* NAVIGATION CONTROLS *******************/
+  /******************* LESSON SUMMARY *******************/
+  background: #F8F8F8;
+  background-color: #F8F8F8;
+}
+
+@font-face {
+  .valamis .reveal-wrapper {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-size: 18.0px;
+    font-style: normal;
+  }
+}
+
+.valamis .reveal-wrapper label {
+  color: inherit;
+}
+
+.valamis .reveal-wrapper .reveal {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 18.0px;
+  font-weight: normal;
+  letter-spacing: -0.02em;
+  color: #1C1C1C;
+  line-height: 1.5;
+}
+
+.valamis .reveal-wrapper .reveal table td {
+  border-bottom: none;
+}
+
+.valamis .reveal-wrapper .reveal label {
+  color: inherit;
+}
+
+.valamis .reveal-wrapper h1, .valamis .reveal-wrapper h2, .valamis .reveal-wrapper h3, .valamis .reveal-wrapper h4, .valamis .reveal-wrapper h5, .valamis .reveal-wrapper h6 {
+  margin: 0 0 20px 0;
+  color: #1C1C1C;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1em;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+  font-weight: normal;
+  -webkit-hyphens: manual;
+      -ms-hyphens: manual;
+          hyphens: manual;
+  word-wrap: normal;
+}
+
+.valamis .reveal-wrapper a:not(.image) {
+  color: #268bd2;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.valamis .reveal-wrapper a:not(.image):hover {
+  color: #78b9e6;
+  text-shadow: none;
+  border: none;
+}
+
+.valamis .reveal-wrapper .roll span:after {
+  color: #FFF;
+  background: #1a6091;
+}
+
+.valamis .reveal-wrapper address {
+  font-style: italic;
+}
+
+.valamis .reveal-wrapper pre {
+  padding: 12px;
+  font-size: 1em;
+  background-color: #EAEAEA;
+}
+
+.valamis .reveal-wrapper section img {
+  margin: 15px 0px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 4px solid #657b83;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s linear;
+}
+
+.valamis .reveal-wrapper a:hover img {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #268bd2;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.55);
+}
+
+.valamis .reveal-wrapper .controls button {
+  outline: none;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-left {
+  border-right-color: #268bd2;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-left:hover {
+  border-right-color: #78b9e6;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-right {
+  border-left-color: #268bd2;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-right:hover {
+  border-left-color: #78b9e6;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-up {
+  border-bottom-color: #268bd2;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-up:hover {
+  border-bottom-color: #78b9e6;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-down {
+  border-top-color: #268bd2;
+}
+
+.valamis .reveal-wrapper .controls button.navigate-down:hover {
+  border-top-color: #78b9e6;
+}
+
+.valamis .reveal-wrapper #lesson-summary {
+  display: table;
+  margin: 0 auto;
+  font-size: 18px;
+  text-align: left;
+  height: 100%;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-questions {
+  padding-top: 16px;
+  height: 100%;
+  padding-bottom: 10px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-questions tr {
+  margin-bottom: 5px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-questions tr td {
+  padding-bottom: 5px;
+  border-bottom: none;
+}
+
+.valamis .reveal-wrapper #lesson-summary .complete-title,
+.valamis .reveal-wrapper #lesson-summary .failed-title {
+  text-align: center;
+  line-height: 40px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .complete-title span,
+.valamis .reveal-wrapper #lesson-summary .failed-title span {
+  display: block;
+  line-height: 40px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .complete-title > span:first-child,
+.valamis .reveal-wrapper #lesson-summary .failed-title > span:first-child {
+  font-size: 24px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pages-pie-graphic,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .questions-pie-graphic {
+  display: table-cell;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic {
+  vertical-align: middle;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend {
+  width: 188px;
+  padding-left: 16px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .ratio-label,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .ratio-label {
+  display: block;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .answers-ratio,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .pages-ratio,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .answers-ratio,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .pages-ratio {
+  font-weight: bold;
+}
+
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .ratio-label,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .answers-ratio,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .pages-ratio,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .ratio-label,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .answers-ratio,
+.valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .pages-ratio {
+  font-size: 18px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .opened-pages-progress svg,
+.valamis .reveal-wrapper #lesson-summary .questions-progress svg {
+  float: left;
+}
+
+.valamis .reveal-wrapper #lesson-summary .opened-pages-progress {
+  width: 50%;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic text,
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic text {
+  font-weight: bold;
+  float: left;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic text .rate-value,
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic text .rate-value {
+  font-size: 24px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic text .rate-unit-sign,
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic text .rate-unit-sign {
+  font-size: 12px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic g:nth-child(3).arc,
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic g:nth-child(3).arc {
+  fill: transparent;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic .success circle {
+  fill: #eff3e6;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic .success g:nth-child(2).arc {
+  fill: #598000;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic .fail circle {
+  fill: #fff9ef;
+}
+
+.valamis .reveal-wrapper #lesson-summary .pages-pie-graphic .fail g:nth-child(2).arc {
+  fill: #f7ac1c;
+}
+
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic .success circle {
+  fill: #eff3e6;
+}
+
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic .success g:nth-child(2).arc {
+  fill: #598000;
+}
+
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic .fail circle {
+  fill: #faeceb;
+}
+
+.valamis .reveal-wrapper #lesson-summary .questions-pie-graphic .fail g:nth-child(2).arc {
+  fill: #CC4233;
+}
+
+.valamis .reveal-wrapper #lesson-summary .progress-col div.checkmark {
+  background-color: #DEDEDE;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-block;
+  color: white;
+  text-align: center;
+}
+
+.valamis .reveal-wrapper #lesson-summary .progress-col div.checkmark span {
+  vertical-align: baseline !important;
+  line-height: 22px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .progress-col div.checkmark .val-icon:before {
+  font-size: 18px;
+}
+
+.valamis .reveal-wrapper #lesson-summary .progress-col.success .checkmark {
+  background-color: #598000;
+}
+
+.valamis .reveal-wrapper #lesson-summary .progress-col.failed .checkmark {
+  background-color: #CC4233;
+}
+
+@media (max-width: 769px) {
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic {
+    width: 100%;
+    padding-left: 50%;
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pages-pie-graphic,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend {
+    -ms-transform: translateX(-50%);
+        transform: translateX(-50%);
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pages-pie-graphic,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .question-statistic .questions-pie-graphic {
+    display: table-row;
+    text-align: center;
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend {
+    width: auto;
+    padding-left: 0;
+    display: table-row;
+    text-align: center;
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-legend .ratio-label,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-legend .ratio-label {
+    padding-top: 15px;
+    font-size: 15px;
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .pages-statistic .pie-circle,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic .questions-statistic .pie-circle {
+    margin-left: 50%;
+    -ms-transform: translateX(-50%);
+        transform: translateX(-50%);
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic.both-pies .pages-statistic,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic.both-pies .questions-statistic {
+    width: 144px;
+    padding-left: 0;
+  }
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic.both-pies .pages-statistic .pages-pie-graphic,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic.both-pies .pages-statistic .pie-legend,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic.both-pies .questions-statistic .pages-pie-graphic,
+  .valamis .reveal-wrapper #lesson-summary .lesson-statistic.both-pies .questions-statistic .pie-legend {
+    -ms-transform: none;
+        transform: none;
+  }
+}
+
+.valamis .reveal-wrapper .check-answer-button {
+  background-color: #598000;
+  border: 1px solid #4b6c00;
+  width: 130px;
+  white-space: nowrap;
+}
+
+.valamis .reveal-wrapper .check-answer-button:hover {
+  box-shadow: inset 0px -20px 20px 0px rgba(0, 0, 0, 0.03), inset 0px -50px 50px 0px rgba(0, 0, 0, 0.03);
+  text-decoration: none;
+}
+
+.valamis .reveal-wrapper .decorative-line {
+  width: 100%;
+}
+
+.valamis .reveal-wrapper .decorative-line div {
+  border-top: 1px solid #CCCCCC;
+}
+
+.valamis .reveal-wrapper .decorative-line div.choice-line {
+  border-color: rgba(0, 0, 0, 0.2);
+  margin: 50px 10px;
+}
+
+.valamis .reveal-wrapper .decorative-line div.summary-line {
+  border-color: #d8d8d8;
+  margin: 16px 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element {
+  /* Question styles for generator */
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .item-content {
+  font-size: 18.0px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .item-content .answer-container > label, .valamis .reveal-wrapper .rj-element.question-element .item-content .answer-textarea, .valamis .reveal-wrapper .rj-element.question-element .item-content .question-short-answers {
+  font-size: 18.0px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .valamis-question.plaintext-element {
+  color: inherit;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .valamis-question p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .valamis-question .question-text {
+  font-size: 1.11em;
+  font-weight: bold;
+  text-align: left;
+  line-height: 1.5;
+  padding-bottom: 30px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .valamis-question .answers-options {
+  padding-bottom: 40px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .question-feedback {
+  display: none;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .choice-answer-text {
+  text-align: left;
+  margin-left: 40px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options .answer-container label {
+  border: 1px solid transparent;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=checkbox].checkbox, .valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=radio].radio {
+  display: none;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=checkbox].checkbox + label, .valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=radio].radio + label {
+  border-radius: 3px;
+  margin: 0;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=checkbox].checkbox + label .answer-checkbox,
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=radio].radio + label .answer-radio {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #AAA;
+  float: left;
+  margin-right: 15px;
+  margin-bottom: 0;
+  margin-top: 2px;
+  background-color: #F8F8F8;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=radio].radio + label .answer-radio.val-icon-radio {
+  border-radius: 50%;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=radio].radio + label .answer-radio.val-icon-radio:before {
+  content: '.';
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  margin-left: 5px;
+  background-color: #2c2c2c;
+  color: #F8F8F8;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=checkbox].checkbox + label .answer-checkbox {
+  border-radius: 2px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=checkbox].checkbox + label .answer-checkbox.val-icon-checkmark:before {
+  margin: 1px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=checkbox].checkbox + label .answer-checkbox.val-icon-checkmark:before,
+.valamis .reveal-wrapper .rj-element.question-element .choice-question .answers-options input[type=radio].radio + label .answer-radio.val-icon-radio:before {
+  display: none;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answers-options .answer-textarea,
+.valamis .reveal-wrapper .rj-element.question-element .answers-options .question-short-answers {
+  padding: 14px 20px;
+  background: #FFF;
+  border: 1px solid #CCCCCC;
+  border-radius: 1px;
+  color: #777;
+  height: initial;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answers-options .answer-textarea:focus,
+.valamis .reveal-wrapper .rj-element.question-element .answers-options .question-short-answers:focus {
+  border-color: #2974A6;
+  color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .result-icon, .valamis .reveal-wrapper .rj-element.question-element .short-question .answers .result-icon {
+  margin-left: 0px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .result-icon.small, .valamis .reveal-wrapper .rj-element.question-element .short-question .answers .result-icon.small {
+  margin-top: 3px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .result-icon.small:before, .valamis .reveal-wrapper .rj-element.question-element .short-question .answers .result-icon.small:before {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .result-label, .valamis .reveal-wrapper .rj-element.question-element .short-question .answers .result-label {
+  margin-left: 40px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .answer-container, .valamis .reveal-wrapper .rj-element.question-element .short-question .answers .answer-container {
+  margin: 20px 0 40px;
+  color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .answer-container.answer-list-icon:before,
+.valamis .reveal-wrapper .rj-element.question-element .numeric-question .answers .answer-container .answer-list-icon:before, .valamis .reveal-wrapper .rj-element.question-element .short-question .answers .answer-container.answer-list-icon:before,
+.valamis .reveal-wrapper .rj-element.question-element .short-question .answers .answer-container .answer-list-icon:before {
+  content: "";
+  width: 16px;
+  height: 2px;
+  background-color: #2c2c2c;
+  display: inline-block;
+  margin: 0 20px 0 6px;
+  vertical-align: middle;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .essay-question .answers-options .answer-textarea {
+  height: 400px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .position-question .valamis-question > .result-icon.val-icon {
+  margin-left: 5px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .position-question .answers-options .answer-container ul .ui-sortable-helper {
+  border: 1px solid #2974A6;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .position-question .answers-options .answer-container ul li:hover {
+  cursor: move;
+  border: 1px solid #2974A6;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .position-question .answers .result-icon {
+  margin-left: 0px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .position-question .answers .result-icon.small {
+  margin-top: 3px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .position-question .answers .result-icon.small:before {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
+@media (max-width: 769px) {
+  .valamis .reveal-wrapper .rj-element.question-element > div .categorization-question,
+  .valamis .reveal-wrapper .rj-element.question-element > div .matching-question {
+    min-width: 320px;
+  }
+  .valamis .reveal-wrapper .rj-element.question-element .categorization-question .phone-row,
+  .valamis .reveal-wrapper .rj-element.question-element .matching-question .phone-row {
+    display: table-row;
+  }
+  .valamis .reveal-wrapper .rj-element.question-element .categorization-question .phone-row .category-item,
+  .valamis .reveal-wrapper .rj-element.question-element .matching-question .phone-row .category-item {
+    margin-right: 0px;
+  }
+  .valamis .reveal-wrapper .rj-element.question-element .valamis-question.answers .result-icon.small {
+    margin-top: 0px;
+  }
+  .valamis .reveal-wrapper .rj-element.question-element .valamis-question.answers .result-icon.small:before {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+  }
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul {
+  list-style-type: none;
+  padding: 5px;
+  display: block;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li {
+  border: 1px solid #F8F8F8;
+  color: #1C1C1C;
+  margin: 8px auto;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  line-height: 1.5;
+  border-radius: 3px;
+  background: #FFF;
+  min-height: 50px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li div {
+  display: block;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li div[class*="val-icon-"] {
+  float: left;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li div[class*="val-icon-"] + div {
+  margin-left: 30px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li div p {
+  margin: 1px 0 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li .result-icon {
+  margin: 0 7px 0 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li .result-icon:before {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li.ui-state-highlight {
+  height: 60px;
+  line-height: 1.2em;
+  background-color: #DEDEDE;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li.correct {
+  border-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .answer-container ul li.incorrect {
+  border-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .category-item, .valamis .reveal-wrapper .rj-element.question-element .matching-question .category-item {
+  background: rgba(212, 212, 212, 0.5);
+  box-shadow: inset 0px 2px 4px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  width: 160px;
+  margin: 0 20px 20px 0;
+  padding: 5px 0 5px 5px;
+  min-height: 75px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .category-item .category-text, .valamis .reveal-wrapper .rj-element.question-element .matching-question .category-item .category-text {
+  font-weight: bold;
+  font-size: 0.72em;
+  word-wrap: break-word;
+  padding: 5px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .category-item ul, .valamis .reveal-wrapper .rj-element.question-element .matching-question .category-item ul {
+  min-height: 75px;
+  height: auto;
+  display: block;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .answer-container-source, .valamis .reveal-wrapper .rj-element.question-element .matching-question .answer-container-source {
+  min-width: 150px;
+  min-height: 75px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .categorization-answer-item, .valamis .reveal-wrapper .rj-element.question-element .matching-question .categorization-answer-item {
+  position: relative;
+  background: #FFF;
+  border: 1px solid #CCCCCC;
+  box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  width: 150px;
+  min-height: 40px;
+  padding: 10px;
+  margin-bottom: 5px;
+  font-size: 0.72em;
+  line-height: 1.5;
+  color: #777;
+  word-wrap: break-word;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .categorization-answer-item:last-child, .valamis .reveal-wrapper .rj-element.question-element .matching-question .categorization-answer-item:last-child {
+  margin-bottom: 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element .categorization-question .categorization-answer-item .invisible-font, .valamis .reveal-wrapper .rj-element.question-element .matching-question .categorization-answer-item .invisible-font {
+  float: left;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element {
+  cursor: default;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .result-icon {
+  font-family: valamis-icons;
+  margin-left: 7px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .result-icon:before {
+  display: inline-block;
+  vertical-align: initial;
+  text-align: center;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  color: #F8F8F8;
+  border-color: #F8F8F8;
+  border-radius: 50%;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .result-icon.incorrect:before {
+  content: 'J';
+  border-color: #CC4233;
+  background-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .result-icon.correct:before {
+  border-color: #598000;
+  background-color: #598000;
+  content: '6';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .result-label {
+  line-height: 1.5;
+  margin-left: 47px;
+  font-weight: bold;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .question-explanation {
+  background-color: rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  border-radius: 3px;
+  line-height: 1.5;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox:checked + label {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox:checked + label .answer-checkbox {
+  border-color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox:checked + label .answer-checkbox.val-icon-checkmark:before {
+  display: block;
+  color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox.incorrect-answer + label {
+  border-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox.correct-answer + label {
+  border-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio.val-icon-radio:before {
+  color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.correct-answer + label .val-icon-checkmark, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.correct-answer:checked + label .val-icon-checkmark {
+  border-color: #598000;
+  background-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.correct-answer + label .answer-checkbox.val-icon-checkmark:before, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.correct-answer:checked + label .answer-checkbox.val-icon-checkmark:before {
+  display: block;
+  color: #FFF;
+  margin: 1px;
+  background-color: transparent;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.correct-answer + label .val-icon-checkmark:before {
+  content: '6';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.incorrect-answer + label .val-icon-checkmark:before {
+  content: 'J';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox + label .answer-checkbox {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox:checked + label {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox:checked + label .answer-checkbox {
+  border-color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox:checked + label .answer-checkbox.val-icon-checkmark:before {
+  display: block;
+  color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox.incorrect-answer + label {
+  border-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=checkbox].checkbox.correct-answer + label {
+  border-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio.val-icon-radio:before {
+  color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.incorrect-answer + label .val-icon-checkmark, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.incorrect-answer:checked + label .val-icon-checkmark {
+  border-color: #CC4233;
+  background-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.incorrect-answer + label .answer-checkbox.val-icon-checkmark:before, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.incorrect-answer:checked + label .answer-checkbox.val-icon-checkmark:before {
+  display: block;
+  color: #FFF;
+  margin: 1px;
+  background-color: transparent;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.correct-answer + label .val-icon-checkmark:before {
+  content: '6';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox.incorrect-answer + label .val-icon-checkmark:before {
+  content: 'J';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=checkbox].checkbox + label .answer-checkbox {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio {
+  border-color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio.val-icon-radio:before {
+  display: block;
+  color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio.incorrect-answer + label {
+  border-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio.correct-answer + label {
+  border-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio.val-icon-radio:before {
+  color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.correct-answer + label .val-icon-radio, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.correct-answer:checked + label .val-icon-radio {
+  border-color: #598000;
+  background-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.correct-answer + label .answer-radio.val-icon-radio:before, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.correct-answer:checked + label .answer-radio.val-icon-radio:before {
+  display: block;
+  color: #FFF;
+  margin: 1px;
+  background-color: transparent;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.correct-answer + label .val-icon-radio:before {
+  content: '6';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.incorrect-answer + label .val-icon-radio:before {
+  content: 'J';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio + label .answer-radio {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio {
+  border-color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio.val-icon-radio:before {
+  display: block;
+  color: #2c2c2c;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio.incorrect-answer + label {
+  border-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio.correct-answer + label {
+  border-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question .answers-options input[type=radio].radio:checked + label .answer-radio.val-icon-radio:before {
+  color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.incorrect-answer + label .val-icon-radio, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.incorrect-answer:checked + label .val-icon-radio {
+  border-color: #CC4233;
+  background-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.incorrect-answer + label .answer-radio.val-icon-radio:before, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.incorrect-answer:checked + label .answer-radio.val-icon-radio:before {
+  display: block;
+  color: #FFF;
+  margin: 1px;
+  background-color: transparent;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.correct-answer + label .val-icon-radio:before {
+  content: '6';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio.incorrect-answer + label .val-icon-radio:before {
+  content: 'J';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .valamis-question.answers input[type=radio].radio + label .answer-radio {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.highlight-previous-position {
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.highlight-previous-position > span {
+  visibility: hidden;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.dragging-answer-item, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item:hover {
+  border: 1px solid #2974A6;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.dragging-answer-item {
+  z-index: 99999;
+  -ms-transform: rotate(-2deg);
+      transform: rotate(-2deg);
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.incorrect-answer {
+  border-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.incorrect-answer .val-icon {
+  border-color: #CC4233;
+  background-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.incorrect-answer .val-icon:before {
+  content: 'J';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.correct-answer {
+  border-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.correct-answer .val-icon {
+  border-color: #598000;
+  background-color: #598000;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.correct-answer .val-icon:before {
+  content: '6';
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.correct-answer .val-icon, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.incorrect-answer .val-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 13px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.correct-answer .val-icon:before, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item.incorrect-answer .val-icon:before {
+  color: #FFF;
+  font-weight: normal;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .categorization-answer-item .question-feedback {
+  margin-top: 40px;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers {
+  display: none;
+  text-align: left;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers .feedback-block-label {
+  font-weight: bold;
+  margin: 40px 0 20px 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers .categorizationAnswerBoxes th, .valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers .categorizationAnswerBoxes td {
+  border: none;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers .answers-table {
+  margin: 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers .answers-table tr td:first-child {
+  padding-left: 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .answers .answers-table tr td:last-child {
+  padding-right: 0;
+}
+
+.valamis .reveal-wrapper .rj-element.question-element.lesson-element .invisible-font {
+  position: absolute;
+}
+
+.valamis .reveal-wrapper.phone .categorization-question,
+.valamis .reveal-wrapper.phone .matching-question, .valamis .reveal-wrapper.tablet .categorization-question,
+.valamis .reveal-wrapper.tablet .matching-question {
+  min-width: 320px;
+}
+
+.valamis .reveal-wrapper.phone .categorization-question .answers-options .phone-row,
+.valamis .reveal-wrapper.phone .matching-question .answers-options .phone-row, .valamis .reveal-wrapper.tablet .categorization-question .answers-options .phone-row,
+.valamis .reveal-wrapper.tablet .matching-question .answers-options .phone-row {
+  display: table-row;
+}
+
+.valamis .reveal-wrapper.phone .categorization-question .answers-options .phone-row .category-item,
+.valamis .reveal-wrapper.phone .matching-question .answers-options .phone-row .category-item, .valamis .reveal-wrapper.tablet .categorization-question .answers-options .phone-row .category-item,
+.valamis .reveal-wrapper.tablet .matching-question .answers-options .phone-row .category-item {
+  margin-right: 0px;
+}
+
+.valamis .reveal-wrapper .val-progress-bar {
+  line-height: inherit;
+  position: relative;
+  display: inline-block;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress {
+  background-color: #DEDEDE;
+  height: 6px;
+  width: 100px;
+  border-radius: 2px;
+  position: relative;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress span {
+  display: inline-block;
+  border-radius: 2px 0 0 2px;
+  height: 6px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress span.full-progress-bar {
+  border-radius: 2px;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress span[style^="width: 100%;"], .valamis .reveal-wrapper .val-progress-bar .val-progress span[style^="width:100%;"] {
+  border-radius: 2px;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress.failed span {
+  background-color: #CC4233;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress.inprogress span {
+  background-color: #f7ac1d;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-progress.success span {
+  background-color: #598000;
+}
+
+.valamis .reveal-wrapper .val-progress-bar.wide {
+  display: block;
+}
+
+.valamis .reveal-wrapper .val-progress-bar.wide .val-progress {
+  width: 100%;
+}
+
+.valamis .reveal-wrapper .val-progress-bar .val-percentage {
+  font-weight: bold;
+}
+
+.valamis .reveal-wrapper .val-legend-block {
+  height: 15px;
+  width: 15px;
+  border-radius: 2px;
+  background: #D1D1D1;
+  display: inline-block;
+  vertical-align: text-top;
+  margin-left: 20px;
+}
+
+.valamis .reveal-wrapper .val-legend-block:first-child {
+  margin-left: 0;
+}
+
+.valamis .reveal-wrapper .val-legend-block.success {
+  background: #598000;
+}
+
+.valamis .reveal-wrapper .val-legend-block.inprogress {
+  background: #f7ac1d;
+}
+
+.valamis .reveal-wrapper .val-legend-block.failed {
+  background: #CC4233;
+}
+
+.valamis .reveal-wrapper .val-progress-chart {
+  width: 100%;
+  height: 40px;
+  position: relative;
+}
+
+.valamis .reveal-wrapper .val-progress-chart div {
+  height: 4px;
+  margin-bottom: 6px;
+  border-radius: 1px;
+  background: #D1D1D1;
+}
+
+.valamis .reveal-wrapper .val-progress-chart div:first-child {
+  margin-top: 3px;
+}
+
+.valamis .reveal-wrapper .val-progress-chart div.progress-success {
+  background: #598000;
+}
+
+.valamis .reveal-wrapper .val-progress-chart div.progress-inprogress {
+  background: #f7ac1d;
+}
+
+.valamis .reveal-wrapper .val-progress-chart div.progress-failed {
+  background: #CC4233;
+}
+
+.valamis #show-package-duration {
+  height: 30px;
+  width: 30px;
+  background-color: #1C1C1C;
+  border-radius: 3px;
+  opacity: 0.5;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+      flex-direction: row;
+  -ms-flex-pack: center;
+      justify-content: center;
+  position: absolute;
+  top: auto;
+  bottom: 30px;
+  left: 30px;
+}
+
+.valamis #show-package-duration.active {
+  width: 83px;
+}
+
+.valamis #show-package-duration .val-icon-clock {
+  color: #AAA;
+  padding-top: 5px;
+}
+
+.valamis #show-package-duration .val-icon-clock.active {
+  color: #FFF;
+}
+
+.valamis #show-package-duration #packageDuration {
+  font-size: 11px;
+  font-weight: bold;
+  color: #FFF;
+  padding: 10px 0px 0px 5px;
+}
+
+@media (max-width: 376px) {
+  .valamis #show-package-duration {
+    bottom: 20px;
+    left: 20px;
+  }
+}

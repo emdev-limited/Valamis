@@ -20,11 +20,10 @@ class AllCoursesView extends GenericPortlet with PortletBase {
     ) ++ securityScope.data
 
     implicit val out = response.getWriter
-    sendTextFile("/templates/2.0/all_courses_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
-    sendTextFile("/templates/2.0/paginator.html")
-    sendTextFile("/templates/2.0/file_uploader.html")
-    sendTextFile("/templates/2.0/image_gallery_templates.html")
+    sendTextFile("/templates/all_courses_templates.html")
+    sendTextFile("/templates/common_templates.html")
+    sendTextFile("/templates/paginator.html")
+    sendTextFile("/templates/file_uploader.html")
     sendMustacheFile(data, "all_courses.html")
   }
 }

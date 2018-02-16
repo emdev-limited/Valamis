@@ -1,157 +1,163 @@
 package com.arcusys.valamis.persistence.impl.slide
 
-import com.arcusys.valamis.model.SkipTake
 import com.arcusys.valamis.persistence.common.DbNameUtils._
-import com.arcusys.valamis.persistence.common.SlickProfile
-import com.arcusys.valamis.slide.model.{SlideSetEntity, SlideSetModel}
+import com.arcusys.valamis.persistence.impl.slide.schema.SlideTableComponent
+import com.arcusys.valamis.slide.model.SlideSet
 import com.arcusys.valamis.slide.storage.SlideSetRepository
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
+import org.joda.time.DateTime
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
-
-class SlideSetRepositoryImpl (db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
+class SlideSetRepositoryImpl (val db: JdbcBackend#DatabaseDef, val driver: JdbcProfile)
   extends SlideSetRepository
-    with SlickProfile
-  with SlideTableComponent {
+    with SlideTableComponent
+    with DatabaseLayer
+    with SlickProfile {
 
-  import driver.simple._
+  import driver.api._
 
-  override def getCount = db.withSession { implicit session =>
-    slideSets.length.run
+  override def getById(id: Long): Option[SlideSet] = execSync {
+    slideSets.filterById(id).result.headOption
   }
 
-  override def getById(id: Long) = db.withSession { implicit session =>
-    slideSets.filter(_.id === id).firstOption
+  override def getByActivityId(activityId: String): Seq[SlideSet] = execSync {
+    slideSets.filterByActivityId(activityId).result
   }
 
-  override def getByActivityId(activityId: String): List[SlideSetEntity] = db.withSession { implicit session =>
-    slideSets.filter(_.activityId === activityId).list
-  }
-
-  override def getByVersion(activityId: String, version: Double): List[SlideSetEntity] = db.withSession { implicit session =>
-    slideSets.filter(x => x.activityId === activityId && x.version < version).list
-  }
-
-  def getLastWithCount(
-    courseId: Long,
-    titleFilter: Option[String],
-    orderByAsc: Boolean,
-    skipTake: SkipTake): List[(SlideSetEntity, Int)] = db.withSession { implicit s =>
-
-    val slideSetQuery = slideSets
-      .filterByCourseId(courseId)
-      .filter(_.isTemplate === false)
-      .filterByTitle(titleFilter)
-
-    val activityToVersion = slideSetQuery
-      .groupBy(_.activityId)
-      .map { case (activityId, x) => activityId -> x.map(_.version).max }
-
-    val resultQuery =
-      (for {
-        s <- slideSetQuery
-        a <- activityToVersion
-        if s.activityId === a._1 && s.version === a._2
-      } yield s)
-        .sortBy(x => if (orderByAsc) x.title.asc else x.title.desc)
-        .drop(skipTake.skip)
-        .take(skipTake.take)
-        .map { set =>
-          val count = slides.filter(x => x.slideSetId === set.id && x.isTemplate === false).length
-          (set, count)
-        }
-
-    resultQuery.list
-  }
-
-  override def getTemplatesWithCount(courseId: Long): List[(SlideSetEntity, Int)] = db.withSession { implicit s =>
-    slideSets.filterByCourseId(courseId)
-      .filter(_.isTemplate)
-      .map { set =>
-        val count = slides.filter(x => x.slideSetId === set.id && x.isTemplate === false).length
-        (set, count)
-      }.list
-  }
-
-  override def getCount(titleFilter: Option[String], courseId: Long): Int =
-    db.withSession { implicit session =>
-      val slideSetQuery = slideSets
-        .filterByCourseId(courseId)
-        .filter(_.isTemplate === false)
-        .filterByTitle(titleFilter)
-
-      val activityToVersion = slideSetQuery
-        .groupBy(_.activityId)
-        .map { case (activityId, x) => activityId -> x.map(_.version).max }
-
-      val resultQuery = for {
-        s <- slideSetQuery
-        a <- activityToVersion
-        if s.activityId === a._1 && s.version === a._2
-      } yield s
-
-      resultQuery.length.run
-    }
-
-  override def delete(id: Long): Unit = db.withSession { implicit session =>
-    slideSets.filter(_.id === id).delete
-  }
-
-  override def update(model: SlideSetModel) = db.withSession { implicit session =>
-    val entity = toEntity(model)
+  override def getByVersion(activityId: String, version: Double): Seq[SlideSet] = execSync {
     slideSets
-      .filter(_.id === model.id.get)
-      .map(_.update)
-      .update(entity)
-
-    slideSets.filter(_.id === model.id.get).first
+      .filterByActivityId(activityId)
+      .filter(_.version < version)
+      .result
   }
 
-  def updateThemeId(oldThemeId: Long, newThemeId: Option[Long]) = db.withSession { implicit session =>
-      slideSets
-        .filter(_.themeId === oldThemeId)
-        .map(_.themeId)
-        .update(newThemeId)
+  override def getByCourseId(courseId: Long, titleFilter: Option[String]): Seq[SlideSet] = execSync {
+    slideSets.getByCourseIdQuery(courseId, titleFilter).result
+  }
+
+  override def getTemplates: Seq[SlideSet] = execSync {
+    slideSets.getTemplatesQuery.result
+  }
+
+  override def delete(id: Long): Unit = execSync {
+    slideSets.filterById(id).delete
+  }
+
+  def update(id: Long, title: String, description: String): Unit = execSync {
+    slideSets.filterById(id)
+      .map(s => ( s.title, s.description))
+      .update(title, description)
+  }
+
+  def update(id: Long,
+             isSelectedContinuity: Boolean,
+             themeId: Option[Long],
+             duration: Option[Long],
+             scoreLimit: Option[Double],
+             playerTitle: String,
+             topDownNavigation: Boolean,
+             status: String,
+             version: Double,
+             oneAnswerAttempt: Boolean,
+             requiredReview: Boolean): Unit = execSync {
+    slideSets.filterById(id)
+      .map(s => (
+        s.isSelectedContinuity,
+        s.themeId,
+        s.duration,
+        s.scoreLimit,
+        s.playerTitle,
+        s.topDownNavigation,
+        s.status,
+        s.version,
+        s.modifiedDate,
+        s.oneAnswerAttempt,
+        s.requiredReview))
+      .update(
+        isSelectedContinuity,
+        themeId,
+        duration,
+        scoreLimit,
+        playerTitle,
+        topDownNavigation,
+        status,
+        version,
+        new DateTime(),
+        oneAnswerAttempt,
+        requiredReview)
+  }
+
+  override def updateLockUser(slideSetId: Long, userId: Option[Long], date: Option[DateTime]): Unit =
+    execSync {
+      slideSets.filterById(slideSetId)
+        .map(s => (
+          s.lockUserId,
+          s.lockDate))
+        .update(userId, date)
     }
 
-  override def create(model: SlideSetModel) = db.withSession { implicit session =>
-    val entity = toEntity(model)
-    val id = slideSets.returning(slideSets.map(_.id)).insert(entity)
-    slideSets.filter(_.id === id).first
+
+  override def updateLogo(id: Long, name: Option[String]): Unit = execSync {
+    slideSets
+      .filterById(id)
+      .map(_.logo)
+      .update(name)
   }
 
-  private def toEntity(from: SlideSetModel) =
-    SlideSetEntity(
-      from.id,
-      from.title,
-      from.description,
-      from.courseId,
-      from.logo,
-      from.isTemplate,
-      from.isSelectedContinuity,
-      from.themeId,
-      from.duration,
-      from.scoreLimit,
-      from.playerTitle,
-      from.topDownNavigation,
-      from.activityId,
-      from.status,
-      from.version,
-      from.modifiedDate,
-      from.oneAnswerAttempt)
+  def updateStatus(id: Long, status: String): Unit = execSync {
+    slideSets
+      .filterById(id)
+      .map(_.status)
+      .update(status)
+  }
+
+  def updateStatusWithDate(id: Long, status: String, date: DateTime): Unit = execSync {
+    slideSets
+      .filterById(id)
+      .map(s=> (s.status, s.modifiedDate))
+      .update(status, date)
+  }
+
+  override def create(slideSet: SlideSet): SlideSet = execSync {
+    (slideSets returning slideSets.map(_.id)).into { (row,newId) =>
+      row.copy(id = newId)
+    } += slideSet
+  }
 
   implicit class SlideSetQueryExt(query: Query[SlideSetTable, SlideSetTable#TableElementType, Seq]) {
 
-    private val EmptyCourse = -1L
+    private lazy val EmptyCourse = -1L
+    private type SlideSetQuery = Query[SlideSetTable, SlideSet, Seq]
 
-    def filterByCourseId(courseId: Long) = query.filter(s => s.courseId === courseId || s.courseId === EmptyCourse)
+    def filterByCourseId(courseId: Long): SlideSetQuery =
+      query.filter(s => s.courseId === courseId || s.courseId === EmptyCourse)
 
-    def filterByTitle(filter: Option[String]) = filter match {
+    def filterById(id: Long): SlideSetQuery = query.filter(_.id === id)
+
+    def filterByActivityId(activityId: String): SlideSetQuery = query.filter(_.activityId === activityId)
+
+    def filterByTemplate(isTemplate: Boolean): SlideSetQuery = query.filter(_.isTemplate === isTemplate)
+
+    def filterByTitle(filter: Option[String]): SlideSetQuery = filter match {
       case Some(title) =>
         val titlePattern = likePattern(title.toLowerCase)
         query.filter(_.title.toLowerCase like titlePattern)
       case _ =>
         query
     }
+
+    def getTemplatesQuery: SlideSetQueryExt#SlideSetQuery =
+      query
+        .filterByCourseId(0L)
+        .filterByTemplate(true)
+
+    def getByCourseIdQuery(courseId: Long, titleFilter: Option[String]): SlideSetQueryExt#SlideSetQuery =
+      query
+        .filterByCourseId(courseId)
+        .filterByTemplate(false)
+        .filterByTitle(titleFilter)
   }
 }

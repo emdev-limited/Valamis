@@ -1,9 +1,11 @@
 package com.arcusys.valamis.lesson.tincan.service
 
+import java.io.InputStream
+
 import com.arcusys.valamis.file.storage.FileStorage
 import com.arcusys.valamis.lesson.tincan.model.TincanActivity
 import com.arcusys.valamis.lesson.tincan.storage.{LessonCategoryGoalTableComponent, TincanActivityTableComponent}
-import com.arcusys.valamis.lrs.service.util.TinCanActivityType
+import com.arcusys.valamis.lrssupport.lrs.service.util.TinCanActivityType
 import com.arcusys.valamis.persistence.common.SlickProfile
 
 import scala.slick.driver.JdbcProfile
@@ -30,18 +32,24 @@ abstract class TincanPackageServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
     getMainActivityId(lessonId).activityId
   }
 
-  override def getLessonIdByRootActivityId(activityId: String): Option[Long] = {
+  override def getLessonIdByRootActivityId(activityId: String): Seq[Long] = {
     db.withSession{implicit s =>
       tincanActivitiesTQ
         .filter(_.activityId === activityId)
         .map(_.lessonId)
-        .firstOption
+        .list
     }
   }
 
   override def addActivities(activities: Seq[TincanActivity]): Unit = {
     db.withTransaction { implicit s =>
       tincanActivitiesTQ ++= activities
+    }
+  }
+
+  override def addActivity(activity: TincanActivity): Unit = {
+    db.withTransaction { implicit s =>
+      tincanActivitiesTQ += activity
     }
   }
 
@@ -92,6 +100,31 @@ abstract class TincanPackageServiceImpl(val db: JdbcBackend#DatabaseDef, val dri
       launchActivities.headOption
     } getOrElse {
       throw new Exception(s"no course main activity for tincan package $lessonId")
+    }
+  }
+
+  def updateActivities(lessonId: Long, manifest: InputStream): Unit = {
+    val activities = ManifestReader.getActivities(lessonId, manifest)
+
+    db.withTransaction { implicit s =>
+      tincanActivitiesTQ.filter(_.lessonId === lessonId).delete
+      tincanActivitiesTQ ++= activities
+    }
+  }
+
+  def getActivities(lessonId: Long): Seq[TincanActivity] = {
+    db.withTransaction { implicit s =>
+      tincanActivitiesTQ.filter(_.lessonId === lessonId).run
+    }
+  }
+
+  def hasActivities(lessonId: Long, activityType: TinCanActivityType.Value*): Boolean = {
+    val types = activityType.map(_.toString)
+
+    db.withTransaction { implicit s =>
+      tincanActivitiesTQ
+        .filter(a => a.lessonId === lessonId && a.activityType.inSet(types))
+        .firstOption.isDefined // .exists is not working with LR PACL
     }
   }
 }

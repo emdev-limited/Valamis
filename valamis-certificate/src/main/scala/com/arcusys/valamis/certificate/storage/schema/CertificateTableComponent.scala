@@ -24,7 +24,8 @@ trait CertificateTableComponent extends LongKeyTableComponent with TypeMapper { 
     def validPeriodType = column[PeriodTypes.PeriodType]("PERIOD_TPE")
     def validPeriod = column[Int]("VALID_PERIOD")
     def createdAt = column[DateTime]("CREATED_AT")
-    def isPublished = column[Boolean]("IS_PUBLISHED")
+    def activationDate = column[Option[DateTime]]("ACTIVATION_DATE")
+    def isActive = column[Boolean]("IS_ACTIVE")
     def scope = column[Option[Long]]("SCOPE")
 
     def * = (
@@ -39,7 +40,8 @@ trait CertificateTableComponent extends LongKeyTableComponent with TypeMapper { 
       validPeriodType,
       validPeriod,
       createdAt,
-      isPublished,
+      activationDate,
+      isActive,
       scope) <> (Certificate.tupled, Certificate.unapply)
 
     def update = (
@@ -53,7 +55,8 @@ trait CertificateTableComponent extends LongKeyTableComponent with TypeMapper { 
       validPeriodType,
       validPeriod,
       createdAt,
-      isPublished,
+      activationDate,
+      isActive,
       scope) <> (tupleToEntity, entityToTuple)
 
     def entityToTuple(entity: TableElementType) = {

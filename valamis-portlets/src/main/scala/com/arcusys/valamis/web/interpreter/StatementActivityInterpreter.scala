@@ -4,10 +4,12 @@ import java.util.UUID
 
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.constants.StringPoolHelper
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.learn.liferay.{LBaseSocialActivityInterpreter, LogFactoryHelper}
 import com.arcusys.valamis.lrs.api.FailureRequestException
 import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.service.{LrsClientManager, LrsRegistration}
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.lrs.tincan.{Activity, AuthorizationScope, Statement}
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.arcusys.valamis.web.configuration.ioc.Configuration
@@ -35,6 +37,7 @@ class StatementActivityInterpreter extends LBaseSocialActivityInterpreter with I
 
     //activity extra data contains statementId or statement json
     val statementOpt: Option[Statement] = if (isUUID(activity.getExtraData)) {
+      implicit val companyId = context.getCompanyId
       getStatementById(UUID.fromString(activity.getExtraData))
     } else {
       Some(JsonHelper.fromJson[Statement](activity.getExtraData, new StatementSerializer))
@@ -72,8 +75,9 @@ class StatementActivityInterpreter extends LBaseSocialActivityInterpreter with I
     text.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
   }
 
-  private def getStatementById(statementId: UUID) = {
-    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All).auth
+  private def getStatementById(statementId: UUID)(implicit companyId: Long) = {
+    val lrsAuth = lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+      host = PortalUtilHelper.getLocalHostUrl).auth
 
     lrsReader.statementApi(_.getStatementById(statementId), Some(lrsAuth)) match {
       case Failure(e: FailureRequestException) if e.responseCode == 404 =>

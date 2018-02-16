@@ -20,7 +20,7 @@ trait UserLessonResultService {
 
   def isLessonFinished(user: LUser, lesson: Lesson): Boolean
 
-  def getLastLessons(user: LUser, count: Int): Seq[(UserLessonResult, Lesson)]
+  def getLastLessons(user: LUser, courseIds: Seq[Long], count: Int): Seq[(UserLessonResult, Lesson)]
 
   def getUserResults(user: LUser, courseId: Long): Seq[UserLessonResult]
 
@@ -29,4 +29,13 @@ trait UserLessonResultService {
   def getLastResult(userId: Long): Option[UserLessonResult]
 
   def get(users: Seq[LUser], lessons: Seq[Lesson]): Seq[UserLessonResult]
+
+  def getAttemptedTotal(lessonsIds: Seq[Long],
+                        isFinished: Boolean,
+                        limit: Int,
+                        offset: Int): Seq[(Long, Int)]
+
+  def getAttemptedTotal(lessonsIds: Seq[Long],
+                        userIds: Seq[Long],
+                        isFinished: Boolean): Seq[(Long, Int)]
 }

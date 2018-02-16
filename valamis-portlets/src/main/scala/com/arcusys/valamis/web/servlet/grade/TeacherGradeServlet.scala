@@ -3,12 +3,13 @@ package com.arcusys.valamis.web.servlet.grade
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.learn.liferay.util.PortletName
 import com.arcusys.valamis.gradebook.model.LessonWithGrades
-import com.arcusys.valamis.gradebook.service.TeacherCourseGradeService
+import com.arcusys.valamis.gradebook.service.{StatementService, TeacherCourseGradeService}
 import com.arcusys.valamis.web.portlet.base.ViewAllPermission
 import com.arcusys.valamis.web.servlet.base.ScalatraPermissionUtil
 import com.arcusys.valamis.web.servlet.grade.notification.GradebookNotificationHelper
 import com.arcusys.valamis.web.servlet.base.BaseJsonApiController
 import com.arcusys.valamis.lesson.service.{GradeVerifier, LessonService, TeacherLessonGradeService, UserLessonResultService}
+import org.scalatra.{BadRequest, NotFound}
 
 class TeacherGradeServlet extends BaseJsonApiController {
 
@@ -17,34 +18,58 @@ class TeacherGradeServlet extends BaseJsonApiController {
   lazy val lessonService = inject[LessonService]
   lazy val lessonResultService = inject[UserLessonResultService]
   lazy val userService = UserLocalServiceHelper()
-  lazy val gradeVerifier = new GradeVerifier
   lazy val gradebookFacade = inject[GradebookFacadeContract]
+  lazy val gradebookNotifications = inject[GradebookNotificationHelper]
+  lazy val statementService = inject[StatementService]
 
   def userId = params.as[Long]("userId")
+
   def courseId = params.as[Long]("courseId")
+
   def studyCourseId = params.as[Long]("studyCourseId")
+
   def lessonId = params.as[Long]("lessonId")
+
   def permissionUtil = new ScalatraPermissionUtil(this)
 
-  post("/teacher-grades/lesson/:lessonId/user/:userId(/)") {
+  post("/teacher-grades/lesson/:lessonId/user/:userId/comment(/)") {
     permissionUtil.requirePermissionApi(ViewAllPermission, PortletName.Gradebook)
-    val grade = gradeVerifier.verify(params.getAs[Float]("grade"))
+
+    val comment = params.get("comment") getOrElse halt(BadRequest("Need to fill comment"))
+    lessonGradeService.setComment(userId, lessonId, comment)
+  }
+
+  post("/teacher-grades/lesson/:lessonId/user/:userId/grade(/)") {
+    permissionUtil.requirePermissionApi(ViewAllPermission, PortletName.Gradebook)
+
+    val lesson = lessonService.getLesson(lessonId).getOrElse(halt(NotFound(s"There is no lesson with $lessonId")))
+    val grade = params.as[Float]("grade")
     val comment = params.get("comment")
 
+    GradeVerifier.verify(grade)
     lessonGradeService.set(userId, lessonId, grade, comment)
 
-    GradebookNotificationHelper.sendPackageGradeNotification(
+    val currentUserId = getUserId
+    try {
+      statementService.sendStatementUserReceivesGrade(userId, currentUserId, lesson, grade, comment)
+    } catch {
+      case e: Throwable => log.error("Failed to send statement " +
+        s"when an instructor puts the grade for the Lesson to the User with id=$userId", e)
+    }
+
+    gradebookNotifications.sendPackageGradeNotification(
       courseId,
-      getUserId,
+      currentUserId,
       userId,
       grade,
-      lessonService.getLesson(lessonId).map(_.title).getOrElse(""),
+      lesson,
       request
     )
-    val lesson = lessonService.getLessonRequired(lessonId)
-    val user = UserLocalServiceHelper().getUser(userId)
+
+    val user = getUser
     val lessonResult = lessonResultService.get(lesson, user)
-    val state = lesson.getLessonStatus(lessonResult, grade)
+    val state = lesson.getLessonStatus(lessonResult, Some(grade))
+
     LessonWithGrades(
       lesson,
       user,
@@ -55,15 +80,23 @@ class TeacherGradeServlet extends BaseJsonApiController {
     )
   }
 
-  post("/teacher-grades/course/:courseId/user/:userId(/)") {
+  post("/teacher-grades/course/:courseId/user/:userId/comment(/)") {
     permissionUtil.requirePermissionApi(ViewAllPermission, PortletName.Gradebook)
 
-    val grade = gradeVerifier.verify(params.getAs[Float]("grade"))
+    val comment = params.get("comment") getOrElse halt(BadRequest("Need to fill comment"))
+    courseGradeService.setComment(courseId, userId, comment, getCompanyId)
+  }
+
+  post("/teacher-grades/course/:courseId/user/:userId/grade(/)") {
+    permissionUtil.requirePermissionApi(ViewAllPermission, PortletName.Gradebook)
+
+    val grade = params.as[Float]("grade")
     val comment = params.get("comment")
 
+    GradeVerifier.verify(grade)
     courseGradeService.set(courseId, userId, grade, comment, getCompanyId)
 
-    GradebookNotificationHelper.sendTotalGradeNotification(
+    gradebookNotifications.sendTotalGradeNotification(
       courseId,
       getUserId,
       userId,
@@ -72,11 +105,4 @@ class TeacherGradeServlet extends BaseJsonApiController {
     )
   }
 
-
-  get("/teacher-grades/course/:courseId/user/:userId/result(/)") {
-    permissionUtil.requirePermissionApi(ViewAllPermission, PortletName.Gradebook)
-
-    val user = userService.getUser(userId)
-    gradebookFacade.getGradesForStudent(userId, studyCourseId, -1, 0, false)
-  }
 }

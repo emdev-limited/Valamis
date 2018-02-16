@@ -1,0 +1,28 @@
+<script type="text/html" id="lrs2ActivityMapperControls">
+    <button class="button medium primary add-new js-add-new">{{addNewLabel}}</button>
+</script>
+
+<script type="text/html" id="activitySocialMapperRow">
+    <td class="activity-rule-name">
+        <div class="js-title-viewer">
+            <span class="title-view">{{title}}</span>
+            <button class="shift-right js-title-edit button valamis medium neutral val-icon-edit no-text">{{editLabel}}</button>
+        </div>
+        <div class="js-title-editor hidden">
+            <input type="text" class="mapping-title" value="{{title}}"/>
+            <button class="button medium primary shift-right js-title-save">{{saveLabel}}</button>
+        </div>
+    </td>
+
+    <td class="activity-verb">
+        <div class="shift-left">
+            <input type="text" class="js-verb-filter" placeholder="{{verbIdLabel}}" value="{{mappedVerb}}"/>
+        </div>
+        <div class="shift-left">
+            <input type="text" class="js-activity-filter" placeholder="{{activityIdLabel}}" value="{{mappedActivity}}"/>
+        </div>
+    </td>
+    <td>
+        <button class="button medium neutral js-filter-delete">{{deleteLabel}}</button>
+    </td>
+</script>

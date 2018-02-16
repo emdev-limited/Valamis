@@ -1,10 +1,12 @@
 package com.arcusys.valamis.web.servlet.admin
 
-import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.lrs.service.LrsRegistration
+import javax.servlet.http.HttpServletResponse
+
+import com.arcusys.learn.liferay.util.{PortalUtilHelper, PortletName}
+import com.arcusys.valamis.lrssupport.lrs.service.LrsRegistration
 import com.arcusys.valamis.lrs.tincan.AuthorizationScope
-import com.arcusys.valamis.lrsEndpoint.model._
-import com.arcusys.valamis.lrsEndpoint.service.LrsEndpointService
+import com.arcusys.valamis.lrssupport.lrsEndpoint.model.{AuthType, AuthorizationType, LrsEndpoint}
+import com.arcusys.valamis.lrssupport.lrsEndpoint.service.LrsEndpointService
 import com.arcusys.valamis.settings.service.SettingService
 import com.arcusys.valamis.web.portlet.base.ViewPermission
 import com.arcusys.valamis.web.servlet.base.{BaseApiController, PermissionUtil}
@@ -15,13 +17,32 @@ class AdminServlet extends BaseApiController {
   lazy val settingsManager = inject[SettingService]
   lazy val lrsRegistration = inject[LrsRegistration]
 
-  get("/administering/TincanLrsSettings") {
-    jsonAction(lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All, Some(request)))
+  private def adminRequest = AdminRequest(this)
+
+  get("/administering/settings/lrs(/)") {
+    implicit val companyId = getCompanyId
+
+    jsonAction(lrsRegistration.getLrsEndpointInfo(AuthorizationScope.All,
+      Some(request),
+      PortalUtilHelper.getLocalHostUrl))
   }
 
-  post("/administering/TincanLrsSettings")(jsonAction {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.AdminView)
+  post("/administering/settings/:type(/)") {
+    requirePortletPermission(ViewPermission, PortletName.AdminView)
 
+    implicit val companyId = getCompanyId
+
+    adminRequest.settingType match {
+      case AdminSettingType.Issuer => updateIssuerSettings
+      case AdminSettingType.GoogleAPI => updateGoogleAPISettings
+      case AdminSettingType.Lti => updateLTISettings
+      case AdminSettingType.Lrs => updateLrsSettings
+      case AdminSettingType.BetaStudio => updateStudioSettings
+    }
+    halt(HttpServletResponse.SC_NO_CONTENT)
+  }
+
+  private def updateLrsSettings(implicit companyId: Long) = {
     val adminRequest = AdminRequest(this)
     if (!adminRequest.isExternalLrs) {
       val customHost = adminRequest.customHost
@@ -43,34 +64,30 @@ class AdminServlet extends BaseApiController {
       }
 
       endpointService.setEndpoint(endpoint)
-      true
     }
-  })
+  }
 
-  post("/administering(/)")(action {
-    PermissionUtil.requirePermissionApi(ViewPermission, PortletName.AdminView)
-
-    val adminRequest = AdminRequest(this)
-    adminRequest.actionType match {
-      case AdminActionType.UpdateIssuerSettings => updateIssuerSettings(adminRequest)
-      case AdminActionType.UpdateEmailSettings => updateEmailSettings(adminRequest)
-      case AdminActionType.UpdateGoogleAPISettings => updateGoogleAPISettings(adminRequest)
-    }
-  })
-
-  private def updateIssuerSettings(adminRequest: AdminRequest.Model) = {
+  private def updateIssuerSettings(implicit companyId: Long) = {
     settingsManager.setIssuerName(adminRequest.issuerName)
     settingsManager.setIssuerURL(adminRequest.issuerUrl)
     settingsManager.setIssuerEmail(adminRequest.issuerEmail)
   }
 
-  private def updateEmailSettings(adminRequest: AdminRequest.Model) = {
-    settingsManager.setSendMessages(adminRequest.sendMessages.toBoolean)
-  }
-
-  private def updateGoogleAPISettings(adminRequest: AdminRequest.Model) = {
+  private def updateGoogleAPISettings(implicit companyId: Long) = {
     settingsManager.setGoogleClientId(adminRequest.googleClientId)
     settingsManager.setGoogleAppId(adminRequest.googleAppId)
     settingsManager.setGoogleApiKey(adminRequest.googleApiKey)
+  }
+
+  private def updateLTISettings(implicit companyId: Long) = {
+    settingsManager.setLtiLaunchPresentationReturnUrl(adminRequest.ltiLaunchPresentationReturnUrl)
+    settingsManager.setLtiMessageType(adminRequest.ltiMessageType)
+    settingsManager.setLtiVersion(adminRequest.ltiVersion)
+    settingsManager.setLtiOauthSignatureMethod(adminRequest.ltiOauthSignatureMethod)
+    settingsManager.setLtiOauthVersion(adminRequest.ltiOauthVersion)
+  }
+
+  private def updateStudioSettings(implicit companyId: Long) = {
+    settingsManager.setBetaStudioUrl(adminRequest.betaStudioUrl)
   }
 }

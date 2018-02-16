@@ -22,4 +22,5 @@ object UploadContentType extends Enumeration {
   val ImportSlideSet = Value("import-slide-set")
   val ImportFromPdf = Value("import-from-pdf")
   val ImportFromPptx = Value("import-from-pptx")
+  val Audio = Value("audio")
 }

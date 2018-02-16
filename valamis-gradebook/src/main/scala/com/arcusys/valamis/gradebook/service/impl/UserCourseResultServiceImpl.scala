@@ -1,9 +1,9 @@
 package com.arcusys.valamis.gradebook.service.impl
 
-import com.arcusys.learn.liferay.LiferayClasses.LUser
 import com.arcusys.valamis.gradebook.model.UserCourseResult
 import com.arcusys.valamis.gradebook.service.{LessonGradeService, UserCourseResultService}
 import com.arcusys.valamis.gradebook.storage.CourseTableComponent
+import com.arcusys.valamis.lesson.service.LessonService
 import com.arcusys.valamis.persistence.common.SlickProfile
 
 import scala.slick.driver.JdbcProfile
@@ -17,22 +17,34 @@ abstract class UserCourseResultServiceImpl(val db: JdbcBackend#DatabaseDef, val 
   import driver.simple._
 
   def packageChecker: LessonGradeService
+  def lessonService: LessonService
 
-  def get(courseId: Long, userId: Long): Option[UserCourseResult] = db.withSession { implicit s =>
-    completedCourses
-      .filter(r => r.userId === userId && r.courseId === courseId)
-      .firstOption
+  private def get(courseId: Long, userId: Long): Option[UserCourseResult] = {
+    db.withSession { implicit s =>
+      completedCourses
+        .filter(r => r.userId === userId && r.courseId === courseId)
+        .firstOption
+    }
   }
 
-  override def isCompleted(courseId: Long, user: LUser, packagesCount: Option[Long]): Boolean = {
-    get(courseId, user.getUserId).map(_.isCompleted) match {
-      case Some(isCompleted) => isCompleted
-      case None =>
-        val isCompleted = packageChecker.isCourseCompleted(courseId, user.getUserId)
+  private def isCourseCompleted(courseId: Long, userId: Long, lessonsCount: Long): Boolean = {
+    get(courseId, userId).map(_.isCompleted) getOrElse {
+      //TODO: synchronize
+      val completedLessonCount = packageChecker.getCompletedLessonsCount(courseId, userId)
+      val isCompleted = completedLessonCount == lessonsCount
+      set(courseId, userId, isCompleted)
 
-        set(courseId, user.getUserId, isCompleted)
+      isCompleted
+    }
+  }
 
-        isCompleted
+  override def getCompletedCount(courseId: Long, userIds: Seq[Long]): Int = {
+    val lessonsCount  = lessonService.getCount(courseId)
+
+    if (lessonsCount <= 0) {
+      0 // no lessons, then nobody complete course
+    } else {
+      userIds.count(isCourseCompleted(courseId, _, lessonsCount))
     }
   }
 
@@ -45,7 +57,7 @@ abstract class UserCourseResultServiceImpl(val db: JdbcBackend#DatabaseDef, val 
         .update(isCompleted)
 
       if (updatedCount == 0) {
-        completedCourses += new UserCourseResult(courseId, userId, isCompleted)
+        completedCourses += UserCourseResult(courseId, userId, isCompleted)
       }
     }
   }

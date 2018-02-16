@@ -19,7 +19,6 @@ trait FilePolicy {
 
   before("/files(/)", FileActionType.withName(request.getParameter(FileRequest.Action)) == FileActionType.Delete)(
     PermissionUtil.requirePermissionApi(ModifyPermission,
-      PortletName.CertificateManager,
       PortletName.LessonManager,
       PortletName.ContentManager)
   )
@@ -27,7 +26,7 @@ trait FilePolicy {
   before("/files(/)", request.getMethod == "POST",
     UploadContentType.withName(request.getParameter(FileRequest.ContentType)) == UploadContentType.Base64Icon)(
     PermissionUtil.requirePermissionApi(
-      ModifyPermission, PortletName.CertificateManager, PortletName.LessonManager)
+      ModifyPermission, PortletName.LessonManager)
   )
 
   before("/files(/)", request.getMethod == "POST",
@@ -35,7 +34,7 @@ trait FilePolicy {
       .contains(UploadContentType.withName(request.getParameter(FileRequest.ContentType)))) {
     PermissionHelper.preparePermissionChecker(PermissionUtil.getUserId)
     PermissionUtil.requirePermissionApi(
-      Permission(ModifyPermission, List(PortletName.CertificateManager, PortletName.LessonManager)),
+      Permission(ModifyPermission, List(PortletName.LessonManager)),
       Permission(ViewPermission, List(PortletName.LessonStudio))
     )
   }
@@ -58,11 +57,6 @@ trait FilePolicy {
   )
 
   before("/files(/)", request.getMethod == "POST",
-    UploadContentType.withName(request.getParameter(FileRequest.ContentType)) == UploadContentType.ImportCertificate)(
-    PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
-  )
-
-  before("/files(/)", request.getMethod == "POST",
     UploadContentType.withName(request.getParameter(FileRequest.ContentType)) == UploadContentType.ImportSlideSet)(
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonStudio)
   )
@@ -71,10 +65,6 @@ trait FilePolicy {
     PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.LessonManager)
   )
 
-  before("/files/certificate/:id/logo", request.getMethod == "POST")(
-    PermissionUtil.requirePermissionApi(ModifyPermission, PortletName.CertificateManager)
-  )
-  
   before("/files/slideset/:id/logo", request.getMethod == "POST")(
     PermissionUtil.requirePermissionApi(ViewPermission, PortletName.LessonStudio)
   )

@@ -1,6 +1,7 @@
 package com.arcusys.valamis.web.servlet.content.response
 
 import com.arcusys.valamis.content.model._
+import com.arcusys.valamis.slide.model.SlideConstants
 
 trait ContentResponse {
   def contentType: String
@@ -62,7 +63,7 @@ object ContentResponseBuilder {
       rightAnswerText = "",
       wrongAnswerText = "",
       contentType = "plaintext",
-      uniqueId = "t_" + plainText.id.get)
+      uniqueId = SlideConstants.PlainTextIdPrefix + plainText.id.get)
   }
 
   def toResponse(node: ContentTreeNode): ContentResponse = {
@@ -115,7 +116,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = q.rightAnswerText,
         wrongAnswerText = q.wrongAnswerText,
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
 
       case q: TextQuestion => new QuestionResponse(
         id = q.id.get,
@@ -131,7 +132,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = q.rightAnswerText,
         wrongAnswerText = q.wrongAnswerText,
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
 
       case q: NumericQuestion => new QuestionResponse(
         id = q.id.get,
@@ -147,7 +148,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = q.rightAnswerText,
         wrongAnswerText = q.wrongAnswerText,
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
 
       case q: PositioningQuestion => new QuestionResponse(
         id = q.id.get,
@@ -163,7 +164,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = q.rightAnswerText,
         wrongAnswerText = q.wrongAnswerText,
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
 
       case q: MatchingQuestion => new QuestionResponse(
         id = q.id.get,
@@ -179,7 +180,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = q.rightAnswerText,
         wrongAnswerText = q.wrongAnswerText,
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
 
       case q: EssayQuestion => new QuestionResponse(
         id = q.id.get,
@@ -195,7 +196,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = "",
         wrongAnswerText = "",
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
 
       case q: CategorizationQuestion => new QuestionResponse(
         id = q.id.get,
@@ -211,7 +212,7 @@ object ContentResponseBuilder {
         courseId = q.courseId,
         rightAnswerText = q.rightAnswerText,
         wrongAnswerText = q.wrongAnswerText,
-        uniqueId = "q_" + q.id.get)
+        uniqueId = SlideConstants.QuestionIdPrefix + q.id.get)
     }
   }
 

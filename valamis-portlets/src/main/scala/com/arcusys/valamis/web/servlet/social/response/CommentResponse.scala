@@ -17,12 +17,21 @@ trait CommentConverter {
 
   private val prettyTime = new PrettyTime
 
-  protected def toResponse(from: Comment): CommentResponse =
+  protected def toResponse(from: Comment): CommentResponse = {
+    val user = userService.getWithDeleted(from.userId)
+
+    val userInfo = if (user.isDeleted) new UserInfo(user)
+    else {
+      userService.getById(from.userId)
+      new UserInfo(userService.getById(from.userId))
+    }
+
     CommentResponse(
       id = from.id.get,
-      user = new UserInfo(userService.getById(from.userId)),
+      userInfo,
       content = from.content,
       creationDate = prettyTime.format(from.creationDate.toDate),
       lastUpdateDate = from.lastUpdateDate.map(date => prettyTime.format(date.toDate))
     )
+  }
 }

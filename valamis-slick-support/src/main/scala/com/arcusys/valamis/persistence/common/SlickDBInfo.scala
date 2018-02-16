@@ -1,7 +1,7 @@
 package com.arcusys.valamis.persistence.common
 
-import scala.slick.driver.{JdbcDriver, JdbcProfile}
-import scala.slick.jdbc.JdbcBackend
+import slick.driver.{JdbcDriver, JdbcProfile}
+import slick.jdbc.JdbcBackend
 
 trait SlickDBInfo {
   def slickDriver: JdbcDriver

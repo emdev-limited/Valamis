@@ -1,0 +1,39 @@
+{
+  "certificateExpirationTracker": [
+    {
+      "id" : "expirationPeriod",
+      "data" : "datePeriod",
+      "options": [
+        {
+          "id": "periodNextWeek",
+          "days": 7,
+          "active": true
+        },
+        {
+          "id": "periodNextMonth",
+          "days": 30
+        },
+        {
+          "id": "periodNextYear",
+          "days": 365
+        },
+        {
+          "id": "periodCustom",
+          "days": 30
+        }
+      ],
+      "startDate" : "",
+      "endDate" : ""
+    },
+    {
+      "id" : "trackerScope",
+      "default": "instantScope",
+      "options": [
+        { "id": "currentCourse"
+        },
+        { "id": "instantScope"
+        }
+      ]
+    }
+  ]
+}

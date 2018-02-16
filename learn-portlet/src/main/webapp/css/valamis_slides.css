@@ -1,0 +1,1910 @@
+@charset "UTF-8";
+/**
+ *
+ * @author Lassi Vehviläinen, Yury Gatilin, Lubov Potakhina
+ *
+ * @name Valamis Sass Theme
+ *
+ *
+ */
+html, body {
+  overflow: visible;
+}
+
+body .overflow-hidden {
+  height: auto !important;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+.overflow-hidden #wrapper {
+  margin-top: 0 !important;
+}
+
+.valamis-slides {
+  /* Bitters 0.10.0
+ * http://bitters.bourbon.io
+ * Copyright 2013–2014 thoughtbot, inc.
+ * MIT License */
+  /* Neat 1.7.0
+ * http://neat.bourbon.io
+ * Copyright 2012-2014 thoughtbot, inc.
+ * MIT License */
+}
+
+.valamis-slides .shift-right .button:first-child {
+  margin-right: 0px;
+  margin-left: 10px;
+}
+
+.valamis-slides .button.slides-with-margin {
+  font-size: 20px;
+  margin: 4px 0px 4px 10px !important;
+}
+
+.valamis-slides .button.slides-with-margin > [class^="val-icon-"]:before,
+.valamis-slides .button.slides-with-margin > [class*=" val-icon-"]:before {
+  font-size: 1em;
+}
+
+.valamis-slides .button.no-margin {
+  margin: 0 !important;
+}
+
+.valamis-slides .button.slides-square {
+  width: 38px !important;
+  height: 38px;
+  border-radius: 0px;
+  border: none;
+}
+
+.valamis-slides .button.slides-medium {
+  border: none;
+  font-size: 20px;
+  height: 60px;
+  width: 60px;
+}
+
+.valamis-slides .button.slides-medium.no-text {
+  width: 60px;
+}
+
+.valamis-slides .button.slides-medium > [class^="val-icon-"]:before,
+.valamis-slides .button.slides-medium > [class*=" val-icon-"]:before {
+  font-size: 1em;
+  margin: 0;
+}
+
+.valamis-slides .button.slides-big {
+  border: none;
+  font-size: 30px;
+  height: 70px;
+  width: 70px;
+  line-height: 40px;
+}
+
+.valamis-slides .button.slides-big.no-text {
+  width: 70px;
+}
+
+.valamis-slides .button.slides-big > [class^="val-icon-"]:before,
+.valamis-slides .button.slides-big > [class*=" val-icon-"]:before {
+  width: 100%;
+  height: 40px;
+  font-size: 1em;
+  margin: 0;
+  line-height: 40px;
+}
+
+.valamis-slides .button.slides-big > span:nth-child(2) {
+  line-height: 20px;
+  height: 20px;
+  display: block;
+  font-size: 13px;
+}
+
+.valamis-slides .button.slides-primary {
+  border-color: #2974A6;
+  background: #2974A6;
+  color: white;
+}
+
+.valamis-slides .button.slides-round {
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+  text-indent: 1px;
+}
+
+.valamis-slides .button.slides-round > [class*="val-icon-"] {
+  display: inline;
+}
+
+.valamis-slides .button.slides-round > [class*="val-icon-"]:before {
+  display: inherit;
+  font-size: 22px;
+  line-height: 42px;
+}
+
+.valamis-slides .button.slides-round.right {
+  position: absolute;
+  top: 50%;
+  right: -60px;
+  margin-top: -20px;
+}
+
+.valamis-slides .button.slides-round.right.fixed {
+  position: fixed;
+  right: 15px;
+  margin-top: 20px;
+}
+
+.valamis-slides .button.slides-round.down {
+  position: absolute;
+  left: 50%;
+  bottom: -60px;
+  margin-left: -20px;
+  z-index: 100;
+}
+
+.valamis-slides .button.slides-round.down.fixed {
+  position: fixed;
+  bottom: 10px;
+  margin-left: 50px;
+}
+
+.valamis-slides .button.slides-dark-button {
+  background: #2c2c2c;
+  color: #AAA;
+  border-color: #2c2c2c;
+  border-bottom-style: inherit;
+}
+
+.valamis-slides .button.slides-dark-button > span {
+  color: #AAA;
+}
+
+.valamis-slides .button.slides-dark-button:hover, .valamis-slides .button.slides-dark-button.active-button {
+  background: #1C1C1C;
+}
+
+.valamis-slides .button.slides-dark-button:hover > span, .valamis-slides .button.slides-dark-button.active-button > span {
+  color: #FFF;
+}
+
+.valamis-slides .button.slides-dark-button.active-button {
+  background-color: #598000;
+  border-color: #598000;
+}
+
+.valamis-slides .button.slides-dark-button.active-button:hover {
+  background-color: #3E5900;
+}
+
+.valamis-slides .button.slides-gray-opacity {
+  background-color: #1C1C1C;
+  border: 0;
+  color: #AAA;
+  opacity: 0.6;
+}
+
+.valamis-slides .button.slides-gray-opacity:hover, .valamis-slides .button.slides-gray-opacity.active {
+  opacity: 0.95;
+}
+
+.valamis-slides .button.slides-dark {
+  background: #1C1C1C;
+  color: #AAA;
+  border-color: #1C1C1C;
+  border-radius: 0;
+}
+
+.valamis-slides .button.slides-dark > span {
+  background: transparent;
+}
+
+.valamis-slides .button.slides-dark:hover, .valamis-slides .button.slides-dark.active {
+  color: #FFF;
+}
+
+.valamis-slides .button.slides-dark.highlight {
+  color: #FFF;
+  position: relative;
+  z-index: 99999;
+}
+
+.valamis-slides .button.slides-medium-dark {
+  background: #1C1C1C;
+  color: #AAA;
+}
+
+.valamis-slides .button.slides-medium-dark:hover {
+  background: #121212;
+  color: #DEDEDE;
+}
+
+.valamis-slides .button.slides-big-dark > span:hover {
+  background: transparent;
+}
+
+.valamis-slides .button.slides-gray {
+  background: #3C3C3C;
+  border-color: #3C3C3C;
+  color: #DEDEDE;
+}
+
+.valamis-slides .button.slides-gray:hover {
+  background: #4C4C4C;
+  border-color: #4C4C4C;
+  color: #DEDEDE;
+}
+
+.valamis-slides .button.slides-gray.disabled {
+  color: #777;
+  cursor: default;
+}
+
+.valamis-slides .button.slides-gray.disabled:hover {
+  color: #777;
+  background: #3C3C3C;
+  border-color: #3C3C3C;
+}
+
+.valamis-slides .button.button-transparent {
+  background-color: transparent;
+}
+
+.valamis-slides .button.button-transparent.no-text {
+  border: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.valamis-slides .button.button-transparent.no-text > [class~="val-icon-"]:before {
+  margin: 0 auto;
+}
+
+.valamis-slides .button.button-transparent.disabled {
+  color: #555;
+  cursor: default;
+}
+
+.valamis-slides .button.button-transparent.disabled:hover {
+  color: #555;
+}
+
+.valamis-slides .button.button-dark-blue {
+  height: 40px;
+  margin: 0 5px;
+  text-align: center;
+  color: #AAA;
+  line-height: 40px;
+}
+
+.valamis-slides .button.button-dark-blue img {
+  opacity: 0.7;
+}
+
+.valamis-slides .button.button-dark-blue.no-text {
+  width: 40px;
+}
+
+.valamis-slides .button.button-dark-blue:hover {
+  color: #FFF;
+}
+
+.valamis-slides .button.button-dark-blue.active {
+  background-color: #2974A6;
+  color: #FFF;
+}
+
+.valamis-slides .button.button-dark-blue.active img {
+  opacity: 1;
+}
+
+.valamis-slides .button.button-dark-blue.no-text > [class~="val-icon-"]:before {
+  margin: 0;
+  display: inline-block;
+}
+
+.valamis-slides .button img {
+  width: 100%;
+}
+
+.valamis-slides .button-group button.button > [class^="val-icon-"]:before {
+  margin: 4px 0 0 0;
+  vertical-align: inherit;
+  line-height: inherit;
+}
+
+.valamis-slides .button-group button.button:first-child {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.valamis-slides .button-group button.button:nth-child(2) {
+  margin-right: 0px !important;
+}
+
+.valamis-slides .button-group button.button:last-child {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.valamis-slides .no-padding {
+  padding: 0 !important;
+}
+
+.valamis-slides #revealEditor {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding-top: 60px;
+  overflow: hidden;
+}
+
+.valamis-slides .sidebar {
+  width: 140px;
+  height: 100%;
+  float: left;
+  border: none;
+  background-color: #2c2c2c;
+  border-right: 1px solid black;
+  box-sizing: content-box;
+}
+
+.valamis-slides .sidebar #toolbar-controls .save-theme {
+  margin-top: 10px !important;
+}
+
+.valamis-slides .sidebar #toolbar-items .toolbar-item {
+  display: inline-block;
+  width: 70px;
+}
+
+.valamis-slides .sidebar .sidebar-padding {
+  padding: 0 10px;
+}
+
+.valamis-slides .reveal-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+}
+
+.valamis-slides.reveal-scroll-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.valamis-slides.reveal-scroll-wrapper .reveal-scroll-container {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+}
+
+.valamis-slides .slides-editor-main-wrapper {
+  position: relative;
+  width: auto;
+  height: 100%;
+  margin-left: 140px;
+  overflow: hidden;
+  overflow-y: auto;
+  background-color: #555;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper {
+  width: 1024px;
+  height: 768px;
+  margin: auto;
+  background-color: #F8F8F8;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.2);
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper.top-position {
+  position: relative;
+  margin: 0 auto 70px auto;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-mode="preview"] {
+  margin: auto;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-mode="preview"] .slides {
+  overflow: hidden;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-mode="preview"] .controls {
+  position: absolute;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-mode="preview"] .layout-resizable-handle {
+  display: none;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-layout="desktop"] {
+  width: 1024px;
+  height: 768px;
+  min-height: 768px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-layout="desktop"][data-mode="preview"] {
+  width: auto;
+  height: auto;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-layout="desktop"][data-mode="preview"] .controls {
+  position: fixed;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-layout="desktop"][data-mode="preview"] .controls button {
+  outline: none;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-layout="tablet"] {
+  width: 768px;
+  height: 1024px;
+  min-height: 1024px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper[data-layout="phone"] {
+  width: 375px;
+  height: 667px;
+  min-height: 667px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper .layout-resizable-handle {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 40px;
+  height: 16px;
+  margin-left: -20px;
+  margin-top: -8px;
+  border-radius: 3px;
+  background: url("../img/sl_resize_handler.gif") no-repeat center center #D7D7D7;
+  cursor: ns-resize;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+.valamis-slides .slides-editor-main-wrapper .slides-work-area-wrapper .grid-line {
+  pointer-events: none;
+  z-index: 99;
+  position: absolute;
+  font-size: 1px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar {
+  width: 280px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  background: #3C3C3C;
+  box-shadow: 1px 0px 0px 0px black;
+  display: none;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item {
+  width: 100%;
+  height: 60px;
+  box-shadow: inset 0px -1px 0px 0px #2c2c2c;
+  background: #3C3C3C;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item.active {
+  box-shadow: inset 4px 0px 0px 0px #2974A6;
+  background: #2c2c2c;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item div {
+  height: 100%;
+  padding-top: 20px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item div:first-child {
+  padding-left: 20px;
+  overflow: hidden;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item div:first-child.has-date {
+  padding-top: 15px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item div:last-child {
+  padding-right: 20px;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item .version-title span {
+  font-weight: bold;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item .version-title span:first-child {
+  color: #FFF;
+  display: block;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item .version-title span:nth-child(2) {
+  color: #AAA;
+  white-space: nowrap;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item .val-label {
+  font-size: 9px;
+  border: 1px solid #555555;
+  border-radius: 2px;
+  background: inherit;
+  color: #AAA;
+  margin: 0;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item .val-label.published {
+  background: #598000;
+  border: 1px solid #598000;
+  color: #FFF;
+}
+
+.valamis-slides .slides-editor-main-wrapper .version-sidebar .version-item [class^="val-icon-"]:before {
+  color: #AAA;
+}
+
+.valamis-slides #versionContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+  background-color: #555;
+}
+
+.valamis-slides .reveal-controls {
+  position: static;
+}
+
+.valamis-slides .reveal-controls .slides-round {
+  z-index: 30;
+}
+
+.valamis-slides .reveal table td {
+  border-bottom: none;
+}
+
+.valamis-slides .reveal .slides {
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.valamis-slides .reveal .slides.slides-static {
+  perspective: none;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.valamis-slides .reveal .slides.slides-static section {
+  transform-style: flat;
+}
+
+.valamis-slides .reveal .slides .slides-grid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+}
+
+.valamis-slides .reveal .slides video {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.valamis-slides .reveal .slides iframe {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.valamis-slides .reveal .slides section {
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.valamis-slides .reveal .slides .controls {
+  position: fixed;
+  bottom: 10px;
+  display: none;
+  height: 110px;
+  right: 10px;
+  width: 110px;
+  z-index: 430;
+  pointer-events: all;
+}
+
+.valamis-slides .reveal .slides .rj-element {
+  position: absolute;
+  cursor: pointer;
+  box-sizing: content-box;
+  min-height: 3px;
+  min-width: 3px;
+}
+
+.valamis-slides .reveal .slides .rj-element h1, .valamis-slides .reveal .slides .rj-element h2, .valamis-slides .reveal .slides .rj-element h3, .valamis-slides .reveal .slides .rj-element h4, .valamis-slides .reveal .slides .rj-element h5, .valamis-slides .reveal .slides .rj-element h6 {
+  text-transform: none;
+}
+
+.valamis-slides .reveal .slides .rj-element .item-content {
+  font-size: 16px;
+}
+
+.valamis-slides .reveal .slides .rj-element .item-controls {
+  font-size: 16px;
+}
+
+.valamis-slides .reveal .slides .rj-element .item-border {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-image {
+  min-height: 0;
+  min-width: 0;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text {
+  word-break: break-word;
+  white-space: normal;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content {
+  overflow-y: hidden;
+  padding: 5px;
+  line-height: 1.2;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content * {
+  font-size: 1em;
+  line-height: initial;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content span {
+  display: block;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content ol,
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content ul {
+  display: block;
+  list-style-position: outside;
+  margin-left: 1.5em;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content ol {
+  list-style-type: decimal;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content ul {
+  list-style-type: disc;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content ol li,
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content ul li {
+  margin: 10px 0;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content table th {
+  text-align: center;
+  font-weight: bold;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content table th, .valamis-slides .reveal .slides .rj-element.rj-text .item-content table td {
+  padding: 5px;
+  border: 1px solid #AAA;
+  font-size: inherit;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content .lesson-questions table th, .valamis-slides .reveal .slides .rj-element.rj-text .item-content .lesson-questions table td {
+  border: none;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content.lesson-summary-block {
+  background-color: #EFEFEF !important;
+}
+
+.valamis-slides .reveal .slides .rj-element.rj-text .item-content.lesson-summary-block #lesson-summary-table {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent url("../img/lesson-summary-default-page.svg") center no-repeat;
+}
+
+.valamis-slides .reveal .slides .rj-element.question-element {
+  max-width: 80%;
+  min-width: 0px;
+  min-height: 0px;
+}
+
+.valamis-slides .reveal .slides .rj-element.question-element .item-content {
+  min-height: 200px;
+  text-align: left;
+}
+
+.valamis-slides .reveal .slides .rj-element.question-element .item-content h2 {
+  font-size: inherit;
+  color: inherit;
+}
+
+.valamis-slides .reveal .slides .rj-element.active .item-border {
+  border: 1px solid #4BA5D7;
+}
+
+.valamis-slides .reveal .slides .rj-element.inactive {
+  cursor: default;
+}
+
+.valamis-slides .reveal .slides .rj-element.linked {
+  cursor: pointer;
+}
+
+.valamis-slides .reveal .slides .rj-element .ui-resizable-handle {
+  border: 1px solid #2974A6 !important;
+}
+
+.valamis-slides .reveal .slides .rj-element .ui-resizable-handle.val-rounded-icon {
+  border: 0 !important;
+  background: none;
+  margin-bottom: 10px;
+  z-index: 1000;
+}
+
+.valamis-slides .reveal .slides .rj-element.hidden-element {
+  border: 2px dashed #AAA;
+}
+
+.valamis-slides .reveal .slides .rj-element.hidden-element .item-content {
+  opacity: 0;
+}
+
+.valamis-slides .reveal .slides .rj-element.hidden-element .item-controls .val-row:not(.hidden-element-visible) {
+  display: none;
+}
+
+.valamis-slides .reveal .slides .rj-element.hidden-element .ui-resizable-handle {
+  display: none;
+}
+
+.valamis-slides .reveal .slides .no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.valamis-slides .reveal .slides .reveal-controls {
+  left: 160px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.valamis-slides .reveal .slides [hidden] {
+  overflow: hidden;
+}
+
+.valamis-slides .file-upload-modal .bbm-modal {
+  max-height: 700px;
+  max-width: 700px;
+}
+
+.valamis-slides .slides-editor-topbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 60px;
+  width: 100%;
+  background-color: #2c2c2c;
+  border-bottom: 1px solid black;
+}
+
+.valamis-slides .slides-editor-topbar.static {
+  position: static;
+}
+
+.valamis-slides .slides-editor-topbar .close-slideset {
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  height: 60px;
+  padding: 20px;
+  width: 60px;
+  background: #1C1C1C;
+  color: #AAA;
+}
+
+.valamis-slides .slides-editor-topbar .close-slideset:hover {
+  background: #121212;
+  color: #DEDEDE;
+}
+
+.valamis-slides .slides-editor-topbar .mode-switcher, .valamis-slides .slides-editor-topbar .topbar-buttons {
+  padding: 10px 13px;
+}
+
+.valamis-slides .slides-editor-topbar .mode-switcher .button.no-text, .valamis-slides .slides-editor-topbar .topbar-buttons .button.no-text {
+  margin-left: 7px;
+}
+
+.valamis-slides .slides-editor-topbar .topbar-buttons.shift-right {
+  padding: 13px;
+}
+
+.valamis-slides .slides-editor-topbar .slides-editor-save-container {
+  padding-left: 10px;
+  display: inline-block;
+}
+
+.valamis-slides .slides-editor-topbar .slides-editor-save-container .slides-editor-changes-saved {
+  cursor: default;
+}
+
+.valamis-slides .slides-editor-topbar .button.big {
+  line-height: 20px;
+}
+
+.valamis-slides .slides-editor-topbar .topbar-buttons-center {
+  text-align: center;
+  margin: 0 400px;
+}
+
+.valamis-slides .slides-editor-topbar .topbar-buttons-center .button.no-text {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.valamis-slides .slideset-editor {
+  border: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1100;
+  background-color: #555;
+}
+
+.valamis-slides .slideset-iframe {
+  border: none;
+  height: 100%;
+  width: 100%;
+}
+
+.valamis-slides #slide-controls {
+  position: absolute;
+  right: -50px;
+  top: 0;
+  z-index: 100;
+}
+
+.valamis-slides #slide-controls.fixed {
+  position: fixed;
+  right: 10px;
+  top: 70px;
+}
+
+.valamis-slides .slide-delete {
+  display: none;
+}
+
+.valamis-slides .item-content {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  line-height: 1;
+  position: relative;
+}
+
+.valamis-slides .item-content .iframe-item, .valamis-slides .item-content .video-js {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  display: none;
+}
+
+.valamis-slides .item-content:focus {
+  outline: none;
+}
+
+.valamis-slides .item-content.iframe-item, .valamis-slides .item-content.img-item, .valamis-slides .item-content.video-item, .valamis-slides .item-content.webgl-item {
+  background-color: #1C1C1C;
+}
+
+.valamis-slides .item-content.question-item {
+  background-color: transparent;
+}
+
+.valamis-slides .item-content > [class^="content-icon-"],
+.valamis-slides .item-content > [class*=" content-icon-"] {
+  color: #777;
+  position: absolute;
+  font-size: 70px;
+  -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+}
+
+.valamis-slides .item-content > [class^="content-icon-"] > [class^="val-icon-"]:before,
+.valamis-slides .item-content > [class^="content-icon-"] > [class*=" val-icon-"]:before,
+.valamis-slides .item-content > [class*=" content-icon-"] > [class^="val-icon-"]:before,
+.valamis-slides .item-content > [class*=" content-icon-"] > [class*=" val-icon-"]:before {
+  font-size: inherit;
+}
+
+.valamis-slides .item-content.question-item .removed-question {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+  color: #FFF;
+}
+
+.valamis-slides .item-content.question-item.random-item {
+  background-color: #EAEAEA;
+}
+
+.valamis-slides .item-content.question-item.random-item .random-question {
+  color: #777;
+  position: absolute;
+  font-size: 40px;
+  font-weight: bold;
+  -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+}
+
+.valamis-slides .item-content .warning {
+  display: none;
+  position: relative;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: 10px;
+  background: #ebb3ad;
+  color: #CC4233;
+  font-size: 13px;
+}
+
+.valamis-slides .item-controls {
+  width: 38px;
+  display: none;
+  position: fixed;
+  right: -50px;
+  transform: translateZ(0);
+  z-index: 10000;
+}
+
+.valamis-slides .item-controls .val-row:first-child .button {
+  margin-top: 0px !important;
+}
+
+.valamis-slides #slide-controls .val-row, .valamis-slides .item-controls .val-row {
+  position: relative;
+}
+
+.valamis-slides #slide-controls .slide-popup-panel label, .valamis-slides .item-controls .slide-popup-panel label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.valamis-slides .slide-popup-panel {
+  background-color: white;
+  border-radius: 3px;
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 50px;
+  width: 360px;
+  z-index: 100;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.valamis-slides .slide-popup-panel label {
+  text-align: left;
+  margin-right: 0px;
+}
+
+.valamis-slides .slide-popup-panel.iframe-edit-panel {
+  right: 50px;
+}
+
+.valamis-slides .slide-popup-panel.iframe-edit-panel textarea {
+  margin-bottom: 20px;
+}
+
+.valamis-slides .slide-popup-panel.math-edit-panel {
+  right: 50px;
+  top: 0px;
+}
+
+.valamis-slides .slide-popup-panel.image-upload-panel .val-select {
+  margin-bottom: 20px;
+}
+
+.valamis-slides .slide-popup-panel.image-upload-panel #slide-background-image-thumbnail {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: none;
+  margin-left: 87px;
+  width: 120px;
+  height: 120px;
+}
+
+.valamis-slides .slide-popup-panel.image-upload-panel .file-uploader-wrapper {
+  padding: 10px 0 20px 0;
+}
+
+.valamis-slides .slide-popup-panel.image-upload-panel .file-uploader-wrapper label {
+  text-align: center;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel {
+  top: 4px;
+  width: 700px;
+  height: 570px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel h2 {
+  font-size: 23px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel input, .valamis-slides .slide-popup-panel.slide-title-edit-panel .selectize-control {
+  margin-bottom: 10px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .selectize-control {
+  border-radius: 0px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .selectize-control .selectize-input {
+  border-radius: 0px;
+  height: 40px !important;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .div-col {
+  padding-left: 0;
+  padding-right: 0;
+  position: relative;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .selectize-control:not(.page-statement) .selectize-input {
+  width: 200px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-label {
+  width: 150px;
+  padding: 0;
+  position: relative;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-label label {
+  position: absolute;
+  top: 28.2px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-learning span.div-col {
+  padding-top: 0;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-learning span.div-col span {
+  position: absolute;
+  padding-top: 11px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-select,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-learning span.div-col {
+  width: 200px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .selectize-control,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-learning,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-select,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .settings-label .div-row {
+  border-bottom: none;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .slide-title-input,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .statement-object-input {
+  width: 280px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .slide-title-input,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .statement-object-input,
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .selectize-input {
+  height: 40px !important;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .statement-object-input {
+  position: absolute;
+  margin: 0 0 0 10px;
+  padding: 6.06667px;
+  top: 18.2px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .page-statement:not(.selectize-dropdown) {
+  width: 100%;
+  height: 40px;
+  padding-left: 70px;
+  margin-bottom: 0px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .val-row h2 {
+  font-weight: normal;
+  margin: 0px;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .val-row .page-setting-title {
+  font-size: 15px;
+  margin: 10px 0px 10px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+.valamis-slides .slide-popup-panel.slide-title-edit-panel .val-row #pageTimePicker .input-append {
+  width: 260px;
+}
+
+.valamis-slides .slide-popup-panel.math-edit-panel {
+  top: 4px;
+}
+
+.valamis-slides .slide-popup-panel.math-edit-panel input#js-slide-title, .valamis-slides .slide-popup-panel.math-edit-panel textarea.math-expr {
+  margin-bottom: 20px;
+}
+
+.valamis-slides .slide-popup-panel.slide-statement-edit-panel {
+  top: 46px;
+}
+
+.valamis-slides .slide-popup-panel.slide-statement-edit-panel .val-row .val-row:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+.valamis-slides .slide-popup-panel.slide-statement-edit-panel .val-row .val-row:not(:last-child) label {
+  font-weight: bold;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel {
+  top: 172px;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel .input-append {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0;
+  margin-bottom: 20px;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel .input-append input[type='text'] {
+  display: inline-block;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel .input-append .add-on {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: -1px;
+  font-size: 14px;
+  padding: 0;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel .input-append .add-on:last-child {
+  border-radius: 0 2px 2px 0;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel .input-append .add-on i {
+  vertical-align: baseline;
+  margin-top: 0;
+}
+
+.valamis-slides .slide-popup-panel.slide-duration-edit-panel .input-append .add-on i:before {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.valamis-slides .slide-popup-panel .background-image-mediagallery {
+  color: #2974A6;
+  cursor: pointer;
+}
+
+.valamis-slides .slide-popup-panel .close-slide-popup-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 40px;
+  width: 40px !important;
+  padding-top: 0px;
+  border: 0px;
+}
+
+.valamis-slides .slide-popup-panel .close-slide-popup-panel .val-icon-exit:before {
+  width: 20px;
+  height: 20px;
+  line-height: normal;
+  margin: 10px;
+}
+
+.valamis-slides .slide-popup-panel.item-settings {
+  color: #1C1C1C;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.valamis-slides .slide-popup-panel.item-settings p {
+  font-size: 22px;
+  text-align: left;
+  padding: 0px 0px 10px;
+}
+
+.valamis-slides .slide-popup-panel.item-settings label {
+  font-size: 15px;
+  padding: 20px 0px 8px;
+  font-weight: bold;
+}
+
+.valamis-slides .slide-popup-panel.item-settings button {
+  display: table;
+  margin: 0px 0px 10px;
+}
+
+.valamis-slides .slide-popup-panel.item-settings textarea {
+  margin: 0px 0px 20px;
+}
+
+.valamis-slides .slide-popup-panel .arrow-right {
+  border-left-color: rgba(0, 0, 0, 0.18);
+  border-top-width: 11px;
+  border-bottom-width: 11px;
+}
+
+.valamis-slides .slide-popup-panel .arrow-right:before {
+  content: "";
+  position: absolute;
+  right: 1px;
+  top: -10px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid white;
+}
+
+.valamis-slides .bordered-row {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.valamis-slides .slide-theme-modal, .valamis-slides .slide-templates-modal {
+  padding: 0 20px;
+}
+
+.valamis-slides .slide-theme-modal .preview, .valamis-slides .slide-templates-modal .preview {
+  height: 160px;
+  display: inline-block;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.valamis-slides .slide-theme-modal .preview .tile-content, .valamis-slides .slide-templates-modal .preview .tile-content {
+  width: 100%;
+  height: 100%;
+  padding-bottom: 30px;
+}
+
+.valamis-slides .slide-theme-modal .preview .tile-content .image, .valamis-slides .slide-templates-modal .preview .tile-content .image {
+  background-size: contain;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+
+.valamis-slides .slide-theme-modal .preview .tile-content .title, .valamis-slides .slide-templates-modal .preview .tile-content .title {
+  margin: 10px 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.valamis-slides .slide-theme-modal .arrow.arrow-up, .valamis-slides .slide-templates-modal .arrow.arrow-up {
+  top: -70px;
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container {
+  max-height: 480px;
+  overflow: auto;
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image {
+  background-image: none;
+  background-color: #EAEAEA;
+  border: 2px solid #FFF;
+  border-radius: 3px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image.copy-slide {
+  background-image: url("../img/templates/copy-slide.png");
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image.lesson-summary {
+  background-image: url("../img/templates/lesson-summary.png");
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image.text-and-image {
+  background-image: url("../img/templates/text-and-image.png");
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image.text-only {
+  background-image: url("../img/templates/text-only.png");
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image.title-and-subtitle {
+  background-image: url("../img/templates/title-and-subtitle.png");
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image.video-only {
+  background-image: url("../img/templates/video-only.png");
+}
+
+.valamis-slides .slide-templates-modal #slide-templates-container .preview .tile-content .image:hover {
+  border-color: #2974A6;
+}
+
+.valamis-slides .slide-theme-modal #theme-container {
+  max-height: 390px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview {
+  height: auto;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview.has-dark-background .val-icon-exit {
+  color: #EAEAEA;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content {
+  height: 120px;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .controls {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: none;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .controls:hover {
+  opacity: 1;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .controls .button {
+  margin: 0;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content:hover .controls {
+  display: block;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .background {
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  display: table;
+  border: 2px solid #F2F2F2;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .background .image {
+  display: table-row;
+  padding: 0;
+  background: transparent no-repeat;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .background .image .title {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .background .image .title .plus-icon {
+  display: none;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content .background.active {
+  border-color: #2974A6;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content.item-button .background .image .title {
+  padding: 0 25px;
+  font-size: 12px;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content.item-button .background .image .title .plus-icon {
+  display: block;
+  color: #555;
+}
+
+.valamis-slides .slide-theme-modal #theme-container .preview .tile-content.item-button .background .image .title .plus-icon .icon:before {
+  font-size: 40px;
+}
+
+.valamis-slides .slide-theme-modal #theme-container.loading-container {
+  margin: 50px 0;
+}
+
+.valamis-slides .bootstrap-timepicker-widget {
+  position: absolute;
+  display: none;
+  float: left;
+  min-width: 160px;
+  margin: 2px 0 0;
+  list-style: outside none none;
+  background-color: #FFF;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  background-clip: padding-box;
+}
+
+.valamis-slides .bootstrap-timepicker-widget table {
+  max-width: 160px;
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0;
+}
+
+.valamis-slides .bootstrap-timepicker-widget table td {
+  padding: 0 5px;
+}
+
+.valamis-slides .bootstrap-timepicker-widget table td input {
+  width: 60px;
+}
+
+.valamis-slides .arrow-right {
+  position: absolute;
+  right: -10px;
+  top: 6px;
+  width: 0;
+  height: 0;
+  border-top: 10px dashed transparent;
+  border-bottom: 10px dashed transparent;
+  border-left: 10px solid white;
+}
+
+.valamis-slides .arrow-left {
+  position: absolute;
+  left: -10px;
+  top: 6px;
+  width: 0;
+  height: 0;
+  border-top: 10px dashed transparent;
+  border-bottom: 10px dashed transparent;
+  border-right: 10px solid white;
+}
+
+.valamis-slides .arrow-up {
+  position: absolute;
+  right: 50%;
+  top: -10px;
+  width: 0;
+  height: 0;
+  border-left: 10px dashed transparent;
+  border-right: 10px dashed transparent;
+  border-bottom: 10px solid white;
+}
+
+.valamis-slides .arrow-up.right {
+  right: 15px;
+}
+
+.valamis-slides .arrow-down {
+  position: absolute;
+  right: 8px;
+  bottom: -10px;
+  width: 0;
+  height: 0;
+  border-left: 10px dashed transparent !important;
+  border-right: 10px dashed transparent !important;
+  border-top: 10px solid white !important;
+}
+
+.valamis-slides .dropzone-link {
+  color: #2974A6;
+}
+
+.valamis-slides .img-item {
+  background-size: 100% 100%;
+  height: 100%;
+  width: 100%;
+}
+
+.valamis-slides .mode-switcher {
+  padding-top: 11px;
+  padding-left: 11px;
+}
+
+.valamis-slides .lesson-title-container {
+  line-height: 34px;
+  padding: 13px;
+  font-size: 13px;
+}
+
+.valamis-slides .lesson-title-container .lesson-title {
+  color: white;
+  font-weight: 700;
+}
+
+.valamis-slides .lesson-title-container .lesson-unsaved {
+  color: #777;
+  display: none;
+  font-style: italic;
+}
+
+.valamis-slides .lesson-title-container .versions-history-start {
+  color: #2974A6;
+}
+
+.valamis-slides .lesson-title-container .version-label {
+  color: #FFF;
+  font-weight: bold;
+  display: none;
+}
+
+.valamis-slides .lesson-title-container .lock-user {
+  color: #777;
+}
+
+.valamis-slides #arrangeContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  clear: both;
+  cursor: move;
+}
+
+.valamis-slides #arrangeSlides {
+  min-width: 100%;
+  min-height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.valamis-slides #arrangeSlides table {
+  margin: 0 auto;
+}
+
+.valamis-slides #arrangeSlides table.centered {
+  left: 50%;
+  top: 50px;
+  -ms-transform: translate(-50%, 0);
+      transform: translate(-50%, 0);
+}
+
+.valamis-slides #arrangeSlides table td {
+  vertical-align: top;
+  padding-top: 80px;
+}
+
+.valamis-slides #arrangeSlides table td.empty-arrange-list {
+  width: 0;
+  padding: 0 20px;
+}
+
+.valamis-slides #arrangeSlides table:first-child {
+  margin-left: 80px;
+}
+
+.valamis-slides #arrangeSlides table:last-child {
+  margin-right: 80px;
+}
+
+.valamis-slides .slides-arrange-tile {
+  width: 200px;
+  height: 150px;
+  background-color: white;
+  color: #AAA;
+  cursor: pointer;
+  margin-bottom: 40px;
+  position: relative;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.25);
+}
+
+.valamis-slides .slides-arrange-tile:hover {
+  border: 3px solid #2974A6;
+  box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.25);
+}
+
+.valamis-slides .slides-arrange-tile.arrange-tile-active {
+  border: 2px solid #2974A6;
+}
+
+.valamis-slides .slides-arrange-tile.arrange-tile-inactive {
+  border: 2px solid #AAA;
+}
+
+.valamis-slides .slides-arrange-tile.ui-sortable-helper {
+  cursor: move;
+}
+
+.valamis-slides .slides-arrange-tile .arrange-tile-cover {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+}
+
+.valamis-slides .slides-arrange-tile .arrange-tile-controls {
+  display: none;
+  position: relative;
+  z-index: 100;
+  top: 5px;
+  right: 5px;
+}
+
+.valamis-slides .slides-arrange-placeholder {
+  width: 200px;
+  height: 150px;
+  margin: 10px 0;
+  border: 2px dashed #2c2c2c;
+  background-color: #3C3C3C;
+}
+
+.valamis-slides .slides-thumbnail {
+  width: 500%;
+  height: 500%;
+  cursor: default;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  -moz-transform: scale(0.2);
+  -moz-transform-origin: 0% 0%;
+  -webkit-transform: scale(0.2);
+  -webkit-transform-origin: 0% 0%;
+  -ms-transform: scale(0.2);
+  -ms-transform-origin: 0% 0%;
+}
+
+.valamis-slides .slides-thumbnail .katex-display {
+  margin: 0;
+}
+
+.valamis-slides .slides-thumbnail .rj-element {
+  position: absolute;
+}
+
+.valamis-slides .scroll-y {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.valamis-slides .no-pointer-events {
+  pointer-events: none;
+}
+
+.valamis-slides .val-modal {
+  font-size: 13px;
+}
+
+.valamis-slides .val-modal input {
+  display: inline-block;
+}
+
+.valamis-slides .add-questions-modal .bbm-modal .bbm-modal__topbar {
+  height: 50px;
+  border-bottom: none;
+}
+
+.valamis-slides .add-questions-modal .bbm-modal .bbm-modal__topbar h3 {
+  padding: 15px 20px;
+  float: none;
+  margin: 0;
+}
+
+.valamis-slides .add-questions-modal .bbm-modal .bbm-modal__topbar .modal-close {
+  background-color: transparent;
+  padding: 15px;
+}
+
+.valamis-slides .add-questions-modal #questionBankBody.val-portlet .portlet-wrapper .val-lesson-content .lesson-items {
+  max-height: 360px;
+  overflow-y: scroll;
+}
+
+.valamis-slides .add-questions-modal #questionBankBody.val-portlet .portlet-wrapper .val-lesson-content .lesson-items .lesson-item-li .lesson-item-title {
+  cursor: default;
+}
+
+.valamis-slides .slides-editor-modals-container .val-table {
+  margin: 0px;
+}
+
+.valamis-slides .slides-editor-modals-container .val-table .js-file-uploader {
+  padding: 0px;
+}
+
+.valamis-slides .liferay-articles-modal .val-table .liferay-article.selected {
+  border: 2px solid #598000;
+}
+
+.valamis-slides .template-info img {
+  width: 35px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.valamis-slides .colpick_hex_field input {
+  padding: 3px;
+  background-color: transparent;
+  border: 0;
+  width: auto;
+  height: auto;
+}
+
+.valamis-slides .colpick_hex_field input:focus {
+  background-color: transparent;
+}
+
+.valamis-slides .devices-list {
+  padding: 0 20px;
+}
+
+.valamis-slides .devices-list > .item {
+  padding: 20px;
+  margin: 0;
+  float: left;
+  width: 33.33333%;
+  text-align: center;
+}
+
+.valamis-slides .devices-list > .item > a {
+  width: 160px;
+  height: 180px;
+  color: #AAA;
+  display: block;
+  position: relative;
+  padding: 40px 30px 20px 30px;
+  border: 1px solid #DEDEDE;
+  text-decoration: none;
+}
+
+.valamis-slides .devices-list > .item > a img {
+  width: 100%;
+}
+
+.valamis-slides .devices-list > .item > a .val-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  padding: 1px;
+  display: none;
+  background-color: #598000;
+  color: #fff;
+  text-align: center;
+}
+
+.valamis-slides .devices-list > .item > a .val-icon:before {
+  font-size: 16px;
+}
+
+.valamis-slides .devices-list > .item > a [class^="val-icon-device"]:before,
+.valamis-slides .devices-list > .item > a [class*="val-icon-device"]:before {
+  font-size: 90px;
+}
+
+.valamis-slides .devices-list > .item:hover > a, .valamis-slides .devices-list > .item.active > a {
+  color: #2c2c2c;
+  border-color: #598000;
+}
+
+.valamis-slides .devices-list > .item.active .val-icon {
+  display: inline-block;
+}
+
+.valamis-slides .devices-list .item-label {
+  display: block;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+.valamis-slides .element-font-size .selectize-input {
+  font-size: 13px;
+  text-align: left;
+  padding: 8px;
+  width: 100px;
+}
+
+.valamis-slides .element-font-size .selectize-dropdown {
+  font-size: 13px;
+  text-align: left;
+}
+
+.valamis-slides * {
+  box-sizing: border-box;
+}
+
+.valamis-slides .portlet-content {
+  padding: 0 !important;
+}
+
+.valamis-slides .val-row .label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.valamis-slides .val-row .dropzone-wrapper {
+  margin: 0px;
+}
+
+.valamis-slides .button-tooltip .val-badge {
+  display: none;
+  background: #1c1c1c !important;
+  max-width: 250px;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 2px;
+  white-space: nowrap;
+  text-transform: none;
+  font-weight: bold;
+  text-shadow: none;
+  font-size: 13px;
+}
+
+.valamis-slides .button-tooltip .val-badge:before {
+  content: '';
+  position: absolute;
+  border: 10px solid transparent;
+  border-right: 5px solid #1c1c1c;
+  left: -14px;
+  top: -3%;
+}
+
+.reveal {
+  -ms-touch-action: auto !important;
+  touch-action: auto !important;
+}
+
+/* ui-selectable */
+.ui-selectable-helper {
+  border: 2px solid #4BA5D7;
+  background-color: rgba(65, 165, 215, 0.2);
+  position: absolute;
+  z-index: 99999;
+}

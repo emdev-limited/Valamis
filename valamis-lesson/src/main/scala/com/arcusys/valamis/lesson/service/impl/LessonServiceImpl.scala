@@ -1,26 +1,29 @@
 package com.arcusys.valamis.lesson.service.impl
 
-import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.learn.liferay.constants.StringPoolHelper
+import com.arcusys.learn.liferay.services.{AssetEntryLocalServiceHelper, UserLocalServiceHelper}
+import com.arcusys.learn.liferay.util.PortalUtilHelper
 import com.arcusys.valamis.exception.EntityNotFoundException
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.file.storage.FileStorage
 import com.arcusys.valamis.lesson.exception.NoLessonException
-import com.arcusys.valamis.lesson.model.LessonType._
+import com.arcusys.valamis.lesson.model.LessonType.LessonType
 import com.arcusys.valamis.lesson.model._
-import com.arcusys.valamis.lesson.service.{CustomLessonService, LessonAssetHelper, LessonService}
-import com.arcusys.valamis.lesson.storage.{LessonAttemptsTableComponent, LessonTableComponent}
+import com.arcusys.valamis.lesson.service.{CustomLessonService, LessonAssetHelper, LessonNotificationService, LessonService}
 import com.arcusys.valamis.lesson.storage.query._
+import com.arcusys.valamis.lesson.storage.{LessonAttemptsTableComponent, LessonTableComponent}
 import com.arcusys.valamis.liferay.SocialActivityHelper
 import com.arcusys.valamis.model.{RangeResult, SkipTake}
-import com.arcusys.valamis.persistence.common.SlickProfile
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
 import com.arcusys.valamis.ratings.RatingService
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.tag.model.ValamisTag
 import com.arcusys.valamis.user.model.User
 import org.joda.time.DateTime
+import slick.driver.JdbcProfile
+import slick.jdbc.JdbcBackend
 
-import scala.slick.driver.JdbcProfile
-import scala.slick.jdbc.JdbcBackend
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by mminin on 21.01.16.
@@ -34,19 +37,31 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
     with LessonViewerQueries
     with LessonAttemptsQueries
     with LessonAttemptsTableComponent
+    with DatabaseLayer
     with SlickProfile {
 
-  import driver.simple._
+  import driver.api._
 
   def ratingService: RatingService[Lesson]
+
   def tagService: TagService[Lesson]
+
   def assetHelper: LessonAssetHelper
+
   def socialActivityHelper: SocialActivityHelper[Lesson]
+
   def userService: UserLocalServiceHelper
+
   def fileService: FileService
+
   def fileStorage: FileStorage
+
   def customLessonServices: Map[LessonType, CustomLessonService]
+
+  def lessonNotificationService: LessonNotificationService
+
   private def logoPathPrefix(packageId: Long) = s"package_logo_$packageId/"
+
   private def getFullLogoPath(packageId: Long, logo: String) = "files/" + logoPathPrefix(packageId) + logo
 
 
@@ -55,11 +70,12 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
                       title: String,
                       description: String,
                       ownerId: Long,
-                      scoreLimit: Option[Double] = None): Lesson = {
+                      scoreLimit: Option[Double] = None,
+                      requiredReview: Boolean = false): Lesson = {
     val logo = None
     val isVisible = Some(true)
 
-    val lessonId = db.withTransaction { implicit s =>
+    val lessonId = execSync {
       lessons
         .map(l => (
           l.lessonType,
@@ -72,32 +88,42 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
           l.creationDate,
           l.scoreLimit,
           l.requiredReview))
-        .returning(lessons.map(_.id))
-        .insert(
-          lessonType,
-          title,
-          description,
-          logo,
-          courseId,
-          isVisible,
-          ownerId,
-          DateTime.now,
-          scoreLimit.getOrElse(0.7),
-          false)
+        .returning(lessons.selectId) += (
+        lessonType,
+        title,
+        description,
+        logo,
+        courseId,
+        isVisible,
+        ownerId,
+        DateTime.now,
+        scoreLimit.getOrElse(0.7),
+        requiredReview
+      )
     }
 
     getLessonRequired(lessonId)
   }
 
-  override def getLesson(id: Long): Option[Lesson] = {
-    db.withSession { implicit s =>
-      lessons.filterById(id).firstOption
-    }
+  override def getLesson(id: Long): Option[Lesson] = execSync {
+    lessons.filterById(id).result.headOption
+  }
+
+  override def getLessonTitlesByIds(ids: Seq[Long]): Seq[(Long, String)] = execSync {
+    lessons.filterByIds(ids) map { lesson =>
+      (lesson.id, lesson.title)
+    } result
+  }
+
+  def getLessonForPublicApi(id: Long): Option[(Lesson, Option[LessonLimit])] = execSync {
+    (lessons.filterById(id) joinLeft lessonLimits on { (lessons, limits) =>
+      lessons.id === limits.lessonId
+    }).result.headOption
   }
 
   override def getRootActivityId(id: Long): String = {
-    db.withSession { implicit s =>
-      lessons.filterById(id).selectType.firstOption
+    execSync {
+      lessons.filterById(id).selectType.result.headOption
     } match {
       case Some(lessonType) => customLessonServices(lessonType).getRootActivityId(id)
       case None => throw new NoLessonException(id)
@@ -108,28 +134,26 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
     customLessonServices(lesson.lessonType).getRootActivityId(lesson.id)
   }
 
-  override def getByRootActivityId(activityId: String): Option[Long] = {
+  override def getByRootActivityId(activityId: String): Seq[Long] = {
     customLessonServices.toStream
       .flatMap { case (lessonType, service) => service.getLessonIdByRootActivityId(activityId) }
-      .headOption
   }
 
   override def getLessonRequired(id: Long): Lesson = {
     getLesson(id) getOrElse (throw new EntityNotFoundException(s"Lesson not found, id $id"))
   }
 
-  override def getCount(courseId: Long): Int = {
+  override def getCount(courseId: Long, titleFilter: Option[String]): Int = execSync {
     //visible ?
-    db.withSession { implicit s =>
-      lessons.filterByCourseId(courseId).length.run
-    }
+    lessons
+      .filterByCourseId(courseId)
+      .filterByTitle(titleFilter)
+      .length.result
   }
 
-  override def getCountByCourses(courseIds: Seq[Long]): Int = {
+  override def getCountByCourses(courseIds: Seq[Long]): Int = execSync {
     //visible ?
-    db.withSession { implicit s =>
-      lessons.filterByCourseIds(courseIds).length.run
-    }
+    lessons.filterByCourseIds(courseIds).length.result
   }
 
   def getLogo(id: Long): Option[Array[Byte]] = {
@@ -150,9 +174,7 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
       deleteFolder = true
     )
 
-    db.withSession { implicit s =>
-      lessons.filterById(id).map(_.logo).update(Some(name))
-    }
+    updateLogo(id, Some(name))
   }
 
   override def delete(id: Long): Unit = {
@@ -168,21 +190,50 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
 
         ratingService.deleteRatings(id)
 
-        db.withTransaction(implicit s => {
-          playerLessons.filterBy(id).delete
-          lessonLimits.filterByLessonId(id).delete
-          lessonViewers.filterByLessonId(id).delete
+        customService.deleteResources(id)
 
-          lessonAttempts.filterByLessonId(id).delete
+        execSyncInTransaction {
+          DBIO.seq(
+            playerLessons.filterBy(id).delete,
+            lessonLimits.filterByLessonId(id).delete,
+            lessonViewers.filterByLessonId(id).delete,
+            lessonAttempts.filterByLessonId(id).delete
+          ) andThen {
+            lessons.filterById(id).delete
+          }
+        }
 
-          customService.deleteResources(id)
-
-          assetHelper.deleteAssetEntry(id)
-          socialActivityHelper.deleteActivities(id)
-
-          lessons.filterById(id).delete
-        })
+        assetHelper.deleteAssetEntry(id, lesson)
+        socialActivityHelper.deleteActivities(id)
     }
+  }
+
+  override def deleteLogo(id: Long): Unit = {
+    fileService.deleteByPrefix(logoPathPrefix(id))
+    updateLogo(id, None)
+  }
+
+  override def update(id: Long,
+                      title: String,
+                      description: String,
+                      isVisible: Option[Boolean],
+                      beginDate: Option[DateTime],
+                      endDate: Option[DateTime],
+                      requiredReview: Boolean,
+                      scoreLimit: Double): Lesson = execSync {
+    updateQ(id)
+      .update((
+        title,
+        description,
+        isVisible,
+        beginDate,
+        endDate,
+        requiredReview,
+        scoreLimit)
+      )
+      .andThen {
+        filterByIdQ(id).result.head
+      }
   }
 
   override def update(id: Long,
@@ -194,35 +245,22 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
                       tagIds: Seq[Long],
                       requiredReview: Boolean,
                       scoreLimit: Double): Unit = {
-    val lesson = db.withTransaction { implicit s =>
-      lessons
-        .filterById(id)
-        .map(l => (
-          l.title,
-          l.description,
-          l.isVisible,
-          l.beginDate,
-          l.endDate,
-          l.requiredReview,
-          l.scoreLimit))
-        .update((
-          title,
-          description,
-          isVisible,
-          beginDate,
-          endDate,
-          requiredReview,
-          scoreLimit))
-
-      lessons.filterById(id).first
-    }
+    val lesson =
+      update(id, title, description, isVisible, beginDate, endDate, requiredReview, scoreLimit)
 
     val assetId = assetHelper.updatePackageAssetEntry(lesson)
     tagService.setTags(assetId, tagIds)
   }
 
+  override def updateLessonTags(id: Long, tagIds: Seq[Long]): Unit = {
+    val asset = assetHelper.getEntry(id).getOrElse {
+      throw new EntityNotFoundException("There is no asset entry for lesson with id: " + id)
+    }
+    tagService.setTags(asset.getPrimaryKey, tagIds)
+  }
+
   override def update(lesson: Lesson): Unit = {
-    db.withTransaction { implicit s =>
+    execSync {
       lessons
         .filterById(lesson.id)
         .map(l => (
@@ -233,135 +271,156 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
           l.endDate,
           l.ownerId,
           l.creationDate,
-          l.scoreLimit))
+          l.scoreLimit,
+          l.requiredReview))
         .update((lesson.title, lesson.description, lesson.isVisible, lesson.beginDate,
-          lesson.endDate, lesson.ownerId, lesson.creationDate, lesson.scoreLimit))
+          lesson.endDate, lesson.ownerId, lesson.creationDate, lesson.scoreLimit, lesson.requiredReview))
     }
 
     assetHelper.updatePackageAssetEntry(lesson)
   }
 
   override def updateLessonsInfo(lessonsInfo: Seq[LessonInfo]): Unit = {
-    val updatedLessons = db.withTransaction { implicit s =>
-      lessonsInfo.map { info =>
+
+    val newLessons: Seq[Lesson] = lessonsInfo.map { info =>
+      val lesson = execSync {
         lessons.filterById(info.id)
           .map(l => (l.title, l.description))
           .update((info.title, info.description))
-
-        lessons.filterById(info.id).first
+          .andThen {
+            lessons.filterById(info.id).result.head
+          }
       }
-    }
 
-    updatedLessons.foreach(assetHelper.updatePackageAssetEntry)
+      assetHelper.updatePackageAssetEntry(lesson)
+      lesson
+    }
+    if (!newLessons.isEmpty)
+      lessonNotificationService.sendLessonAvailableNotification(newLessons, newLessons.head.courseId)
   }
 
   override def updateVisibility(lessonId: Long, isVisible: Option[Boolean]): Unit = {
-    val lesson = db.withTransaction { implicit s =>
+    val lesson = execSync {
       lessons.filterById(lessonId)
         .map(_.isVisible)
         .update(isVisible)
-
-      lessons.filterById(lessonId).first
+        .andThen {
+          lessons.filterById(lessonId).result.head
+        }
     }
 
     assetHelper.updatePackageAssetEntry(lesson)
   }
 
-  override def getAll(courseId: Long): Seq[Lesson] = {
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseId(courseId)
-        .list
-    }
+  override def getAll(courseId: Long): Seq[Lesson] = execSync {
+    lessons.filterByCourseId(courseId).result
   }
 
-  def getByCourses(courseIds: Seq[Long]): Seq[Lesson] = {
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseIds(courseIds)
-        .list
-    }
+  override def getLessonsForPublicApi(courseId: Long, lessonType: Option[LessonType],
+                                      skipTake: Option[SkipTake]): Seq[(Lesson, Option[LessonLimit])] = execSync {
+    val lessonsQ = lessons
+      .filterByCourseId(courseId)
+      .filterByType(lessonType)
+      .joinLeft(lessonLimits).on((lessons, limits) => lessons.id === limits.lessonId)
+      .sortBy { case (l, _) => l.title }
+
+    (skipTake match {
+      case Some(SkipTake(skip, take)) => lessonsQ.drop(skip).take(take)
+      case None => lessonsQ
+    }).result
+  }
+
+  def getByCourses(courseIds: Seq[Long]): Seq[Lesson] = execSync {
+    lessons.filterByCourseIds(courseIds).result
   }
 
   override def getAllSorted(courseId: Long,
-                            ascending: Boolean = true,
-                            skipTake: Option[SkipTake] = None): Seq[Lesson] = {
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseId(courseId)
-        .sortByTitle(ascending)
-        .slice(skipTake)
-        .list
-    }
+                            titleFilter: Option[String],
+                            ascending: Boolean,
+                            skipTake: Option[SkipTake]): Seq[Lesson] = execSync {
+    lessons
+      .filterByCourseId(courseId)
+      .filterByTitle(titleFilter)
+      .sortByTitle(ascending)
+      .slice(skipTake)
+      .result
   }
 
   override def getSortedByCourses(courseIds: Seq[Long],
-                                  ascending: Boolean = true,
-                                  skipTake: Option[SkipTake] = None): Seq[Lesson] = {
-
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseIds(courseIds)
-        .sortByTitle(ascending)
-        .slice(skipTake)
-        .list
-    }
+                                  titleFilter: Option[String],
+                                  ascending: Boolean,
+                                  skipTake: Option[SkipTake]): Seq[Lesson] = execSync {
+    lessons
+      .filterByCourseIds(courseIds)
+      .filterByTitle(titleFilter)
+      .sortByTitle(ascending)
+      .slice(skipTake)
+      .result
   }
 
-  def getInReview(courseId: Long): Seq[Lesson] = {
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseId(courseId)
-        .filterByInReview
-        .list
-    }
+  def getInReview(courseId: Long): Seq[Lesson] = execSync {
+    lessons
+      .filterByCourseId(courseId)
+      .filterByInReview
+      .result
   }
 
-  def getInReviewByCourses(courseIds: Seq[Long]): Seq[Lesson]= {
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseIds(courseIds)
-        .filterByInReview
-        .list
-    }
+  def getInReviewByCourses(courseIds: Seq[Long]): Seq[Lesson] = execSync {
+    lessons
+      .filterByCourseIds(courseIds)
+      .filterByInReview
+      .result
   }
 
-  def getWithLimit(lessonId: Long): (Lesson, Option[LessonLimit]) = {
-    db.withSession { implicit s =>
-      val lesson = lessons.filterById(lessonId).first
-      val limit = lessonLimits.filterByLessonId(lessonId).firstOption
-
+  def getWithLimit(lessonId: Long): (Lesson, Option[LessonLimit]) = execSync {
+    for {
+      lesson <- lessons.filterById(lessonId).result.head
+      limit <- lessonLimits.filterByLessonId(lessonId).result.headOption
+    } yield {
       (lesson, limit)
     }
   }
 
   def getAllWithLimits(courseId: Long): Seq[(Lesson, Option[LessonLimit])] = {
     val lessonsQ = lessons.filterByCourseId(courseId)
+    val limitsQ = lessonsQ
+      .join(lessonLimits).on((l, lim) => l.id === lim.lessonId)
+      .map { case (l, lim) => lim }
 
-    db.withSession { implicit s =>
-      val courseLessons = lessonsQ.list
-
-      val limits = lessonsQ
-        .join(lessonLimits).on((l, lim) => l.id === lim.lessonId)
-        .map { case (l, lim) => lim }
-        .list
-
-      courseLessons.map(l => (l, limits.find(lim => lim.lessonId == l.id)))
+    val (courseLessons, limits) = execSync {
+      for {
+        courseLessons <- lessonsQ.result
+        limits <- limitsQ.result
+      } yield {
+        (courseLessons, limits)
+      }
     }
+
+    courseLessons.map(l => (l, limits.find(lim => lim.lessonId == l.id)))
   }
 
-  def getAllVisible(courseId: Long): Seq[Lesson] = {
-    db.withSession { implicit s =>
-      lessons
-        .filterByCourseId(courseId)
-        .filterVisible(true)
-        .list
-    }
+  /**
+    * get all visible lessons
+    * @param courseId scope
+    * @param extraVisible add lessons with external visible configuration to result
+    *                     (isVisible undefined in lesson table)
+    */
+  def getAllVisible(courseId: Long, extraVisible: Boolean): Seq[Lesson] = execSync {
+
+    val visibleCondition: (LessonTable => Rep[Option[Boolean]]) = if (extraVisible)
+      l => l.isVisible === true || l.isVisible.isEmpty
+    else
+      l => l.isVisible === true
+
+    lessons
+      .filterByCourseId(courseId)
+      .filter(visibleCondition)
+      .result
   }
 
-  override def getAll(criterion: LessonFilter,
-                      ascending: Boolean,
-                      skipTake: Option[SkipTake]
+  override def getLessonsWithData(criterion: LessonFilter,
+                                  ascending: Boolean,
+                                  skipTake: Option[SkipTake]
                      ): RangeResult[LessonFull] = {
 
     val lessonIdsByTag = criterion.tagId.map(tagService.getItemIds)
@@ -379,15 +438,18 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
         query = query.filterByIds(ids)
       }
 
-      val result = db.withSession { implicit s =>
-        //we can't use query.length
-        //select count() ... where ID in (...) - falls on hypersonic (liferay version)
-        val count = query.map(_.id).run.size
-
-        val resultLessons = query.sortByTitle(ascending).slice(skipTake).list
-
-        RangeResult(count, resultLessons)
+      //we can't use query.length
+      //select count() ... where ID in (...) - falls on hypersonic (liferay version)
+      val (countItems, resultLessons) = execSync {
+        for {
+          countItems <- query.map(_.id).result
+          resultLessons <- query.sortByTitle(ascending).slice(skipTake).result
+        } yield {
+          (countItems, resultLessons)
+        }
       }
+
+      val result = RangeResult(countItems.size, resultLessons)
 
       if (result.records.isEmpty) {
         RangeResult(result.total, Nil)
@@ -401,9 +463,11 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
     val ids = result.records.map(_.id)
 
     val tags = ids.map(id => (id, tagService.getByItemId(id))).toMap
-    val limits = db.withSession { implicit s =>
-      lessonLimits.filterByLessonIds(ids).list.map(limit => (limit.lessonId, limit)).toMap
-    }
+    val limits = execSync {
+      lessonLimits.filterByLessonIds(ids).result
+    } map {
+      limit => (limit.lessonId, limit)
+    } toMap
 
     val userIds = result.records.map(_.ownerId).distinct
     val users = userService.getUsers(userIds).map(u => new User(u))
@@ -418,18 +482,49 @@ abstract class LessonServiceImpl(val db: JdbcBackend#DatabaseDef, val driver: Jd
   }
 
   override def getTagsFromCourse(courseId: Long): Seq[ValamisTag] = {
-    val lessonIds = db.withSession { implicit s =>
-      lessons.filterByCourseId(courseId).selectId.run
+    val lessonIds = execSync {
+      lessons.filterByCourseId(courseId).selectId.result
     }
 
     tagService.getByItemIds(lessonIds)
   }
 
   override def getTagsFromCourses(courseIds: Seq[Long]): Seq[ValamisTag] = {
-    val lessonIds = db.withSession { implicit s =>
-      lessons.filterByCourseIds(courseIds).selectId.run
+    val lessonIds = execSync {
+      lessons.filterByCourseIds(courseIds).selectId.result
     }
 
     tagService.getByItemIds(lessonIds)
+  }
+
+  override def isExisted(lessonId: Long): Boolean = execSync {
+    lessons.filterById(lessonId).map(_.id).take(1).result.headOption.map(_.isDefined)
+  }
+
+  private def updateLogo(id: Long, name: Option[String]) = execSync {
+    lessons.filterById(id)
+      .map(_.logo)
+      .update(name)
+  }
+
+
+  override def getLessonURL(lesson: Lesson, companyId: Long, plId: Option[Long] = None): String = {
+
+    val assetEntry = AssetEntryLocalServiceHelper.getAssetEntry(classOf[Lesson].getName, lesson.id)
+
+    val sb = new StringBuilder()
+    sb.append(PortalUtilHelper.getLocalHostUrlForCompany(companyId))
+    sb.append(PortalUtilHelper.getPathMain)
+    sb.append("/portal/learn-portlet/open_package")
+    sb.append(StringPoolHelper.QUESTION)
+    sb.append("plid")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(String.valueOf(plId.getOrElse("")))
+    sb.append(StringPoolHelper.AMPERSAND)
+    sb.append("resourcePrimKey")
+    sb.append(StringPoolHelper.EQUAL)
+    sb.append(String.valueOf(assetEntry.getEntryId))
+
+    sb.toString
   }
 }

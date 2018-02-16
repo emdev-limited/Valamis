@@ -1,0 +1,670 @@
+<script type="text/template" id="allCoursesMainAppLayoutTemplate">
+    <div id="allCoursesRegion"></div>
+</script>
+
+<script type="text/template" id="coursesBrowserMainAppLayoutTemplate">
+    <ul class="nav nav-tabs" id="studentViewTabs">
+        <li class="">
+            <a id="studentViewMyCoursesTab" href="#studentViewMyCourses">{{myCoursesLabel}}</a>
+        </li>
+        <li class="">
+            <a id="studentViewAvailableCoursesTab" href="#studentViewAvailableCourses">{{availableCoursesLabel}}</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="studentViewMyCourses" class="tab-pane"></div>
+        <div id="studentViewAvailableCourses" class="tab-pane"></div>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesAppLayoutTemplate">
+    <div id="allCourseToolbar"></div>
+    <div id="allCourseCourseList"></div>
+    <div id="allCoursePaginator" class="val-paginator"></div>
+</script>
+
+<script type="text/template" id="allCoursesToolbarTemplate">
+    <div class="val-row filters-row">
+        <div class="filter-element shift-left">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+        {{#isEditor}}{{#ALLCOURSE.CREATE_COURSE}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-new-course">
+                <span class="val-icon-plus"></span>{{addCourseButtonLabel}}
+            </button>
+        </div>
+        {{/ALLCOURSE.CREATE_COURSE}}{{/isEditor}}
+    </div>
+
+    <div class="val-row filters-row">
+        <div class="shift-left filter-element paging-showing-label" id="allCoursesToolbarShowing"></div>
+
+        <div class="dropdown filter-element shift-right js-sort-filter">
+            <button class="button medium simple ">
+                <span class="dropdown-text"> {{byNameAscLabel}} </span><span
+                    class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+
+            <ul class="dropdown-menu">
+                <li class="js-sort" data-value="nameAsc"> {{byNameAscLabel}}</li>
+                <li class="js-sort" data-value="nameDesc"> {{byNameDescLabel}}</li>
+            </ul>
+        </div>
+
+        <button class="button medium simple no-text hide-s shift-right js-display-option"
+                data-value="{{tilesModeOption}}">
+            <span class="val-icon-grid-view">Grid View</span>
+        </button>
+        <button class="button medium simple no-text hide-s shift-right js-display-option"
+                data-value="{{listModeOption}}">
+            <span class="val-icon-list-view">List View</span>
+        </button>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesEditModalTemplate">
+    <div class="modal-content"></div>
+</script>
+
+<script type="text/html" id="allCoursesMainEditView">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs" id="editCourseTabs">
+            <li class="">
+                <a id="editCourseDetailsTab" href="#editCourseDetails">{{editCourseInfoLabel}}</a>
+            </li>
+            {{#isEditor}}
+            {{#isMemberEditor}}
+            <li class="">
+                <a id="editCourseMembersTab" href="#editCourseMembers" class="hidden">{{editCourseMembersLabel}}</a>
+            </li>
+            <li class="">
+                <a id="editRequestsTab" href="#editRequests" class="hidden">
+                    {{editRequestsLabel}}
+                </a>
+                <span class="request-count-tab-label membership-requests-count"></span>
+            </li>
+            <li class="">
+                <a id="editQueueTab" href="#editQueues" class="hidden">
+                    {{editQueuesLabel}}
+                </a>
+                <span class="queue-count-tab-label membership-requests-count" style="display: none;"></span>
+            </li>
+            {{/isMemberEditor}}
+            {{/isEditor}}
+        </ul>
+
+        <div class="tab-content">
+            <div id="editCourseDetails" class="tab-pane"></div>
+            <div id="editCourseMembers" class="tab-pane"></div>
+            <div id="editRequests" class="tab-pane"></div>
+            <div id="editQueues" class="tab-pane"></div>
+        </div>
+    </div>
+    <div class="modal-close val-icon-exit"></div>
+
+    <div class="bbm-modal__bottombar">
+        <button class="button medium primary js-submit-button">
+            {{saveCourseButtonLabel}}
+        </button>
+        <button class="button medium simple modal-close">
+            {{cancelLabel}}
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="allCoursesEditCourseView">
+    <div class="div-table val-info-table">
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{courseNameLabel}}</div>
+            <div class="div-col content-col">
+                <input type='text' title='{{requiredFieldTooltipLabel}}'
+                       class="js-course-title text-input valamis" value='{{title}}' placeholder='{{newCourseLabel}}'/>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{slidesetLogoLabel}}</div>
+            <div class="div-col content-col">
+                <img src="{{logoUrlTmpstamp}}" class='js-logo shift-left val-img-logo course js-upload-image'>
+                <div class="button-block shift-left">
+                    <button class="button medium primary inline js-upload-image">
+                        {{uploadLabel}}
+                    </button>
+                    <button class="button medium simple no-text val-icon-trash danger inline js-delete-logo">
+                        {{deleteLogoLabel}}
+                    </button>
+                    <button class="button medium neutral js-select-from-media-gallery">
+                        {{selectFromMediaGalleryLabel}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{courseDescriptionLabel}}</div>
+            <div class="div-col content-col">
+                <textarea rows="4" class="js-course-description textarea valamis "
+                          placeholder='{{courseDescriptionPlaceholder}}'>{{description}}</textarea>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{courseLongDescriptionLabel}}</div>
+            <div class="div-col content-col">
+                <textarea rows="4" id="allCoursesLongDescriptionTextView" class="js-course-long-description textarea valamis "
+                          placeholder='{{courseLongDescriptionPlaceholder}}'>{{longDescription}}</textarea>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{courseActiveState}}</div>
+            <div class="div-col content-col">
+                <div>
+                    <label class="radio-inline">
+                        <input type="radio" name="siteActiveType" id="siteActiveYes">
+                        {{yesLabel}}
+                    </label>
+
+                    <label class="radio-inline">
+                        <input type="radio" name="siteActiveType" id="siteActiveNo">
+                        {{noLabel}}
+                    </label>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{courseFriendlyUrlLabel}}</div>
+            <div class="div-col content-col">
+                <input type='text' class="js-course-friendly-url text-input valamis"
+                       value='{{friendlyUrl}}' placeholder='{{friendlyUrlPlaceholder}}'/>
+            </div>
+        </div>
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{membershipTypeTitle}}</div>
+            <div class="div-col content-col course-type-selector">
+                <div>
+                    <label class="radio-inline course-type-name">
+                        <input type="radio" name="membershipType" id="openMembership">
+                        {{membershipTypeOptionOpenLabel}}
+                    </label>
+                    <label class="course-type-description" id="membershipSelectionCommentOpen">
+                        {{membershipTypeOptionOpenComment}}
+                    </label>
+                    <label class="radio-inline course-type-name">
+                        <input type="radio" name="membershipType" id="requestMembership">
+                        {{membershipTypeRestrictedLabel}}
+                    </label>
+                    <label class="course-type-description" id="membershipSelectionCommentRestricted">
+                        {{membershipTypeRestrictedComment}}
+                    </label>
+                    <label class="radio-inline course-type-name">
+                        <input type="radio" name="membershipType" id="closedMembership">
+                        {{membershipTypePrivateLabel}}
+                    </label>
+                    <label class="course-type-description" id="membershipSelectionCommentPrivate">
+                        {{membershipTypePrivateComment}}
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{categoriesLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <input type="text" class="js-course-tags val-tags demo-default selectized" title="Lesson tags"
+                       tabindex="-1" style="display: none;"/>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{certificatesLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <input type="text" class="js-course-certificates val-certificates demo-default selectized" title="Course certificates"
+                       tabindex="-1" style="display: none;"/>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{instructorsLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <input type="text" class="js-course-instructors val-instructors demo-default selectized" title="Course instructors"
+                       tabindex="-1" style="display: none;"/>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{courseFromPlaceholder}}</div>
+            <div class="div-col content-col" style="position: relative">
+                <input type="text" class="js-course-begin-datetimepicker">
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{courseToPlaceholder}}</div>
+            <div class="div-col content-col" style="position: relative">
+                <input type="text" class="js-course-end-datetimepicker">
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col">{{courseUserLimitLabel}}</div>
+            <div class="div-col content-col">
+                <div class="js-course-user-limit js-plus-minus display-inline-block"></div>
+                <p class="display-inline-block">{{courseUserLimitComment}}</p>
+            </div>
+        </div>
+        {{^title}}
+        <div class="div-row">
+            <div class="div-col name-col">{{courseTemplateLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <select type="text" class="js-course-template demo-default selectized" title="Templates" tabindex="-1" />
+            </div>
+        </div>
+        {{/title}}
+        <div class="div-row">
+            <div class="div-col name-col">{{courseThemeLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <select type="text" class="js-course-theme demo-default selectized" title="Themes" tabindex="-1" />
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="allCoursesViewCourseView">
+    <div class="div-table val-info-table">
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{slidesetLogoLabel}}</div>
+            <div class="div-col content-col">
+                <img src="{{logoUrlTmpstamp}}" class='js-logo shift-left val-img-logo course js-upload-image'>
+            </div>
+        </div>
+
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{courseNameLabel}}</div>
+            <div class="div-col content-col">{{title}}</div>
+        </div>
+
+        {{#description}}
+        <div class="div-row">
+            <div class="div-col name-col valamis">{{courseDescriptionLabel}}</div>
+            <div class="div-col content-col">{{description}}</div>
+        </div>
+        {{/description}}
+
+        {{#longDescription}}
+        <div class="div-row">
+            <div class="div-col name-col">{{courseLongDescriptionLabel}}</div>
+            <div class="div-col content-col js-long-description">{{{longDescription}}}</div>
+        </div>
+        {{/longDescription}}
+
+        {{#beginDate}}
+        <div class="div-row">
+            <div class="div-col name-col">{{courseFromPlaceholder}}</div>
+            <div class="div-col content-col">{{formattedBeginDate}}</div>
+        </div>
+        {{/beginDate}}
+
+        {{#endDate}}
+        <div class="div-row">
+            <div class="div-col name-col">{{courseToPlaceholder}}</div>
+            <div class="div-col content-col">{{formattedEndDate}}</div>
+        </div>
+        {{/endDate}}
+
+        {{#tagsList}}
+        <div class="div-row">
+            <div class="div-col name-col">{{categoriesLabel}}</div>
+            <div class="div-col content-col">{{tagsList}}</div>
+        </div>
+        {{/tagsList}}
+
+        {{#certificatesList}}
+        <div class="div-row">
+            <div class="div-col name-col">{{certificatesLabel}}</div>
+            <div class="div-col content-col">
+                <ul class="js-course-certificates course-certificates"></ul>
+            </div>
+        </div>
+        {{/certificatesList}}
+
+        <div class="div-row">
+            <div class="div-col name-col">{{courseUserLabel}}</div>
+            <div class="div-col content-col selectize-dropdown-style">
+                <span class="js-course-participants"></span>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesLayoutTemplate">
+    <div class="js-courses-list val-row list"></div>
+    <div class="div-table no-content-table hidden js-no-items">
+        <div class="div-col div-col-center">{{noCoursesLabel}}</div>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesRowViewTemplate">
+    <div class="tile-content with-action">
+        <div class="tile-with-rating">
+            <div class="image course"
+                 {{#hasLogo}}
+                 style="background-image: url('{{logoUrl}}&tmstamp={{timestamp}}')"
+                 {{
+            /hasLogo}}
+            >
+            {{#url}}<a href={{url}} target="_blank"></a>{{/url}}
+        </div>
+        <div class="val-rating js-valamis-rating{{#notRated}} not-rated{{/notRated}}{{#noAverage}} no-average{{/noAverage}}">
+            <div class="val-rating-content js-rating-content">
+                <span class="val-rating-average"><i class="val-icon val-icon-star"></i><em class="js-rating-average">{{ratingAverage}}</em></span>
+                <span class="val-rating-score js-rating-score">
+                        <span class="current"><i class="val-icon val-icon-star"></i><em class="js-rating-current">{{ratingScore}}</em></span>
+                        <span class="delete js-rating-delete"><i class="val-icon val-icon-delete"></i></span>
+                    </span>
+            </div>
+            <div class="val-rating-area js-rating-area"></div>
+        </div>
+    </div>
+    <ul>
+        <li class="titleRow">
+            {{#url}}<a href="{{url}}" target="_blank">{{/url}}
+            <span class="title">{{title}}</span>
+            {{#url}}</a>{{/url}}
+            {{#isEditor}}{{#membershipRequestsCount}}
+            <span class="membership-requests-count">{{membershipRequestsCount}}</span>
+            <span class="membership-requests-label">{{requestsPendingLabel}}</span>
+            {{/membershipRequestsCount}}{{/isEditor}}
+        </li>
+        {{#courseDateInterval}}
+        <li class="date-interval-label hidden-tiles">{{courseDateInterval}}</li>
+        {{/courseDateInterval}}
+        {{#beginDateFormatted}}
+        <li class="date-interval-label hidden-list">{{beginDateFormatted}}</li>
+        {{/beginDateFormatted}}
+        {{#endDateFormatted}}
+        <li class="date-interval-label hidden-list">{{endDateFormatted}}</li>
+        {{/endDateFormatted}}
+        {{#description}}
+        <li class="description hidden-tiles">{{description}}</li>
+        {{/description}}
+        {{^isEditor}}
+            {{#isQueueMember}}
+            <li class="">
+                <span class="membership-requests-label">{{buttonLabelRequestedQueue}}</span>
+            </li>
+            {{/isQueueMember}}
+        {{/isEditor}}
+        <li>
+            <span class="course-type val-label"></span>
+            {{^isActive}}<span class="val-label">{{inactiveLabel}}</span>{{/isActive}}
+            <span>· {{userCount}} {{participantLabel}}
+                {{#userLimit}}
+                / {{userLimit}} {{maxLabel}}
+                {{/userLimit}}
+            </span>
+        </li>
+    </ul>
+    <div class="dropdown actions shift-right">
+        <button class="button medium neutral">
+            <span class="dropdown-text">{{actionsButtonLabel}}</span><span
+                class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {{#isEditor}}
+            {{#ALLCOURSE.MODIFY_ACTION}}
+            <li class="js-course-info-edit" data-value="editInfo:true"> {{editInfoButtonLabel}}</li>
+            {{/ALLCOURSE.MODIFY_ACTION}}
+            {{^ALLCOURSE.MODIFY_ACTION}}
+            <li class="js-course-info-view" data-value="editInfo:true"> {{viewInfoButtonLabel}}</li>
+            {{/ALLCOURSE.MODIFY_ACTION}}
+            {{#isMemberEditor}}
+            <li class="js-course-members-edit" data-value="editMembers:true"> {{editMembersButtonLabel}}</li>
+            {{#isRestrictedCourse}}
+            <li class="js-course-requests-edit" data-value="editRequests:true"> {{editRequestsButtonLabel}}</li>
+            {{/isRestrictedCourse}}
+            {{#isQueue}}
+            <li class="js-course-queue-edit" data-value="editQueue:true"> {{editQueueButtonLabel}}</li>
+            {{/isQueue}}
+            {{/isMemberEditor}}
+            {{#ALLCOURSE.MODIFY_ACTION}}
+            <li class="js-course-delete" data-value="delete:true"> {{deleteButtonLabel}}</li>
+            {{/ALLCOURSE.MODIFY_ACTION}}
+            {{/isEditor}}
+            {{^isEditor}}
+            <li class="js-course-info-view" data-value="editInfo:true"> {{viewInfoButtonLabel}}</li>
+            <li class="js-course-join"></li>
+            {{/isEditor}}
+        </ul>
+    </div>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesMembersToolbarViewTemplate">
+
+    <div class="filters-row clearfix">
+        <div class="filter-element paging-showing-label shift-left js-paginator-showing"></div>
+
+        <div class="filter-element shift-left">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+
+        <div class="filter-element shift-right">
+            {{#isAddView}}
+            <button class="button medium primary shift-right js-add-items" data-value="{{memberType}}">
+                {{addMembersLabel}}
+            </button>
+            {{/isAddView}}
+        </div>
+    </div>
+
+    <div class="filters-row clearfix display-on-selection">
+        <div class="filter-element shift-left user-selection-count">
+            <span class="user-selection-count-label"></span>
+            <span class="user-selection-separator">-</span>
+            <span class="deselect-all-label">{{deselectAllLabel}}</span>
+        </div>
+        <div class="filter-element shift-left user-global-deselect"></div>
+        <div class="filter-element shift-left user-global-buttons">
+            <button class="button medium simple no-text js-global-assign-role">
+                <span class="val-icon-user"></span>
+            </button>
+            <button class="button medium danger simple no-text js-global-delete-item">
+                <span class="val-icon-trash"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="filters-row clearfix table-header-row">
+        <table class="val-table">
+            <thead>
+            <tr>
+                <th class="narrow-col">
+                    <input type="checkbox" name="check"
+                           {{#isAddView}}
+                           id="AddViewCheckbox"
+                           {{/isAddView}}
+                    {{^isAddView}}
+                    id="notAddViewCheckbox"
+                    {{/isAddView}}
+                    class="val-checkbox js-selectAll-item"/>
+                    <label class="checkbox-label"
+                           {{#isAddView}}
+                           for="AddViewCheckbox"
+                           {{/isAddView}}
+                    {{^isAddView}}
+                    for="notAddViewCheckbox"
+                    {{/isAddView}} ">
+                    </label>
+                </th>
+
+                <th class="picture-placeholder"></th>
+                <th class="name-col">{{memberLabel}}</th>
+
+                {{#isAddView}}
+                <th class="role-col">{{rolesLabel}}</th>
+                {{/isAddView}}
+
+                <th class="text-right">
+                    <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
+                        <button class="button medium simple">
+                            <span class="dropdown-text">{{byNameAscLabel}}</span><span
+                                class="val-icon-arrow-down val-icon-right"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li class="selected" data-value="name:true"> {{byNameAscLabel}}</li>
+                            <li data-value="name:false"> {{byNameDescLabel}}</li>
+                        </ul>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesEditMembersItemViewTemplate">
+    <td class="narrow-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
+    </td>
+
+    {{#picture}}
+    <td class="narrow-col">
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+    </td>
+    {{/picture}}
+
+    <td class="name-col title"> {{name}}</td>
+
+    <td><span class="role-col"></span></td>
+
+    <td class="text-right">
+        <button class="button medium simple no-text js-assign-role">
+            <span class="val-icon-user"></span>
+        </button>
+        <button class="button medium danger simple no-text js-delete-item">
+            <span class="val-icon-trash"></span>
+        </button>
+    </td>
+</script>
+
+<script type="text/template" id="allCoursesAddMembersItemViewTemplate">
+    <td class="narrow-col">
+        {{#prerequisitesCompleted}}
+        <input type="checkbox" id="toggleAddItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleAddItem_{{id}}"></label>
+        {{/prerequisitesCompleted}}
+        {{^prerequisitesCompleted}}
+        <input type="checkbox" name="check" class="val-checkbox" disabled/>
+        <label class="checkbox-label"></label>
+        {{/prerequisitesCompleted}}
+    </td>
+
+    {{#picture}}
+    <td class="narrow-col">
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+    </td>
+    {{/picture}}
+
+    <td class="name-col title"> {{name}}</td>
+
+
+    <td class="text-right">
+        {{^prerequisitesCompleted}}{{userJoinByCertificatesError}}{{/prerequisitesCompleted}}
+    </td>
+
+</script>
+
+<script type="text/template" id="allCoursesMemberRequestsItemViewTemplate">
+    {{#picture}}
+    <td class="narrow-col">
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+    </td>
+    {{/picture}}
+
+    <td class="name-col">
+        <div class="title">{{name}}</div>
+        <div class="info">{{email}}</div>
+    </td>
+
+    <td class="text-right">
+        {{^prerequisitesCompleted}}
+        <span class="info">{{userJoinByCertificatesError}}</span>
+        {{/prerequisitesCompleted}}
+
+        {{#isMyId}}
+        <span class="info">{{userJoinHimselfError}}</span>
+        {{/isMyId}}
+        {{^isMyId}}
+            {{#prerequisitesCompleted}}
+            <button class="button medium primary js-button-accept">{{buttonLabelApprove}}</button>
+            {{/prerequisitesCompleted}}
+            <button class="button medium neutral js-button-deny">{{buttonLabelDeny}}</button>
+        {{/isMyId}}
+    </td>
+</script>
+
+<script type="text/template" id="allCoursesMemberQueueItemViewTemplate">
+    {{#picture}}
+    <td class="narrow-col">
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+    </td>
+    {{/picture}}
+
+    <td class="name-col">
+        <div class="title">{{name}}</div>
+        <div class="info">{{email}}</div>
+    </td>
+
+    <td class="text-right">
+        {{^prerequisitesCompleted}}
+        <span class="info">{{userJoinByCertificatesError}}</span>
+        {{/prerequisitesCompleted}}
+
+        {{#isMyId}}
+        <span class="info">{{userJoinHimselfError}}</span>
+        {{/isMyId}}
+        {{^isMyId}}
+            {{#prerequisitesCompleted}}
+            <button class="button medium primary js-button-accept">{{buttonLabelApprove}}</button>
+            {{/prerequisitesCompleted}}
+            <button class="button medium neutral js-button-deny">{{buttonLabelDeny}}</button>
+        {{/isMyId}}
+    </td>
+</script>
+
+<script type="text/template" id="allCoursesAddSiteRolesToolbarViewTemplate">
+    <div class="filters-row clearfix table-header-row site-roles-table-header-row">
+        <table class="val-table">
+            <thead>
+            <tr>
+                <th class="narrow-col">
+                    <input type="checkbox" name="check" id="SiteRolesGlobalCheckbox"
+                           class="val-checkbox js-selectAll-item"/>
+                    <label class="checkbox-label" for="SiteRolesGlobalCheckbox"> </label>
+                </th>
+
+                <th> {{siteRoleNameHeaderLabel}}</th>
+                <th> {{siteRoleDescriptionHeaderLabel}}</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</script>
+
+<script type="text/template" id="allCoursesAddSiteRolesItemViewTemplate">
+    <td class="narrow-col">
+        <input type="checkbox" id="siteRoleToggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="siteRoleToggleItem_{{id}}"></label>
+    </td>
+
+    <td class="title"> {{name}}</td>
+    <td> {{description}}</td>
+</script>

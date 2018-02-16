@@ -29,7 +29,12 @@ trait FileService {
                destName: String,
                deleteFolder: Boolean = true): Unit
 
+  @deprecated("""Shouldn't require "files/" in path. see deleteFile""")
+  def deleteFileStoryTree(name: String): Unit
+
   def deleteFile(name: String): Unit
+
+  def deleteFile(folder: String, name: String): Unit
 
   def deleteByPrefix(prefix: String): Unit
 

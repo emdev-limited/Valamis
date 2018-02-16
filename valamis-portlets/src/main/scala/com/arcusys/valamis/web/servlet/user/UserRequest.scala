@@ -14,9 +14,12 @@ object UserRequest extends BaseCollectionRequest with BaseRequest {
 
   val ModuleId = "moduleId"
   val Available = "available"
-  val IsOnlyPublished = "isOnlyPublished"
+  val IsActive = "isActive"
+  val IsAchieved = "isAchieved"
   val IsUserJoined = "isUserJoined"
+  val WithUserIdFilter = "withUserIdFilter"
   val CertificateId = "certificateId"
+  val UserIds = "userIds"
   val WithOpenbadges = "withOpenBadges"
   val WithStat = "withStat"
 
@@ -34,19 +37,23 @@ object UserRequest extends BaseCollectionRequest with BaseRequest {
 
     def moduleID = Parameter(ModuleId).intRequired
 
-    def isShortResult = !Parameter(ResultAs).option.exists(_ == "detailed")
+    def isShortResult = !Parameter(ResultAs).option.contains("detailed")
 
     def available = Parameter(Available).booleanOption.getOrElse(false)
 
     def scope = Parameter(Scope).longOption
 
-    def isOnlyPublished = Parameter(IsOnlyPublished).booleanOption.getOrElse(true)
+    def isActive = Parameter(IsActive).booleanOption
 
-    def isPublished = if (isOnlyPublished) Some(true) else None
+    def isAchieved = Parameter(IsAchieved).booleanOption
 
     def certificateId = Parameter(CertificateId).longOption(-1)
 
+    def userIds = Parameter(UserIds).multiWithEmpty.map(_.toLong)
+
     def isUserJoined = Parameter(IsUserJoined).booleanOption.getOrElse(true)
+
+    def withUserIdFilter = Parameter(WithUserIdFilter).booleanOption.getOrElse(false)
 
     def withOpenBadges = Parameter(WithOpenbadges).booleanOption.getOrElse(false)
 

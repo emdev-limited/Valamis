@@ -2,7 +2,9 @@ package com.arcusys.valamis.web.portlet
 
 import javax.portlet.{RenderRequest, RenderResponse}
 
-import com.arcusys.valamis.web.portlet.base.{OAuthPortlet, PortletBase}
+import com.arcusys.learn.liferay.services.CompanyHelper
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
+import com.arcusys.valamis.web.portlet.base.PortletBase
 
 class AchievedCertificatesView extends OAuthPortlet with PortletBase {
 
@@ -12,8 +14,8 @@ class AchievedCertificatesView extends OAuthPortlet with PortletBase {
 
     val data = securityScope.data
 
-    sendTextFile("/templates/2.0/achieved_certificates_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/achieved_certificates_templates.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(data, "achieved_certificates.html")
   }
 }

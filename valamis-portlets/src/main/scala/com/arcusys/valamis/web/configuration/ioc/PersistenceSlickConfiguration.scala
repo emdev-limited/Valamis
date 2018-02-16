@@ -1,22 +1,25 @@
 package com.arcusys.valamis.web.configuration.ioc
 
-import com.arcusys.valamis.content.storage._
-import com.arcusys.valamis.content.storage.impl.{AnswerStorageImpl, CategoryStorageImpl, PlainTextStorageImpl, QuestionStorageImpl}
+import com.arcusys.valamis.certificate.service.LearningPathService
+import com.arcusys.valamis.course.service.{CourseCertificateService, CourseCertificateServiceImpl}
 import com.arcusys.valamis.file.storage.FileStorage
 import com.arcusys.valamis.lesson.scorm.model.manifest.{ExitConditionRule, PostConditionRule, PreConditionRule}
 import com.arcusys.valamis.lesson.scorm.storage._
 import com.arcusys.valamis.lesson.scorm.storage.sequencing._
 import com.arcusys.valamis.lesson.scorm.storage.tracking._
-import com.arcusys.valamis.lrsEndpoint.storage.{LrsEndpointStorage, LrsTokenStorage}
-import com.arcusys.valamis.persistence.common.{DatabaseLayer, Slick3DatabaseLayer, SlickDBInfo}
+import com.arcusys.valamis.persistence.common.SlickDBInfo
+import com.arcusys.valamis.persistence.impl.contentProviders.ContentProviderRepositoryImpl
+import com.arcusys.valamis.course.storage.{CourseCertificateRepository, CourseExtendedRepository, CourseInstructorRepository}
+import com.arcusys.valamis.persistence.impl.course.{CourseCertificateRepositoryImpl, CourseExtendedRepositoryImpl, CourseInstructorRepositoryImpl}
 import com.arcusys.valamis.persistence.impl.file.FileRepositoryImpl
-import com.arcusys.valamis.persistence.impl.lrs.{LrsEndpointStorageImpl, TokenRepositoryImpl}
+import com.arcusys.valamis.persistence.impl.lti.LTIDataRepositoryImpl
 import com.arcusys.valamis.persistence.impl.scorm.storage._
-import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementStorageImpl, SettingStorageImpl, StatementToActivityStorageImpl}
+import com.arcusys.valamis.persistence.impl.settings.{ActivityToStatementStorageImpl, StatementToActivityStorageImpl}
 import com.arcusys.valamis.persistence.impl.slide._
 import com.arcusys.valamis.persistence.impl.social.{CommentRepositoryImpl, LikeRepositoryImpl}
 import com.arcusys.valamis.persistence.impl.uri.TincanUriStorageImpl
-import com.arcusys.valamis.settings.storage.{ActivityToStatementStorage, SettingStorage, StatementToActivityStorage}
+import com.arcusys.valamis.settings.{SettingStorage, SettingStorageImpl}
+import com.arcusys.valamis.settings.storage.{ActivityToStatementStorage, StatementToActivityStorage}
 import com.arcusys.valamis.slide.storage._
 import com.arcusys.valamis.social.storage.{CommentRepository, LikeRepository}
 import com.arcusys.valamis.uri.storage.TincanURIStorage
@@ -34,10 +37,6 @@ class PersistenceSlickConfiguration(dbInfo: => SlickDBInfo)(implicit configurati
       new FileRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
-    bind[LrsTokenStorage].toSingle {
-      new TokenRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
-    }
-
     bind[CommentRepository].toSingle {
       new CommentRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
@@ -46,7 +45,7 @@ class PersistenceSlickConfiguration(dbInfo: => SlickDBInfo)(implicit configurati
       new LikeRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
-    bind[SlideThemeRepositoryContract].toSingle {
+    bind[SlideThemeRepository].toSingle {
       new SlideThemeRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
@@ -70,46 +69,20 @@ class PersistenceSlickConfiguration(dbInfo: => SlickDBInfo)(implicit configurati
       new SlideElementPropertyRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
-    bind[SlidePropertyRepository].toSingle{
-      new SlidePropertyRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
-    }
-
     bind[DeviceRepository].toSingle{
       new DeviceRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
+    bind[ContentProviderRepository].toSingle{
+      new ContentProviderRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
+    }
+
+    bind[LTIDataRepository].toSingle{
+      new LTIDataRepositoryImpl(dbInfo.slickProfile)
+    }
+
     bind[StatementToActivityStorage] toSingle {
       new StatementToActivityStorageImpl(dbInfo.databaseDef, dbInfo.slickProfile)
-    }
-
-    bind[LrsEndpointStorage] toSingle {
-      new LrsEndpointStorageImpl(dbInfo.databaseDef, dbInfo.slickProfile)
-    }
-
-    //Content manager
-
-    bind[DatabaseLayer].toSingle {
-      new Slick3DatabaseLayer(dbInfo.databaseDef, dbInfo.slickProfile)
-    }
-
-    //plain text
-    bind[PlainTextStorage].toSingle {
-      new PlainTextStorageImpl(dbInfo.databaseDef,dbInfo.slickProfile)
-    }
-
-    //categories
-    bind[CategoryStorage].toSingle {
-      new CategoryStorageImpl(dbInfo.databaseDef,dbInfo.slickProfile)
-    }
-
-    //questions
-    bind[QuestionStorage].toSingle {
-      new QuestionStorageImpl(dbInfo.databaseDef,dbInfo.slickProfile)
-    }
-
-    //answers
-    bind[AnswerStorage].toSingle {
-      new AnswerStorageImpl(dbInfo.databaseDef, dbInfo.slickProfile)
     }
 
     bind[TincanURIStorage] toSingle {
@@ -229,5 +202,24 @@ class PersistenceSlickConfiguration(dbInfo: => SlickDBInfo)(implicit configurati
 
     bind[ScormUserStorage] toSingle {
       new UserStorageImpl(dbInfo.databaseDef, dbInfo.slickProfile)
+    }
+
+    bind[CourseExtendedRepository] toSingle {
+      new CourseExtendedRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
+    }
+
+    bind[CourseCertificateRepository] toSingle {
+      new CourseCertificateRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
+    }
+
+    bind[CourseInstructorRepository] toSingle {
+      new CourseInstructorRepositoryImpl(dbInfo.databaseDef, dbInfo.slickProfile)
+    }
+
+    bind[CourseCertificateService] toSingle {
+      new CourseCertificateServiceImpl {
+        lazy val courseCertificateRepository = inject[CourseCertificateRepository](None)
+        lazy val learningPathService = inject[LearningPathService](None)
+      }
     }
 })

@@ -1,10 +1,10 @@
 <!--[if (gte IE 8)&(lt IE 10)]>
-<script src="{{contextPath}}/js2.0/cors/jquery.xdr-transport.js"></script>
-<script src="{{contextPath}}/js2.0/vendor/classList.min.js"></script>
+<script src="{{contextPath}}/js/cors/jquery.xdr-transport.js"></script>
 <![endif]-->
 
 <div id="lessonStudioAppRegion"></div>
 <input type="hidden" id="SCORMContextPath" value="{{contextPath}}"/>
+<input type="hidden" id="ServletContextPath" value="{{servletContextPath}}"/>
 <div class="slideset-editor hidden">
     <div id="revealEditor">
         <div class="sidebar"></div>
@@ -14,16 +14,33 @@
                 <div class="reveal-controls"></div>
             </div>
             <div id="slides-modals-layout"></div>
-            <div class="js-version-sidebar version-sidebar">
-
-
-            </div>
+            <div class="js-version-sidebar version-sidebar"></div>
         </div>
     </div>
     <div class="slides-editor-topbar js-slides-editor-topbar"></div>
+
+    <div class="spinner-container js-loading-spinner hidden">
+        <div class="spinner center">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">
+
+    CKEDITOR_BASEPATH = "{{contextPath}}/js/vendor/ckeditor/";
+
     Backbone.emulateJSON = true;
 
     function onGoogleClientAPIReady() {
@@ -34,6 +51,7 @@
     }
 
     jQueryValamis(function () {
+
 
         if (!valamisApp.started) {
             valamisApp.start();
@@ -54,19 +72,26 @@
         var permissionActionsLessonStudio = {
             LessonStudio: {
                 MODIFY: eval('{{permissionToModify}}'),
-                CAN_EDIT_THEME: eval('{{permissionEditTheme}}')
+                CAN_EDIT_THEME: eval('{{permissionEditTheme}}'),
+                CAN_UNLOCK_LESSON: eval('{{permissionUnlockLesson}}')
             },
             ContentManager : {
                 MODIFY: eval('{{permissionCMToModify}}')
             }
         };
-
         var googleClientId = '{{{googleClientId}}}',
             googleAppId = '{{{googleAppId}}}',
             googleApiKey = '{{{googleApiKey}}}';
+
+        var ltiVersion = '{{ltiVersion}}',
+            ltiMessageType = '{{ltiMessageType}}',
+            ltiLaunchPresentationReturnUrl = '{{ltiLaunchPresentationReturnUrl}}',
+            ltiOauthVersion = '{{ltiOauthVersion}}',
+            ltiOauthSignatureMethod = '{{ltiOauthSignatureMethod}}';
+
         var googleApiConfigured = !!(googleClientId && googleAppId && googleApiKey);
         var lessonStudioOptions = {
-            resourceName: 'lessonStudio',
+            resourceName: ['lessonStudio', 'common'],
             permissions: permissionActionsLessonStudio,
             app: lessonStudio,
             appOptions: {
@@ -75,6 +100,11 @@
                 googleApiKey: googleApiKey,
                 googleApiConfigured: googleApiConfigured,
                 googleClientApiConfigured: googleApiConfigured,
+                ltiVersion: ltiVersion,
+                ltiMessageType: ltiMessageType,
+                ltiLaunchPresentationReturnUrl: ltiLaunchPresentationReturnUrl,
+                ltiOauthVersion: ltiOauthVersion,
+                ltiOauthSignatureMethod: ltiOauthSignatureMethod,
                 portletId: '{{{portletId}}}',
                 groupId: '{{{groupId}}}',
                 primaryKey: '{{{primaryKey}}}',
@@ -84,7 +114,8 @@
                 eventAggregator: new Backbone.Wreqr.EventAggregator(),
                 googleClientAPILoadTryCount: 0,
                 youtubeIframeAPILoadTryCount: 0,
-                cmShowGlobalBase: false
+                cmShowGlobalBase: false,
+                betaStudioUrl: '{{{betaStudioUrl}}}'
             }
         };
 

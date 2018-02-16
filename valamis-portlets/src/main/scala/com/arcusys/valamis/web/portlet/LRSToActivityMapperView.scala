@@ -12,7 +12,7 @@ class LRSToActivityMapperView extends GenericPortlet with PortletBase {
     val translations = getTranslation("lrsToActivitiesMapper", language)
     val data = translations ++ getSecurityData(request).data
 
-    sendTextFile("/templates/2.0/lrs_to_activities_mapper_templates.html")
+    sendTextFile("/templates/lrs_to_activities_mapper_templates.html")
     sendMustacheFile(data, "lrs_to_activities_mapper.html")
   }
 }

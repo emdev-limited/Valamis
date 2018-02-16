@@ -1,18 +1,20 @@
 package com.arcusys.learn.liferay.services
 
+import java.util.{Date, Locale}
+
 import com.liferay.counter.service.CounterLocalServiceUtil
 import com.liferay.portal.service.{GroupLocalServiceUtil, UserLocalServiceUtil}
 import com.liferay.portal.util.PortalUtil
 import com.liferay.portlet.asset.NoSuchVocabularyException
+import com.liferay.portlet.asset.model.AssetVocabulary
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil
-import java.util.{Date, Locale}
 
 object AssetVocabularyLocalServiceHelper {
-  def getGroupVocabulary(globalGroupId: Long, vocabularyName: String) = {
+  def getGroupVocabulary(globalGroupId: Long, vocabularyName: String): AssetVocabulary = {
     AssetVocabularyLocalServiceUtil.getGroupVocabulary(globalGroupId, vocabularyName)
   }
 
-  def addAssetVocabulary(companyId: Long, vocabularyName: String) = {
+  def addAssetVocabulary(companyId: Long, vocabularyName: String): AssetVocabulary = {
     val globalGroupId = GroupLocalServiceUtil.getCompanyGroup(companyId).getGroupId
     val defaultUserId = UserLocalServiceUtil.getDefaultUserId(companyId.toLong)
 
@@ -35,7 +37,15 @@ object AssetVocabularyLocalServiceHelper {
         vocabulary.setModifiedDate(date)
         vocabulary.setName(vocabularyName)
 
-        AssetVocabularyLocalServiceUtil.updateAssetVocabulary(vocabulary)
+        val voc = AssetVocabularyLocalServiceUtil.addAssetVocabulary(vocabulary)
+        addVocabularyResources(vocabulary, addGroupPermissions = true, addGuestPermissions = true)
+        voc
     }
+  }
+
+  def addVocabularyResources(vocabulary: AssetVocabulary,
+                             addGroupPermissions: Boolean,
+                             addGuestPermissions: Boolean): Unit = {
+    AssetVocabularyLocalServiceUtil.addVocabularyResources(vocabulary, addGroupPermissions, addGuestPermissions)
   }
 }

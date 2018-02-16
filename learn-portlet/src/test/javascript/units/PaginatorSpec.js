@@ -8,7 +8,7 @@ describe("Paginator", function () {
         var templateContainer = $('#paginatorTemplate');
         if (templateContainer.length == 0) {
             $.ajax({
-               url: "src/main/webapp/templates/2.0/paginator.html",
+               url: "src/main/webapp/templates/paginator.html",
                async:false
             }).done(function(response) {
                 $("<div></div>").appendTo("body").html(response)

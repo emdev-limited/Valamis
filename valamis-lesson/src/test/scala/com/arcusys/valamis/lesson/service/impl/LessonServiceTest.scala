@@ -1,7 +1,5 @@
 package com.arcusys.valamis.lesson.service.impl
 
-import java.sql.Connection
-
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.file.storage.FileStorage
@@ -12,40 +10,31 @@ import com.arcusys.valamis.lesson.storage.{LessonAttemptsTableComponent, LessonT
 import com.arcusys.valamis.liferay.SocialActivityHelper
 import com.arcusys.valamis.persistence.common.SlickProfile
 import com.arcusys.valamis.ratings.RatingService
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.tag.model.ValamisTag
 import org.scalatest.{BeforeAndAfter, FunSuite}
-
-import scala.slick.driver.{H2Driver, HsqldbDriver, JdbcProfile}
-import scala.slick.jdbc.JdbcBackend
-
-class LessonServiceH2Test extends LessonServiceTestBase(
-  H2Driver,
-  H2Driver.simple.Database.forURL("jdbc:h2:mem:LessonServiceTest", driver = "org.h2.Driver")
-)
-
 //TODO: add hsql test dependency
 //class LessonServiceHSQLTest extends LessonServiceTestBase(
 //  HsqldbDriver,
 //  HsqldbDriver.simple.Database.forURL("jdbc:hsqldb:mem:LessonServiceTest;shutdown=true", driver = "org.hsqldb.jdbcDriver")
 //)
 
-abstract class LessonServiceTestBase(val driver: JdbcProfile, db: => JdbcBackend#DatabaseDef)
+class LessonServiceTest
   extends FunSuite
     with BeforeAndAfter
     with LessonTableComponent
     with LessonAttemptsTableComponent
-    with SlickProfile {
+    with SlickProfile
+    with SlickDbTestBase {
 
   import driver.simple._
 
-  var connection: Connection = _
-
   before {
-    connection = db.source.createConnection()
+    createDB()
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val courseId = 345
@@ -67,6 +56,7 @@ abstract class LessonServiceTestBase(val driver: JdbcProfile, db: => JdbcBackend
       lazy val fileService: FileService = ???
       lazy val customLessonServices: Map[LessonType, CustomLessonService] = ???
       lazy val fileStorage: FileStorage = ???
+      lazy val lessonNotificationService = ???
     }
 
     db.withTransaction { implicit s =>
@@ -75,7 +65,7 @@ abstract class LessonServiceTestBase(val driver: JdbcProfile, db: => JdbcBackend
 
     lessonService.create(LessonType.Tincan, courseId, "t1", "d1", userId)
 
-    val items = lessonService.getAll(new LessonFilter(Seq(courseId), None, tagId = Some(tagId)))
+    val items = lessonService.getLessonsWithData(new LessonFilter(Seq(courseId), None, tagId = Some(tagId)))
 
     assert(items.total == 1)
   }

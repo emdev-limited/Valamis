@@ -1,38 +1,46 @@
 package com.arcusys.valamis.web.configuration.database
 
-import com.arcusys.valamis.persistence.common.SlickProfile
-import com.arcusys.valamis.persistence.impl.slide.SlideTableComponent
+import com.arcusys.valamis.persistence.common.{DatabaseLayer, SlickProfile}
+import com.arcusys.valamis.persistence.impl.slide.schema.SlideTableComponent
 import slick.jdbc.JdbcBackend
+import slick.driver._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.slick.driver._
-
-class CreateDefaultValues(val driver: JdbcProfile, db: JdbcBackend#DatabaseDef)
+class CreateDefaultValues(val driver: JdbcProfile, val db: JdbcBackend#DatabaseDef)
   extends SlideTableComponent
+    with DatabaseLayer
     with SlickProfile {
 
-  import driver.simple._
+  import driver.api._
 
-  def create(): Unit = {
-    db.withTransaction { implicit session =>
+  def create(): Unit = execSync {
 
-      val defaultSlideSet = slideSets.filter { e =>
-        e.title === defaultSlideSetTemplate.title &&
-          e.description === defaultSlideSetTemplate.description &&
-          e.courseId === defaultSlideSetTemplate.courseId &&
-          e.logo.isEmpty &&
-          e.isTemplate === defaultSlideSetTemplate.isTemplate &&
-          e.isSelectedContinuity === defaultSlideSetTemplate.isSelectedContinuity
-      }.firstOption
+    val insertSlideSet =
+      for {
+        count <- slideSets
+          .filter(set => set.courseId === defaultSlideSetTemplate.courseId
+            && set.isTemplate === defaultSlideSetTemplate.isTemplate)
+          .size
+          .result
+        _ <- if (count == 0) {
+          slideSets += defaultSlideSetTemplate
+        }
+        else {
+          DBIO.successful()
+        }
+      } yield ()
 
-      if (defaultSlideSet.isEmpty)
-        slideSets += defaultSlideSetTemplate
-    }
+    val insertThemes =
+      for {
+        count <- slideThemes.size.result
+        _ <- if (count == 0) {
+          slideThemes ++= defaultSlideThemes
+        }
+        else {
+          DBIO.successful()
+        }
+      } yield ()
 
-    db.withTransaction { implicit session =>
-      val defaultThemes = slideThemes.filter(_.isDefault === true).firstOption
-
-      if (defaultThemes.isEmpty)
-        slideThemes ++= defaultSlideThemes
-    }
+    insertSlideSet >> insertThemes
   }
 }

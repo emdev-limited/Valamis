@@ -20,6 +20,7 @@ object LayoutLocalServiceHelper {
     LayoutLocalServiceUtil.getLayouts(groupId, privateLayout, layoutType)
 
   def getLayout(plid: Long): LLayout = LayoutLocalServiceUtil.getLayout(plid)
+  def fetchLayout(plid: Long): Option[LLayout] = Option(LayoutLocalServiceUtil.fetchLayout(plid))
 
   def getFriendlyURLLayout(groupId: Long,
     privateLayout: Boolean,

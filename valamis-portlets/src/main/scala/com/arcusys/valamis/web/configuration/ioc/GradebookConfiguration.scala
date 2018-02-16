@@ -1,14 +1,14 @@
 package com.arcusys.valamis.web.configuration.ioc
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
-import com.arcusys.valamis.course.CourseService
-import com.arcusys.valamis.gradebook.service.impl.{TeacherCourseGradeServiceImpl, CourseLessonsResultServiceImpl, LessonGradeServiceImpl, UserCourseResultServiceImpl}
+import com.arcusys.valamis.course.api.CourseService
 import com.arcusys.valamis.gradebook.service._
-import com.arcusys.valamis.gradebook.service.impl.{CourseLessonsResultServiceImpl, LessonGradeServiceImpl, UserCourseResultServiceImpl}
+import com.arcusys.valamis.gradebook.service.impl._
 import com.arcusys.valamis.lesson.service._
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.lrssupport.lrs.service.{LrsClientManager, LrsRegistration}
 import com.arcusys.valamis.persistence.common.SlickDBInfo
 import com.arcusys.valamis.user.service.UserService
+import com.arcusys.valamis.web.util.ForkJoinPoolWithLRCompany
 import com.escalatesoft.subcut.inject.{BindingModule, NewBindingModule}
 
 class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: BindingModule) extends NewBindingModule(fn = module => {
@@ -16,7 +16,8 @@ class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: Binding
   import module.bind
 
   bind[TeacherCourseGradeService] toSingle {
-    new TeacherCourseGradeServiceImpl(db.databaseDef, db.slickProfile)
+    new TeacherCourseGradeServiceImpl(db.databaseDef, db.slickProfile,
+      ForkJoinPoolWithLRCompany.ExecutionContext)
   }
 
   bind[LessonGradeService] toSingle new LessonGradeServiceImpl {
@@ -29,11 +30,13 @@ class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: Binding
     lazy val memberService = inject[LessonMembersService](None)
     lazy val userService = inject[UserService](None)
     lazy val membersService = inject[LessonMembersService](None)
+    lazy val teacherCourseGradeService = inject[TeacherCourseGradeService](None)
   }
 
   bind[UserCourseResultService] toSingle new UserCourseResultServiceImpl(db.databaseDef, db.slickProfile) {
     lazy val userCourseResultService = inject[UserCourseResultServiceImpl](None)
     lazy val packageChecker = inject[LessonGradeService](None)
+    lazy val lessonService = inject[LessonService](None)
   }
 
   bind[CourseLessonsResultService] toSingle new CourseLessonsResultServiceImpl(db.databaseDef, db.slickProfile) {
@@ -54,5 +57,11 @@ class GradebookConfiguration(db: => SlickDBInfo)(implicit configuration: Binding
   bind[GradeBookService] toSingle new GradeBookServiceImpl {
     lazy val statementReader = inject[LessonStatementReader](None)
     lazy val lessonService = inject[LessonService](None)
+  }
+
+  bind[StatementService] toSingle new StatementServiceImpl {
+    lazy val lrsClientManager  = inject[LrsClientManager](None)
+    lazy val lrsRegistration = inject[LrsRegistration](None)
+    lazy val userLocalServiceHelper  = inject[UserLocalServiceHelper](None)
   }
 })

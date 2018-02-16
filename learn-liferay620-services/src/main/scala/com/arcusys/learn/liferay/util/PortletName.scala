@@ -29,8 +29,6 @@ object PortletName { //TODO: Enumeration?
 
   case object LearningTranscript extends PortletName("LearningTranscript")
 
-  case object UserPortfolio extends PortletName("SCORMUserAccount")
-
   case object AdminView extends PortletName("SCORMApplicationAdmin")
 
   case object ActivityToLRSMapper extends PortletName("SocialActivitiesTinCanMapper")
@@ -54,5 +52,15 @@ object PortletName { //TODO: Enumeration?
   case object MyCourses extends PortletName("MyCourses")
 
   case object AllCourses extends PortletName("AllCourses")
+
+  case object ContentProviderManager extends PortletName("ContentProviderManager")
+
+  case object TinCanStatementViewer extends PortletName("TinCanStatementViewer")
+
+  case object ValamisReport extends PortletName("ValamisReport")
+
+  case object CertExpirationTracker extends PortletName("CertExpirationTracker")
+
+  case object LearningReport extends PortletName("LearningReport")
 }
 

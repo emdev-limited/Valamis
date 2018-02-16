@@ -1,0 +1,74 @@
+{
+  "report_settings" : [
+    {
+      "id" : "reportType",
+      "type" : "dropdown",
+      "primary" : true,
+      "currentOptionId" : "reportTypeCertificates",
+      "options" : [
+        {
+          "id" : "reportTypeCertificates",
+          "dependencies" : [ "reportUsers", "reportPeriod" ]
+        },
+        {
+          "id" : "reportTypeTopLessons",
+          "dependencies" : [ "reportsScope", "reportUsers", "reportPeriod" ]
+        },
+        {
+          "id" : "reportTypeMostActiveUsers",
+          "dependencies" : [ "reportPeriod" ]
+        },
+        {
+          "id" : "reportTypeAveragePassingGrade",
+          "dependencies" : []
+        },
+        {
+          "id" : "reportTypeNumberOfLessonsAttempted",
+          "dependencies" : []
+        }
+      ]
+    },
+    {
+      "id" : "reportsScope",
+      "type" : "dropdown",
+      "currentOptionId" : "currentCourse",
+      "options": [
+        { "id": "currentCourse"},
+        { "id": "instantScope"}
+      ]
+    },
+    {
+      "id" : "reportUsers",
+      "type" : "modal",
+      "data" : "usersList",
+      "users" : []
+    },
+    {
+      "id" : "reportPeriod",
+      "type" : "dropdown",
+      "data" : "datePeriod",
+      "currentOptionId" : "periodCustom",
+      "options": [
+        {
+          "id": "periodLastWeek",
+          "days": 7
+        },
+        {
+          "id": "periodLastMonth",
+          "days": 30
+        },
+        {
+          "id": "periodLastYear",
+          "days": 365
+        },
+        {
+          "id": "periodCustom",
+          "days": 30,
+          "groupFirstItem": true
+        }
+      ],
+      "startDate" : "",
+      "endDate" : ""
+    }
+  ]
+}

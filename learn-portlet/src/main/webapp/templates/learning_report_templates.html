@@ -1,0 +1,568 @@
+<!-- loading block -->
+<script type="text/template" id="loadingTemplate">
+    <div class="loading-message">{{loadingLabel}}...</div>
+</script>
+
+<script type="text/html" id="learningReportCoursesTemplate">
+    <div class="dropdown js-courses-list">
+        <button class="button course-selector">
+            <span class="dropdown-text"></span><span class="val-icon-arrow-down val-icon-right"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {{#courses}}
+            <li data-value="{{id}}">{{title}}</li>
+            {{/courses}}
+        </ul>
+    </div>
+</script>
+
+<script type="text/html" id="learningReportCourseTitleTemplate">
+    <div class="course-title">{{title}}</div>
+</script>
+
+<script type="text/template" id="learningReportDetailLayoutHeaderViewTemplate">
+    <div class="back-link">
+        <span class="js-back-link">
+            <span class="val-icon val-icon-arrow-left-two"></span>
+            <span>{{courseTitle}}</span>
+        </span>
+    </div>
+    <div class="grid-title">{{gridTitle}}</div>
+</script>
+
+<!-- general layout -->
+<script type="text/template" id="learningReportLayoutTemplate">
+    <div class="val-tabs">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#learningReportLessonsTab">{{learningReportLessonsLabel}}</a></li>
+            <li><a href="#learningReportPathsTab">{{learningReportPathsLabel}}</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="learningReportLessonsTab" class="tab-pane learning-report-lessons-tab active"></div>
+            <div id="learningReportPathsTab" class="tab-pane learning-report-paths-tab"></div>
+        </div>
+    </div>
+</script>
+
+<!-- tab layout -->
+<script type="text/template" id="learningReportTabTemplate">
+    <div class="learning-report-heading clearfix">
+        <div class="js-learning-report-filter learning-report-filter"></div>
+        <div class="js-learning-report-course-selector learning-report-course-selector"></div>
+        <div class="js-learning-report-legend learning-report-legend"></div>
+        <div class="js-learning-report-detailed-view-header learning-report-detailed-view-header"></div>
+        <div class="js-learning-report-detailed-view-legend learning-report-legend hidden"></div>
+    </div>
+    <div class="js-learning-report-data-renderer learning-report-content"></div>
+</script>
+
+<!-- tab content layout -->
+<script type="text/template" id="learningReportDatatableLayoutTemplate">
+    <div id="learningReportLoading">
+        <div class="loading-message-block">
+            <div class="loading-message">{{loadingLabel}}...</div>
+        </div>
+    </div>
+    <div class="valamis-info-label js-no-lessons-message hidden">
+        <span>{{lessonsListEmptyLabel}}</span>
+    </div>
+    <div class="valamis-info-label js-no-paths-message hidden">
+        <span>{{pathsListEmptyLabel}}</span>
+    </div>
+    <div class="valamis-info-label js-no-users-message hidden">
+        <span>{{usersListEmptyLabel}}</span>
+    </div>
+    <div class="valamis-info-label js-empty-data-message hidden">
+        <span>{{filterReturnedNoDataLabel}}</span>
+    </div>
+    <div class="learning-report-table js-learning-report-table hidden total-bar-hidden">
+        <div id="learningReportUserlist" class="learning-report-user-list"></div>
+        <div id="learningReportUserSummary" class="learning-report-user-summary"></div>
+        <div id="learningReportUserDetailSummary" class="learning-report-user-summary hidden"></div>
+        <div class="learning-report-data-grid">
+            <div class="loading-overlay js-loading-overlay"></div>
+            <div id="learningReportDataHeaders" class="learning-report-grid-headers"></div>
+            <div id="learningReportDatatable" class="learning-report-grid-data"></div>
+            <div id="learningReportDetailHeaders" class="learning-report-grid-headers"></div>
+            <div id="learningReportDetailGrid" class="learning-report-grid-data"></div>
+            <div class="learning-report-total-bar">
+                <div id="learningReportTotalBar"></div>
+                <div id="learningReportDetailTotalBar"></div>
+            </div>
+        </div>
+    </div>
+    <div class="toggle-container js-show-more hidden">
+        <i class="loading-spinner"></i>
+        <span class="val-icon-arrow-down val-icon-right"></span>
+        <span>{{showMoreLabel}}</span>
+    </div>
+</script>
+
+<!-- total bar templates -->
+<script type="text/template" id="learningReportTotalBarView">
+    <div class="total-bar-container">
+        <ul class="total-bar-content js-bar-content"></ul>
+    </div>
+</script>
+
+<script type="text/template" id="learningReportTotalBarItemView">
+    <ul class="js-statictics total-bar-brief"></ul>
+    <div class="element-tooltip-content">
+        <p><strong>{{title}}</strong></p>
+        <table class="total-bar-detailed js-tooltip-statictics"></table>
+    </div>
+</script>
+
+<script type="text/template" id="learningReportTotalBarLoadingView">
+    <ul class="total-bar-brief">
+        <li class="val-icon val-icon-dots"></li>
+    </ul>
+</script>
+
+<script type="text/template" id="learningReportTotalBarValueTemplate">
+    {{#valuesList}}
+    <li class="{{classPrefix}}-state-{{name}}">{{value}}</li>
+    {{/valuesList}}
+</script>
+
+<script type="text/template" id="learningReportTotalBarTooltipValueTemplate">
+    {{#valuesList}}
+    <tr class="{{classPrefix}}-state-{{name}}"><td>{{value}}</td><td>{{label}}</td></tr>
+    {{/valuesList}}
+</script>
+
+<!-- legend templates -->
+<script type="text/template" id="learningReportLegendItemTemplate">
+    <label>
+        <input type="checkbox"{{#isActive}} checked="checked"{{/isActive}}/>
+        <span class="val-icon legend-icon"></span>
+        <span class="legend-label">{{title}}</span>
+    </label>
+</script>
+
+<script type="text/template" id="learningReportLessonsLegendItemTemplate">
+    <label>
+        <span class="svg-icon">
+            <svg width="22" height="22">
+                <use xlink:href="{{bookIconSrc}}"></use>
+            </svg>
+        </span>
+        <span class="legend-label">{{title}}</span>
+    </label>
+</script>
+
+<!-- filter templates -->
+<script type="text/template" id="learningReportSettingsFieldset">
+    <div class="dropdown-filter js-dropdown-filter">
+        <div class="filter-toggle-button js-filter-toggle-button">
+            <span>{{filterShowButtonLabel}}</span>
+        </div>
+        <div id="filterDropdown" class="dropdown-wrapper"></div>
+    </div>
+    <div id="activeFilters" class="active-filters-block"></div>
+</script>
+
+<script type="text/template" id="reportActiveFiltersTemplate">
+    <div class="active-filters-title">* {{activeFiltersTitleLabel}}:</div>
+    <ul></ul>
+</script>
+
+<script type="text/template" id="reportActiveFilterItemTemplate">
+    {{optionTitle}} <span>{{displayValue}}</span> <i class="js-remove remove val-icon-exit"></i>
+</script>
+
+<script type="text/template" id="reportFilterOptionListTemplate">
+    <div class="filter-section-title">{{title}}</div>
+    <ul></ul>
+</script>
+
+<script type="text/template" id="reportFilterToggleSwitchTemplate">
+    <div class="filter-section-title">{{title}}</div>
+    <label class="val-switch">
+        <input type="checkbox" class="switch-input js-val-switch"{{#currentValue}} checked="checked"{{/currentValue}}>
+        <span class="switch-handle"></span>
+    </label>
+</script>
+
+<script type="text/template" id="reportFilterTextSearchTemplate">
+    <div class="filter-section-title">{{title}}</div>
+    <div class="filter-search-field">
+        <div class="val-search js-search">
+            <input placeholder="" type="text" value="{{currentValue}}">
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="reportListOption">
+    <span data-value="{{value}}">{{optionTitle}}</span>
+</script>
+
+<!-- datatable templates -->
+<script type="text/template" id="learningReportTheadView">
+</script>
+
+<script type="text/template" id="learningReportLessonsThView">
+    <div class="title"><span class="js-lesson-title">{{title}}</span></div>
+    <div class="actions">
+        <span class="js-toggle-lesson-slides action">{{showPagesLabel}}</span>
+        <span class="js-loading-lesson-detail loading-label">{{loadingLabel}}...</span>
+    </div>
+</script>
+
+<script type="text/template" id="learningReportPathsThView">
+    <div class="title"><span class="js-path-title">{{title}}</span></div>
+    <div class="actions">
+        <span class="js-toggle-path-goals action">{{showGoalsLabel}}</span>
+        <span class="js-loading-path-detail loading-label">{{loadingLabel}}...</span>
+    </div>
+</script>
+
+<script type="text/template" id="learningReportDetailThView">
+    <div class="detail-title" title="{{title}}">{{title}}</div>
+</script>
+
+<script type="text/template" id="learningReportSlideView">
+    {{#lessonState}}
+    <span class="slide-icon {{slideStatus}}{{#isQuestion}} slide-has-question{{/isQuestion}} js-slide-icon"></span>
+    <div class="element-tooltip-content">
+        <p><strong>{{userName}}</strong></p>
+        <p>{{stateDescr}} <strong>"{{title}}"</strong></p>
+        {{#slideOpenDate}}
+            <p class="info">
+                <span>{{slideOpenDate}}</span>
+                {{#lessonVersion}}<span>{{lessonVersion}}</span>{{/lessonVersion}}
+            </p>
+        {{/slideOpenDate}}
+    </div>
+    {{/lessonState}}
+</script>
+
+<script type="text/template" id="learningReportGoalView">
+    {{#showIcon}}
+    <span class="goal-icon {{goalStateClass}} js-goal-icon"></span>
+    <div class="element-tooltip-content">
+        <p><strong>{{userName}}</strong></p>
+        <p>{{stateDescr}} <strong>"{{title}}"</strong></p>
+        {{#lastDate}}
+        <p class="info">
+            <span>{{pathDateTitle}} {{lastDate}}</span>
+        </p>
+        {{/lastDate}}
+    </div>
+    {{/showIcon}}
+</script>
+
+<script type="text/template" id="learningReportUserListItemViewTemplate">
+    <div class="learning-report-td user-name">
+        <img src="{{user.picture}}" alt="{{user.name}}" width="30" height="30"/>
+        <span>{{user.name}}</span>
+    </div>
+    {{#showGrade}}
+    <div class="learning-report-td user-grade">
+        <span>{{gradePercent}}%</span>
+    </div>
+    {{/showGrade}}
+    <div class="learning-report-td user-organization">
+        {{#organization}}
+        <span class="js-tooltipster" title="{{organization}}">{{organization}}</span>
+        {{/organization}}
+        {{^organization}}
+        <span>-</span>
+        {{/organization}}
+    </div>
+</script>
+
+<script type="text/template" id="learningReportUserListViewTemplate">
+    <div class="learning-report-tr">
+        <div class="learning-report-th">
+            <div class="title">
+                <span class="js-listed-users-info">0 {{usersLabel}}</span>
+            </div>
+            <div class="actions">
+                <span class="action js-show-user-information">{{showInformationLabel}}</span>
+            </div>
+            <div class="field-titles">
+                <div class="user-name">
+                    <span>{{nameLabel}}</span>
+                </div>
+                {{#showGrade}}
+                <div class="user-grade">
+                    <span>{{totalGradeLabel}}</span>
+                </div>
+                {{/showGrade}}
+                <div class="user-organization">
+                    <span>{{organizationLabel}}</span>
+                </div>
+            </div>
+            <div class="hide-details-icon js-hide-user-information"></div>
+        </div>
+    </div>
+    <div class="js-left-column-user-list"></div>
+    <div class="total-bar-title">{{usersInTotalBarLabel}}</div>
+</script>
+
+<script type="text/template" id="learningReportUserView">
+</script>
+
+<script type="text/template" id="learningReportLessonView">
+    <div class="js-lesson-state lesson-{{lessonStatus}}">
+        {{#showIcon}}
+            <span class="svg-icon js-lesson-icon">
+                <svg width="{{bookIconSize}}" height="{{bookIconSize}}">
+                    <use xlink:href="{{bookIconSrc}}"></use>
+                </svg>
+            </span>
+            <div class="element-tooltip-content">
+                <p><strong>{{userName}}</strong></p>
+                <p>{{stateDescr}} <strong>"{{title}}"</strong></p>
+                {{#lessonOpenDate}}<p class="info">{{lessonOpenDate}}</p>{{/lessonOpenDate}}
+            </div>
+        {{/showIcon}}
+    </div>
+    <ul class="js-pages-list lesson-pages-chain"></ul>
+</script>
+
+<script type="text/template" id="learningReportCertificateView">
+    <div class="js-cert-state cert-{{certificateStatus}}">
+        {{#showIcon}}
+            <span class="js-cert-icon certificate-icon"></span>
+            <div class="element-tooltip-content">
+                <p><strong>{{userName}}</strong></p>
+                <p>{{stateDescr}} <strong>"{{title}}"</strong></p>
+                {{#pathDate}}<p class="info">{{pathDateTitle}} {{pathDate}}</p>{{/pathDate}}
+            </div>
+        {{/showIcon}}
+    </div>
+    <ul class="js-goals-list path-goals-chain"></ul>
+</script>
+
+<script type="text/template" id="learningReportUserSummaryItemViewTemplate">
+    <div class="user-summary-value user-summary-value-finished"><span>{{summary.summaryFinished}}</span></div>
+    {{^detailSummaryView}}
+        <div class="user-summary-value user-summary-value-in-progress"><span>{{summary.summaryInProgress}}</span></div>
+    {{/detailSummaryView}}
+    <div class="user-summary-value user-summary-value-failed"><span>{{summary.summaryFailed}}</span></div>
+    {{^detailSummaryView}}
+        <div class="user-summary-value user-summary-value-attempted"><span>{{summary.summaryAttempted}}</span></div>
+    {{/detailSummaryView}}
+    <div class="user-summary-value user-summary-value-not-started"><span>{{summary.summaryNotStarted}}</span></div>
+</script>
+
+<script type="text/template" id="learningReportUserSummaryViewTemplate">
+    <div class="summary-header">
+        <div class="title">
+            <span>{{summaryLabel}}</span>
+        </div>
+        <ul class="summary-values-legend">
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-finished"></div>
+            </li>
+            {{^detailSummaryView}}
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-in-progress"></div>
+            </li>
+            {{/detailSummaryView}}
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-failed"></div>
+            </li>
+            {{^detailSummaryView}}
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-attempted"></div>
+            </li>
+            {{/detailSummaryView}}
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-not-started"></div>
+            </li>
+        </ul>
+    </div>
+    <div class="js-users-summary"></div>
+    <div class="total-bar-cover"></div>
+</script>
+
+<script type="text/template" id="learningReportPathsSummaryItemViewTemplate">
+    <div class="user-summary-value user-summary-value-achieved"><span>{{summary.summaryAchieved}}</span></div>
+    <div class="user-summary-value user-summary-value-failed"><span>{{summary.summaryFailed}}</span></div>
+    <div class="user-summary-value user-summary-value-started"><span>{{summary.summaryInProgress}}</span></div>
+    {{^detailSummaryView}}
+        <div class="user-summary-value user-summary-value-expiring"><span>{{summary.summaryExpiring}}</span></div>
+        <div class="user-summary-value user-summary-value-expired"><span>{{summary.summaryExpired}}</span></div>
+    {{/detailSummaryView}}
+</script>
+
+<script type="text/template" id="learningReportPathsSummaryViewTemplate">
+    <div class="summary-header">
+        <div class="title">
+            <span>{{summaryLabel}}</span>
+        </div>
+        <ul class="summary-values-legend">
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-achieved"></div>
+            </li>
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-failed"></div>
+            </li>
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-started"></div>
+            </li>
+            {{^detailSummaryView}}
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-expiring"></div>
+            </li>
+            <li>
+                <div class="user-summary-heading-icon user-summary-heading-expired"></div>
+            </li>
+            {{/detailSummaryView}}
+        </ul>
+    </div>
+    <div class="js-users-summary"></div>
+    <div class="total-bar-cover"></div>
+</script>
+
+<script type="text/template" id="learningReportUserLessonDetailTemplate">
+    {{#pagesList}}
+    <li class="page-state-{{state}}{{#isQuestion}} page-has-question{{/isQuestion}}" title="{{title}}">
+        <div class="element-tooltip-content">
+            <p><strong>{{username}}</strong></p>
+            <p>{{stateDescr}} <strong>"{{title}}"</strong> {{ofLabel}}&nbsp;<em>{{lesson}}</em></p>
+            {{#slideOpenDate}}
+            <p class="info">
+                <span>{{slideOpenDate}}</span>
+                {{#lessonVersion}}<span>{{lessonVersion}}</span>{{/lessonVersion}}
+            </p>
+            {{/slideOpenDate}}
+        </div>
+    </li>
+    {{/pagesList}}
+</script>
+
+<script type="text/template" id="learningReportUserPathDetailTemplate">
+    {{#goalsList}}
+    <li class="goal-state-{{state}}" title="{{title}}">
+        <div class="element-tooltip-content">
+            <p><strong>{{userName}}</strong></p>
+            <p>{{stateDescr}} <strong>"{{title}}"</strong> {{ofLabel}}&nbsp;<em>{{pathTitle}}</em></p>
+            {{#lastDate}}
+            <p class="info">
+                <span>{{lastDate}}</span>
+            </p>
+            {{/lastDate}}
+        </div>
+    </li>
+    {{/goalsList}}
+</script>
+
+<!-- modal user selector templates -->
+<script type="text/template" id="learningReportSelectUsersModalTemplate">
+    <div class="bbm-modal__topbar">
+        <h3 class="bbm-modal__title">{{header}}</h3>
+        <div class="modal-close val-icon-exit"></div>
+    </div>
+    <div class="bbm-modal__section modal-content"></div>
+
+    <div class="bbm-modal__bottombar">
+        <a href="#" class="modal-close button big neutral">{{closeLabel}}</a>
+        <!--<a class="button big primary js-save-users">{{saveLabel}}</a>-->
+    </div>
+</script>
+
+<script type="text/template" id="learningReportSettingsUsersToolbarViewTemplate">
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <div class="val-search js-search">
+                <input type="text" placeholder="{{searchLabel}}">
+            </div>
+        </div>
+        {{#showUserTypes}}
+        <div class="filter-element shift-left">
+            <div class="dropdown js-user-type" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{usersLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li class="selected" data-value="{{userTypeObject.USER}}">{{usersLabel}}</li>
+                    <li data-value="{{userTypeObject.ORGANIZATION}}">{{organizationsLabel}}</li>
+                    <li data-value="{{userTypeObject.GROUP}}">{{groupsLabel}}</li>
+                    <li data-value="{{userTypeObject.ROLE}}">{{rolesLabel}}</li>
+                </ul>
+            </div>
+        </div>
+        {{/showUserTypes}}
+
+        {{#isUser}}
+        <div class="filter-element shift-left">
+            <div class="dropdown js-organizations-filter" data-value="">
+                <button class="button medium simple">
+                    <span class="dropdown-text">{{allOrganizationsLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+                </button>
+                <ul class="dropdown-menu edit-users-dropdown">
+                    <li class="selected" data-value="">{{allOrganizationsLabel}}</li>
+                    {{#organizations}}
+                    <li data-value="{{id}}">{{name}}</li>
+                    {{/organizations}}
+                </ul>
+            </div>
+        </div>
+        {{/isUser}}
+
+        <div class="filter-element paging-showing-label shift-left js-paginator-showing"></div>
+
+        {{^showAvailable}}
+        <div class="filter-element shift-right">
+            <button class="button medium primary shift-right js-add-items" data-value="{{userType}}">
+                {{addButtonLabelText}}
+            </button>
+        </div>
+        {{/showAvailable}}
+    </div>
+
+    <div class="filters-row clearfix">
+        <div class="filter-element shift-left">
+            <button class="button medium neutral shift-left js-select-all">
+                <span class="val-icon-checkmark"></span> {{selectAllLabel}}
+            </button>
+        </div>
+
+        {{^available}}
+        <div class="dropdown actions filter-element shift-left">
+            <button class="button medium neutral">
+                <span class="dropdown-text">{{actionLabel}}</span>
+                <span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="js-delete-items" data-value="1">{{deleteLabel}}</li>
+            </ul>
+        </div>
+        {{/available}}
+
+        <div class="dropdown filter-element shift-right js-sort-filter" data-value="name:true">
+            <button class="button medium simple">
+                <span class="dropdown-text">{{byNameAscLabel}}</span><span class="val-icon-arrow-down val-icon-right"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="selected" data-value="name:true"> {{byNameAscLabel}} </li>
+                <li data-value="name:false"> {{byNameDescLabel}} </li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="learningReportSettingsEditUsersItemViewTemplate">
+    <td class="narrow-col">
+        <input type="checkbox" id="toggleItem_{{id}}" name="check" class="val-checkbox js-select-item"/>
+        <label class="checkbox-label" for="toggleItem_{{id}}"></label>
+    </td>
+
+    {{#picture}}
+    <td class="narrow-col">
+        <img src="{{picture}}" alt="{{name}}" class="img-circle">
+    </td>
+    {{/picture}}
+
+    <td>{{name}}</td>
+
+    <td class="text-right">
+        <button class="button medium danger simple no-text js-delete-item">
+            <span class="val-icon-trash"></span> {{deleteLabel}}
+        </button>
+    </td>
+</script>

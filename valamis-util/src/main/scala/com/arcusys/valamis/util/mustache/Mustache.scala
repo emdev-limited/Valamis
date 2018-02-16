@@ -1,5 +1,7 @@
 package com.arcusys.valamis.util.mustache
 
+import java.io.InputStream
+
 import scala.io.Source
 
 /**
@@ -14,6 +16,10 @@ class Mustache(
             var otag = open
             var ctag = close
           }).parse())
+
+        def this(inputStream: InputStream) = {
+          this(Source.fromInputStream(inputStream))
+        }
 
         def this(str: String) = this(Source.fromString(str))
 

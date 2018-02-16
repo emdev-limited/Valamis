@@ -1,11 +1,12 @@
 package com.arcusys.valamis.lesson.service.impl
 
 import com.arcusys.learn.liferay.LiferayClasses._
-import com.arcusys.learn.liferay.services.UserLocalServiceHelper
+import com.arcusys.learn.liferay.services.{AssetCategoryLocalServiceHelper, AssetEntryLocalServiceHelper, CompanyHelper, UserLocalServiceHelper}
 import com.arcusys.valamis.lesson.model._
 import com.arcusys.valamis.lesson.service._
 import com.arcusys.valamis.lesson.storage.LessonTableComponent
 import com.arcusys.valamis.lesson.storage.query.{LessonLimitQueries, LessonPlayerQueries, LessonQueries, LessonViewerQueries}
+import com.arcusys.valamis.liferay.AssetHelper
 import com.arcusys.valamis.model.{PeriodTypes, RangeResult, SkipTake}
 import com.arcusys.valamis.ratings.RatingService
 import com.arcusys.valamis.tag.TagService
@@ -39,6 +40,9 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
   def tagService: TagService[Lesson]
   def lessonResultService: UserLessonResultService
   def teacherGradeService: TeacherLessonGradeService
+  def playerAssetHelper: AssetHelper[LessonPlayer]
+
+  private val lessonPlayerName = "Lesson Player"
 
   override def getAllVisible(courseId: Long, playerId: Long): Seq[Lesson] = {
     val now = DateTime.now
@@ -66,6 +70,13 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
                             getSuspendedId: (Long, Lesson) => Option[String]): RangeResult[LessonWithPlayerState] = {
 
     val lessonIds = tagId.map(tagService.getItemIds)
+      .orElse {
+        getCategoriesByPlayerId(playerId).map(categories =>
+          categories.flatMap(c =>
+            tagService.getItemIds(c.getCategoryId)
+          )
+        )
+      }
 
     val lessons = getLessons(courseId, playerId, user, title, tagId, ascending, sortBy, lessonIds)
 
@@ -192,13 +203,15 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     else {
       var playerLessonsQ = lessons.filterByCourseId(courseId) union lessons.filterByPlayerId(playerId)
 
+      playerLessonsQ = playerLessonsQ.filterPlayerVisible(playerId)
+
       for (ids <- lessonIds) playerLessonsQ = playerLessonsQ.filterByIds(ids)
 
       var lessonQ = playerLessonsQ
         .filterVisible(true)
         .filterByBeginEndDates(DateTime.now.withTimeAtStartOfDay)
 
-      val extraVisibleLessonQ = playerLessonsQ.filterExtraVisisble
+      val extraVisibleLessonQ = playerLessonsQ.filterExtraVisible
 
       lessonQ = lessonQ union extraVisibleLessonQ.filterByViewer(user.getUserId, MemberTypes.User)
 
@@ -231,7 +244,14 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     val externalLessons = lessons.filterByPlayerId(playerId)
 
     db.withSession { implicit s =>
-      (courseLessons union externalLessons).list
+      val invisibleLessons = invisibleLessonViewers.filter(_.playerId === playerId)
+      val lessons = (courseLessons union externalLessons)
+        .leftJoin(invisibleLessons).on((l,p) => l.id === p.lessonId)
+        .map(p => (p._1, p._2.lessonId.?)).list
+
+      lessons.map({
+        case (lesson, visible) => lesson.copy(isVisible = Some(visible.isEmpty))
+      })
     }
   }
 
@@ -277,7 +297,7 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     val entities = lessonIds
       .zipWithIndex
       .map { case (lessonId, lessonIndex) =>
-        PlayerLesson(
+        LessonPlayerOrder(
           playerId,
           lessonId,
           index = startIndex + lessonIndex
@@ -296,18 +316,22 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
   }
 
   override def getTagsFromPlayer(playerId: Long, courseId: Long): Seq[ValamisTag] = {
+    getCategoriesByPlayerId(playerId) match {
+      case Some(categories) => categories.map(c => ValamisTag(c.getCategoryId, c.getName))
+      case None =>
         val courseLessons = lessons.filterByCourseId(courseId)
         val externalLessons = lessons.filterByPlayerId(playerId)
 
-    val lessonIds = db.withSession { implicit s =>
-      (courseLessons union externalLessons).map(_.id).list
-    }
+        val lessonIds = db.withSession { implicit s =>
+          (courseLessons union externalLessons).map(_.id).list
+        }
 
-    tagService.getByItemIds(lessonIds)
+        tagService.getByItemIds(lessonIds)
+    }
   }
 
   override def updateOrder(playerId: Long, ids: Seq[Long]): Unit = {
-    val entities = ids.zipWithIndex.map { case (id, i) => PlayerLesson(playerId, id, i) }
+    val entities = ids.zipWithIndex.map { case (id, i) => LessonPlayerOrder(playerId, id, i) }
 
     if (ids.nonEmpty) db.withTransaction { implicit s =>
       playerLessons.filterByLessonIds(ids, playerId).delete
@@ -342,7 +366,16 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
     }
   }
 
-  private def isLessonVisible(user: LUser, lesson: Lesson): Boolean = {
+  override def setLessonVisibilityFromPlayer(playerId: Long, lessonId: Long, hidden: Boolean): Unit = {
+    db.withSession { implicit s =>
+    if(hidden)
+      invisibleLessonViewers += (playerId, lessonId)
+    else
+      invisibleLessonViewers.filter(il => il.playerId === playerId && il.lessonId === lessonId).delete
+    }
+  }
+
+  override def isLessonVisible(user: LUser, lesson: Lesson): Boolean = {
     lazy val viewers = db.withSession { implicit s =>
       lessonViewers.filterByLessonId(lesson.id).list.toStream
     }
@@ -375,5 +408,32 @@ abstract class LessonPlayerServiceImpl(val db: JdbcBackend#DatabaseDef,
 
     lesson.isVisible
       .getOrElse(isVisibleForUser || isVisibleForRole || isVisibleForGroup || isVisibleForOrganization)
+  }
+
+  override def updateCategories(categoriesIds: Seq[Long], playerId: Long, courseId: Long, userId: Long) = {
+    val cIds = categoriesIds.filter(id => AssetCategoryLocalServiceHelper.getAssetCategory(id).nonEmpty).toArray
+    val assetId = playerAssetHelper.updateAssetEntry(
+      playerId,
+      Some(userId),
+      Some(courseId),
+      Some(lessonPlayerName),
+      None,
+      LessonPlayer(playerId),
+      Option(CompanyHelper.getCompanyId))
+
+    AssetEntryLocalServiceHelper.setAssetCategories(assetId, cIds)
+  }
+
+  override def getCategories(playerId: Long): Seq[ValamisTag] = {
+    getCategoriesByPlayerId(playerId) match {
+      case Some(categories) => categories.map(c => ValamisTag(c.getCategoryId, c.getName))
+      case None => Seq()
+    }
+  }
+
+  private def getCategoriesByPlayerId(playerId: Long): Option[Seq[LAssetCategory]] = {
+    val entry = AssetEntryLocalServiceHelper.fetchAssetEntry(classOf[LessonPlayer].getName, playerId)
+    entry.map(e => AssetCategoryLocalServiceHelper.getAssetEntryAssetCategories(e.getEntryId))
+      .filter(_.nonEmpty)
   }
 }

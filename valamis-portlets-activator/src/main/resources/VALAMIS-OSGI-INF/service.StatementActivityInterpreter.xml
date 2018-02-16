@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<component name="com.arcusys.valamis.web.interpreter.StatementActivityInterpreter" immediate="true">
+  <implementation class="com.arcusys.valamis.web.interpreter.StatementActivityInterpreter"/>
+  <service>
+    <provide interface="com.liferay.social.kernel.model.SocialActivityInterpreter"/>
+  </service>
+  <property name="javax.portlet.name" type="String" value="com_arcusys_valamis_web_portlet_LessonViewerView"/>
+</component>

@@ -24,7 +24,7 @@ class DBUpdater2414 extends LUpgradeProcess
 
     import driver.simple._
 
-    dbInfo.databaseDef.withSession { implicit session =>
+    dbInfo.databaseDef.withTransaction { implicit session =>
       completedCourses.ddl.create
     }
   }

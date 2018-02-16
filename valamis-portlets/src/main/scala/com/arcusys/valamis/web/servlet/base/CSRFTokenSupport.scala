@@ -8,6 +8,10 @@ trait CSRFTokenSupport extends ScalatraBase {
   private val methodList = Set("POST", "PUT", "DELETE", "PATCH")
 
   before(methodList.contains(request.getMethod)) {
+    checkCSRFToken
+  }
+
+  protected def checkCSRFToken: Unit = {
     AuthTokenUtilHelper.checkCSRFToken(request, this.getClass.getName)
   }
 }

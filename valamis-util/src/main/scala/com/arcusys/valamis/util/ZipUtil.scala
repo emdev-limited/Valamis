@@ -3,6 +3,8 @@ package com.arcusys.valamis.util
 import java.io.File
 import java.util.zip.ZipFile
 
+import scala.collection.JavaConverters._
+
 object ZipUtil {
 
   def zipContains(filename: String, zipFile: File): Boolean = {
@@ -23,21 +25,29 @@ object ZipUtil {
     }
   }
 
+  def findInZip(zipFile: File, condition: String => Boolean): Option[String] = {
+    val zip = new ZipFile(zipFile)
+    try {
+      zip.entries.asScala
+        .find(e => condition(e.getName))
+        .map(e => e.getName)
+    }
+    finally {
+      zip.close()
+    }
+  }
+
   def unzipFile(filename: String, targetDirectory: File, zipFile: File) {
     targetDirectory.mkdirs
     val zip = new ZipFile(zipFile)
     try {
-      val entries = zip.entries
-
-      while (entries.hasMoreElements) {
-        val entry = entries.nextElement
-        if (entry.getName.equals(filename)) {
-          val inputStream = zip.getInputStream(entry)
+      zip.entries.asScala
+        .find { e => e.getName.endsWith(filename) }
+        .foreach { e =>
+          val inputStream = zip.getInputStream(e)
           StreamUtil.writeToFile(inputStream, new File(targetDirectory, filename))
           inputStream.close()
-          return
         }
-      }
     }
     finally {
       zip.close()

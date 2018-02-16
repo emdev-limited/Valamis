@@ -4,11 +4,13 @@ import javax.portlet._
 
 import com.arcusys.learn.liferay.LiferayClasses._
 import com.arcusys.learn.liferay.constants.{PortletKeysHelper, WebKeysHelper}
-import com.arcusys.learn.liferay.services.PortletPreferencesLocalServiceHelper
+import com.arcusys.learn.liferay.services.{CompanyHelper, PortletPreferencesLocalServiceHelper}
 import com.arcusys.learn.liferay.util.PortletName
-import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, OAuthPortlet, PortletBase}
+import com.arcusys.valamis.lrssupport.oauth.OAuthPortlet
+import com.arcusys.valamis.web.portlet.base.{LiferayHelpers, PortletBase}
 
 class LearningPathsView extends OAuthPortlet with PortletBase {
+
   override def doView(request: RenderRequest, response: RenderResponse) {
     implicit val out = response.getWriter
     val securityScope = getSecurityData(request)
@@ -21,8 +23,8 @@ class LearningPathsView extends OAuthPortlet with PortletBase {
       "certificateScope" -> certificateScope
     ) ++ securityScope.data
 
-    sendTextFile("/templates/2.0/learning_paths_templates.html")
-    sendTextFile("/templates/2.0/common_templates.html")
+    sendTextFile("/templates/learning_paths_templates.html")
+    sendTextFile("/templates/common_templates.html")
     sendMustacheFile(data, "learning_paths.html")
   }
 

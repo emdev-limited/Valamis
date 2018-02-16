@@ -1,5 +1,9 @@
+deployCss.sh
+deployJavascript.sh
+deployTemplates.sh
 *.iml
 .idea
+.sbtopts
 target
 rebel.xml
 /phantomjsdriver.log

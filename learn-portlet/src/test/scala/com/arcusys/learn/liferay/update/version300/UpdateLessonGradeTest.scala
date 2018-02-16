@@ -5,6 +5,7 @@ import java.sql.Connection
 import com.arcusys.learn.liferay.update.version300.lesson.{LessonGradeTableComponent, LessonTableComponent}
 import com.arcusys.valamis.lesson.model.LessonType
 import com.arcusys.valamis.persistence.common.{SlickDBInfo, SlickProfile}
+import com.arcusys.valamis.slick.util.SlickDbTestBase
 import com.escalatesoft.subcut.inject.NewBindingModule
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -16,14 +17,9 @@ import slick.jdbc._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class UpdateLessonGradeTest extends FunSuite with BeforeAndAfter{
-
-  val driver = H2Driver
+class UpdateLessonGradeTest extends FunSuite with BeforeAndAfter with SlickDbTestBase {
 
   import driver.api._
-
-  val db = Database.forURL("jdbc:h2:mem:lessonGrades", driver = "org.h2.Driver")
-  var connection: Connection = _
 
   val bindingModule = new NewBindingModule({ implicit module =>
     module.bind[SlickDBInfo] toSingle new SlickDBInfo {
@@ -34,15 +30,15 @@ class UpdateLessonGradeTest extends FunSuite with BeforeAndAfter{
   })
 
   before {
-    connection = db.source.createConnection()
+    createDB()
     Await.result(tables.createSchema, Duration.Inf)
   }
   after {
-    connection.close()
+    dropDB()
   }
 
   val tables = new LessonGradeTableComponent with SlickProfile with LessonTableComponent{
-    val driver: JdbcProfile = H2Driver
+    val driver: JdbcProfile = UpdateLessonGradeTest.this.driver
     import driver.api._
     def createSchema = db.run {
       (lessons.schema ++ lessonGrades.schema).create

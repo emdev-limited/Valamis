@@ -2,12 +2,11 @@ package com.arcusys.valamis.web.service
 
 import com.arcusys.valamis.liferay.SocialActivityHelper
 import com.arcusys.valamis.lrs.serializer.StatementSerializer
-import com.arcusys.valamis.lrs.tincan.{Activity, Statement}
+import com.arcusys.valamis.lrs.tincan.{Activity, Statement, StatementObject, Verb}
 import com.arcusys.valamis.settings.model.StatementToActivity
 import com.arcusys.valamis.settings.storage.StatementToActivityStorage
 import com.arcusys.valamis.util.serialization.JsonHelper
 import com.escalatesoft.subcut.inject.{BindingModule, Injectable}
-import org.joda.time.DateTime
 
 trait StatementActivityCreator {
   def create(companyId: Long, statements: Seq[Statement], userId: Long): Unit
@@ -38,16 +37,31 @@ class StatementActivityCreatorImpl(implicit val bindingModule: BindingModule)
   }
 
   private def isMatch(statement: Statement)(rule: StatementToActivity): Boolean = {
-    val isActivityMatched =
-      rule.mappedActivity.isEmpty || (statement.obj match {
-        case act: Activity => rule.mappedActivity.get == act.id
-        case _ => false
-      })
+    !isRuleEmpty(rule) &&
+      isActivityMatched(statement.obj, rule) &&
+      isVerbMatched(statement.verb, rule)
+  }
 
-    val isVerbMatched =
-      rule.mappedVerb.isEmpty ||
-        (rule.mappedVerb.get == statement.verb.id)
+  private def isRuleEmpty(rule: StatementToActivity): Boolean = {
+    rule.mappedActivity.exists(_.isEmpty) &&
+      rule.mappedVerb.exists(_.isEmpty)
+  }
 
-    isActivityMatched && isVerbMatched
+  private def isActivityMatched(statementObj: StatementObject, rule: StatementToActivity): Boolean = {
+    (rule.mappedActivity, statementObj) match {
+      case m@(None, _) => true
+      case m@(Some(""), _) => true
+      case m@(ruleActivity, activity: Activity) => ruleActivity.contains(activity.id)
+      case _ => false
+    }
+  }
+
+  private def isVerbMatched(statementVerb: Verb, rule: StatementToActivity): Boolean = {
+    (rule.mappedVerb, statementVerb) match {
+      case m@(None, _) => true
+      case m@(Some(""), _) => true
+      case m@(ruleVerb, verb: Verb) => ruleVerb.contains(verb.id)
+      case _ => false
+    }
   }
 }

@@ -18,6 +18,8 @@ object RoleLocalServiceHelper {
 
   val RoleTypeRegular = RoleConstants.TYPE_REGULAR
 
+  val RoleSiteOwner = RoleConstants.SITE_OWNER
+
   def getCount(roleIds: Seq[Long],
                contains: Boolean,
                companyId: Long,
@@ -45,6 +47,9 @@ object RoleLocalServiceHelper {
       .asScala.map(_.asInstanceOf[Role])
   }
 
+  def getRole(companyId: Long, name: String): Role = RoleLocalServiceUtil.getRole(companyId, name)
+
+
   def dynamicQuery(roleIds: Seq[Long],
                    contains: Boolean,
                    companyId: Long,
@@ -54,6 +59,6 @@ object RoleLocalServiceHelper {
       .add(RestrictionsFactoryUtil.eq(CompanyIdKey, companyId))
       .add(RestrictionsFactoryUtil.eq(RoleType, roleType))
       .addLikeRestriction(NameKey, nameLike)
-      .addInSetRestriction(IdKey, roleIds, contains)
+      .addFilterByValues(IdKey, roleIds, contains)
   }
 }

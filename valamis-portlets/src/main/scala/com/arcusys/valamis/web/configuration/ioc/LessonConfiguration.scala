@@ -3,28 +3,36 @@ package com.arcusys.valamis.web.configuration.ioc
 import java.io.File
 
 import com.arcusys.learn.liferay.services.UserLocalServiceHelper
-import com.arcusys.valamis.course.CourseService
+import com.arcusys.valamis.certificate.reports.DateReport
+import com.arcusys.valamis.certificate.service.{LearningPathService, LearningPathServiceImpl}
+import com.arcusys.valamis.course.api.CourseService
 import com.arcusys.valamis.file.service.FileService
 import com.arcusys.valamis.file.storage.FileStorage
-import com.arcusys.valamis.gradebook.service.UserCourseResultService
-import com.arcusys.valamis.lesson.model.{Lesson, LessonType, UserLessonResult}
+import com.arcusys.valamis.gradebook.service.{LessonGradeService, UserCourseResultService}
+import com.arcusys.valamis.lesson.model.{Lesson, LessonType, LessonPlayer, UserLessonResult}
 import com.arcusys.valamis.lesson.scorm.service._
 import com.arcusys.valamis.lesson.scorm.service.sequencing._
 import com.arcusys.valamis.lesson.scorm.storage.{ActivityStorage, ResourcesStorage}
 import com.arcusys.valamis.lesson.service._
+import com.arcusys.valamis.lesson.service.export.{PackageExportProcessor, PackageImportProcessor, PackageMobileExportProcessor}
 import com.arcusys.valamis.lesson.service.impl._
 import com.arcusys.valamis.lesson.tincan.service._
-import com.arcusys.valamis.liferay.SocialActivityHelper
-import com.arcusys.valamis.lrs.service.LrsClientManager
+import com.arcusys.valamis.liferay.{AssetHelper, SocialActivityHelper}
+import com.arcusys.valamis.lrssupport.lrs.service.LrsClientManager
 import com.arcusys.valamis.member.service.MemberService
 import com.arcusys.valamis.persistence.common.SlickDBInfo
 import com.arcusys.valamis.ratings.RatingService
+import com.arcusys.valamis.reports.model.{TopLesson, TopLessonConfig}
+import com.arcusys.valamis.reports.service.{ReportService, ReportServiceImpl}
 import com.arcusys.valamis.slide.convert.PresentationProcessor
 import com.arcusys.valamis.slide.service.PresentationPackageUploader
 import com.arcusys.valamis.tag.TagService
 import com.arcusys.valamis.uri.service.TincanURIService
+import com.arcusys.valamis.user.service.UserService
 import com.arcusys.valamis.web.listener.LessonListener
 import com.escalatesoft.subcut.inject.{BindingModule, NewBindingModule}
+
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Created by mminin on 26.02.16.
@@ -32,6 +40,10 @@ import com.escalatesoft.subcut.inject.{BindingModule, NewBindingModule}
 class LessonConfiguration(db: => SlickDBInfo)(implicit configuration: BindingModule) extends NewBindingModule(module => {
   import configuration.inject
   import module.bind
+
+  bind[LessonNotificationService] toSingle new LessonNotificationServiceImpl {
+    lazy val lessonService = inject[LessonService](None)
+  }
 
   bind[TincanPackageService] toSingle new TincanPackageServiceImpl(db.databaseDef, db.slickProfile) {
     lazy val fileStorage = inject[FileStorage](None)
@@ -50,6 +62,7 @@ class LessonConfiguration(db: => SlickDBInfo)(implicit configuration: BindingMod
   bind[LessonAssetHelper] toSingle new LessonAssetHelper
   bind[LessonMembersService] toSingle new LessonMembersServiceImpl(db.databaseDef, db.slickProfile) {
     lazy val memberService = inject[MemberService](None)
+    lazy val userService = inject[UserService](None)
   }
   bind[LessonLimitService] toSingle new LessonLimitServiceImpl(db.databaseDef, db.slickProfile)
   bind[TagService[Lesson]] toSingle new TagService[Lesson]
@@ -57,6 +70,17 @@ class LessonConfiguration(db: => SlickDBInfo)(implicit configuration: BindingMod
   bind[LessonStatementReader].toSingle(new LessonStatementReader {
     lazy val lrsClient = inject[LrsClientManager](None)
     lazy val lessonService = inject[LessonService](None)
+  })
+
+  bind[ReportService].toSingle(new ReportServiceImpl(db.slickProfile, db.databaseDef) {
+    lazy val reader = inject[LessonStatementReader](None)
+    lazy val lessonService = inject[LessonService](None)
+    lazy val dateReport = inject[DateReport](None)
+    lazy val userService = inject[UserService](None)
+    lazy val lessonGradeService = inject[LessonGradeService](None)
+    lazy val courseService = inject[CourseService](None)
+    lazy val learningPathService = inject[LearningPathService](None)
+    lazy val userResult = inject[UserLessonResultService](None)
   })
 
   bind[LessonService].toSingle(new LessonServiceImpl(db.databaseDef, db.slickProfile) {
@@ -71,6 +95,7 @@ class LessonConfiguration(db: => SlickDBInfo)(implicit configuration: BindingMod
     lazy val socialActivityHelper = new SocialActivityHelper[Lesson]
     lazy val userService = UserLocalServiceHelper()
     lazy val fileStorage = inject[FileStorage](None)
+    lazy val lessonNotificationService = inject[LessonNotificationService](None)
 
     override def delete(lessonId: Long): Unit = {
       val lesson = getLessonRequired(lessonId)
@@ -90,6 +115,7 @@ class LessonConfiguration(db: => SlickDBInfo)(implicit configuration: BindingMod
     lazy val tagService = inject[TagService[Lesson]](None)
     lazy val lessonResultService = inject[UserLessonResultService](None)
     lazy val teacherGradeService= inject[TeacherLessonGradeService](None)
+    lazy val playerAssetHelper = new AssetHelper[LessonPlayer]
   }
 
   bind[UserLessonResultService] toSingle new UserLessonResultServiceImpl(db.databaseDef, db.slickProfile) {
@@ -168,4 +194,21 @@ class LessonConfiguration(db: => SlickDBInfo)(implicit configuration: BindingMod
   bind[RollupServiceContract] toSingle new RollupService
   bind[EndAttemptServiceContract] toSingle new EndAttemptService
 
+  bind[PackageMobileExportProcessor] toSingle new PackageMobileExportProcessor {
+    lazy val fileService = inject[FileService](None)
+    lazy val fileStorage = inject[FileStorage](None)
+  }
+
+  bind[PackageExportProcessor] toSingle new PackageExportProcessor {
+    lazy val fileService = inject[FileService](None)
+    lazy val fileStorage = inject[FileStorage](None)
+  }
+
+  bind[PackageImportProcessor] toSingle new PackageImportProcessor {
+    lazy val packageUploader = inject[PackageUploadManager](None)
+    lazy val lessonService = inject[LessonService](None)
+    lazy val lessonNotificationService = inject[LessonNotificationService](None)
+  }
+
+  bind[LearningPathService] toSingle new LearningPathServiceImpl
 })
